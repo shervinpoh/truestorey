@@ -510,11 +510,72 @@ footer.site{margin-top:40px;padding:18px 0 0;border-top:1px solid var(--line);li
    reads the right bar. */
 .bandtable .bar{transform-origin:left center;animation:grow .55s cubic-bezier(.22,.61,.36,1) both}
 @keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-.seg button,.mapopt,.guidelist a,.idx a{transition:background .18s ease,color .18s ease}
-.storeycard,.planrow{transition:background .18s ease}
+.seg button,.mapopt,.guidelist a,.idx a{transition:background var(--t2) var(--ease),color var(--t2) var(--ease)}
+.storeycard,.planrow{transition:background var(--t2) var(--ease)}
+
+/* ── the state layer ────────────────────────────────────────────────────────
+   Every interactive surface on this site changed state instantly, because
+   transitions were added per-component as each was built and most components
+   never got one. Nine declarations covered about thirty components, so hovering
+   a town tile snapped white -> teal in a single frame while the segmented
+   control beside it eased. Inconsistent timing reads as cheap far more than
+   slow timing does.
+
+   Two durations and one curve, and nothing here is longer than a fifth of a
+   second. This is feedback, not animation: the reader should feel the site
+   answering, never wait for it. The figure is still the point of the page.
+
+   --t1 is for a colour or a border changing on something small — a link, a
+   row, a table cell. --t2 is for a whole surface changing, where the larger
+   area needs slightly longer or it reads as a flicker.
+
+   Deliberately NOT transitioned:
+     · width, height, top/left — layout properties, which cost a reflow per
+       frame and are what makes a page feel heavy rather than smooth.
+     · anything on a figure. Recalculating tools rewrite those every keystroke
+       and a transition would make the number lag the input that caused it.
+     · outline on :focus-visible. A focus ring that fades in is a focus ring
+       that is late; keyboard users need it in the frame the focus lands. */
+:root{--t1:.14s;--t2:.2s;--ease:cubic-bezier(.22,.61,.36,1)}
+
+.gnav a.n,.crumbs a,.lede h1 a,.linkish{transition:color var(--t1) var(--ease),
+ box-shadow var(--t1) var(--ease)}
+.feed a,.arow .t a,.idxbtn,.tw,.tile,.tile .n,.tile .v,.tile .b{
+ transition:background var(--t2) var(--ease),color var(--t2) var(--ease)}
+.cta,.ghost{transition:background var(--t2) var(--ease),color var(--t2) var(--ease),
+ border-color var(--t2) var(--ease)}
+input,textarea,select{transition:border-color var(--t1) var(--ease)}
+/* The heat wash behind a town tile. It fades rather than cutting, so the tile
+   reads as one surface changing instead of two things happening at once. */
+.tw:before,.tile:before{transition:opacity var(--t2) var(--ease)}
+
+/* Pressed feedback. One pixel, and only on things that are genuinely buttons —
+   enough to confirm the press landed on a trackpad, small enough that nobody
+   reading a figure notices it happened. */
+.cta:active:not(:disabled),.ghost:active,.seg button:active:not(:disabled),
+.tw:active,.idxbtn:active{transform:translateY(1px)}
+
+/* The proceeds slider is the one control on the site a reader drags rather
+   than clicks, so it is the one that has to feel continuous. The thumb grows
+   slightly under the cursor and the cursor itself confirms the grab. */
+input[type=range]::-webkit-slider-thumb{transition:transform var(--t1) var(--ease)}
+input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.15)}
+input[type=range]:active::-webkit-slider-thumb{transform:scale(1.15);cursor:grabbing}
+input[type=range]::-moz-range-thumb{transition:transform var(--t1) var(--ease)}
+input[type=range]:hover::-moz-range-thumb{transform:scale(1.15)}
+input[type=range]:active::-moz-range-thumb{transform:scale(1.15);cursor:grabbing}
+
 @media(prefers-reduced-motion:reduce){
  .reveal{opacity:1;transform:none;transition:none}
  .bandtable .bar{animation:none}
+ /* Including the 1px press and the thumb scale above. Someone who asked for
+    less movement gets state changes, not motion between them. */
+ .cta:active:not(:disabled),.ghost:active,.seg button:active:not(:disabled),
+ .tw:active,.idxbtn:active{transform:none}
+ input[type=range]:hover::-webkit-slider-thumb,
+ input[type=range]:active::-webkit-slider-thumb{transform:none}
+ input[type=range]:hover::-moz-range-thumb,
+ input[type=range]:active::-moz-range-thumb{transform:none}
  *,*::before,*::after{transition-duration:.01ms !important;animation-duration:.01ms !important}
 }
 /* A project's size cohorts, opened underneath its own row. */

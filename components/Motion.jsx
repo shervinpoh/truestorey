@@ -66,9 +66,28 @@ export function Figure({ value, format = v => v, duration = 600, className = 'st
   const started = useRef(false);
   const animating = useRef(false);
   const raf = useRef(0);
+  const settle = useRef(0);
   const [shown, setShown] = useState(value);
 
   if (Number.isFinite(value)) target.current = value;
+
+  /**
+   * Land on the target and give up the animating latch.
+   *
+   * Every exit from the count goes through here, because the latch is what
+   * gates the tracking effect below and a latch that can stick is the whole
+   * failure mode. requestAnimationFrame DOES NOT RUN IN A BACKGROUND TAB: a
+   * reader who switches away 20ms into a count comes back to a figure stranded
+   * on frame one, with `animating` still true and every later value silently
+   * refused. That is the same wrong-number-that-will-not-move as before,
+   * arriving by a different route, and switching tabs is not an edge case.
+   */
+  const land = () => {
+    cancelAnimationFrame(raf.current);
+    clearTimeout(settle.current);
+    animating.current = false;
+    setShown(target.current);
+  };
 
   // Not mid-count ⇒ the figure IS its value. This is the line whose absence
   // froze every recalculating tool on the site.
@@ -89,14 +108,15 @@ export function Figure({ value, format = v => v, duration = 600, className = 'st
       const t0 = performance.now();
       const step = now => {
         const k = Math.min(1, (now - t0) / duration);
+        if (k >= 1) { land(); return; }   // lands on the CURRENT target
         setShown(target.current * easeOut(k));
-        if (k < 1) { raf.current = requestAnimationFrame(step); return; }
-        // Land exactly on the current target, never on the one captured when
-        // the count began.
-        animating.current = false;
-        setShown(target.current);
+        raf.current = requestAnimationFrame(step);
       };
       raf.current = requestAnimationFrame(step);
+      // The deadline. setTimeout still fires in a background tab where
+      // requestAnimationFrame does not, so this is what guarantees the figure
+      // is correct whenever the reader is actually looking at it.
+      settle.current = setTimeout(land, duration + 250);
     }, { threshold: 0.4 });
 
     io.observe(el);
@@ -108,6 +128,7 @@ export function Figure({ value, format = v => v, duration = 600, className = 'st
   // Unmount only. A cancel on every value change is the original bug.
   useEffect(() => () => {
     cancelAnimationFrame(raf.current);
+    clearTimeout(settle.current);
     animating.current = false;
   }, []);
 

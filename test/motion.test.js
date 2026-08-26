@@ -81,6 +81,29 @@ test('the count lands on the current target, not the one it started with', () =>
   );
 });
 
+test('an interrupted count still lands', () => {
+  const body = figureBody();
+  // requestAnimationFrame does not run in a background tab. Without a timer
+  // that fires regardless, a reader who switches away 20ms into a count comes
+  // back to a figure stranded on frame one — with the animating latch still
+  // set, so every later value is refused in silence. This was the second route
+  // into the same stranded-number bug and it was reproduced, not theorised:
+  // the figure sat at S$9,396 against a true S$487,907 in the table below it.
+  assert.match(
+    body,
+    /setTimeout\(\s*land/,
+    'Figure no longer sets a deadline for its count. A count interrupted by a ' +
+    'backgrounded tab would never clear the animating latch, and the figure ' +
+    'would ignore every subsequent value.'
+  );
+  assert.match(
+    body,
+    /animating\.current = false;[\s\S]{0,60}setShown\(target\.current\)/,
+    'The settle path no longer clears the animating latch and lands on the ' +
+    'current target. Both must happen together or the figure stays stuck.'
+  );
+});
+
 test('the real value is what renders before any animation runs', () => {
   const body = figureBody();
   // SSR and no-JS readers must get the figure, per the rules at the top of
