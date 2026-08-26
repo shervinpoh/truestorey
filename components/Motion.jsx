@@ -31,35 +31,85 @@ const still = () =>
 
 const easeOut = t => 1 - (1 - t) ** 3;
 
-/** Counts to `value` once, on first sight. `format` renders every frame. */
+/**
+ * Counts to `value` once, on first sight. `format` renders every frame.
+ *
+ * THE FIGURE MUST EQUAL ITS VALUE WHENEVER IT IS NOT MID-COUNT. That sounds
+ * too obvious to write down, and it is the bug this component shipped with.
+ *
+ * The first version kept the effect keyed on `[value, duration]` and wrote
+ * `shown` only from inside the animation loop. So on any recalculation React
+ * ran the cleanup, the cleanup cancelled the in-flight frame, and the new
+ * effect hit `if (done.current) return` and never restarted the loop. Nothing
+ * else could write `shown`, so the number froze on whatever frame it had
+ * reached — mid-ease, and therefore an arbitrary fraction of the truth — and
+ * then ignored every later input in silence.
+ *
+ * On /plan that meant "cash you need on the day" reading S$12,516 against a
+ * true S$57,100, next to a table that had the right figure all along, and
+ * staying there while the reader changed their income. A wrong number that
+ * does not move is worse than no number: it looks settled. Everything this
+ * site publishes goes out under a CEA registration, so this is a correctness
+ * bug first and a motion bug second.
+ *
+ * Three things keep it fixed, and a test covers each:
+ *   · a tracking effect writes `shown` whenever no count is running, so the
+ *     figure follows its value even after the one-time animation is over;
+ *   · the observer effect is keyed on `[duration]` only — a recalculation must
+ *     never cancel or restart the count;
+ *   · the loop reads the target from a ref each frame, so a value that changes
+ *     mid-count is animated toward instead of being overwritten on landing.
+ */
 export function Figure({ value, format = v => v, duration = 600, className = 'statnum', style }) {
   const ref = useRef(null);
-  const done = useRef(false);
+  const target = useRef(value);
+  const started = useRef(false);
+  const animating = useRef(false);
+  const raf = useRef(0);
   const [shown, setShown] = useState(value);
+
+  if (Number.isFinite(value)) target.current = value;
+
+  // Not mid-count ⇒ the figure IS its value. This is the line whose absence
+  // froze every recalculating tool on the site.
+  useEffect(() => {
+    if (!animating.current) setShown(value);
+  }, [value]);
 
   useEffect(() => {
     const el = ref.current;
-    if (!el || done.current || still() || !Number.isFinite(value)) return;
+    if (!el || started.current || still() || !Number.isFinite(target.current)) return;
     if (typeof IntersectionObserver === 'undefined') return;
 
     const io = new IntersectionObserver(entries => {
-      if (!entries[0].isIntersecting || done.current) return;
-      done.current = true;
+      if (!entries[0].isIntersecting || started.current) return;
+      started.current = true;
+      animating.current = true;
       io.disconnect();
-      const from = 0, t0 = performance.now();
-      let raf = 0;
+      const t0 = performance.now();
       const step = now => {
         const k = Math.min(1, (now - t0) / duration);
-        setShown(from + (value - from) * easeOut(k));
-        if (k < 1) raf = requestAnimationFrame(step);
+        setShown(target.current * easeOut(k));
+        if (k < 1) { raf.current = requestAnimationFrame(step); return; }
+        // Land exactly on the current target, never on the one captured when
+        // the count began.
+        animating.current = false;
+        setShown(target.current);
       };
-      raf = requestAnimationFrame(step);
-      el._cancel = () => cancelAnimationFrame(raf);
+      raf.current = requestAnimationFrame(step);
     }, { threshold: 0.4 });
 
     io.observe(el);
-    return () => { io.disconnect(); el._cancel?.(); };
-  }, [value, duration]);
+    return () => io.disconnect();
+    // Deliberately not keyed on `value`. Re-running this on every keystroke is
+    // precisely what cancelled the animation and stranded the figure.
+  }, [duration]);
+
+  // Unmount only. A cancel on every value change is the original bug.
+  useEffect(() => () => {
+    cancelAnimationFrame(raf.current);
+    animating.current = false;
+  }, []);
 
   return <b ref={ref} className={className} style={style}>{format(shown)}</b>;
 }
