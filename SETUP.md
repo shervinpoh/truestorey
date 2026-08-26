@@ -4,6 +4,41 @@ The bridge Claude works over has no network and cannot install packages, so
 everything below has to happen in Terminal. Nothing here is urgent — the site
 runs today without any of it.
 
+---
+
+## Check it in one command first
+
+```
+npm run preflight
+```
+
+Asks every integration at once and prints three states. **The middle one is the
+point:** `missing` is a decision — the feature is off and the page says so.
+`BROKEN` is a fault — the key is present, so the feature switches itself on and
+then fails in front of a reader. They must never be read as the same thing.
+
+It writes nothing, prints no secret, and is safe against production. Exit code
+is non-zero only for `BROKEN`, so a deliberately unconfigured feature will not
+fail a CI step.
+
+**As of 27 Aug 2026 it reports four missing, all of them credentials:**
+
+| | what unblocks it |
+|---|---|
+| Supabase | both keys empty. Project `hewrqrvquvbbqscjvyhu` exists; paste its keys — see §4a |
+| Perplexity | `PERPLEXITY_API_KEY` |
+| Anthropic | `ANTHROPIC_API_KEY` |
+| Gemini | `GEMINI_API_KEY` |
+
+`ARTICLE_WEBHOOK_SECRET` and `STUDIO_PASSWORD` were generated on 27 Aug and are
+in `.env.local`, which is gitignored. Read them with:
+
+```
+grep -E 'ARTICLE_WEBHOOK_SECRET|STUDIO_PASSWORD' .env.local
+```
+
+The webhook secret is the one Make.com needs in its Authorization header.
+
 ## 1 · No npm install is needed
 
 Deliberate. All three AI engines and Supabase are called over plain `fetch`
@@ -105,8 +140,15 @@ a missing key disables its own feature and nothing else.
 
 ## 6 · Before go-live
 
-- `npm run build` — the AI routes have never been through a production build here.
-- Test the webhook end to end from Make.com against a preview deploy first.
+- ~~`npm run build`~~ — **done 27 Aug.** `npx next build` passes clean: 36
+  routes, 755 static pages, zero warnings. Note that `npm run build` is
+  `npm run data && next build`, so it runs three live ingests against
+  data.gov.sg before every build — a deploy fails if the source is down. Worth
+  making the deploy command `next build` against committed data instead.
+- ~~Test the webhook end to end~~ — **auth verified 27 Aug** against a local
+  server: no header → 401, wrong secret → 401 (constant-time), correct secret →
+  passes and stops at the Supabase write with a 503. The only untested link is
+  the write itself, which needs the Supabase keys.
 - `/studio` is HTTP Basic over one password. Fine for one person; if a second
   ever needs in, that is the moment for Supabase Auth, not a second password.
 - Confirm the LTV and stamp duty rates against source once more before the site
