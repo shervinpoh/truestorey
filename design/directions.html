@@ -1,0 +1,268 @@
+<title>Truestorey — three directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600;6..72,700&family=Spectral:wght@400;500;600;700&family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--pg:#111;--pgb:#f2f2f0;}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--pg:#e8e8e6;--pgb:#0d0d0c;}}
+:root[data-theme=dark]{--pg:#e8e8e6;--pgb:#0d0d0c;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--pgb);color:var(--pg);font-family:"IBM Plex Sans",system-ui,sans-serif;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:40px 20px 100px}
+.intro{max-width:62ch;margin-bottom:44px}
+.intro h1{font-family:"Archivo",sans-serif;font-weight:800;font-size:clamp(1.6rem,4vw,2.3rem);letter-spacing:-.03em;margin:0 0 12px;line-height:1.05}
+.intro p{margin:0 0 12px;font-size:15.5px;opacity:.82}
+.intro code{font-family:"IBM Plex Mono",monospace;font-size:.88em;background:rgba(128,128,128,.16);padding:1px 5px}
+.opt{margin:0 0 64px}
+.optbar{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px;padding-bottom:9px;margin-bottom:0;border-bottom:2px solid var(--pg)}
+.optnum{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;opacity:.55}
+.optname{font-family:"Archivo",sans-serif;font-weight:700;font-size:1.18rem;letter-spacing:-.02em}
+.optwhy{font-size:13.5px;opacity:.75;flex:1 1 320px;min-width:0}
+.frame{border:1px solid rgba(128,128,128,.34);border-top:0;overflow:hidden}
+.note{font-size:13px;opacity:.7;margin:10px 2px 0;max-width:70ch}
+.note b{opacity:1}
+/* ══════════════════════════ 1 · BLUEPRINT ══════════════════════════ */
+.bp{--ink:#0d1b2a;--pap:#eef1f4;--line:#c3ced8;--blue:#1f4e79;--acc:#a6412a;--mute:#6b7c8c;
+ background:var(--pap);color:var(--ink);padding:0;font-family:"IBM Plex Sans",sans-serif;position:relative}
+.bp .sheet{background:
+  repeating-linear-gradient(0deg,transparent 0 23px,rgba(31,78,121,.09) 23px 24px),
+  repeating-linear-gradient(90deg,transparent 0 23px,rgba(31,78,121,.09) 23px 24px);
+  padding:0}
+.bp .tb{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;
+ border-bottom:2px solid var(--blue);padding:16px 24px 10px;background:rgba(238,241,244,.9)}
+.bp .mk{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:13px;letter-spacing:.22em;color:var(--blue);text-transform:uppercase}
+.bp .tbmeta{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.1em;color:var(--mute);text-align:right;line-height:1.7}
+.bp .body{padding:26px 24px 30px}
+.bp h2{font-family:"IBM Plex Sans",sans-serif;font-weight:600;font-size:clamp(1.5rem,3.4vw,2rem);letter-spacing:-.03em;margin:0 0 2px;line-height:1.05}
+.bp .addr{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.14em;color:var(--mute);text-transform:uppercase;margin-bottom:26px}
+.bp .dim{margin:0 0 26px;position:relative;padding:0 0 4px}
+.bp .dimlab{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.14em;color:var(--mute);text-transform:uppercase;margin-bottom:12px}
+.bp .bar{position:relative;height:44px}
+.bp .bar .track{position:absolute;left:0;right:0;top:21px;height:1px;background:var(--blue)}
+.bp .bar .tick{position:absolute;top:13px;width:1px;height:17px;background:var(--blue)}
+.bp .bar .med{position:absolute;top:6px;width:2px;height:31px;background:var(--acc)}
+.bp .bar .v{position:absolute;top:-4px;font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:500;transform:translateX(-50%);white-space:nowrap}
+.bp .bar .v.a{color:var(--acc);font-weight:600}
+.bp .bar .c{position:absolute;bottom:-4px;font-family:"IBM Plex Mono",monospace;font-size:8.5px;letter-spacing:.1em;color:var(--mute);transform:translateX(-50%);text-transform:uppercase}
+.bp .cols{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);background:rgba(255,255,255,.55);margin-bottom:24px}
+.bp .cell{padding:13px 15px;border-right:1px solid var(--line)}
+.bp .cell:last-child{border-right:0}
+.bp .cell .k{font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.15em;color:var(--mute);text-transform:uppercase}
+.bp .cell .n{font-size:1.32rem;font-weight:600;letter-spacing:-.025em;margin-top:4px;font-variant-numeric:tabular-nums}
+.bp .cell .s{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--mute);margin-top:2px}
+.bp .sec{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.18em;color:var(--blue);text-transform:uppercase;
+ border-bottom:1px solid var(--blue);padding-bottom:5px;margin:0 0 12px;display:flex;justify-content:space-between}
+.bp .row{display:flex;justify-content:space-between;gap:14px;padding:7px 0;border-bottom:1px dotted var(--line);font-size:13.5px}
+.bp .row:last-child{border-bottom:0}
+.bp .row .d{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--mute);white-space:nowrap}
+.bp .row .d em{font-style:normal;color:var(--acc)}
+.bp .prov{font-family:"IBM Plex Mono",monospace;font-size:8.5px;letter-spacing:.06em;color:var(--mute);line-height:1.8;margin-top:22px;border-top:1px solid var(--line);padding-top:10px}
+/* ═════════════════════ 2 · DOCUMENT OF RECORD ═════════════════════ */
+.dr{--ink:#1a1712;--pap:#f7f4ec;--rule:#1a1712;--soft:#cfc7b4;--acc:#7d2b18;--mute:#6f6656;
+ background:var(--pap);color:var(--ink);font-family:"Spectral",Georgia,serif;padding:0}
+.dr .hd{border-bottom:4px double var(--rule);padding:22px 30px 14px;text-align:center}
+.dr .mk{font-family:"Spectral",serif;font-weight:700;font-size:1.5rem;letter-spacing:.3em;text-transform:uppercase}
+.dr .sub{font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.26em;text-transform:uppercase;color:var(--mute);margin-top:7px}
+.dr .body{padding:28px 30px 32px;max-width:none}
+.dr .cert{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);
+ display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--soft);padding-bottom:9px;margin-bottom:22px}
+.dr h2{font-family:"Spectral",serif;font-weight:600;font-size:clamp(1.55rem,3.6vw,2.15rem);letter-spacing:-.012em;margin:0 0 4px;line-height:1.12}
+.dr .addr{font-size:14px;color:var(--mute);font-style:italic;margin-bottom:26px}
+.dr .clause{margin:0 0 22px}
+.dr .cn{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--acc);margin-bottom:8px}
+.dr .lead{font-size:15.5px;line-height:1.62;margin:0 0 12px;max-width:64ch}
+.dr .fig{font-family:"Spectral",serif;font-weight:700;font-size:clamp(2rem,6vw,2.9rem);letter-spacing:-.03em;
+ font-variant-numeric:tabular-nums;line-height:1;margin:2px 0 6px}
+.dr .figs{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.dr table{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0 0}
+.dr th{font-family:"IBM Plex Mono",monospace;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);
+ font-weight:400;text-align:left;padding:0 10px 6px 0;border-bottom:1px solid var(--rule)}
+.dr td{padding:8px 10px 8px 0;border-bottom:1px solid var(--soft);font-variant-numeric:tabular-nums}
+.dr td:last-child,.dr th:last-child{text-align:right;padding-right:0}
+.dr .mark{background:linear-gradient(transparent 62%,rgba(125,43,24,.2) 62%)}
+.dr .seal{border:1.5px solid var(--acc);color:var(--acc);display:inline-block;padding:6px 12px;
+ font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;margin-top:4px}
+.dr .prov{font-family:"IBM Plex Mono",monospace;font-size:8.5px;letter-spacing:.05em;color:var(--mute);line-height:1.85;
+ border-top:1px solid var(--soft);padding-top:10px;margin-top:24px}
+/* ══════════════════════════ 3 · BROADSHEET ══════════════════════════ */
+.bs{--ink:#191614;--pap:#fff1e5;--rule:#cbb9a8;--acc:#8b1d1d;--blue:#0f5257;--mute:#6b625b;
+ background:var(--pap);color:var(--ink);font-family:"IBM Plex Sans",sans-serif;padding:0}
+.bs .hd{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
+ border-bottom:1px solid var(--ink);padding:14px 26px 11px}
+.bs .mk{font-family:"Newsreader",Georgia,serif;font-weight:700;font-size:1.34rem;letter-spacing:-.03em}
+.bs .nav{display:flex;gap:17px;font-size:12.5px;font-weight:500;color:var(--mute)}
+.bs .nav b{color:var(--ink);font-weight:600;border-bottom:2px solid var(--acc);padding-bottom:2px}
+.bs .body{padding:26px 26px 32px}
+.bs .kicker{font-family:"IBM Plex Sans",sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.17em;
+ text-transform:uppercase;color:var(--acc);margin-bottom:9px}
+.bs h2{font-family:"Newsreader",Georgia,serif;font-weight:600;font-size:clamp(1.9rem,5vw,2.9rem);
+ letter-spacing:-.028em;line-height:1.03;margin:0 0 10px;max-width:19ch}
+.bs .standfirst{font-family:"Newsreader",serif;font-size:17px;line-height:1.48;color:#463f39;max-width:52ch;margin:0 0 24px}
+.bs .split{display:grid;grid-template-columns:1.35fr 1fr;gap:32px;align-items:start}
+.bs .chartbox{border-top:2px solid var(--ink);padding-top:12px}
+.bs .ct{font-size:12.5px;font-weight:600;margin-bottom:2px}
+.bs .cs{font-size:11px;color:var(--mute);margin-bottom:14px}
+.bs .plot{display:flex;align-items:flex-end;gap:3px;height:132px;border-bottom:1px solid var(--ink)}
+.bs .plot i{flex:1;background:var(--blue);opacity:.32;min-height:2px}
+.bs .plot i.hi{opacity:1;background:var(--acc)}
+.bs .ax{display:flex;justify-content:space-between;font-family:"IBM Plex Mono",monospace;font-size:9px;color:var(--mute);margin-top:5px}
+.bs .stat{border-top:2px solid var(--ink);padding-top:12px}
+.bs .big{font-family:"Newsreader",serif;font-weight:600;font-size:2.5rem;letter-spacing:-.035em;line-height:1;font-variant-numeric:tabular-nums}
+.bs .biglab{font-size:11px;color:var(--mute);margin-top:5px;line-height:1.45}
+.bs .pull{border-left:3px solid var(--acc);padding:2px 0 2px 15px;margin:20px 0;font-family:"Newsreader",serif;
+ font-size:16.5px;line-height:1.45;color:#463f39}
+.bs .sect{font-size:10.5px;font-weight:600;letter-spacing:.17em;text-transform:uppercase;color:var(--mute);
+ border-top:1px solid var(--rule);padding-top:9px;margin:24px 0 10px}
+.bs .lrow{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--rule);font-size:14px}
+.bs .lrow em{font-style:normal;font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--mute)}
+.bs .lrow em.f{color:var(--acc);font-weight:500}
+.bs .prov{font-size:10px;color:var(--mute);line-height:1.75;border-top:1px solid var(--rule);padding-top:10px;margin-top:22px}
+@media(max-width:760px){.bs .split{grid-template-columns:1fr;gap:22px}.bp .cols{grid-template-columns:1fr}
+ .bp .cell{border-right:0;border-bottom:1px solid var(--line)}.bp .cell:last-child{border-bottom:0}}
+</style>
+
+<div class="wrap">
+<div class="intro">
+<h1>Three directions, same block</h1>
+<p>All three show <code>Blk 275A Bishan St 24</code> with your real numbers — 25 filed transactions, median $1,099 psf, Catholic High inside the 1&nbsp;km band. Judge them on which one you'd be happy to have your name and CEA number on.</p>
+<p>What makes a site read as AI-made is being <em>tastefully default</em>: sensible type, even spacing, one safe accent, every section the same weight. Each of these commits to one unreasonable idea instead.</p>
+</div>
+
+<!-- ─────────── 1 ─────────── -->
+<section class="opt">
+<div class="optbar"><span class="optnum">01</span><span class="optname">Blueprint</span>
+<span class="optwhy">The site as an architectural drawing. Drafting grid, hairlines, dimension lines instead of a bar chart, a title block in the corner like a real sheet.</span></div>
+<div class="frame"><div class="bp"><div class="sheet">
+<div class="tb"><div><div class="mk">Truestorey</div></div>
+<div class="tbmeta">SHEET 04 OF 13,243 · REV 2026.08<br>HDB RESALE · BISHAN · BLK 275A</div></div>
+<div class="body">
+<h2>Blk 275A Bishan St 24</h2>
+<div class="addr">Bishan · DBSS · 84 yrs 03 mths remaining · 4 &amp; 5 room</div>
+
+<div class="dim">
+<div class="dimlab">Observed price per square foot — 25 filed transactions</div>
+<div class="bar">
+ <div class="track"></div>
+ <div class="tick" style="left:0"></div><div class="tick" style="left:100%"></div>
+ <div class="med" style="left:52.3%"></div>
+ <div class="v" style="left:0">$919</div>
+ <div class="v a" style="left:52.3%">$1,099</div>
+ <div class="v" style="left:100%">$1,263</div>
+ <div class="c" style="left:0">LOW</div><div class="c" style="left:52.3%">MEDIAN</div><div class="c" style="left:100%">HIGH</div>
+</div></div>
+
+<div class="cols">
+ <div class="cell"><div class="k">Median transacted</div><div class="n">$1,375,800</div><div class="s">4 &amp; 5 room combined</div></div>
+ <div class="cell"><div class="k">Lease remaining</div><div class="n">84y 03m</div><div class="s">of 99 years</div></div>
+</div>
+
+<div class="sec"><span>Within walking reach</span><span>STRAIGHT LINE</span></div>
+<div class="row"><span>Bishan MRT — Exit B</span><span class="d">825 m</span></div>
+<div class="row"><span>Marymount MRT — Exit A</span><span class="d">993 m</span></div>
+<div class="row"><span>Shunfu Mart hawker centre</span><span class="d">897 m</span></div>
+<div class="row"><span>Thomson Park</span><span class="d">1.1 km</span></div>
+
+<div class="sec" style="margin-top:22px"><span>Primary schools · MOE 1 km band</span><span>2 WITHIN</span></div>
+<div class="row"><span>Catholic High School</span><span class="d">642 m</span></div>
+<div class="row"><span>Ai Tong School</span><span class="d"><em>971 m — on the line</em></span></div>
+
+<div class="prov">SOURCE: HDB RESALE FLAT PRICES VIA DATA.GOV.SG · 2023-08 TO 2026-08 · ACCESSED 2026-08-23<br>
+COORDINATES: ONEMAP © SINGAPORE LAND AUTHORITY · DISTANCES ARE STRAIGHT-LINE, NOT WALKING<br>
+SHERVIN POH · CEA REG. NO. R0XXXXXX · HUTTONS ASIA PTE LTD · NOT A VALUATION</div>
+</div></div></div></div>
+<p class="note"><b>Why it might be right:</b> "Truestorey" means a floor of a building — the name and the visual language finally agree. It matches the modern-architectural taste you described, and no property site in Singapore looks like this. <b>Risk:</b> technical drawing can read as cold if the copy doesn't stay warm.</p>
+</section>
+
+<!-- ─────────── 2 ─────────── -->
+<section class="opt">
+<div class="optbar"><span class="optnum">02</span><span class="optname">Document of record</span>
+<span class="optwhy">A certified extract, not a web page. Double rules, numbered clauses, serif throughout, one oxblood accent. Reads as evidence.</span></div>
+<div class="frame"><div class="dr">
+<div class="hd"><div class="mk">Truestorey</div>
+<div class="sub">Extract of filed transactions · Housing &amp; Development Board</div></div>
+<div class="body">
+<div class="cert"><span>Ref. HDB/BISHAN/275A</span><span>Compiled 23 August 2026</span><span>Public data · no sign-up</span></div>
+
+<h2>Blk 275A Bishan St 24</h2>
+<div class="addr">Bishan · DBSS · 4 and 5 room · 84 years 3 months of lease remaining</div>
+
+<div class="clause">
+<div class="cn">§1 · What has actually been paid</div>
+<p class="lead">Twenty-five resale transactions have been filed at this block between August 2023 and August 2026. They were transacted at prices between <span class="mark">$919 and $1,263 per square foot</span>. The middle of that range is:</p>
+<div class="fig">$1,099 psf</div>
+<div class="figs">Median · 25 filed transactions · $1,375,800 median price</div>
+<div class="seal">Range shown, not a valuation</div>
+</div>
+
+<div class="clause">
+<div class="cn">§2 · The four most recent</div>
+<table><thead><tr><th>Month</th><th>Type</th><th>Storey</th><th>PSF</th></tr></thead>
+<tbody>
+<tr><td>Jun 2026</td><td>4 room</td><td>25–27</td><td>$1,231</td></tr>
+<tr><td>Feb 2026</td><td>5 room</td><td>10–12</td><td>$1,065</td></tr>
+<tr><td>Jan 2026</td><td>4 room</td><td>19–21</td><td>$1,152</td></tr>
+<tr><td>Dec 2025</td><td>4 room</td><td>04–06</td><td>$988</td></tr>
+</tbody></table>
+</div>
+
+<div class="clause">
+<div class="cn">§3 · Distance bands, measured as MOE measures them</div>
+<p class="lead">Two primary schools fall inside the one-kilometre band: <b>Catholic High School</b> at 642 m and <b>Ai Tong School</b> at 971 m. A band is priority in a ballot, not a place, and MOE measures from a registered home address rather than from the block.</p>
+</div>
+
+<div class="prov">SOURCE — HDB RESALE FLAT PRICES, DATA.GOV.SG. PERIOD 2023-08 TO 2026-08. ACCESSED 23 AUG 2026.<br>
+COORDINATES — ONEMAP, © SINGAPORE LAND AUTHORITY. ALL DISTANCES STRAIGHT-LINE, NOT WALKING.<br>
+SHERVIN POH · CEA REG. NO. R0XXXXXX · HUTTONS ASIA PTE LTD · LICENCE NO. L3008899K<br>
+FIGURES ARE DERIVED FROM PUBLIC GOVERNMENT DATA AND ARE NOT A VALUATION OR AN OFFER.</div>
+</div></div></div>
+<p class="note"><b>Why it might be right:</b> your whole positioning is evidence over opinion — this looks like the thing you'd hand a lawyer. The §-numbered clauses make the compliance lines feel deliberate rather than bolted on. <b>Risk:</b> serif-heavy and formal; a 28-year-old on TikTok may find it stuffy.</p>
+</section>
+
+<!-- ─────────── 3 ─────────── -->
+<section class="opt">
+<div class="optbar"><span class="optnum">03</span><span class="optname">Broadsheet</span>
+<span class="optwhy">Data journalism. Tinted paper, big serif headline, a proper chart, a pull quote in your voice. Closest to today — pushed much harder.</span></div>
+<div class="frame"><div class="bs">
+<div class="hd"><div class="mk">Truestorey</div>
+<div class="nav"><b>Blocks</b><span>Market</span><span>MOP</span><span>Insights</span></div></div>
+<div class="body">
+<div class="kicker">Bishan · HDB resale · 25 filed transactions</div>
+<h2>Blk 275A Bishan St 24</h2>
+<p class="standfirst">A DBSS block with 84 years of lease left, two MRT lines under a kilometre away, and Catholic High inside the 1 km band. Here is what has actually been paid.</p>
+
+<div class="split">
+<div class="chartbox">
+ <div class="ct">Median psf by month</div>
+ <div class="cs">Each bar is a month with at least one filed transaction</div>
+ <div class="plot">
+  <i style="height:62%"></i><i style="height:71%"></i><i style="height:24%"></i><i style="height:82%"></i>
+  <i style="height:55%"></i><i style="height:63%"></i><i style="height:29%"></i><i style="height:74%"></i>
+  <i style="height:51%"></i><i class="hi" style="height:96%"></i>
+ </div>
+ <div class="ax"><span>Apr 2025</span><span>Jun 2026</span></div>
+ <div class="pull">"The thing is, a range tells you what people paid. A single number tells you what someone wants you to believe."</div>
+</div>
+<div>
+ <div class="stat"><div class="big">$1,099</div>
+ <div class="biglab">Median psf across 25 filed transactions.<br>Observed range $919 – $1,263.</div></div>
+ <div class="sect">Getting around</div>
+ <div class="lrow"><span>Bishan MRT</span><em>825 m</em></div>
+ <div class="lrow"><span>Marymount MRT</span><em>993 m</em></div>
+ <div class="lrow"><span>Shunfu Mart</span><em>897 m</em></div>
+ <div class="sect">Primary schools within 1 km</div>
+ <div class="lrow"><span>Catholic High School</span><em>642 m</em></div>
+ <div class="lrow"><span>Ai Tong School</span><em class="f">971 m · on the line</em></div>
+</div></div>
+
+<div class="prov">Source: HDB Resale Flat Prices via data.gov.sg, 2023-08 to 2026-08, accessed 23 Aug 2026. Coordinates from OneMap, © Singapore Land Authority — distances are straight-line, not walking.<br>
+Shervin Poh · CEA Reg. No. R0XXXXXX · Huttons Asia Pte Ltd · Figures are derived from public government data and are not a valuation or an offer.</div>
+</div></div></div>
+<p class="note"><b>Why it might be right:</b> the warm tint and serif headline are what the FT and Bloomberg use for exactly this job, and it's the friendliest of the three to a first-time visitor from Google. It also has room for your voice as a pull quote. <b>Risk:</b> it is the most familiar, so it is the easiest for someone else to copy.</p>
+</section>
+
+<div class="intro" style="margin-top:8px">
+<h1 style="font-size:1.35rem">My read</h1>
+<p><b>Blueprint</b>, and it isn't close. It's the only one where the name, your stated taste, and the subject matter all point the same way — and it's the only one a competitor can't casually imitate, because committing to it means committing to the drafting grid everywhere.</p>
+<p><b>Document of record</b> is the strongest second, and worth stealing one thing from regardless: the numbered clauses turn your compliance lines from a legal footnote into part of the design.</p>
+<p>Tell me a number and I'll apply it to the whole site — tokens, components, charts, dark mode, plus the nav and wordmark.</p>
+</div>
+</div>

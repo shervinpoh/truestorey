@@ -1,0 +1,261 @@
+<title>Truestorey — editorial-first, in colour</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Schibsted+Grotesk:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+ --paper:#FFFFFF; --ink:#0B0D0F; --ink2:#414750; --mute:#7C858F;
+ --line:#E4E7EB; --sunk:#F5F7F9;
+ --up:#0A8A55; --dn:#D23B1F;
+ /* the switchable one */
+ --acc:#FFE600; --on-acc:#0B0D0F; --acc-soft:#FFF9CC; --acc-line:#E8D200;
+}
+[data-p="teal"]{--acc:#00C2CC;--on-acc:#04262A;--acc-soft:#DFF8FA;--acc-line:#00A7B0}
+[data-p="indigo"]{--acc:#4B45FF;--on-acc:#FFFFFF;--acc-soft:#E9E8FF;--acc-line:#3A34E0}
+[data-p="coral"]{--acc:#FF4F3D;--on-acc:#FFFFFF;--acc-soft:#FFE7E3;--acc-line:#E23A29}
+*{box-sizing:border-box;border-radius:0}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Schibsted Grotesk",system-ui,sans-serif;line-height:1.5}
+.mono{font-family:"DM Mono",monospace}
+.bar{background:var(--ink);color:#fff;padding:10px 22px;display:flex;justify-content:space-between;
+ align-items:center;flex-wrap:wrap;gap:10px;font-size:12.5px;position:sticky;top:0;z-index:60}
+.bar b{font-weight:600}
+.swatches{display:flex;gap:6px;align-items:center}
+.swatches button{width:26px;height:26px;border:2px solid #fff;cursor:pointer;padding:0}
+.swatches button[aria-pressed="true"]{outline:2px solid #fff;outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 22px 90px}
+.note{background:var(--sunk);border-left:3px solid var(--acc);padding:12px 16px;font-size:13.5px;margin:22px 0;color:var(--ink2)}
+.note b{color:var(--ink)}
+/* ── nav ── */
+.nav{border-bottom:2px solid var(--ink);padding:16px 0 0}
+.navtop{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding-bottom:14px}
+.mk{font-weight:900;font-size:1.35rem;letter-spacing:-.055em}
+.mk span{background:var(--acc);color:var(--on-acc);padding:0 7px;margin-left:-2px}
+.navlinks{display:flex;gap:2px;flex-wrap:wrap}
+.navlinks a{font-size:13.5px;font-weight:600;text-decoration:none;color:var(--ink);padding:9px 13px;border:1px solid transparent}
+.navlinks a:hover{background:var(--sunk)}
+.navlinks a.on{background:var(--acc);color:var(--on-acc)}
+.searchbtn{border:2px solid var(--ink);background:none;padding:9px 14px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;display:flex;gap:8px;align-items:center}
+.searchbtn:hover{background:var(--acc);border-color:var(--acc)}
+/* ── hero lede ── */
+.lede{display:grid;grid-template-columns:1.5fr 1fr;gap:0;border-bottom:2px solid var(--ink)}
+.lede .main{padding:26px 26px 26px 0;border-right:1px solid var(--line)}
+.lede .side{padding:26px 0 26px 26px}
+.tag{display:inline-block;background:var(--acc);color:var(--on-acc);font-size:10.5px;font-weight:700;
+ letter-spacing:.1em;text-transform:uppercase;padding:4px 9px;margin-bottom:12px}
+.tag.plain{background:var(--ink);color:#fff}
+.lede h1{font-size:clamp(1.9rem,4vw,2.75rem);font-weight:800;letter-spacing:-.045em;line-height:1.03;margin:0 0 12px}
+.lede p{font-size:16px;color:var(--ink2);margin:0 0 14px;max-width:52ch}
+.byline{font-size:12px;color:var(--mute)}
+.chartcard{border:1px solid var(--line);padding:14px}
+.chartcard .h{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-bottom:10px}
+.spark{display:flex;align-items:flex-end;gap:2px;height:96px;border-bottom:2px solid var(--ink)}
+.spark i{flex:1;background:var(--ink);opacity:.16;min-height:3px}
+.spark i.hi{opacity:1;background:var(--acc)}
+.figrow{display:flex;justify-content:space-between;align-items:baseline;margin-top:10px}
+.fignum{font-size:2rem;font-weight:800;letter-spacing:-.04em;line-height:1}
+.delta{font-size:12.5px;font-weight:700;padding:3px 7px}
+.delta.dn{background:#FCE9E5;color:var(--dn)}
+.delta.up{background:#E4F6EE;color:var(--up)}
+/* ── section head ── */
+.sec{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);
+ padding:0 0 8px;margin:44px 0 0}
+.sec h2{font-size:1.3rem;font-weight:800;letter-spacing:-.035em;margin:0}
+.sec a{font-size:12.5px;font-weight:600;color:var(--ink);text-decoration:none;border-bottom:2px solid var(--acc)}
+/* ── article grid ── */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-bottom:1px solid var(--line)}
+.card{padding:20px 20px 22px;border-right:1px solid var(--line)}
+.card:last-child{border-right:0}
+.card:first-child{padding-left:0}
+.thumb{height:104px;margin-bottom:14px;display:flex;align-items:flex-end;gap:2px;background:var(--sunk);padding:12px}
+.thumb i{flex:1;background:var(--ink);opacity:.2;min-height:3px}
+.thumb i.hi{opacity:1;background:var(--acc)}
+.thumb.blockmap{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;align-items:stretch;padding:12px}
+.thumb.blockmap i{opacity:1}
+.card h3{font-size:1.02rem;font-weight:700;letter-spacing:-.026em;line-height:1.24;margin:0 0 7px}
+.card p{font-size:13px;color:var(--ink2);margin:0 0 10px;line-height:1.5}
+.meta{font-size:11px;color:var(--mute)}
+/* ── archive ── */
+.arch{border-top:2px solid var(--ink)}
+.arow{display:grid;grid-template-columns:104px 1fr auto;gap:16px;padding:14px 0;border-bottom:1px solid var(--line);align-items:start}
+.arow .d{font-size:11.5px;color:var(--mute);padding-top:2px}
+.arow .t{font-size:14.5px;font-weight:600;letter-spacing:-.018em;line-height:1.35}
+.arow .s{font-size:12.5px;color:var(--ink2);margin-top:4px;line-height:1.45}
+.src{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--line);
+ padding:3px 7px;color:var(--mute);white-space:nowrap}
+.src.ura{border-color:var(--acc-line);background:var(--acc-soft);color:var(--on-acc)}
+[data-p="indigo"] .src.ura,[data-p="coral"] .src.ura{color:var(--acc-line)}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0 0}
+.filters button{border:1px solid var(--line);background:none;font:inherit;font-size:12px;font-weight:600;
+ padding:6px 11px;cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+/* ── browse ── */
+.browse{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1px;background:var(--line);
+ border:1px solid var(--line);margin-top:16px}
+.tile{background:var(--paper);padding:13px 14px;text-decoration:none;color:var(--ink);position:relative;overflow:hidden}
+.tile:before{content:"";position:absolute;inset:0;background:var(--acc);opacity:var(--h,.06)}
+.tile>*{position:relative}
+.tile .n{font-size:13.5px;font-weight:700;letter-spacing:-.02em;display:block}
+.tile .v{font-size:11.5px;color:var(--ink2);margin-top:3px;display:block}
+.tile .b{font-size:10px;color:var(--mute);margin-top:2px;display:block}
+.tile:hover{background:var(--ink)}
+.tile:hover .n,.tile:hover .v,.tile:hover .b{color:#fff}
+.tile:hover:before{opacity:0}
+.tabs{display:flex;gap:0;border-bottom:2px solid var(--ink);margin-top:20px}
+.tabs button{border:0;background:none;font:inherit;font-size:14px;font-weight:700;padding:10px 18px;cursor:pointer;
+ color:var(--mute);border-bottom:3px solid transparent;margin-bottom:-2px}
+.tabs button[aria-pressed="true"]{color:var(--ink);border-bottom-color:var(--acc)}
+.sitemap{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0;border:1px solid var(--line);margin-top:16px}
+.sitemap div{padding:14px 16px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.sitemap b{display:block;font-size:13.5px;margin-bottom:4px}
+.sitemap span{font-size:11.5px;color:var(--mute);line-height:1.5;display:block}
+.sitemap .new{background:var(--acc);color:var(--on-acc);font-size:9px;font-weight:700;padding:1px 5px;margin-left:5px;letter-spacing:.06em}
+@media(max-width:820px){.lede{grid-template-columns:1fr}.lede .main{border-right:0;padding-right:0;border-bottom:1px solid var(--line)}
+ .lede .side{padding-left:0}.grid3{grid-template-columns:1fr}.card{border-right:0;border-bottom:1px solid var(--line);padding-left:0}
+ .arow{grid-template-columns:1fr;gap:6px}}
+</style>
+
+<div class="bar">
+  <b>Palette — click to switch the whole page</b>
+  <div class="swatches">
+    <button style="background:#FFE600" onclick="P('yellow',this)" aria-pressed="true" title="Signal yellow"></button>
+    <button style="background:#00C2CC" onclick="P('teal',this)" aria-pressed="false" title="Bright teal"></button>
+    <button style="background:#4B45FF" onclick="P('indigo',this)" aria-pressed="false" title="Electric indigo"></button>
+    <button style="background:#FF4F3D" onclick="P('coral',this)" aria-pressed="false" title="Hot coral"></button>
+  </div>
+</div>
+<script>
+function P(n,el){document.documentElement.setAttribute('data-p',n);
+ document.querySelectorAll('.swatches button').forEach(b=>b.setAttribute('aria-pressed', b===el?'true':'false'));}
+</script>
+
+<div class="wrap">
+<div class="nav">
+  <div class="navtop">
+    <div class="mk">True<span>Storey</span></div>
+    <button class="searchbtn">⌕ Search any block or project</button>
+  </div>
+  <div class="navlinks">
+    <a href="#" class="on">Latest</a><a href="#">Policy &amp; data</a><a href="#">HDB</a>
+    <a href="#">Condo</a><a href="#">Landed</a><a href="#">Schools</a><a href="#">Rates</a>
+    <a href="#">MOP</a><a href="#">Tools</a><a href="#">About</a>
+  </div>
+</div>
+
+<div class="lede">
+  <div class="main">
+    <span class="tag">Deep dive · this week</span>
+    <h1>Everyone says sell the moment you hit MOP. Here's what they leave out.</h1>
+    <p>Nearly a hundred thousand flats reach their fifth year over the next five years. Whether you
+    should rush to beat them depends on one question about yourself, not about the market.</p>
+    <p class="byline mono">SHERVIN POH · 22 AUG 2026 · 3 MIN · SOURCES: HDB VIA DATA.GOV.SG</p>
+  </div>
+  <div class="side">
+    <div class="chartcard">
+      <div class="h">HDB Resale Price Index</div>
+      <div class="spark">
+        <i style="height:52%"></i><i style="height:58%"></i><i style="height:63%"></i><i style="height:70%"></i>
+        <i style="height:76%"></i><i style="height:83%"></i><i style="height:88%"></i><i style="height:94%"></i>
+        <i style="height:99%"></i><i class="hi" style="height:97%"></i>
+      </div>
+      <div class="figrow"><span class="fignum">202.8</span><span class="delta dn">▼ 0.3% QoQ</span></div>
+      <p class="meta mono" style="margin:8px 0 0">2026-Q2 · 146 QUARTERS SINCE 1990-Q1<br>SOURCE: HDB VIA DATA.GOV.SG</p>
+    </div>
+  </div>
+</div>
+
+<div class="sec"><h2>Latest</h2><a href="#">Everything →</a></div>
+<div class="grid3">
+  <div class="card">
+    <div class="thumb"><i style="height:30%"></i><i style="height:45%"></i><i style="height:38%"></i><i style="height:62%"></i><i style="height:55%"></i><i class="hi" style="height:88%"></i></div>
+    <span class="tag plain">Note</span>
+    <h3>Punggol has 3,222 units hitting year five this year — the most of any town</h3>
+    <p>What that does to a seller's timing depends on how many of them actually list.</p>
+    <p class="meta mono">23 AUG 2026 · FROM HDB PROPERTY INFORMATION</p>
+  </div>
+  <div class="card">
+    <div class="thumb blockmap">
+      <i style="background:var(--acc)"></i><i style="background:#D9DDE1"></i><i style="background:var(--acc)"></i><i style="background:#D9DDE1"></i>
+      <i style="background:#D9DDE1"></i><i style="background:var(--acc)"></i><i style="background:#D9DDE1"></i><i style="background:#D9DDE1"></i>
+      <i style="background:#D9DDE1"></i><i style="background:#D9DDE1"></i><i style="background:var(--acc)"></i><i style="background:#D9DDE1"></i>
+      <i style="background:var(--acc)"></i><i style="background:#D9DDE1"></i><i style="background:#D9DDE1"></i><i style="background:#D9DDE1"></i>
+    </div>
+    <span class="tag plain">Note</span>
+    <h3>680 blocks are past their fifth year with no resale ever filed</h3>
+    <p>Toa Payoh alone has 36. That is the real held-back supply — not Tengah.</p>
+    <p class="meta mono">21 AUG 2026 · FROM HDB RESALE + PROPERTY INFO</p>
+  </div>
+  <div class="card">
+    <div class="thumb"><i style="height:88%"></i><i style="height:72%"></i><i style="height:64%"></i><i style="height:58%"></i><i style="height:44%"></i><i class="hi" style="height:36%"></i></div>
+    <span class="tag plain">Note</span>
+    <h3>Two more Marina Gardens and Orchard Boulevard sites go on the confirmed list</h3>
+    <p>URA released both on 13 August. What lands there sets the psf floor for the district.</p>
+    <p class="meta mono">13 AUG 2026 · FROM URA MEDIA RELEASE</p>
+  </div>
+</div>
+
+<div class="sec"><h2>Policy &amp; data archive</h2><a href="#">All 214 entries →</a></div>
+<p style="font-size:13.5px;color:var(--ink2);margin:12px 0 0;max-width:66ch">Every official announcement and
+data release that moves Singapore residential property, dated and linked to the source. Facts only — the
+commentary sits in the notes.</p>
+<div class="filters">
+  <button aria-pressed="true">All</button><button aria-pressed="false">GLS &amp; land</button>
+  <button aria-pressed="false">Cooling measures</button><button aria-pressed="false">Rates</button>
+  <button aria-pressed="false">HDB</button><button aria-pressed="false">Statistics</button>
+</div>
+<div class="arch" style="margin-top:14px">
+  <div class="arow"><span class="d mono">13 AUG 2026</span>
+    <div><div class="t">URA releases two sale sites at Marina Gardens Lane and Orchard Boulevard</div>
+    <div class="s">Both on the Confirmed List. Marina Gardens Lane is the third parcel in the Marina South precinct.</div></div>
+    <span class="src ura">URA</span></div>
+  <div class="arow"><span class="d mono">07 AUG 2026</span>
+    <div><div class="t">Tender awarded — Berlayar Drive</div>
+    <div class="s">Award follows the 4 August tender close.</div></div>
+    <span class="src ura">URA</span></div>
+  <div class="arow"><span class="d mono">07 AUG 2026</span>
+    <div><div class="t">Tender awarded — Chitty Road and Veerasamy Road</div>
+    <div class="s">Award follows the 28 July tender close.</div></div>
+    <span class="src ura">URA</span></div>
+  <div class="arow"><span class="d mono">01 AUG 2026</span>
+    <div><div class="t">HDB Resale Price Index, 2026-Q2 — 202.8</div>
+    <div class="s">Down 0.3% on the quarter, flat on the year. 146 quarters of history back to 1990-Q1.</div></div>
+    <span class="src">data.gov.sg</span></div>
+  <div class="arow"><span class="d mono">01 AUG 2026</span>
+    <div><div class="t">URA real estate statistics, Q2 2026</div>
+    <div class="s">Quarterly private residential price index and transaction volumes.</div></div>
+    <span class="src ura">URA</span></div>
+</div>
+<div class="note"><b>Every row links to the primary source</b> — a URA media release, a data.gov.sg dataset,
+an MAS series. Nothing here is a rewrite of somebody else's article, which is what makes it worth keeping
+and what keeps it on the right side of your own rule.</div>
+
+<div class="sec"><h2>Find a place</h2><a href="#">Advanced search →</a></div>
+<div class="tabs">
+  <button aria-pressed="true">HDB</button><button aria-pressed="false">Condo</button>
+  <button aria-pressed="false">Landed</button><button aria-pressed="false">Executive Condo</button>
+</div>
+<div class="browse">
+  <a class="tile" href="#" style="--h:.30"><span class="n">Bishan</span><span class="v mono">$1,099 psf median</span><span class="b">148 blocks</span></a>
+  <a class="tile" href="#" style="--h:.26"><span class="n">Queenstown</span><span class="v mono">$1,041 psf</span><span class="b">231 blocks</span></a>
+  <a class="tile" href="#" style="--h:.22"><span class="n">Toa Payoh</span><span class="v mono">$962 psf</span><span class="b">329 blocks</span></a>
+  <a class="tile" href="#" style="--h:.18"><span class="n">Ang Mo Kio</span><span class="v mono">$871 psf</span><span class="b">412 blocks</span></a>
+  <a class="tile" href="#" style="--h:.15"><span class="n">Tampines</span><span class="v mono">$806 psf</span><span class="b">820 blocks</span></a>
+  <a class="tile" href="#" style="--h:.12"><span class="n">Punggol</span><span class="v mono">$782 psf</span><span class="b">288 blocks</span></a>
+  <a class="tile" href="#" style="--h:.09"><span class="n">Woodlands</span><span class="v mono">$651 psf</span><span class="b">507 blocks</span></a>
+  <a class="tile" href="#" style="--h:.06"><span class="n">Yishun</span><span class="v mono">$628 psf</span><span class="b">441 blocks</span></a>
+</div>
+<div class="note"><b>Shaded by median psf, so the map reads before you do.</b> A town opens onto a filtered
+list, not a 820-row scroll — and the search box at the top of the page skips both steps entirely.</div>
+
+<div class="sec"><h2>What the site would actually have</h2></div>
+<div class="sitemap">
+  <div><b>Latest</b><span>Notes and deep dives in one feed</span></div>
+  <div><b>Policy &amp; data archive<span class="new">NEW</span></b><span>Every official release, dated and sourced</span></div>
+  <div><b>HDB</b><span>Town → block, filtered not scrolled</span></div>
+  <div><b>Condo</b><span>Project pages, by district</span></div>
+  <div><b>Landed<span class="new">FIX</span></b><span>By street — currently unreachable from the nav</span></div>
+  <div><b>Schools<span class="new">NEW</span></b><span>1km and 2km bands, searchable by school</span></div>
+  <div><b>Rates<span class="new">NEW</span></b><span>SORA, HDB 2.6%, what a change costs you</span></div>
+  <div><b>MOP</b><span>Who can sell, by town and year</span></div>
+  <div><b>Tools<span class="new">NEW</span></b><span>Proceeds, affordability, stamp duty — one page</span></div>
+  <div><b>About</b><span>Who is writing this and why</span></div>
+</div>
+</div>

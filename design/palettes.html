@@ -1,0 +1,238 @@
+<title>Broadsheet — three identities</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=Public+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+:root{--pg:#141414;--pgb:#f4f4f2}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--pg:#e9e9e6;--pgb:#0e0e0d}}
+:root[data-theme=dark]{--pg:#e9e9e6;--pgb:#0e0e0d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--pgb);color:var(--pg);font-family:Inter,system-ui,sans-serif;line-height:1.5}
+.wrap{max-width:1120px;margin:0 auto;padding:38px 20px 90px}
+.intro{max-width:64ch;margin-bottom:40px}
+.intro h1{font-weight:700;font-size:clamp(1.5rem,4vw,2.1rem);letter-spacing:-.035em;margin:0 0 12px;line-height:1.05}
+.intro p{margin:0 0 11px;font-size:15px;opacity:.82}
+.opt{margin:0 0 58px}
+.optbar{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px;padding-bottom:9px;border-bottom:2px solid var(--pg)}
+.optnum{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;opacity:.5}
+.optname{font-weight:700;font-size:1.14rem;letter-spacing:-.02em}
+.optwhy{font-size:13.5px;opacity:.75;flex:1 1 340px;min-width:0}
+.frame{border:1px solid rgba(128,128,128,.3);border-top:0;overflow:hidden}
+.note{font-size:13px;opacity:.72;margin:10px 2px 0;max-width:74ch}
+.note b{opacity:1}
+.sw{display:flex;gap:0;margin:0}
+.sw i{height:7px;flex:1}
+/* shared broadsheet skeleton — only the skin changes between the three */
+.bs{padding:0}
+.bs .hd{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:15px 26px 12px}
+.bs .mk{font-size:1.34rem;letter-spacing:-.03em}
+.bs .nav{display:flex;gap:17px;font-size:12.5px;font-weight:500}
+.bs .body{padding:26px 26px 30px}
+.bs .kicker{font-size:10.5px;font-weight:600;letter-spacing:.17em;text-transform:uppercase;margin-bottom:10px}
+.bs h2{font-size:clamp(1.95rem,5vw,3rem);line-height:1.02;margin:0 0 11px;max-width:19ch}
+.bs .standfirst{font-size:17px;line-height:1.47;max-width:53ch;margin:0 0 24px}
+.bs .split{display:grid;grid-template-columns:1.35fr 1fr;gap:32px;align-items:start}
+.bs .chartbox,.bs .stat{padding-top:12px}
+.bs .ct{font-size:12.5px;font-weight:600;margin-bottom:2px}
+.bs .cs{font-size:11px;margin-bottom:14px}
+.bs .plot{display:flex;align-items:flex-end;gap:3px;height:128px}
+.bs .plot i{flex:1;min-height:2px}
+.bs .ax{display:flex;justify-content:space-between;font-family:"IBM Plex Mono",monospace;font-size:9px;margin-top:5px}
+.bs .big{font-size:2.55rem;letter-spacing:-.035em;line-height:1;font-variant-numeric:tabular-nums}
+.bs .biglab{font-size:11px;margin-top:5px;line-height:1.45}
+.bs .pull{padding:2px 0 2px 15px;margin:20px 0 0;font-size:16.5px;line-height:1.44}
+.bs .sect{font-size:10.5px;font-weight:600;letter-spacing:.17em;text-transform:uppercase;padding-top:9px;margin:22px 0 8px}
+.bs .lrow{display:flex;justify-content:space-between;gap:12px;padding:8px 0;font-size:14px}
+.bs .lrow em{font-style:normal;font-family:"IBM Plex Mono",monospace;font-size:11.5px}
+.bs .prov{font-size:10px;line-height:1.75;padding-top:10px;margin-top:22px}
+/* ───────── A · GALLERY ───────── */
+.a{--pap:#faf8f5;--ink:#14120f;--soft:#6d675f;--rule:#ded7cc;--acc:#0f4f4a;background:var(--pap);color:var(--ink);font-family:Inter,sans-serif}
+.a .hd{border-bottom:1px solid var(--ink)}
+.a .mk{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:1.55rem}
+.a .nav{color:var(--soft)}.a .nav b{color:var(--ink);border-bottom:2px solid var(--acc);padding-bottom:2px}
+.a .kicker{color:var(--acc)}
+.a h2{font-family:"Instrument Serif",Georgia,serif;font-weight:400;letter-spacing:-.015em}
+.a .standfirst{color:#4a453e}
+.a .chartbox,.a .stat{border-top:1px solid var(--ink)}
+.a .cs,.a .ax,.a .biglab{color:var(--soft)}
+.a .plot{border-bottom:1px solid var(--ink)}
+.a .plot i{background:var(--acc);opacity:.26}.a .plot i.hi{opacity:1}
+.a .big{font-family:"Instrument Serif",serif;font-weight:400}
+.a .pull{border-left:2px solid var(--acc);font-family:"Instrument Serif",serif;font-size:19px;color:#3d3831}
+.a .sect{border-top:1px solid var(--rule);color:var(--soft)}
+.a .lrow{border-bottom:1px solid var(--rule)}.a .lrow em{color:var(--soft)}.a .lrow em.f{color:var(--acc);font-weight:500}
+.a .prov{border-top:1px solid var(--rule);color:var(--soft)}
+/* ───────── B · FIELD NOTES ───────── */
+.b{--pap:#edefe9;--ink:#1b1e19;--soft:#646a5e;--rule:#ccd1c4;--acc:#a34a2a;background:var(--pap);color:var(--ink);font-family:"IBM Plex Sans",sans-serif}
+.b .hd{border-bottom:1px solid var(--ink)}
+.b .mk{font-family:Fraunces,Georgia,serif;font-weight:600;font-variation-settings:"opsz" 40}
+.b .nav{color:var(--soft)}.b .nav b{color:var(--ink);border-bottom:2px solid var(--acc);padding-bottom:2px}
+.b .kicker{color:var(--acc)}
+.b h2{font-family:Fraunces,Georgia,serif;font-weight:600;letter-spacing:-.02em;font-variation-settings:"opsz" 96}
+.b .standfirst{color:#4c5147}
+.b .chartbox,.b .stat{border-top:2px solid var(--ink)}
+.b .cs,.b .ax,.b .biglab{color:var(--soft)}
+.b .plot{border-bottom:1px solid var(--ink)}
+.b .plot i{background:var(--ink);opacity:.22}.b .plot i.hi{opacity:1;background:var(--acc)}
+.b .big{font-family:Fraunces,serif;font-weight:600}
+.b .pull{border-left:3px solid var(--acc);font-family:Fraunces,serif;color:#4c5147}
+.b .sect{border-top:1px solid var(--rule);color:var(--soft)}
+.b .lrow{border-bottom:1px solid var(--rule)}.b .lrow em{color:var(--soft)}.b .lrow em.f{color:var(--acc);font-weight:500}
+.b .prov{border-top:1px solid var(--rule);color:var(--soft)}
+/* ───────── C · LEDGER ───────── */
+.c{--pap:#f7f3e8;--ink:#1a1712;--soft:#6f6656;--rule:#ddd3bf;--acc:#7d2b18;background:var(--pap);color:var(--ink);font-family:"Public Sans",sans-serif}
+.c .hd{border-bottom:3px double var(--ink)}
+.c .mk{font-family:"Source Serif 4",Georgia,serif;font-weight:700}
+.c .nav{color:var(--soft)}.c .nav b{color:var(--ink);border-bottom:2px solid var(--acc);padding-bottom:2px}
+.c .kicker{color:var(--acc)}
+.c h2{font-family:"Source Serif 4",Georgia,serif;font-weight:700;letter-spacing:-.022em}
+.c .standfirst{color:#514839;font-family:"Source Serif 4",serif}
+.c .chartbox,.c .stat{border-top:2px solid var(--ink)}
+.c .cs,.c .ax,.c .biglab{color:var(--soft)}
+.c .plot{border-bottom:1px solid var(--ink)}
+.c .plot i{background:var(--acc);opacity:.28}.c .plot i.hi{opacity:1}
+.c .big{font-family:"Source Serif 4",serif;font-weight:700}
+.c .pull{border-left:3px solid var(--acc);font-family:"Source Serif 4",serif;color:#514839}
+.c .sect{border-top:1px solid var(--rule);color:var(--soft)}
+.c .lrow{border-bottom:1px solid var(--rule)}.c .lrow em{color:var(--soft)}.c .lrow em.f{color:var(--acc);font-weight:500}
+.c .prov{border-top:1px solid var(--rule);color:var(--soft)}
+/* the one to avoid */
+.ft{background:#fff1e5;color:#33302e;padding:15px 20px;border:1px solid rgba(128,128,128,.3);font-family:Georgia,serif}
+@media(max-width:760px){.bs .split{grid-template-columns:1fr;gap:22px}}
+</style>
+<div class="wrap">
+<div class="intro">
+<h1>Same layout, three identities</h1>
+<p>You were right about Blueprint — grid paper and wide-tracked mono caps is the current house style of AI-generated landing pages. And you're right that broadsheet is familiar. But the thing that makes it read as <em>borrowed</em> is the FT's salmon paper, not the structure.</p>
+<p>So: identical Broadsheet bones, three colour and type identities that aren't anyone else's. Same block, same real numbers.</p>
+</div>
+
+<section class="opt">
+<div class="optbar"><span class="optnum">A</span><span class="optname">Gallery</span>
+<span class="optwhy">Bone paper, near-black ink, one deep teal. Instrument Serif headlines — high contrast, lots of air.</span></div>
+<div class="sw"><i style="background:#faf8f5"></i><i style="background:#14120f"></i><i style="background:#0f4f4a"></i><i style="background:#ded7cc"></i></div>
+<div class="frame"><div class="bs a">
+<div class="hd"><div class="mk">Truestorey</div>
+<div class="nav"><b>Blocks</b><span>Market</span><span>MOP</span><span>Insights</span></div></div>
+<div class="body">
+<div class="kicker">Bishan · HDB resale · 25 filed transactions</div>
+<h2>Blk 275A Bishan St 24</h2>
+<p class="standfirst">A DBSS block with 84 years of lease left, two MRT lines under a kilometre away, and Catholic High inside the 1&nbsp;km band. Here is what has actually been paid.</p>
+<div class="split">
+<div class="chartbox">
+ <div class="ct">Median psf by month</div>
+ <div class="cs">Each bar is a month with at least one filed transaction</div>
+ <div class="plot">
+  <i style="height:62%"></i><i style="height:71%"></i><i style="height:24%"></i><i style="height:82%"></i>
+  <i style="height:55%"></i><i style="height:63%"></i><i style="height:29%"></i><i style="height:74%"></i>
+  <i style="height:51%"></i><i class="hi" style="height:96%"></i></div>
+ <div class="ax"><span>Apr 2025</span><span>Jun 2026</span></div>
+ <div class="pull">&ldquo;The thing is, a range tells you what people paid. A single number tells you what someone wants you to believe.&rdquo;</div>
+</div>
+<div>
+ <div class="stat"><div class="big">$1,099</div>
+ <div class="biglab">Median psf across 25 filed transactions.<br>Observed range $919 &ndash; $1,263.</div></div>
+ <div class="sect">Getting around</div>
+ <div class="lrow"><span>Bishan MRT</span><em>825 m</em></div>
+ <div class="lrow"><span>Marymount MRT</span><em>993 m</em></div>
+ <div class="lrow"><span>Shunfu Mart</span><em>897 m</em></div>
+ <div class="sect">Primary schools within 1 km</div>
+ <div class="lrow"><span>Catholic High School</span><em>642 m</em></div>
+ <div class="lrow"><span>Ai Tong School</span><em class="f">971 m &middot; on the line</em></div>
+</div></div>
+<div class="prov">Source: HDB Resale Flat Prices via data.gov.sg, 2023-08 to 2026-08, accessed 23 Aug 2026. Coordinates from OneMap, &copy; Singapore Land Authority &mdash; distances are straight-line, not walking.<br>
+Shervin Poh &middot; CEA Reg. No. R0XXXXXX &middot; Huttons Asia Pte Ltd &middot; Figures are derived from public government data and are not a valuation or an offer.</div>
+</div></div></div>
+<p class="note"><b>Feels like:</b> an architecture or art magazine. Closest to the "crisp white, thin hairline" brief you gave originally, but with a serif that has actual personality. <b>Strength:</b> the most confident of the three — high-contrast type earns its space. <b>Risk:</b> the airiness needs discipline; if pages get dense it loses the effect.</p>
+</section>
+
+<section class="opt">
+<div class="optbar"><span class="optnum">B</span><span class="optname">Field notes</span>
+<span class="optwhy">Cool grey-green paper, burnt sienna accent, Fraunces headlines. Warmer and slightly imperfect.</span></div>
+<div class="sw"><i style="background:#edefe9"></i><i style="background:#1b1e19"></i><i style="background:#a34a2a"></i><i style="background:#ccd1c4"></i></div>
+<div class="frame"><div class="bs b">
+<div class="hd"><div class="mk">Truestorey</div>
+<div class="nav"><b>Blocks</b><span>Market</span><span>MOP</span><span>Insights</span></div></div>
+<div class="body">
+<div class="kicker">Bishan · HDB resale · 25 filed transactions</div>
+<h2>Blk 275A Bishan St 24</h2>
+<p class="standfirst">A DBSS block with 84 years of lease left, two MRT lines under a kilometre away, and Catholic High inside the 1&nbsp;km band. Here is what has actually been paid.</p>
+<div class="split">
+<div class="chartbox">
+ <div class="ct">Median psf by month</div>
+ <div class="cs">Each bar is a month with at least one filed transaction</div>
+ <div class="plot">
+  <i style="height:62%"></i><i style="height:71%"></i><i style="height:24%"></i><i style="height:82%"></i>
+  <i style="height:55%"></i><i style="height:63%"></i><i style="height:29%"></i><i style="height:74%"></i>
+  <i style="height:51%"></i><i class="hi" style="height:96%"></i></div>
+ <div class="ax"><span>Apr 2025</span><span>Jun 2026</span></div>
+ <div class="pull">&ldquo;The thing is, a range tells you what people paid. A single number tells you what someone wants you to believe.&rdquo;</div>
+</div>
+<div>
+ <div class="stat"><div class="big">$1,099</div>
+ <div class="biglab">Median psf across 25 filed transactions.<br>Observed range $919 &ndash; $1,263.</div></div>
+ <div class="sect">Getting around</div>
+ <div class="lrow"><span>Bishan MRT</span><em>825 m</em></div>
+ <div class="lrow"><span>Marymount MRT</span><em>993 m</em></div>
+ <div class="lrow"><span>Shunfu Mart</span><em>897 m</em></div>
+ <div class="sect">Primary schools within 1 km</div>
+ <div class="lrow"><span>Catholic High School</span><em>642 m</em></div>
+ <div class="lrow"><span>Ai Tong School</span><em class="f">971 m &middot; on the line</em></div>
+</div></div>
+<div class="prov">Source: HDB Resale Flat Prices via data.gov.sg, 2023-08 to 2026-08, accessed 23 Aug 2026. Coordinates from OneMap, &copy; Singapore Land Authority &mdash; distances are straight-line, not walking.<br>
+Shervin Poh &middot; CEA Reg. No. R0XXXXXX &middot; Huttons Asia Pte Ltd &middot; Figures are derived from public government data and are not a valuation or an offer.</div>
+</div></div></div>
+<p class="note"><b>Feels like:</b> a well-made independent journal. Fraunces has a soft, slightly odd character that reads as made-by-a-person rather than generated. <b>Strength:</b> the furthest from anything in Singapore property, without being a gimmick. <b>Risk:</b> the green-grey is the most opinionated choice here — you will either like it immediately or not at all.</p>
+</section>
+
+<section class="opt">
+<div class="optbar"><span class="optnum">C</span><span class="optname">Ledger</span>
+<span class="optwhy">Cream, oxblood, Source Serif. Broadsheet bones with the authority of the document-of-record option.</span></div>
+<div class="sw"><i style="background:#f7f3e8"></i><i style="background:#1a1712"></i><i style="background:#7d2b18"></i><i style="background:#ddd3bf"></i></div>
+<div class="frame"><div class="bs c">
+<div class="hd"><div class="mk">Truestorey</div>
+<div class="nav"><b>Blocks</b><span>Market</span><span>MOP</span><span>Insights</span></div></div>
+<div class="body">
+<div class="kicker">Bishan · HDB resale · 25 filed transactions</div>
+<h2>Blk 275A Bishan St 24</h2>
+<p class="standfirst">A DBSS block with 84 years of lease left, two MRT lines under a kilometre away, and Catholic High inside the 1&nbsp;km band. Here is what has actually been paid.</p>
+<div class="split">
+<div class="chartbox">
+ <div class="ct">Median psf by month</div>
+ <div class="cs">Each bar is a month with at least one filed transaction</div>
+ <div class="plot">
+  <i style="height:62%"></i><i style="height:71%"></i><i style="height:24%"></i><i style="height:82%"></i>
+  <i style="height:55%"></i><i style="height:63%"></i><i style="height:29%"></i><i style="height:74%"></i>
+  <i style="height:51%"></i><i class="hi" style="height:96%"></i></div>
+ <div class="ax"><span>Apr 2025</span><span>Jun 2026</span></div>
+ <div class="pull">&ldquo;The thing is, a range tells you what people paid. A single number tells you what someone wants you to believe.&rdquo;</div>
+</div>
+<div>
+ <div class="stat"><div class="big">$1,099</div>
+ <div class="biglab">Median psf across 25 filed transactions.<br>Observed range $919 &ndash; $1,263.</div></div>
+ <div class="sect">Getting around</div>
+ <div class="lrow"><span>Bishan MRT</span><em>825 m</em></div>
+ <div class="lrow"><span>Marymount MRT</span><em>993 m</em></div>
+ <div class="lrow"><span>Shunfu Mart</span><em>897 m</em></div>
+ <div class="sect">Primary schools within 1 km</div>
+ <div class="lrow"><span>Catholic High School</span><em>642 m</em></div>
+ <div class="lrow"><span>Ai Tong School</span><em class="f">971 m &middot; on the line</em></div>
+</div></div>
+<div class="prov">Source: HDB Resale Flat Prices via data.gov.sg, 2023-08 to 2026-08, accessed 23 Aug 2026. Coordinates from OneMap, &copy; Singapore Land Authority &mdash; distances are straight-line, not walking.<br>
+Shervin Poh &middot; CEA Reg. No. R0XXXXXX &middot; Huttons Asia Pte Ltd &middot; Figures are derived from public government data and are not a valuation or an offer.</div>
+</div></div></div>
+<p class="note"><b>Feels like:</b> a financial journal of record. Keeps Public Sans, so it is the smallest jump from what you have running now. <b>Strength:</b> the oxblood-on-cream carries gravity, which suits a site whose pitch is evidence. <b>Risk:</b> cream plus serif is the safest of the three — good, but the least likely to be remembered.</p>
+</section>
+
+<section class="opt">
+<div class="optbar"><span class="optnum">—</span><span class="optname">For contrast: the one to avoid</span>
+<span class="optwhy">This exact tint is the FT's. It is what makes the layout read as borrowed rather than yours.</span></div>
+<div class="ft">#FFF1E5 &mdash; Financial Times salmon. Instantly recognisable, and not available to you.</div>
+</section>
+
+<div class="intro" style="margin-top:6px">
+<h1 style="font-size:1.3rem">My read, having been wrong once already</h1>
+<p><b>B, Field notes.</b> You said broadsheet looks best and that its weakness is familiarity — B is the version that keeps what you liked and fixes what you flagged. The grey-green and the burnt sienna belong to nobody in this market, and Fraunces has enough character that the page reads as designed rather than assembled.</p>
+<p><b>A, Gallery</b> is the one to pick if you want the site to feel expensive and restrained. <b>C, Ledger</b> is the safe one and the fastest to ship, since it keeps your current sans.</p>
+<p>Letter, and I will take it through tokens, components, charts, dark mode, the global nav and a real wordmark.</p>
+</div>
+</div>

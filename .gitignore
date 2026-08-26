@@ -1,0 +1,22 @@
+# Secrets. This line is the most important one in the file.
+.env.local
+.env*.local
+
+# Build output
+.next/
+out/
+build.log
+
+# Dependencies
+node_modules/
+
+# macOS
+.DS_Store
+
+# Raw ingest downloads, kept only so a parse failure can be diagnosed
+data/.boundaries-raw.geojson
+data/.onemap-pace.json
+
+# Analytics sink. Real visitor session ids and paths — never versioned.
+# api/track recreates it on first event.
+data/events.jsonl

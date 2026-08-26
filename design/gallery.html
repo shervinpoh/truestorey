@@ -1,0 +1,164 @@
+<title>Truestorey — Gallery direction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--pg:#141414;--pgb:#f0f0ee}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--pg:#e9e9e6;--pgb:#0e0e0d}}
+:root[data-theme=dark]{--pg:#e9e9e6;--pgb:#0e0e0d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--pgb);color:var(--pg);font-family:"Schibsted Grotesk",system-ui,sans-serif;line-height:1.5}
+.wrap{max-width:1120px;margin:0 auto;padding:38px 20px 90px}
+.intro{max-width:64ch;margin-bottom:34px}
+.intro h1{font-weight:700;font-size:clamp(1.5rem,4vw,2.1rem);letter-spacing:-.035em;margin:0 0 12px;line-height:1.05}
+.intro p{margin:0 0 11px;font-size:15px;opacity:.84}
+.intro code{font-family:"DM Mono",monospace;font-size:.87em;background:rgba(128,128,128,.16);padding:1px 5px}
+.bar{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px;padding-bottom:9px;border-bottom:2px solid var(--pg);margin-bottom:0}
+.bnum{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.14em;opacity:.5}
+.bname{font-weight:700;font-size:1.14rem;letter-spacing:-.02em}
+.bwhy{font-size:13.5px;opacity:.75;flex:1 1 340px}
+.frame{border:1px solid rgba(128,128,128,.3);border-top:0;overflow:hidden}
+.note{font-size:13px;opacity:.74;margin:12px 2px 34px;max-width:76ch}
+.note b{opacity:1}
+/* map */
+.map{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:0 0 40px}
+.mapc{border:1px solid rgba(128,128,128,.3);padding:13px 14px}
+.mapc h4{margin:0 0 3px;font-size:13.5px;font-weight:700;letter-spacing:-.01em}
+.mapc p{margin:0 0 10px;font-size:11.5px;opacity:.7;line-height:1.5}
+.chips{display:flex;gap:0;height:26px}
+.chips i{flex:1}
+/* ════════ THE DIRECTION ════════ */
+.g{--paper:#fdfdfc;--ink:#101112;--ink2:#3d4145;--mute:#8b9095;--line:#e3e5e6;--hair:#111;
+  --up:#0f7a52;--dn:#c2402b;--sig:var(--ink);
+  background:var(--paper);color:var(--ink);font-family:"Schibsted Grotesk",sans-serif}
+.g *{border-radius:0!important}
+.g .nav{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
+ padding:16px 28px;border-bottom:1px solid var(--hair)}
+.g .mk{font-weight:800;font-size:1.06rem;letter-spacing:-.05em}
+.g .mk span{font-weight:400;color:var(--mute)}
+.g .nl{display:flex;gap:22px;font-size:13px;font-weight:500;color:var(--ink2)}
+.g .nl b{font-weight:600;color:var(--ink);box-shadow:0 2px 0 var(--ink)}
+.g .body{padding:34px 28px 34px}
+.g .crumb{font-family:"DM Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-bottom:16px}
+.g h2{font-weight:700;font-size:clamp(1.9rem,4.6vw,2.7rem);letter-spacing:-.045em;line-height:1;margin:0 0 8px}
+.g .sub{font-size:14.5px;color:var(--ink2);margin:0 0 34px;max-width:56ch}
+/* the number is the hero */
+.g .hero{border-top:1px solid var(--hair);padding-top:16px;margin-bottom:34px;
+ display:grid;grid-template-columns:auto 1fr;gap:0 40px;align-items:end}
+.g .heron{font-size:clamp(3.4rem,11vw,6.2rem);font-weight:700;letter-spacing:-.06em;line-height:.84;
+ font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.g .heron small{font-size:.26em;font-weight:500;letter-spacing:-.02em;color:var(--mute);margin-left:6px}
+.g .herom{padding-bottom:6px}
+.g .k{font-family:"DM Mono",monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);display:block;margin-bottom:5px}
+.g .herom .r{font-family:"DM Mono",monospace;font-size:13px;color:var(--ink2);line-height:1.7}
+.g .strip{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:34px}
+.g .strip>div{padding:13px 0;border-right:1px solid var(--line)}
+.g .strip>div:last-child{border-right:0}
+.g .strip>div:not(:first-child){padding-left:18px}
+.g .strip .v{font-size:1.28rem;font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums;margin-top:2px}
+.g .cols{display:grid;grid-template-columns:1.4fr 1fr;gap:44px;align-items:start}
+.g .sh{font-family:"DM Mono",monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);
+ border-bottom:1px solid var(--hair);padding-bottom:7px;margin:0 0 4px;display:flex;justify-content:space-between}
+.g .plot{display:flex;align-items:flex-end;gap:2px;height:118px;margin-top:16px}
+.g .plot i{flex:1;background:var(--ink);opacity:.16;min-height:2px}
+.g .plot i.hi{opacity:1;background:var(--sig)}
+.g .ax{display:flex;justify-content:space-between;font-family:"DM Mono",monospace;font-size:9px;color:var(--mute);
+ border-top:1px solid var(--hair);padding-top:6px;margin-top:0}
+.g .row{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.g .row:last-child{border-bottom:0}
+.g .row .d{font-family:"DM Mono",monospace;font-size:12px;color:var(--mute);white-space:nowrap;font-variant-numeric:tabular-nums}
+.g .row .d.f{color:var(--dn)}
+.g .quote{font-size:17px;line-height:1.45;letter-spacing:-.015em;color:var(--ink2);
+ border-left:2px solid var(--ink);padding-left:16px;margin:26px 0 0;max-width:48ch}
+.g .prov{font-family:"DM Mono",monospace;font-size:9px;letter-spacing:.03em;color:var(--mute);line-height:1.9;
+ border-top:1px solid var(--line);padding-top:12px;margin-top:32px}
+@media(max-width:740px){.g .cols{grid-template-columns:1fr;gap:30px}.g .hero{grid-template-columns:1fr;gap:14px}}
+/* accent variants */
+.v2{--sig:#1b52d6}
+.v3{--sig:#0f7a52}
+.acc{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:0 0 12px}
+.accb{border:1px solid rgba(128,128,128,.3);padding:14px}
+.accb .t{font-size:12.5px;font-weight:600;margin-bottom:9px}
+.accb .p{display:flex;align-items:flex-end;gap:2px;height:52px;margin-bottom:9px}
+.accb .p i{flex:1;background:#111;opacity:.16;min-height:2px}
+.accb .p i.hi{opacity:1}
+.accb .d{font-size:11.5px;opacity:.72;line-height:1.5}
+</style>
+<div class="wrap">
+<div class="intro">
+<h1>The gap in the market, and the thing that fits it</h1>
+<p>Measured off the live sites, not from memory. Both of your benchmarks went warm off-white. Neither uses a cool white, hairlines, or square corners.</p>
+</div>
+
+<div class="map">
+ <div class="mapc"><h4>Stacked Homes</h4><p>Cream paper, Gascogne serif headlines, orange accent. Warm, editorial, magazine.</p>
+  <div class="chips"><i style="background:#F7F1E6"></i><i style="background:#111"></i><i style="background:#FC9047"></i><i style="background:#DDD6CC"></i></div></div>
+ <div class="mapc"><h4>TRM Intel</h4><p>Warm off-white, Inter throughout, rounded cards, navy and gold. The default SaaS dashboard.</p>
+  <div class="chips"><i style="background:#F4F3EF"></i><i style="background:#0E214A"></i><i style="background:#EBCB7B"></i><i style="background:#3F4451"></i></div></div>
+ <div class="mapc"><h4>Truestorey — proposed</h4><p>Cool white, near-black, hairlines, zero radius. No warm tint, no serif, no cards.</p>
+  <div class="chips"><i style="background:#FDFDFC;box-shadow:inset 0 0 0 1px #ddd"></i><i style="background:#101112"></i><i style="background:#8B9095"></i><i style="background:#E3E5E6"></i></div></div>
+</div>
+
+<div class="bar"><span class="bnum">04</span><span class="bname">Gallery</span>
+<span class="bwhy">Cool white, Schibsted Grotesk, DM Mono for figures. No serif, no cards, no rounded corners anywhere. The number is the largest thing on the page.</span></div>
+<div class="frame"><div class="g">
+<div class="nav"><div class="mk">Truestorey<span> / sg</span></div>
+<div class="nl"><b>Blocks</b><span>Market</span><span>MOP</span><span>Insights</span><span>About</span></div></div>
+<div class="body">
+<div class="crumb">HDB &nbsp;/&nbsp; Bishan &nbsp;/&nbsp; Blk 275A</div>
+<h2>Blk 275A Bishan St 24</h2>
+<p class="sub">DBSS · 4 and 5 room · 84 years 3 months of lease remaining · 25 filed resale transactions since August 2023</p>
+
+<div class="hero">
+ <div><span class="k">Median, per square foot</span><div class="heron">1,099<small>psf</small></div></div>
+ <div class="herom"><span class="k">Observed range</span>
+  <div class="r">$919 &nbsp;—&nbsp; $1,263<br>$1,375,800 median price</div></div>
+</div>
+
+<div class="strip">
+ <div><span class="k">Transactions</span><div class="v">25</div></div>
+ <div><span class="k">Lease left</span><div class="v">84y 03m</div></div>
+ <div><span class="k">Nearest MRT</span><div class="v">825m</div></div>
+</div>
+
+<div class="cols">
+<div>
+ <div class="sh"><span>Median psf by month</span><span>2025-04 → 2026-06</span></div>
+ <div class="plot">
+  <i style="height:62%"></i><i style="height:71%"></i><i style="height:24%"></i><i style="height:82%"></i>
+  <i style="height:55%"></i><i style="height:63%"></i><i style="height:29%"></i><i style="height:74%"></i>
+  <i style="height:51%"></i><i class="hi" style="height:96%"></i></div>
+ <div class="ax"><span>APR 2025</span><span>JUN 2026</span></div>
+ <p class="quote">&ldquo;The thing is, a range tells you what people paid. A single number tells you what someone wants you to believe.&rdquo;</p>
+</div>
+<div>
+ <div class="sh"><span>Primary schools</span><span>MOE 1km band</span></div>
+ <div class="row"><span>Catholic High School</span><span class="d">642m</span></div>
+ <div class="row"><span>Ai Tong School</span><span class="d f">971m · on the line</span></div>
+ <div class="sh" style="margin-top:26px"><span>Getting around</span><span>Straight line</span></div>
+ <div class="row"><span>Bishan MRT</span><span class="d">825m</span></div>
+ <div class="row"><span>Marymount MRT</span><span class="d">993m</span></div>
+ <div class="row"><span>Shunfu Mart</span><span class="d">897m</span></div>
+ <div class="row"><span>Thomson Park</span><span class="d">1.1km</span></div>
+</div></div>
+
+<div class="prov">HDB RESALE FLAT PRICES VIA DATA.GOV.SG · 2023-08 TO 2026-08 · ACCESSED 23 AUG 2026<br>
+COORDINATES ONEMAP © SINGAPORE LAND AUTHORITY · DISTANCES STRAIGHT-LINE, NOT WALKING<br>
+SHERVIN POH · CEA REG. NO. R0XXXXXX · HUTTONS ASIA PTE LTD · NOT A VALUATION OR AN OFFER</div>
+</div></div></div>
+<p class="note"><b>What makes it not-Stacked:</b> cool white instead of cream, sans instead of serif, and the figure — not the headline — is the biggest thing on the page. <b>What makes it not-TRM:</b> no Inter, no cards, no rounded corners, no navy. <b>What makes it not-AI:</b> it commits to one discipline and holds it — every rule is 1px, every corner is square, there is exactly one type family and one mono. Restraint is much harder to fake than decoration.</p>
+
+<div class="bar" style="margin-top:6px"><span class="bnum">—</span><span class="bname">One decision left: the signal colour</span>
+<span class="bwhy">The chart bar and the on-the-line flag are the only coloured things on the page. That is the whole brand palette.</span></div>
+<div class="acc" style="margin-top:16px">
+ <div class="accb"><div class="t">i · No colour at all</div>
+  <div class="p"><i style="height:40%"></i><i style="height:62%"></i><i style="height:30%"></i><i class="hi" style="height:96%;background:#101112"></i></div>
+  <div class="d">Pure black and white. The most disciplined and the most gallery. Colour appears only for a rise or a fall.</div></div>
+ <div class="accb"><div class="t">ii · Signal cobalt</div>
+  <div class="p"><i style="height:40%"></i><i style="height:62%"></i><i style="height:30%"></i><i class="hi" style="height:96%;background:#1b52d6"></i></div>
+  <div class="d">One saturated blue, used sparingly. Reads precise and instrument-like. Risk: adjacent to TRM's navy.</div></div>
+ <div class="accb"><div class="t">iii · Signal green</div>
+  <div class="p"><i style="height:40%"></i><i style="height:62%"></i><i style="height:30%"></i><i class="hi" style="height:96%;background:#0f7a52"></i></div>
+  <div class="d">Deep green. Unused by anyone in this market, and reads as money without being literal about it.</div></div>
+</div>
+<p class="note" style="margin-bottom:0"><b>My pick: i, no colour.</b> A property site with no brand colour is a genuinely unusual decision, it is the hardest to copy casually, and it makes the two places colour <em>does</em> appear — a price move, a school on the 1km line — carry real weight. Say the word and I will take this through tokens, every component, the charts, dark mode, the nav and the wordmark.</p>
+</div>
