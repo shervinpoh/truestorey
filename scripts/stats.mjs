@@ -11,6 +11,7 @@
  */
 import fs from 'node:fs/promises';
 import { FUNNEL, EVENTS } from '../lib/analytics.js';
+import { recentEvents, configured } from '../lib/supabase/rest.js';
 
 const arg = process.argv[2];
 const DAYS = arg === 'all' ? Infinity : (Number(arg) || 30);
@@ -19,21 +20,50 @@ const pad = (s, n) => String(s).padEnd(n);
 const rpad = (s, n) => String(s).padStart(n);
 const num = n => Number(n).toLocaleString('en-SG');
 
-async function main() {
-  let raw;
+/**
+ * Read from wherever /api/track wrote.
+ *
+ * The two sinks are not interchangeable and the report has to say which one it
+ * read, or a deployed site with a stale local file reads as if it had no
+ * traffic — silence that looks like data. Same rule as everywhere else here:
+ * say what could not be measured rather than printing an empty table.
+ */
+async function load() {
+  if (configured()) {
+    const { rows, error } = await recentEvents({ limit: 20000 });
+    if (error) return { events: null, from: 'Supabase', error };
+    return { events: rows, from: 'Supabase', error: null };
+  }
   try {
-    raw = await fs.readFile(new URL('../data/events.jsonl', import.meta.url), 'utf8');
+    const raw = await fs.readFile(new URL('../data/events.jsonl', import.meta.url), 'utf8');
+    const events = raw.split('\n').filter(Boolean)
+      .map(l => { try { return JSON.parse(l); } catch { return null; } })
+      .filter(Boolean);
+    return { events, from: 'data/events.jsonl', error: null };
   } catch {
-    console.log('\nNo data/events.jsonl yet.\n');
+    return { events: [], from: 'data/events.jsonl', error: null };
+  }
+}
+
+async function main() {
+  const { events: all, from, error } = await load();
+
+  if (error) {
+    console.log(`\nCould not read events from ${from}: ${error}\n`);
+    console.log('This is not the same as no traffic. Nothing is being reported here.\n');
+    return;
+  }
+  if (!all.length) {
+    console.log(`\nNo events in ${from} yet.\n`);
     console.log('Run the site, click around, then try again. Nothing is recorded until');
     console.log('someone actually visits — including you.\n');
     return;
   }
 
   const cutoff = DAYS === Infinity ? '' : new Date(Date.now() - DAYS * 86400000).toISOString();
-  const events = raw.split('\n').filter(Boolean)
-    .map(l => { try { return JSON.parse(l); } catch { return null; } })
-    .filter(e => e && e.t >= cutoff);
+  // Supabase returns newest first; the file is oldest first. Sort so the span
+  // line below reads correctly whichever sink this came from.
+  const events = all.filter(e => e && e.t >= cutoff).sort((a, b) => (a.t < b.t ? -1 : 1));
 
   if (!events.length) {
     console.log(`\nNo events in the last ${DAYS} days.\n`);
@@ -45,6 +75,7 @@ async function main() {
 
   console.log(`\n${'='.repeat(58)}`);
   console.log(`  ${num(events.length)} events · ${num(sessions.size)} sessions · ${span[0]} to ${span[1]}`);
+  console.log(`  read from ${from}`);
   console.log(`${'='.repeat(58)}\n`);
 
   /* ---- funnel, by session ---- */

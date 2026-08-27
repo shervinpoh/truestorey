@@ -84,6 +84,23 @@ async function supabase() {
     add(MISS, 'Supabase · secret key', 'SUPABASE_SECRET_KEY empty — the webhook cannot write');
   }
 
+  // The events table. Separate migration, so it is entirely possible to have
+  // articles working and analytics quietly going nowhere — which is the exact
+  // failure /api/track was moved off the filesystem to end, arriving by a
+  // different route. The route still returns 204 with this missing, by design,
+  // so nothing else will ever tell you.
+  if (secret) {
+    const r = await call(secret, 'events?select=id&limit=1');
+    if (r.status === 200) add(OK, 'Supabase · events', 'table exists — analytics are being recorded');
+    else if (r.status === 404 || /does not exist|schema cache/i.test(JSON.stringify(r.body))) {
+      add(BAD, 'Supabase · events',
+        'MISSING — every event is being dropped. /api/track still answers 204, so ' +
+        'nothing else reports this. Run scripts/supabase-events.sql in the SQL editor');
+    } else {
+      add(BAD, 'Supabase · events', `${r.status} ${JSON.stringify(r.body).slice(0, 120)}`);
+    }
+  }
+
   // The RLS check. The anon key must not be able to see a draft. This is the
   // one assertion here that is about the SHAPE of the data rather than its
   // presence, and it is worth the extra call: the whole approval step in
