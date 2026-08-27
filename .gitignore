@@ -20,3 +20,8 @@ data/.onemap-pace.json
 # Analytics sink. Real visitor session ids and paths — never versioned.
 # api/track recreates it on first event.
 data/events.jsonl
+
+# Claude Code's local permission allowlist. Machine-specific, and it records
+# the bash commands it was granted — which is how a live Supabase secret key
+# ended up committed here on 28 Aug. Never versioned.
+.claude/settings.local.json
