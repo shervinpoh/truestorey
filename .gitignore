@@ -25,3 +25,5 @@ data/events.jsonl
 # the bash commands it was granted — which is how a live Supabase secret key
 # ended up committed here on 28 Aug. Never versioned.
 .claude/settings.local.json
+.vercel
+.env*
