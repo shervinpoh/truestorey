@@ -100,6 +100,34 @@ test('text is escaped, so markup in prose cannot become markup', () => {
   hasnt(out, '<script');
 });
 
+/*
+ * The case above passed all the way through the prose-eating bug, twice.
+ *
+ * A stray '<' followed by a DIGIT cannot begin a tag name, so the parser
+ * rejected it and escaped it back into the text — correctly. Put a LETTER
+ * after the bracket and it reads a plausible tag name instead, finds it is not
+ * on the allowlist, and drops everything up to the next '>' — which is the
+ * closing tag of the paragraph, several sentences later.
+ *
+ * "price < expected" and "a < b" are ordinary things to write about property.
+ * The first article posted through the Make.com webhook lost half a paragraph
+ * to this, and every existing test stayed green while it happened.
+ */
+test('a stray < followed by a letter does not eat the rest of the paragraph', () => {
+  const out = sanitizeHtml('<p>a stray < angle bracket in prose</p>');
+  has(out, '&lt;');
+  has(out, 'angle bracket in prose');   // the words after the bracket survive
+  has(out, '</p>');                     // and so does the tag that closed them
+});
+
+test('a stray < does not swallow the markup that follows it', () => {
+  const out = sanitizeHtml('<p>under < budget, a <b>bold</b> run</p><p>tail</p>');
+  has(out, '&lt;');
+  has(out, 'budget');
+  has(out, '<b>bold</b>');   // a real element after the stray bracket still parses
+  has(out, 'tail');
+});
+
 test('a non-string input returns an empty string rather than throwing', () => {
   for (const v of [null, undefined, 42, {}, []]) assert.equal(sanitizeHtml(v), '');
 });
