@@ -107,16 +107,31 @@ async function supabase() {
 }
 
 /* ── the model providers ─────────────────────────────────────────────────── */
-// One cheap live call each. A key that is present and rejected is the case this
-// exists to catch, so "present" is never reported as "working".
+/**
+ * A REAL CALL EACH, AND ONLY A 200 COUNTS.
+ *
+ * The first version of this sent deliberately degenerate requests — max_tokens
+ * of 1 — so a success could never come back as 200, and it had to treat
+ * "anything that is not 401, 403 or 429" as working. That reasoning let a dead
+ * model through and reported it as ok: Google had closed gemini-2.5-flash to
+ * new keys, /floorplan was returning 404 on every request, and preflight said
+ * "Everything wired". A check that cannot fail is not a check.
+ *
+ * So these are ordinary requests that should genuinely succeed, and anything
+ * other than 200 is reported with the status and the API's own message. The
+ * cost is a few tokens per run, which is the correct price for the difference
+ * between "the key was not rejected" and "this feature works".
+ */
+const PING = 'Reply with exactly: OK';
+
 const providers = [
   {
     name: 'Perplexity', env: 'PERPLEXITY_API_KEY', feature: '/neighbourhood',
     probe: key => fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
       headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'sonar', max_tokens: 1, messages: [{ role: 'user', content: 'ping' }] }),
-      signal: AbortSignal.timeout(20000),
+      body: JSON.stringify({ model: 'sonar', max_tokens: 16, messages: [{ role: 'user', content: PING }] }),
+      signal: AbortSignal.timeout(30000),
     }),
   },
   {
@@ -124,24 +139,31 @@ const providers = [
     probe: key => fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1, messages: [{ role: 'user', content: 'ping' }] }),
-      signal: AbortSignal.timeout(20000),
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 16, messages: [{ role: 'user', content: PING }] }),
+      signal: AbortSignal.timeout(30000),
     }),
   },
   {
+    // Keep this model in step with lib/ai/providers.js. If they drift, this
+    // reports a working deployment that is not, or a broken one that is fine.
     name: 'Gemini', env: 'GEMINI_API_KEY', feature: '/floorplan',
     probe: key => fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${key}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: 'ping' }] }],
-          generationConfig: { maxOutputTokens: 1 },
-        }),
-        signal: AbortSignal.timeout(20000),
+        body: JSON.stringify({ contents: [{ parts: [{ text: PING }] }] }),
+        signal: AbortSignal.timeout(30000),
       }),
   },
 ];
+
+/** The provider's own words, which are usually the actual diagnosis. */
+async function reason(res) {
+  try {
+    const j = JSON.parse(await res.text());
+    return (j.error?.message || j.error?.type || j.message || '').slice(0, 150);
+  } catch { return ''; }
+}
 
 async function models() {
   for (const p of providers) {
@@ -149,16 +171,16 @@ async function models() {
     if (!key) { add(MISS, p.name, `${p.env} not set — ${p.feature} is off and says so`); continue; }
     try {
       const res = await p.probe(key);
-      // 400 means the request shape was refused, not the key. Anything that is
-      // not an auth or quota rejection means the credential works, which is all
-      // this is asking.
-      if (res.status === 401 || res.status === 403) {
-        add(BAD, p.name, `key ${mask(key)} rejected (${res.status}) — ${p.feature} will fail in front of a reader`);
-      } else if (res.status === 429) {
-        add(BAD, p.name, 'rate limited or out of quota (429)');
-      } else {
-        add(OK, p.name, `key ${mask(key)} accepted (${res.status})`);
-      }
+      if (res.status === 200) { add(OK, p.name, `live — ${mask(key)} answered`); continue; }
+
+      const why = await reason(res);
+      const lead =
+        res.status === 401 || res.status === 403 ? 'key rejected'
+        : res.status === 404 ? 'MODEL GONE — the key is fine, the model id is not'
+        : res.status === 429 ? 'rate limited or out of credit'
+        : res.status >= 500 ? 'provider error — may be transient, run again'
+        : 'refused';
+      add(BAD, p.name, `${lead} (${res.status})${why ? ' — ' + why : ''}`);
     } catch (e) {
       add(BAD, p.name, `could not reach the API — ${e.message}`);
     }
