@@ -1,8 +1,30 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { f } from './fmt.js';
+import { saleProceeds } from '../lib/calc/proceeds.js';
 
-const CPF_RATE = 0.025;   // CPF OA accrual. NOT the HDB loan rate — see lib/calc/constants.js
+/*
+ * THE MATHS LIVES IN lib/calc/proceeds.js. IT IS NOT REPEATED HERE.
+ *
+ * This component used to carry its own copy, with 2.5% and 9% written in as
+ * literals and lib/calc/proceeds.js sitting unused beside it — tested, correct,
+ * and imported by nothing. Two versions of the sale-proceeds maths, and the one
+ * that ran on every record page was the untested one.
+ *
+ * They agreed on a healthy sale and diverged exactly where it mattered. The
+ * inline version floored the result at zero:
+ *
+ *     thin equity   showed  S$0   the answer was  -S$31,864
+ *     underwater    showed  S$0   the answer was -S$197,747
+ *
+ * So a seller who would have to bring nearly two hundred thousand dollars to
+ * completion was told they walk away with nothing. That is not a rounding
+ * difference, it is the difference between breaking even and owing a deposit
+ * on a flat — published under a CEA registration.
+ *
+ * Rule 6 says every derived figure renders its source. The source of these is
+ * lib/calc/constants.js, and this file no longer gets a vote.
+ */
 
 /** The sale-proceeds waterfall. Re-anchors whenever the median it is given moves. */
 const STORE = 'truestorey.proceeds.v1';
@@ -58,10 +80,27 @@ export default function Proceeds({ median, onEngage }) {
 
   useEffect(() => { if (median) setSp(Math.round(median/1000)*1000); }, [median]);
 
-  const accrued = Math.round(cpf * (Math.pow(1 + CPF_RATE/12, yrs*12) - 1));
-  const agent   = sp * fee/100 * 1.09 + 2800;
-  const cash    = Math.max(0, sp - loan - cpf - accrued - agent);
-  const seg = [[cash,'w5'],[loan,'w1'],[cpf,'w2'],[accrued,'w3'],[agent,'w4']];
+  // The one tested implementation. This component used to carry its own copy
+  // of the maths with 2.5% and 9% written in as literals — see the note at the
+  // top of the file for why that is gone.
+  const r = saleProceeds({
+    salePrice: sp,
+    outstandingLoan: loan,
+    cpfPrincipal: cpf,
+    yearsHeld: yrs,
+    agentFeePct: fee,
+    propertyType: 'HDB',
+  });
+  const accrued = r.cpfAccruedInterest;
+  const agent   = r.agentFee + r.legalFees;
+  const cash    = r.cashInHand;
+  // A shortfall is not a zero-width segment, it is the whole point. The bar
+  // shows where the money went, so when there is none left it shows only the
+  // things that consumed it and the total below carries the negative.
+  const short   = cash < 0;
+  const seg = (short ? [] : [[cash,'w5']])
+    .concat([[loan,'w1'],[cpf,'w2'],[accrued,'w3'],[agent,'w4']]);
+  const barBase = short ? (loan + cpf + accrued + agent) : sp;
 
   return (
     <>
@@ -69,7 +108,7 @@ export default function Proceeds({ median, onEngage }) {
       <p className="hint">Drag the sale price. Everything moves.</p>
 
       <div className="wf">{seg.map(([v,c],i)=>(
-        <span key={i} style={{width:(sp?v/sp*100:0)+'%',background:`var(--${c})`}} />
+        <span key={i} style={{width:(barBase?v/barBase*100:0)+'%',background:`var(--${c})`}} />
       ))}</div>
       <div className="wfkey">
         <div><b style={{background:'var(--w5)'}} />Cash</div>
@@ -104,9 +143,12 @@ export default function Proceeds({ median, onEngage }) {
         <Row label="Sale price" v={sp} />
         <Row label="Outstanding loan" v={-loan} />
         <Row label="CPF principal refund" v={-cpf} sub="Back into your CPF, not lost" />
-        <Row label="CPF accrued interest" v={-accrued} sub={`2.5% compounded over ${yrs} years`} />
+        <Row label="CPF accrued interest" v={-accrued} sub={`CPF OA rate, compounded over ${yrs} years`} />
         <Row label={`Agent fee (${fee}% + GST) and legal`} v={-agent} />
-        <div className="row tot"><span>Cash in hand</span><span>{f(cash)}</span></div>
+        <div className={`row tot${short ? ' neg' : ''}`}>
+          <span>{short ? 'Shortfall to bring on completion' : 'Cash in hand'}</span>
+          <span>{f(Math.abs(cash))}</span>
+        </div>
       </div>
 
       <div className="note">
