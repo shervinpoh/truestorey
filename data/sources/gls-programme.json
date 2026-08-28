@@ -1,0 +1,9 @@
+{
+  "programme": null,
+  "publishedBy": "URA Government Land Sales programme — Confirmed List and Reserve List",
+  "sourceUrl": "https://www.ura.gov.sg/Corporate/Land-Sales/Sites-For-Tender",
+  "enteredAt": null,
+  "enteredBy": null,
+  "note": "Hand-transcribed from URA's published programme. data.gov.sg carries only an Industrial GLS layer (166 lot numbers, no unit yields, last updated 2017), which cannot answer the question this check asks. Ships empty on purpose — see data/sources/README.md.",
+  "sites": []
+}

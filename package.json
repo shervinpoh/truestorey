@@ -37,7 +37,8 @@
     "build:yield": "node scripts/build-yield.mjs",
     "ingest:boundaries": "node scripts/ingest-boundaries.mjs",
     "preflight": "node scripts/preflight.mjs",
-    "ingest:zoning": "node scripts/ingest-zoning.mjs"
+    "ingest:zoning": "node scripts/ingest-zoning.mjs",
+    "ingest:gls": "node scripts/ingest-gls.mjs"
   },
   "dependencies": {
     "next": "^15.0.0",
