@@ -92,20 +92,48 @@ if (dueOnly) {
 
 console.log(`\nRefreshing ${due.length}…\n`);
 let failed = 0;
+const untouched = [];
 for (const r of due) {
   console.log(`── ${r.key}`);
+  let threw = false;
   try { execSync(r.cmd, { stdio: 'inherit', cwd: ROOT }); }
-  catch { failed++; console.error(`   ${r.key} failed — the others still ran.\n`); }
+  catch { threw = true; failed++; console.error(`   ${r.key} failed — the others still ran.\n`); }
+
+  /*
+   * AN EXIT CODE IS NOT EVIDENCE THE FILE MOVED.
+   *
+   * ingest:sora exits 0 when MAS is under maintenance, on purpose — a MAS
+   * outage is not a fault in this repo and must not fail `npm run data:all`.
+   * The cost was that this script then printed "All 1 refreshed" over a
+   * dataset it had not refreshed, and the scheduled workflow went green,
+   * committed nothing, and left a log saying everything was fine.
+   *
+   * So the file itself is the evidence. If it is still as old as it was — or
+   * still missing — the job did not do what this script just claimed it did,
+   * whatever it returned.
+   */
+  const after = ageOf(r.file);
+  if (!threw && (after === null || after >= r.every)) {
+    untouched.push(r.key);
+    console.error(`   ${r.key} reported success but data/${r.file} is ${after === null ? 'still missing' : `still ${after}d old`} — not refreshed.\n`);
+  }
 }
 
 // A failing source must never stop the rest. That is the SORA lesson: MAS
 // being down for an afternoon cannot be allowed to hold back HDB transactions.
-console.log(failed ? `\n${failed} of ${due.length} failed. Re-run to retry just those.\n`
-                   : `\nAll ${due.length} refreshed. Next: npm run brief, then npm run note.\n`);
+const stalled = failed + untouched.length;
+if (stalled) {
+  const parts = [];
+  if (failed) parts.push(`${failed} failed`);
+  if (untouched.length) parts.push(`${untouched.length} reported success without refreshing (${untouched.join(', ')})`);
+  console.log(`\n${parts.join(', ')} of ${due.length}. Re-run to retry just those.\n`);
+} else {
+  console.log(`\nAll ${due.length} refreshed. Next: npm run brief, then npm run note.\n`);
+}
 
 // A failing source still must not stop the others — that is the SORA lesson and
 // it is why the loop above swallows each error. But the EXIT CODE has to tell
 // the truth, or a scheduled run rots silently: the workflow commits whatever
 // succeeded, sees a zero, and reports green while a source has been down for
 // weeks. Everything that was going to run has already run by this point.
-process.exit(failed ? 1 : 0);
+process.exit(stalled ? 1 : 0);
