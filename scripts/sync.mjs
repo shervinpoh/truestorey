@@ -47,6 +47,15 @@ const JOBS = [
     why: 'URA files rental contracts quarterly, but in rolling batches' },
   { key: 'boundaries', file: 'boundaries.json', every: 365, cmd: 'npm run ingest:boundaries && npm run build:map',
     why: 'the Master Plan is redrawn about every five years — this is a formality, not a refresh' },
+  { key: 'planning', file: 'planning.json', every: 30, cmd: 'npm run ingest:planning',
+    why: 'URA decides applications continuously and the current year grows all year' },
+  { key: 'zoning', file: 'zoning.json', every: 365, cmd: 'npm run ingest:zoning',
+    why: 'the Master Plan land use layer changes on the statutory review, not on a feed' },
+  // gls is NOT here on purpose. data/sources/gls-programme.json is transcribed
+  // by hand from URA's published programme, so there is nothing for a scheduler
+  // to fetch — running the ingest would only re-geocode the same list. It goes
+  // stale on a calendar and the ingest refuses a programme older than the
+  // current half, which is the reminder.
 ];
 
 const ageOf = f => {
@@ -93,4 +102,10 @@ for (const r of due) {
 // being down for an afternoon cannot be allowed to hold back HDB transactions.
 console.log(failed ? `\n${failed} of ${due.length} failed. Re-run to retry just those.\n`
                    : `\nAll ${due.length} refreshed. Next: npm run brief, then npm run note.\n`);
-process.exit(0);
+
+// A failing source still must not stop the others — that is the SORA lesson and
+// it is why the loop above swallows each error. But the EXIT CODE has to tell
+// the truth, or a scheduled run rots silently: the workflow commits whatever
+// succeeded, sees a zero, and reports green while a source has been down for
+// weeks. Everything that was going to run has already run by this point.
+process.exit(failed ? 1 : 0);

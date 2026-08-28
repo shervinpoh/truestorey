@@ -1,0 +1,104 @@
+# Keep the published figures current without anyone remembering to.
+#
+# Every figure on this site is derived at build time from JSON committed to the
+# repo. That is a deliberate architecture and it has one cost: the data is only
+# as fresh as the last time somebody ran an ingest on their own laptop. A site
+# whose whole position is "every figure carries its source and period" cannot
+# quietly be serving a period from three months ago.
+#
+# HOW IT DECIDES WHAT TO RUN. It does not. `npm run sync` already knows: every
+# dataset in scripts/sync.mjs carries a refresh interval and a reason, and sync
+# runs only what is past due. This workflow runs daily because SORA is daily;
+# on most days sync will find one thing due, or nothing, and finish in seconds.
+#
+# WHY IT COMMITS. Pushing to master is what triggers a Vercel deploy, so the
+# commit IS the publish. The alternative — refreshing data on Vercel at build
+# time — was rejected: it would make every deploy depend on data.gov.sg being
+# up, which is the trap vercel.json's `next build` override exists to avoid.
+#
+# WHAT IT WILL NOT DO. It never touches content/, never publishes an article,
+# and never runs ingest:gls — that file is transcribed by hand from URA's
+# published programme and there is nothing to fetch.
+name: Refresh data
+
+on:
+  schedule:
+    # 21:00 UTC = 05:00 SGT. After MAS and HDB have published, before anyone
+    # is reading the site.
+    - cron: '0 21 * * *'
+  workflow_dispatch:        # so it can be run by hand without waiting a day
+
+# The job commits back to the repo, which needs more than the default read.
+permissions:
+  contents: write
+
+concurrency:
+  # Two refreshes committing to master at once would conflict. A queued run is
+  # pointless anyway — the later one would find nothing due.
+  group: refresh-data
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45      # the planning ingest geocodes through OneMap, which is rate-limited
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Three dependencies, and `npm ci` needs the lockfile to match. No cache
+      # step: installing next/react/react-dom is faster than restoring a cache.
+      - run: npm ci
+
+      - name: What is due
+        run: npm run due
+
+      - name: Refresh
+        id: sync
+        # sync exits non-zero if any source failed, having already run the
+        # others. Do not stop here — whatever succeeded is still worth
+        # committing, and the failure is reported at the end so the run goes
+        # red and Shervin gets the email.
+        continue-on-error: true
+        env:
+          URA_ACCESS_KEY: ${{ secrets.URA_ACCESS_KEY }}
+        run: npm run sync
+
+      # A refresh that breaks the derivations must never reach the site. The
+      # tests are the gate, not the ingest's own exit code.
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npx next build
+
+      - name: Commit whatever changed
+        id: commit
+        run: |
+          git config user.name  "truestorey-bot"
+          git config user.email "noreply@github.com"
+          # data/ only. Nothing else in the tree is this job's business.
+          git add data/
+          if git diff --cached --quiet; then
+            echo "nothing changed"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "Refresh data $(date -u +%Y-%m-%d)
+
+          Automated by .github/workflows/refresh-data.yml. Only datasets past
+          their refresh interval in scripts/sync.mjs were touched."
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Last, so a source being down is loud rather than silent, but only after
+      # everything that could still be refreshed has been.
+      - name: Report a failed source
+        if: steps.sync.outcome == 'failure'
+        run: |
+          echo "::error::A data source failed to refresh. Anything that succeeded has been committed; see the Refresh step for which one."
+          exit 1
