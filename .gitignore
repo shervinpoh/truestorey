@@ -27,3 +27,7 @@ data/events.jsonl
 .claude/settings.local.json
 .vercel
 .env*
+
+# Raw Master Plan download, 181MB. Kept so a parse failure can be read
+# back; never versioned.
+data/.zoning-raw.geojson

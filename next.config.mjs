@@ -46,6 +46,10 @@ const nextConfig = {
       './data/records.json',      // superseded by the per-shard files in records/
       // Diagnostics and scratch. Kept so a parse failure can be read back.
       './data/.boundaries-raw.geojson',
+      // 135MB. Gitignoring it does nothing here — the tracer reads the disk,
+      // not the index — and leaving it out of this list took the blindspot
+      // function from 75.6MB to 222.5MB against a 250MB ceiling.
+      './data/.zoning-raw.geojson',
       './data/.onemap-pace.json',
       './data/.brief-state.json',
       './data/brief-latest.md',

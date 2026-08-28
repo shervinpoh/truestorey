@@ -178,6 +178,9 @@ function Result({ report, boxRef }) {
             <span className="mono pts">{c.points} / {c.max}</span>
           </div>
           <p>{c.finding}</p>
+          {/* What the check could not read, next to what it did. A figure that
+              covers a minority of the radius reads as a ceiling without this. */}
+          {c.caveat && <p className="hint" style={{ margin: '0 0 6px' }}>{c.caveat}</p>}
           <span className="prov" style={{ display: 'block', margin: 0 }}>{c.source}</span>
         </div>
       ))}
