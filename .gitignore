@@ -31,3 +31,6 @@ data/events.jsonl
 # Raw Master Plan download, 181MB. Kept so a parse failure can be read
 # back; never versioned.
 data/.zoning-raw.geojson
+
+# Raw URA planning download. Kept for diagnosis, never versioned.
+data/.planning-raw.json

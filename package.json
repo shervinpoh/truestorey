@@ -38,7 +38,8 @@
     "ingest:boundaries": "node scripts/ingest-boundaries.mjs",
     "preflight": "node scripts/preflight.mjs",
     "ingest:zoning": "node scripts/ingest-zoning.mjs",
-    "ingest:gls": "node scripts/ingest-gls.mjs"
+    "ingest:gls": "node scripts/ingest-gls.mjs",
+    "ingest:planning": "node --env-file=.env.local scripts/ingest-planning.mjs"
   },
   "dependencies": {
     "next": "^15.0.0",
