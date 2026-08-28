@@ -45,9 +45,16 @@ test('nothing measurable at all returns no score rather than a clean bill', () =
   assert.equal(none.checks.length, 0);
 });
 
+/*
+ * `view` is STOREYS, not a plot ratio. It changed with rubric v2, when the
+ * check moved from what the Master Plan permits to what URA has actually
+ * approved. The values below were 4.2 and 3.5 — plot ratios — and under the
+ * new bands they read as four-storey buildings and scored nothing, which is
+ * how this test caught the change rather than sleeping through it.
+ */
 test('more risk scores higher, and the bands say so', () => {
   const low = score({ price: 0.2, supply: 0.01, gls: 0, view: 0 });
-  const high = score({ price: 0.99, supply: 0.4, gls: 2000, view: 4.2 });
+  const high = score({ price: 0.99, supply: 0.4, gls: 2000, view: 39 });
   assert.ok(high.points > low.points);
   assert.equal(high.points, totalPossible());
   assert.match(high.direction, /Higher means more to check/);
@@ -65,7 +72,7 @@ test('every band is reachable and they tile the whole range', () => {
 });
 
 test('every finding names a figure rather than an adjective', () => {
-  const r = score({ price: 0.93, supply: 0.22, gls: 900, view: 3.5 });
+  const r = score({ price: 0.93, supply: 0.22, gls: 900, view: 25 });
   for (const c of r.checks) {
     assert.match(c.finding, /\d/, `${c.key} finding carries no number: ${c.finding}`);
     // Rule 7 — no verdict words anywhere in the output.

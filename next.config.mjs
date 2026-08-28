@@ -50,6 +50,10 @@ const nextConfig = {
       // not the index — and leaving it out of this list took the blindspot
       // function from 75.6MB to 222.5MB against a 250MB ceiling.
       './data/.zoning-raw.geojson',
+      // Same again for the URA planning download. Gitignoring a raw file and
+      // forgetting this list has now happened twice; if you add an ingest that
+      // saves its raw download, it belongs here in the same commit.
+      './data/.planning-raw.json',
       './data/.onemap-pace.json',
       './data/.brief-state.json',
       './data/brief-latest.md',
