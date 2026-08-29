@@ -8,6 +8,14 @@ Shervin Poh · CEA Reg. No. R066925H · Huttons Asia Pte Ltd. **Everything
 published here goes out under a licensed agent's registration number.** That is
 the reason for most of the rules below.
 
+**It is live.** https://truestorey.vercel.app, deployed from
+`shervinpoh/truestorey` on push to `master`. Secrets are Vercel environment
+variables and `.env.local`; neither is in the repo. `npm run preflight` asks
+every integration whether it actually works, and only a real 200 counts.
+
+Data refreshes itself: `.github/workflows/refresh-data.yml` runs `npm run sync`
+daily, commits `data/`, and that commit is the deploy.
+
 ---
 
 **`NEXT.md` is the ordered backlog.** Start there for what to do; this file is
@@ -92,8 +100,11 @@ SSR and no-JS readers get the number.
 
 ```
 npm run dev            localhost:3000
-npm test               121 tests, node:test, no framework
-npm run build          data build + next build
+npm test               132 tests, node:test, no framework
+npm run build          data build + next build. NOT the deploy command —
+                       vercel.json pins that to `next build`, because this runs
+                       three live data.gov.sg ingests first.
+npm run preflight      ask every integration whether it actually works
 
 npm run due            what data is stale
 npm run sync           refresh only what is past due
@@ -103,6 +114,9 @@ npm run ingest:hdb     HDB resales via data.gov.sg
 npm run ingest:ura     URA private transactions
 npm run ingest:rental  URA rental contracts
 npm run ingest:boundaries   URA Master Plan planning areas
+npm run ingest:zoning       URA Master Plan land use + plot ratio
+npm run ingest:planning     URA planning decisions (what has been APPROVED)
+npm run ingest:gls          GLS sites from data/sources/gls-programme.json
 npm run build:map      data/map.json
 npm run build:storey   data/storey.json  (Tower View)
 npm run build:yield    data/yield.json
@@ -143,14 +157,69 @@ so a change in one place and not the other goes red before it ships.
 run `next dev`, `next build` or any ingest. Plain node scripts, `npm test` and
 python-pptx all work. This does not apply to Claude Code running locally.
 
-**The site has never been through a production build.** Everything was written
-and verified in `npm run dev` because the bridge could not run one. `npx next
-build` is the first thing to do. Related: `next.config.mjs` sets
-`outputFileTracingIncludes` because the tracer cannot see
+**The tracer cannot see a runtime path, in both directions.**
+`next.config.mjs` sets `outputFileTracingIncludes` because the data layer reads
 `path.join(process.cwd(), 'data', f)` with a runtime `f` — without it the data
 files are absent from the serverless bundle and every Blindspot lookup fails in
 production while passing in dev. Any new API route that reads `data/` goes in
-that map.
+that map. It also sets `outputFileTracingExcludes`, because @vercel/nft's
+fallback for that same unresolvable path is to bundle ALL of `data/` — 155MB
+into every function against a 250MB ceiling. **A raw ingest download must be
+added to the excludes as well as to `.gitignore`; the tracer reads the disk,
+not the index.** That has been forgotten twice.
+
+**Never run `next build` while `next dev` is running.** They share `.next` and
+the mix corrupts it. The build still exits 0, then production 500s with
+`Cannot find module './vendor-chunks/@swc.js'`, or dev serves a page with no
+CSS. `rm -rf .next` and rebuild.
+
+**A headline figure froze on a wrong number for weeks.** `Figure` in
+`Motion.jsx` keyed its count-up effect on `[value, duration]`, so every
+recalculation cancelled the in-flight frame and the run-once latch blocked the
+restart. Nothing else wrote the displayed value, so it stranded mid-ease and
+then ignored every keystroke. `/plan` showed S$12,516 above a table reading
+S$57,100. It happened twice: the second time because requestAnimationFrame does
+not run in a background tab. `test/motion.test.js` guards both by reading the
+source — Node does not strip JSX and a transform would cost more than the
+three-dependency rule is worth.
+
+**A calculator floored a loss at zero.** `Proceeds.jsx` carried its own copy of
+the sale-proceeds maths wrapped in `Math.max(0, …)`, so a seller who would have
+to bring S$197,747 to completion was told they walk away with nothing.
+`lib/calc/proceeds.js` was correct, tested, and imported by nothing. Two
+implementations is the bug; the floor is what made it dangerous.
+
+**The sanitiser ate prose again, by a narrower route.** The documented fix
+covered a stray `<` followed by something that cannot start a tag name — "5 <
+10" — and that is what the test asserted. Put a LETTER after it and the parser
+reads a plausible tag name, finds it is not allowlisted, and drops everything
+to the next `>`, closing tag included. A real tag cannot contain another `<`;
+when one does, the bracket is prose.
+
+**An exit code is a claim, not evidence.** `ingest:sora` exits 0 when MAS is
+under maintenance, on purpose. `sync` read only exit codes, so it printed "All
+1 refreshed" over a dataset it had not refreshed and the scheduled workflow
+went green. It now re-checks each file's age after running its command.
+
+**The geocoder returned nothing, silently, for everything.** OneMap began
+answering unauthenticated searches with `{ error: "Authentication token
+missing…", found: 72, results: [...] }` — full data plus an advisory. The
+wrapper bailed on the presence of `error` alone. Existing coverage was
+unaffected because `geo.json` is cached, so nothing looked wrong; any NEW block
+would simply have failed to place. Results win now; only an error with no
+results is a failure. `ONEMAP_TOKEN` is optional and OneMap's tokens last three
+days.
+
+**A resolver returns an object when it fails.** `geocodeProject` returns
+`{ match: 'none' }`, which is truthy, so `geocodeProject(...) || geocodeStreet(...)`
+never falls through. Check for a coordinate, not for a return value.
+
+**A thinking model spends your output budget on thinking.**
+`gemini-2.5-flash` was closed to new keys and 404s — the error names the model,
+not the key, which is the opposite of where anyone looks first. Its replacement
+thinks, and those tokens count against `maxOutputTokens`: 942 thinking plus 498
+of answer against a 1600 ceiling truncated the JSON mid-object, intermittently.
+Passes in dev, passes on the retry, fails for a reader.
 
 ---
 
@@ -177,7 +246,7 @@ content/
   insights/     hand-written notes (markdown)
   guides/       GENERATED — edit the build pack, not these
   source/       the deck research base
-test/           node:test. 121 passing.
+test/           node:test. 132 passing.
 ```
 
 ---
