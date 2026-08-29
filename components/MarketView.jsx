@@ -1,6 +1,6 @@
 'use client';
-import { useState } from 'react';
-import { mLabel } from './fmt.js';
+import { useMemo, useState } from 'react';
+import Chart from './Chart.jsx';
 
 /** The arrow already carries direction, so the number never repeats the sign.
  *  Movement under 0.05% rounds to "0.0%", which reads as a fall that did not
@@ -25,53 +25,10 @@ export default function MarketView({ idx, rates, mop }) {
 
   return (
     <>
-      {idx && (() => {
-        const pts = idx.points.slice(-span);
-        const vals = pts.map(p => p.index);
-        const mn = Math.min(...vals) * 0.985, mx = Math.max(...vals) * 1.005;
-        const up = (idx.yoy ?? 0) >= 0;
-        return (
-          <>
-            <span className="lab">HDB resale price index · {idx.base}</span>
-            <div className="big">{idx.latest.index.toFixed(1)}</div>
-            <p className="meta">{qLabel(idx.latest.quarter)} · index, not a price</p>
-            <div style={{display:'flex',gap:8,flexWrap:'wrap',margin:'8px 0 0'}}>
-              <Move v={idx.yoy} label="vs a year ago" />
-              <Move v={idx.qoq} label="on the quarter" />
-            </div>
-
-            <div className="seg" style={{marginTop:14}}>
-              {[[8,'2 yrs'],[20,'5 yrs'],[40,'10 yrs'],[idx.points.length,'All']].map(([n,l]) => (
-                <button key={l} aria-pressed={span===n} onClick={()=>setSpan(n)}>{l}</button>
-              ))}
-            </div>
-
-            <div className="bars" style={{marginTop:12}}>
-              {pts.map((p,k)=>(
-                <i key={p.quarter} className={k===pts.length-1?'last':''}
-                   style={{height:(8+(p.index-mn)/(mx-mn)*88)+'%'}}
-                   title={`${qLabel(p.quarter)} · ${p.index.toFixed(1)}`} />
-              ))}
-            </div>
-            <div className="axis">
-              <span className="lab">{qLabel(pts[0].quarter)}</span>
-              <span className="lab">{qLabel(pts.at(-1).quarter)}</span>
-            </div>
-            <p className="prov">{idx.source} · {idx.points[0].quarter} to {idx.latest.quarter} · accessed {idx.accessedAt.slice(0,10)}</p>
-
-            <div className="note" style={{marginTop:4}}>
-              <b>An index is not a price.</b> It tracks the whole country&apos;s resale market against 1Q2009.
-              It tells you the direction of travel — it cannot tell you what your flat is worth, because it
-              knows nothing about your block, your floor or your lease.
-            </div>
-          </>
-        );
-      })()}
+      {idx && <IndexPanel idx={idx} />}
 
       {rates && (() => {
         const pts = rates.points.slice(-180);
-        const vals = pts.map(p => p.sora);
-        const mn = Math.min(...vals) * 0.97, mx = Math.max(...vals) * 1.02;
         const dn = (rates.yoyPts ?? 0) <= 0;
         return (
           <div style={{marginTop:30,paddingTop:22,borderTop:'1px solid var(--line)'}}>
@@ -94,16 +51,10 @@ export default function MarketView({ idx, rates, mop }) {
               </div>
             )}
 
-            <div className="bars" style={{marginTop:12}}>
-              {pts.map((p,k)=>(
-                <i key={p.date} className={k===pts.length-1?'last':''}
-                   style={{height:(8+(p.sora-mn)/(mx-mn)*88)+'%'}}
-                   title={`${p.date} · ${p.sora.toFixed(2)}%`} />
-              ))}
-            </div>
-            <div className="axis">
-              <span className="lab">{pts[0].date}</span><span className="lab">{pts.at(-1).date}</span>
-            </div>
+            <Chart
+              points={pts.map(p => ({ label: p.date, value: p.sora }))}
+              format={v => v.toFixed(2)} unit="%"
+              ariaLabel={`SORA, ${pts.length} readings from ${pts[0].date} to ${pts.at(-1).date}.`} />
             <p className="prov">{rates.source} · rate as at {rates.latest.date} · fetched {rates.accessedAt.slice(0,10)}{rateAge > 0 ? ` (${rateAge} day${rateAge>1?'s':''} ago)` : ''}</p>
             {rateStale && (
               <div className="warn" style={{marginTop:10}}>
@@ -143,4 +94,99 @@ function Move({ v, label }) {
   if (Math.abs(v) < FLAT) return <span className="pill">Flat {label}</span>;
   const up = v > 0;
   return <span className={'pill ' + (up ? 'u' : 'd')}>{up ? '▲' : '▼'} {pct(v)} {label}</span>;
+}
+
+/**
+ * The index, with a comparison you choose.
+ *
+ * A single line running from 1990 answers "is it up", which everyone already
+ * knows. The question people actually arrive with is "up by how much SINCE",
+ * and the since is different for everyone — since I bought, since the cooling
+ * measures, since covid, since last year. So the two ends are pickable, the
+ * chart shades the span between them, and the figures underneath are computed
+ * from the two quarters chosen rather than from a fixed window.
+ *
+ * The annualised figure is the one worth having and the one most places leave
+ * out: 88% over nineteen years and 88% over four are not the same market, and
+ * only the compound rate says so.
+ *
+ * Still an index, never a price — the note below the chart stays.
+ */
+function IndexPanel({ idx }) {
+  const pts = idx.points;
+  const [from, setFrom] = useState(Math.max(0, pts.length - 21));
+  const [to, setTo] = useState(pts.length - 1);
+
+  const lo = Math.min(from, to), hi = Math.max(from, to);
+  const a = pts[lo], b = pts[hi];
+
+  const cmp = useMemo(() => {
+    if (!a || !b || a.index <= 0) return null;
+    const quarters = hi - lo;
+    const change = ((b.index - a.index) / a.index) * 100;
+    const years = quarters / 4;
+    // Compound annual growth, not the change divided by the years — the second
+    // one flatters long spans and is the reason "up 88%" gets quoted without
+    // anyone saying over what.
+    const annual = years > 0 ? ((b.index / a.index) ** (1 / years) - 1) * 100 : null;
+    return { quarters, years, change, annual };
+  }, [a, b, lo, hi]);
+
+  const opt = (p, i) => <option key={p.quarter} value={i}>{qLabel(p.quarter)} — {p.index.toFixed(1)}</option>;
+
+  return (
+    <>
+      <span className="lab">HDB resale price index · {idx.base}</span>
+      <div className="big">{idx.latest.index.toFixed(1)}</div>
+      <p className="meta">{qLabel(idx.latest.quarter)} · index, not a price</p>
+      <div style={{display:'flex',gap:8,flexWrap:'wrap',margin:'8px 0 0'}}>
+        <Move v={idx.yoy} label="vs a year ago" />
+        <Move v={idx.qoq} label="on the quarter" />
+      </div>
+
+      <div className="cmpbar">
+        <label><span className="filtn">Compare from</span>
+          <select value={lo} onChange={e => setFrom(Number(e.target.value))}>
+            {pts.map(opt)}
+          </select>
+        </label>
+        <label><span className="filtn">To</span>
+          <select value={hi} onChange={e => setTo(Number(e.target.value))}>
+            {pts.map(opt)}
+          </select>
+        </label>
+      </div>
+
+      {cmp && (
+        <div className="kpi3 cmpout">
+          <div>
+            <div className="v">{cmp.change >= 0 ? '+' : '−'}{Math.abs(cmp.change).toFixed(1)}%</div>
+            <span className="lab">{qLabel(a.quarter)} to {qLabel(b.quarter)}</span>
+          </div>
+          <div>
+            <div className="v">{cmp.annual == null ? '—' : `${cmp.annual >= 0 ? '+' : '−'}${Math.abs(cmp.annual).toFixed(1)}%`}</div>
+            <span className="lab">a year, compounded</span>
+          </div>
+          <div>
+            <div className="v">{a.index.toFixed(1)} → {b.index.toFixed(1)}</div>
+            <span className="lab">{cmp.quarters} quarters</span>
+          </div>
+        </div>
+      )}
+
+      <Chart
+        points={pts.map(p => ({ label: qLabel(p.quarter), value: p.index }))}
+        format={v => v.toFixed(1)}
+        markFrom={lo} markTo={hi}
+        ariaLabel={`HDB resale price index, ${pts.length} quarters from ${qLabel(pts[0].quarter)} to ${qLabel(idx.latest.quarter)}. Comparing ${qLabel(a.quarter)} with ${qLabel(b.quarter)}.`} />
+
+      <p className="prov">{idx.source} · {idx.points[0].quarter} to {idx.latest.quarter} · accessed {idx.accessedAt.slice(0,10)}</p>
+
+      <div className="note" style={{marginTop:4}}>
+        <b>An index is not a price.</b> It tracks the whole country&apos;s resale market against 1Q2009.
+        It tells you the direction of travel — it cannot tell you what your flat is worth, because it
+        knows nothing about your block, your floor or your lease.
+      </div>
+    </>
+  );
 }

@@ -380,6 +380,36 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--ink)
 .bars i.last{opacity:1;background:var(--acc-line)}
 .bars i:hover{opacity:.5}
 .bars i.last:hover{opacity:1}
+
+/* ── a chart you can read a figure off ──────────────────────────────────────
+   Every chart here marked one bar with the accent and left the rest an
+   undifferentiated grey slab whose only readout was the operating system's
+   `title` tooltip — slow, unstyleable, invisible on a touchscreen and
+   unreachable from a keyboard. On a site whose argument is that the figures
+   are the point, the charts were the one place a figure could not be read. */
+.chart{margin-top:10px}
+.chartread{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 0 2px;min-height:30px}
+.chartread b{font-family:Archivo,"Source Sans 3",sans-serif;font-variation-settings:"wdth" 88;
+ font-size:1.5rem;font-weight:700;letter-spacing:-.03em;line-height:1.1;color:var(--ink);
+ font-variant-numeric:tabular-nums}
+.chartread span{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;color:var(--ink2)}
+.chartread em{font-style:normal;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;
+ letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-left:auto}
+.chartplot{cursor:crosshair;touch-action:pan-y;margin-top:4px}
+.chartplot:focus-visible{outline:2px solid var(--acc-lit);outline-offset:3px}
+/* The bar under the pointer takes the bright teal — this is the one place
+   --acc-lit is exactly right: data that is selected, live, and momentary. */
+.chartplot i.on{opacity:1;background:var(--acc-lit)}
+.chartplot i.span{opacity:.42}
+.chartplot i.span.on{opacity:1}
+.chartplot:hover i.last:not(.on){opacity:.17}
+
+/* The two ends of a comparison, and what fell out of it. */
+.cmpbar{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.cmpbar select{padding:9px 11px;font-size:14px;border-radius:var(--r1)}
+.cmpout{margin-top:14px}
+.cmpout .v{font-variant-numeric:tabular-nums}
+@media(max-width:520px){.cmpbar{grid-template-columns:1fr}}
 .axis{display:flex;justify-content:space-between;margin-top:6px}
 
 /* ── rows and tables ───────────────────────────────────────────────────── */

@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Chart from './Chart.jsx';
 
 /**
  * MOP tracker. Every year shown is the EARLIEST POSSIBLE fifth year derived from
@@ -10,7 +11,6 @@ import { useState } from 'react';
 export default function MopView({ mop }) {
   const [open, setOpen] = useState(null);
   const years = mop.upcomingByYear;
-  const maxUnits = Math.max(...years.map(y => y.units), 1);
 
   const towns = Object.values(mop.towns)
     .map(t => {
@@ -29,16 +29,13 @@ export default function MopView({ mop }) {
   return (
     <>
       <span className="lab">By year · units reaching their fifth year</span>
-      <div className="bars" style={{height:110,marginTop:8}}>
-        {years.map((y,i)=>(
-          <i key={y.year} className={i===0?'last':''}
-             style={{height:(10+(y.units/maxUnits)*88)+'%'}}
-             title={`${y.year} · ${y.units.toLocaleString('en-SG')} units · ${y.blocks} blocks`} />
-        ))}
-      </div>
-      <div className="axis">
-        {years.map(y => <span className="lab" key={y.year}>{String(y.year).slice(2)}</span>)}
-      </div>
+      {/* Five bars, and every one of them readable. This was a row of grey
+          slabs with the accent on the first, and a native title tooltip as the
+          only way to learn what any of the others meant. */}
+      <Chart
+        points={years.map(y => ({ label: `${y.year} · ${y.blocks} block${y.blocks > 1 ? 's' : ''}`, value: y.units }))}
+        format={v => v.toLocaleString('en-SG')} unit=" units" height={130}
+        ariaLabel={`Units reaching their fifth year, ${years[0]?.year} to ${years.at(-1)?.year}.`} />
 
       <div className="kpi3" style={{marginTop:18}}>
         <div><div className="v">{mop.totals.upcomingBlocks.toLocaleString('en-SG')}</div><span className="lab">Blocks</span></div>
