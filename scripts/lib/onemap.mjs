@@ -240,9 +240,25 @@ export async function search(q) {
 
 async function doSearch(q, key) {
   const { results, error } = await rawSearch(q);   // RateLimited throws through
-  // A transport error is NOT cached — caching it would bake a wifi blip into
-  // the dataset permanently. Only a real answer, including a real empty one.
-  if (error) return { results: [], error, uncached: true };
+  /*
+   * AN `error` ALONGSIDE RESULTS IS A WARNING, NOT A FAILURE.
+   *
+   * OneMap now returns
+   *     { error: "Authentication token missing…", found: 72, results: [ … ] }
+   * for an unauthenticated search — the data is all there and the error is an
+   * advisory that a token will be needed. This function used to bail on the
+   * presence of `error` alone, which meant every lookup returned nothing while
+   * OneMap was answering perfectly. Silently: no throw, no empty-cache entry,
+   * just an island-wide geocoder that had quietly stopped working.
+   *
+   * That is the MOP geocoder failure again by a different route — the one
+   * CLAUDE.md records, where the supply check reported near-zero risk
+   * everywhere because coordinates were missing rather than wrong.
+   *
+   * So: results win. Only an error WITH NO RESULTS is a failure, and that is
+   * still not cached, because caching a wifi blip would bake it in forever.
+   */
+  if (error && !results?.length) return { results: [], error, uncached: true };
   const slim = results.slice(0, 6).map(r => ({
     name: r.SEARCHVAL, blk: r.BLK_NO, road: r.ROAD_NAME, building: r.BUILDING,
     address: r.ADDRESS, postal: r.POSTAL,

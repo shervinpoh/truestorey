@@ -105,8 +105,16 @@ async function main() {
     if (!s?.name) continue;
     let lat = Number(s.lat), lon = Number(s.lon);
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
-      const hit = (await geocodeProject(s.name, s.street || null))
-               || (s.street ? await geocodeStreet(s.street) : null);
+      /*
+       * The resolvers return an OBJECT on failure — { match: 'none' } or
+       * { error } — and an object is truthy, so `a || b` never fell through to
+       * the street lookup. Every parcel name failed at step one and the street
+       * that would have resolved it was never tried. Check for a coordinate,
+       * not for a return value.
+       */
+      const placed = h => (h && Number.isFinite(h.lat) && Number.isFinite(h.lon)) ? h : null;
+      const hit = placed(await geocodeProject(s.name, s.street || null))
+               || (s.street ? placed(await geocodeStreet(s.street)) : null);
       if (hit) { lat = hit.lat; lon = hit.lon; }
     }
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) { unplaced.push(s.name); continue; }
