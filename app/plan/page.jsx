@@ -21,7 +21,10 @@ export default function Page() {
   }));
 
   return (
-    <main className="shell">
+    // Wide, because the calculator is two columns now: inputs beside a sticky
+    // answer. At 760px the input column came out at 425px, which collapsed the
+    // form grid to one field per row and made the page longer, not shorter.
+    <main className="shell wide">
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
         title="Can I afford it"
         sub="TDSR, the loan-to-value ceiling, the downpayment, the cash CPF cannot cover, and both stamp duties — as one answer instead of four." />

@@ -124,12 +124,19 @@ export default function Proceeds({ median, onEngage }) {
              min={Math.round((median||sp)*0.8)} max={Math.round((median||sp)*1.2)} step={1000}
              value={sp} onChange={e=>{touch();setSp(+e.target.value)}} />
 
+      {/* Sliders on these two as well as on the sale price. They are the
+          figures a seller does not know precisely and wants to feel the shape
+          of — "roughly this much loan left, roughly this much CPF in it" —
+          which is exactly what a slider is for and a text box is not. Years
+          held and the agent fee stay typed: those are facts, not ranges. */}
       <div className="f2">
         <div><span className="lab">Outstanding loan</span>
-          <MoneyInput value={loan} ariaLabel="Outstanding loan"
+          <MoneyInput value={loan} ariaLabel="Outstanding loan" slider
+            min={0} max={Math.max(Math.round(sp * 1.1), 100000)} step={5000}
             onChange={v=>{touch();setLoan(v)}} /></div>
         <div><span className="lab">CPF principal used</span>
-          <MoneyInput value={cpf} ariaLabel="CPF principal used"
+          <MoneyInput value={cpf} ariaLabel="CPF principal used" slider
+            min={0} max={Math.max(Math.round(sp * 1.1), 100000)} step={5000}
             onChange={v=>{touch();setCpf(v)}} /></div>
       </div>
       <div className="f2">

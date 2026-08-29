@@ -7,6 +7,7 @@ import Search from './Search.jsx';
 import Masthead from './Masthead.jsx';
 import Amenities from './Amenities.jsx';
 import Storey from './Storey.jsx';
+import SectionNav from './SectionNav.jsx';
 import { titleCase } from '../lib/name.js';
 import { track } from './Track.jsx';
 import { EVENTS } from '../lib/analytics.js';
@@ -64,7 +65,9 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
           ? `${rec.n} filed resale transactions · ${titleCase(rec.town)} · ${rec.remainingLease} of lease left`
           : `${rec.n} filed transactions · District ${rec.district} · ${rec.segment}`} />
 
-      <section className="pane">
+      <SectionNav />
+
+      <section className="pane" id="overview">
         <RecordView rec={rec} attribution={attribution}
           onType={(t, rv) => setMedian(rv.medianPrice)}
           afterSummary={<Fork price={price} planHref={planHref}

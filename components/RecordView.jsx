@@ -21,6 +21,7 @@ import { titleCase } from '../lib/name.js';
  */
 export default function RecordView({ rec, attribution = [], onType, afterSummary = null }) {
   const [rtype, setRtype] = useState(null);
+  const [showAll, setShowAll] = useState(false);
 
   const types = rec.flatTypes || rec.propertyTypes || [];
   const rv = (rtype && rec.byType?.[rtype]) ? { ...rec, ...rec.byType[rtype] } : rec;
@@ -100,7 +101,7 @@ export default function RecordView({ rec, attribution = [], onType, afterSummary
         const vals = srs.map(s => s.median);
         const mn = Math.min(...vals)*0.985, mx = Math.max(...vals)*1.005;
         return (<>
-          <div className="sh"><span>Median price by month</span>
+          <div className="sh" id="history"><span>Median price by month</span>
             <span>{srs.length} months with a sale</span></div>
           <div className="bars">{srs.map((s,i)=>(
             <i key={s.month} className={i===srs.length-1?'last':''}
@@ -120,10 +121,14 @@ export default function RecordView({ rec, attribution = [], onType, afterSummary
       })()}
 
       {recent.length > 0 && (<>
-        <div className="sh"><span>The transactions behind those figures</span>
+        <div className="sh" id="transactions"><span>The transactions behind those figures</span>
           <span>{recent.length} of {rv.n}</span></div>
         <p className="hint" style={{marginTop:10}}>Nothing modelled — these are the filed sales.</p>
-        {recent.map((t,i)=>(
+        {/* Eight, then the rest on request. A block with forty filed sales put
+            forty rows between the chart and everything below it, and nobody
+            reads the twenty-ninth. They are all still here, and still in the
+            page for anyone who wants them — one click, not a fetch. */}
+        {recent.slice(0, showAll ? recent.length : 8).map((t,i)=>(
           <div className="txn" key={i}>
             <div>
               <b>{[
@@ -137,6 +142,11 @@ export default function RecordView({ rec, attribution = [], onType, afterSummary
             <div className="r"><b>{f(t.price)}</b><br /><span className="lab">${Math.round(t.psf)} psf</span></div>
           </div>
         ))}
+        {recent.length > 8 && (
+          <button type="button" className="ghost" onClick={() => setShowAll(v => !v)}>
+            {showAll ? 'Show the most recent eight' : `Show all ${recent.length} filed sales`}
+          </button>
+        )}
       </>)}
 
       <div className="note"><b>Why a range, not one number.</b> Valuation tools routinely disagree by

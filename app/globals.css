@@ -106,10 +106,34 @@ a{color:var(--ink)}
    phone and a laptop the row used to run off the edge of a hidden scroller.
    A second line on a tablet is cheap; an invisible one is not. */
 .gnav .navrow{display:flex;flex-wrap:wrap;gap:6px 20px;list-style:none;margin:0;padding:0}
-.gnav a.n{font-size:13px;font-weight:500;color:var(--ink2);text-decoration:none;
+.gnav a.n,.gnav button.n{font-size:13px;font-weight:500;color:var(--ink2);text-decoration:none;
  white-space:nowrap;padding-bottom:2px}
-.gnav a.n:hover{color:var(--ink)}
-.gnav a.n[aria-current="page"]{color:var(--ink);font-weight:700;box-shadow:0 3px 0 var(--acc)}
+.gnav button.n{background:none;border:0;font-family:inherit;cursor:pointer;padding:2px 0;
+ display:inline-flex;align-items:center;gap:5px}
+.gnav a.n:hover,.gnav button.n:hover{color:var(--ink)}
+.gnav a.n[aria-current="page"],.gnav button.n[aria-current="true"]{color:var(--ink);font-weight:700;
+ box-shadow:0 3px 0 var(--acc)}
+.gnav button.n i{font-style:normal;font-family:"DM Mono",ui-monospace,monospace;font-size:11px;
+ color:var(--mute)}
+.gnav button.n[aria-expanded="true"]{color:var(--ink);font-weight:700}
+
+/* ── the desktop dropdowns ──────────────────────────────────────────────────
+   Eleven equal-weight links, none of which named a tool. "Tools" was one word
+   among ten, and behind it sat the six calculators that are the whole argument
+   for this site over a paid competitor — two of which no nav anywhere led to.
+   Three headings that print their contents instead. */
+.navgrp{position:relative}
+.navdrop{position:absolute;top:calc(100% + 11px);right:0;z-index:42;min-width:330px;
+ background:var(--paper);border:1px solid var(--ink);padding:4px 0}
+.navgrp:first-child .navdrop{left:0;right:auto}
+.navdrop a{display:block;padding:10px 15px;text-decoration:none;color:var(--ink);
+ border-bottom:1px solid var(--line2)}
+.navdrop a:last-child{border-bottom:0}
+.navdrop a b{display:block;font-size:13.5px;font-weight:600;letter-spacing:-.022em;line-height:1.25}
+.navdrop a span{display:block;font-size:11.5px;color:var(--ink2);line-height:1.4;margin-top:3px}
+.navdrop a:hover{background:var(--acc)}
+.navdrop a:hover b,.navdrop a:hover span{color:var(--on-acc)}
+.navdrop a[aria-current="page"] b{box-shadow:inset 0 -2px 0 var(--acc)}
 
 /* ── the mobile nav ─────────────────────────────────────────────────────────
    The row used to scroll horizontally with its scrollbar hidden, which meant
@@ -324,8 +348,23 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--ink)
 .forkcol a:hover b{box-shadow:inset 0 -2px 0 var(--acc)}
 .forkcol a:hover span{color:var(--ink)}
 @media(max-width:640px){.fork{grid-template-columns:1fr}}
-/* The nav is sticky, so an anchor lands under it without this. */
-#floor,#nearby,#proceeds{scroll-margin-top:74px}
+/* Two sticky bars above these now, so an anchor has to clear both. */
+#overview,#history,#transactions,#floor,#nearby,#proceeds{scroll-margin-top:120px}
+
+/* ── a record page's own contents ───────────────────────────────────────────
+   These pages run to five or six thousand pixels and every part of that is
+   worth having; none of it is worth scrolling past to reach the one part you
+   came for. Pinned under the global nav, which is 57px, so this sits at 56. */
+.secnav{position:sticky;top:56px;z-index:30;background:var(--paper);
+ border-bottom:1px solid var(--line);margin-top:6px}
+.secnavin{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.secnavin::-webkit-scrollbar{display:none}
+.secnav a{flex:0 0 auto;padding:11px 14px 10px;font-size:12.5px;font-weight:500;color:var(--ink2);
+ text-decoration:none;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
+.secnav a:first-child{padding-left:0}
+.secnav a:hover{color:var(--ink)}
+.secnav a[aria-current="true"]{color:var(--ink);font-weight:700;border-bottom-color:var(--acc)}
+@media(max-width:560px){.secnav a{padding:11px 12px 10px;font-size:12px}}
 
 /* ── waterfall ─────────────────────────────────────────────────────────── */
 .wf{display:flex;height:30px;border:1px solid var(--ink);margin:8px 0 4px;overflow:hidden}
@@ -712,6 +751,64 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
    the site already publishes. */
 .within{margin-top:26px}
 .within .prov{margin-top:12px}
+.withinsort{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+.withinsort .seg{flex:1 1 300px}
+.withinsort .seg button{padding:7px 6px;font-size:12px;min-width:0}
+.withinmore{display:flex;gap:18px;align-items:baseline;flex-wrap:wrap;margin-top:14px;font-size:13.5px}
+.withinmore a{color:var(--ink);font-weight:600;text-decoration:none;
+ border-bottom:2px solid var(--acc);padding-bottom:1px}
+.withinmore a:hover{background:var(--acc);color:var(--on-acc)}
+
+/* ── where the figures came from ────────────────────────────────────────────
+   This printed the raw path at the reader — "Prefilled from /hdb/ang-mo-kio/
+   591a-ang-mo-kio-st-51" — which looked like a URL had leaked rather than like
+   the site had carried their property across. */
+.fromprop{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;
+ border-left:3px solid var(--acc);padding:10px 0 10px 16px;margin:0 0 22px}
+.fromprop b{display:block;font-size:16px;font-weight:700;letter-spacing:-.026em;line-height:1.2;
+ margin:3px 0 3px}
+.fromprop .mono{display:block;font-size:11.5px;color:var(--ink2)}
+.fromback{font-size:13px;font-weight:600;color:var(--ink);text-decoration:none;white-space:nowrap;
+ border-bottom:2px solid var(--acc);padding-bottom:1px}
+.fromback:hover{background:var(--acc);color:var(--on-acc)}
+
+/* ── the calculator, two columns ────────────────────────────────────────────
+   The answer used to sit below eleven inputs, so every change scrolled its own
+   consequence off the screen. Side by side, with the answer sticky, the two
+   figures that matter stay visible while you argue with the assumptions that
+   produce them. */
+.planlayout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:0 34px;align-items:start;
+ margin-top:18px}
+.plangroup{border:0;border-top:1px solid var(--line);margin:0;padding:14px 0 4px;min-width:0}
+.plangroup:first-child{border-top:0;padding-top:0}
+.plangroup > legend{padding:0;margin-bottom:2px}
+.plangroup .planform{margin-top:10px}
+.planfold{border-top:1px solid var(--line);padding-bottom:14px}
+.planfold summary{cursor:pointer;list-style:none;padding:2px 0}
+.planfold summary::-webkit-details-marker{display:none}
+.planfold summary:before{content:"+ ";font-family:"DM Mono",ui-monospace,monospace;color:var(--mute)}
+.planfold[open] summary:before{content:"− "}
+
+.plansummary{position:sticky;top:78px}
+.plansumin{border:1px solid var(--ink);padding:15px 16px 16px}
+.plansumfig{margin-bottom:14px}
+.plansumfig .statnum,.plansumfig .big{display:block}
+.plansumfig .hint{margin:6px 0 0;font-size:12px;line-height:1.5}
+.plansumrows{border-top:1px solid var(--line);padding-top:10px}
+.plansumrows div{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:12.5px;
+ color:var(--ink2)}
+.plansumrows b{color:var(--ink);font-weight:600}
+
+/* The sticky bottom bar is the small-screen form of the same idea. */
+.planbar{display:none}
+@media(max-width:900px){
+ .planlayout{grid-template-columns:1fr;gap:0}
+ .plansummary{position:static;margin-top:20px}
+ .planbar{display:flex;position:sticky;bottom:0;z-index:20;gap:18px;justify-content:space-between;
+  background:var(--paper);border-top:1px solid var(--ink);padding:9px 0;margin-top:18px}
+ .planbar i{font-style:normal;display:block}
+ .planbar b{font-size:15px;font-weight:700;letter-spacing:-.02em}
+}
 /* The chain, one step per line. Indented continuation rows read as parts of
    the line above them rather than as separate answers. */
 .plansteps{margin-top:22px;border-top:1px solid var(--line)}

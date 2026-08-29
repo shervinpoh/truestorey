@@ -106,7 +106,12 @@ export default function BlindspotReport() {
 
         <div className="planform" style={{ marginTop: 16 }}>
           <label><span>What it is being asked for</span>
+            {/* The slider appears once there is a figure to move. Before that
+                there is nothing for a thumb to point at, and a range control
+                sitting at zero next to an empty box reads as a broken field. */}
             <MoneyInput value={price} onChange={setPrice} emptyIsBlank
+              slider={price !== '' && price != null}
+              min={100000} max={8000000} step={10000}
               placeholder="S$1,250,000" ariaLabel="What it is being asked for" /></label>
           <label><span>Floor area, sq ft</span>
             <input type="number" step="10" value={area} onChange={e => setArea(e.target.value)} placeholder="1292" /></label>
