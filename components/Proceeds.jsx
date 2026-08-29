@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { f } from './fmt.js';
 import { saleProceeds } from '../lib/calc/proceeds.js';
+import MoneyInput from './MoneyInput.jsx';
 
 /*
  * THE MATHS LIVES IN lib/calc/proceeds.js. IT IS NOT REPEATED HERE.
@@ -124,8 +125,12 @@ export default function Proceeds({ median, onEngage }) {
              value={sp} onChange={e=>{touch();setSp(+e.target.value)}} />
 
       <div className="f2">
-        <div><span className="lab">Outstanding loan</span><input type="number" value={loan} onChange={e=>{touch();setLoan(+e.target.value||0)}} /></div>
-        <div><span className="lab">CPF principal used</span><input type="number" value={cpf} onChange={e=>{touch();setCpf(+e.target.value||0)}} /></div>
+        <div><span className="lab">Outstanding loan</span>
+          <MoneyInput value={loan} ariaLabel="Outstanding loan"
+            onChange={v=>{touch();setLoan(v)}} /></div>
+        <div><span className="lab">CPF principal used</span>
+          <MoneyInput value={cpf} ariaLabel="CPF principal used"
+            onChange={v=>{touch();setCpf(v)}} /></div>
       </div>
       <div className="f2">
         <div><span className="lab">Years held</span><input type="number" value={yrs} onChange={e=>setYrs(+e.target.value||0)} /></div>

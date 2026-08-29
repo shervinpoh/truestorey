@@ -55,10 +55,35 @@ import { titleCase } from '../lib/name.js';
  *   A confidently wrong rail line over real transactions is the exact failure
  *   this site exists not to commit.
  *
- * There is deliberately no zoom or pan gesture. The viewport only ever moves
- * to a named region, which means every view has a caption and nobody can end
- * up somewhere the page cannot describe.
+ * ── NAVIGATION ─────────────────────────────────────────────────────────────
+ * This used to say: "There is deliberately no zoom or pan gesture. The
+ * viewport only ever moves to a named region, which means every view has a
+ * caption and nobody can end up somewhere the page cannot describe."
+ *
+ * The principle was right and the conclusion was wrong. A map of thirteen
+ * thousand addresses where the only way to move is a dropdown of twenty-six
+ * towns is not a map, it is twenty-six pictures. Every reader who tried to
+ * scroll into a neighbourhood found nothing happened, and the one gesture
+ * everyone brings to a map — pinch — did nothing at all.
+ *
+ * So the viewport is free now, and the caption is derived rather than
+ * enumerated: THE VIEW ALWAYS NAMES ITSELF. The strip under the map reports
+ * the region nearest the centre of whatever you are looking at, and how many
+ * of the current type are in frame. Pan somewhere with nothing in it and it
+ * says so. Nobody ends up somewhere the page cannot describe, because the
+ * description is computed from the viewport instead of being chosen from a
+ * list.
+ *
+ * Wheel and pinch zoom about the pointer, drag pans, the arrow keys move and
+ * +/− zoom once the canvas has focus, and 0 resets. The viewport is clamped:
+ * never wider than the island, never narrower than 1/40th of it, and its
+ * centre stays inside the bounding box, so no gesture can strand a reader in
+ * empty sea with nothing to navigate back by.
  */
+/** Zoom limits, as a fraction of the island's own latitude span. */
+const MAX_ZOOM = 40;
+/** Below this many pixels of movement, a pointer-up is a click, not a drag. */
+const DRAG_SLOP = 4;
 const RAMP = ['#7AD3DC', '#45BECB', '#17A2B0', '#0A8089', '#065E66', '#03403F'];
 const KIND = [
   { code: 0, key: 'hdb', label: 'HDB', unit: 'blocks', region: 'town' },
@@ -95,6 +120,8 @@ export default function PriceMap({ map }) {
   const viewRef = useRef(base);
 
   const shown = useMemo(() => map.points.filter(p => p[0] === kind), [map.points, kind]);
+  /** Cheapest first — see the draw pass. Memoised because panning redraws. */
+  const order = useMemo(() => shown.slice().sort((a, b) => a[3] - b[3]), [shown]);
   const regions = useMemo(() => map.regions?.[kind] || [], [map.regions, kind]);
   const rail = map.rail || [];
   const land = map.land || null;
@@ -112,6 +139,30 @@ export default function PriceMap({ map }) {
     return () => ro.disconnect();
   }, [aspect]);
 
+  /**
+   * Keep a viewport legal: locked to the canvas aspect, no wider than the
+   * island, no narrower than 1/40th of it, and centred somewhere inside the
+   * bounding box. The last clause is what stops a fast trackpad flick from
+   * leaving a reader looking at open sea with no landmark to come back by.
+   */
+  const clampView = useCallback(rect => {
+    const fullLat = maxLat - minLat;
+    const [a, b, c, d] = rect;
+    const latSpan = Math.min(Math.max(c - a, fullLat / MAX_ZOOM), fullLat);
+    const lonSpan = latSpan * aspect;
+    const cy = Math.min(Math.max((a + c) / 2, minLat), maxLat);
+    const cx = Math.min(Math.max((b + d) / 2, minLon), maxLon);
+    return [cy - latSpan / 2, cx - lonSpan / 2, cy + latSpan / 2, cx + lonSpan / 2];
+  }, [aspect, minLat, minLon, maxLat, maxLon]);
+
+  /** Set the viewport now, with no easing — what every gesture uses. */
+  const setViewNow = useCallback(rect => {
+    cancelAnimationFrame(animRef.current);
+    const next = clampView(rect);
+    viewRef.current = next;
+    setView(next);
+  }, [clampView]);
+
   /** Widen a rect until it matches the canvas, so nothing is ever squashed. */
   const toAspect = useCallback(rect => {
     let [a, b, c, d] = rect;
@@ -126,9 +177,31 @@ export default function PriceMap({ map }) {
     return [a, b, c, d];
   }, [aspect]);
 
-  /** Ease the viewport from wherever it is to a new rect. */
+  /**
+   * Ease the viewport from wherever it is to a new rect.
+   *
+   * requestAnimationFrame DOES NOT RUN IN A BACKGROUND TAB. This repo has been
+   * bitten by that once already — Motion.jsx stranded a headline figure
+   * mid-ease for the same reason — and here it strands the whole map: pick a
+   * town, switch tab before the ease finishes, come back, and the viewport is
+   * frozen somewhere between where it was and where it was asked to go, with
+   * no gesture in flight to finish it.
+   *
+   * So the destination is held, hidden documents skip the animation entirely,
+   * and coming back to a visible tab lands the pending move rather than
+   * resuming an ease whose clock ran on without it.
+   */
+  const targetRef = useRef(null);
+
   const flyTo = useCallback(target => {
     cancelAnimationFrame(animRef.current);
+    targetRef.current = target;
+    if (typeof document !== 'undefined' && document.hidden) {
+      viewRef.current = target;
+      setView(target);
+      targetRef.current = null;
+      return;
+    }
     const start = viewRef.current.slice();
     const t0 = performance.now();
     const step = now => {
@@ -137,8 +210,21 @@ export default function PriceMap({ map }) {
       viewRef.current = next;
       setView(next);
       if (k < 1) animRef.current = requestAnimationFrame(step);
+      else targetRef.current = null;
     };
     animRef.current = requestAnimationFrame(step);
+  }, []);
+
+  useEffect(() => {
+    const onVis = () => {
+      if (document.hidden || !targetRef.current) return;
+      cancelAnimationFrame(animRef.current);
+      viewRef.current = targetRef.current;
+      setView(targetRef.current);
+      targetRef.current = null;
+    };
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
   }, []);
 
   useEffect(() => () => cancelAnimationFrame(animRef.current), []);
@@ -162,6 +248,133 @@ export default function PriceMap({ map }) {
   function switchKind(code) {
     setKind(code); setSel(-1); setHover(null); setHoverRegion(-1);
     cancelAnimationFrame(animRef.current); viewRef.current = base; setView(base);
+  }
+
+  /* ── gestures ──────────────────────────────────────────────────────────────
+     All of them write the same rect through setViewNow, so wheel, pinch, drag
+     and the keyboard cannot disagree about where the viewport is. */
+
+  /** Zoom by a factor about a point given in 0..1 canvas fractions. */
+  const zoomAbout = useCallback((factor, fx = 0.5, fy = 0.5) => {
+    const [a, b, c, d] = viewRef.current;
+    const lon = b + fx * (d - b);
+    const lat = c - fy * (c - a);
+    const latSpan = (c - a) * factor;
+    const lonSpan = latSpan * aspect;
+    // Hold (lat, lon) at the same fraction of the canvas it was already at.
+    const nb = lon - fx * lonSpan;
+    const nc = lat + fy * latSpan;
+    setViewNow([nc - latSpan, nb, nc, nb + lonSpan]);
+  }, [aspect, setViewNow]);
+
+  /** Pan by a pixel delta. */
+  const panBy = useCallback((dx, dy) => {
+    if (!size.w) return;
+    const [a, b, c, d] = viewRef.current;
+    const dLon = -(dx / size.w) * (d - b);
+    const dLat = (dy / size.h) * (c - a);
+    setViewNow([a + dLat, b + dLon, c + dLat, d + dLon]);
+  }, [size.w, size.h, setViewNow]);
+
+  // Wheel has to be bound by hand: React attaches onWheel passively, and a
+  // passive listener cannot preventDefault, so zooming the map would scroll
+  // the page underneath it at the same time.
+  useEffect(() => {
+    const cvs = cvsRef.current;
+    if (!cvs) return;
+    const onWheel = e => {
+      e.preventDefault();
+      const r = cvs.getBoundingClientRect();
+      zoomAbout(Math.exp(e.deltaY * 0.0015),
+        (e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height);
+    };
+    cvs.addEventListener('wheel', onWheel, { passive: false });
+    return () => cvs.removeEventListener('wheel', onWheel);
+  }, [zoomAbout]);
+
+  // Pointer state for drag and pinch. A ref, not state: these change on every
+  // pointermove and re-rendering on each one would drop frames for nothing.
+  const ptrs = useRef(new Map());
+  const dragRef = useRef(null);
+  const pinchRef = useRef(0);
+  const [dragging, setDragging] = useState(false);
+
+  function onPointerDown(e) {
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+    ptrs.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (ptrs.current.size === 1) {
+      dragRef.current = { x: e.clientX, y: e.clientY, moved: 0 };
+    } else if (ptrs.current.size === 2) {
+      dragRef.current = null;                       // a second finger ends the drag
+      setDragging(false);
+    }
+  }
+
+  function onPointerMove(e) {
+    const p = ptrs.current.get(e.pointerId);
+    if (p) { p.x = e.clientX; p.y = e.clientY; }
+
+    if (ptrs.current.size === 2) {
+      const [p1, p2] = [...ptrs.current.values()];
+      const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+      const prev = pinchRef.current;
+      const r = cvsRef.current.getBoundingClientRect();
+      const fx = ((p1.x + p2.x) / 2 - r.left) / r.width;
+      const fy = ((p1.y + p2.y) / 2 - r.top) / r.height;
+      if (prev && prev > 0 && dist > 0) zoomAbout(prev / dist, fx, fy);
+      pinchRef.current = dist;
+      return;
+    }
+
+    if (dragRef.current && p) {
+      const dx = e.clientX - dragRef.current.x;
+      const dy = e.clientY - dragRef.current.y;
+      dragRef.current.moved += Math.abs(dx) + Math.abs(dy);
+      dragRef.current.x = e.clientX;
+      dragRef.current.y = e.clientY;
+      if (dragRef.current.moved > DRAG_SLOP) {
+        if (!dragging) setDragging(true);
+        setHover(null); setHoverRegion(-1);        // no tooltip mid-drag
+        panBy(dx, dy);
+      }
+      return;
+    }
+
+    // Not dragging: this is a hover.
+    const hit = pick(e);
+    setHover(hit.point); setHoverRegion(hit.region);
+  }
+
+  function onPointerUp(e) {
+    ptrs.current.delete(e.pointerId);
+    if (ptrs.current.size < 2) pinchRef.current = 0;
+    const d = dragRef.current;
+    dragRef.current = null;
+    setDragging(false);
+    // A pointer-up that barely moved is a click. Anything further is a pan,
+    // and opening a record because someone dragged across it would be the
+    // worst possible outcome of adding pan.
+    if (d && d.moved <= DRAG_SLOP) {
+      if (hover) router.push(hover[4]);
+      else if (hoverRegion >= 0) focus(hoverRegion);
+    }
+  }
+
+  function onKeyDown(e) {
+    const step = 0.12;
+    const [a, b, c, d] = viewRef.current;
+    const dLat = (c - a) * step, dLon = (d - b) * step;
+    const go = rect => { e.preventDefault(); setViewNow(rect); };
+    switch (e.key) {
+      case 'ArrowUp': return go([a + dLat, b, c + dLat, d]);
+      case 'ArrowDown': return go([a - dLat, b, c - dLat, d]);
+      case 'ArrowLeft': return go([a, b - dLon, c, d - dLon]);
+      case 'ArrowRight': return go([a, b + dLon, c, d + dLon]);
+      case '+': case '=': e.preventDefault(); return zoomAbout(1 / 1.35);
+      case '-': case '_': e.preventDefault(); return zoomAbout(1.35);
+      case '0': e.preventDefault(); return setViewNow(base);
+      default:
+    }
   }
 
   const project = useMemo(() => {
@@ -230,8 +443,10 @@ export default function PriceMap({ map }) {
 
     // ── the transactions ──────────────────────────────────────────────────
     // Cheapest first, dearest last, so an expensive outlier is never buried
-    // under the cluster of ordinary blocks around it.
-    const order = shown.slice().sort((a, b) => a[3] - b[3]);
+    // under the cluster of ordinary blocks around it. Sorted once per property
+    // type rather than once per frame: this used to re-sort 9,477 points inside
+    // the draw, which was invisible when the viewport only moved on a dropdown
+    // change and is a dropped frame per pointermove now that it can be dragged.
     const r = Math.min(6, (shown.length > 6000 ? 2 : 3) * Math.max(1, scale * 0.55));
     for (const pass of sel >= 0 ? [false, true] : [true]) {
       ctx.globalAlpha = pass ? 1 : 0.13;               // dim, never hide
@@ -280,11 +495,35 @@ export default function PriceMap({ map }) {
     // rather than at the median of its transactions. Those are close in a
     // dense town and quite far apart in one with a reservoir in the middle.
     const byCentroid = new Map((land?.areas || []).map(([, slug, c]) => [slug, c]));
+
+    // Where each region's housing is WITHIN THE FRAME.
+    // A centroid is the right anchor at island scale and useless once you are
+    // zoomed into a corner of a town: the centre of Geylang is off screen, so
+    // every name was dropped and a reader who had zoomed in — the thing zoom
+    // is for — was looking at an unlabelled field of dots. Falling back to the
+    // middle of a region's own visible blocks is the same fallback this map
+    // used before boundaries were ingested, and it names a place over its own
+    // housing rather than over a boundary nobody can see.
+    const [va, vb, vc, vd] = view;
+    const inFrame = new Map();
+    for (const p of shown) {
+      if (p[1] < va || p[1] > vc || p[2] < vb || p[2] > vd) continue;
+      let e = inFrame.get(p[7]);
+      if (!e) { e = { lat: 0, lon: 0, n: 0 }; inFrame.set(p[7], e); }
+      e.lat += p[1]; e.lon += p[2]; e.n++;
+    }
+
     const byWeight = regions.map((rg, i) => [i, rg]).sort((a, b) => b[1][R.PLOTTED] - a[1][R.PLOTTED]);
     for (const [i, rg] of byWeight) {
       const home = byCentroid.get(String(rg[R.LABEL]).toLowerCase().replace(/[^a-z0-9]+/g, '-'));
-      const [x, y] = project(home?.[0] ?? rg[R.LAT], home?.[1] ?? rg[R.LON], size.w, size.h);
-      if (x < 0 || y < 0 || x > size.w || y > size.h) continue;
+      let [x, y] = project(home?.[0] ?? rg[R.LAT], home?.[1] ?? rg[R.LON], size.w, size.h);
+      const off = () => x < 0 || y < 0 || x > size.w || y > size.h;
+      if (off()) {
+        const e = inFrame.get(i);
+        if (!e) continue;                      // nothing of this region is in frame
+        [x, y] = project(e.lat / e.n, e.lon / e.n, size.w, size.h);
+        if (off()) continue;
+      }
       const on = i === sel;
       const opts = {
         weight: on ? 700 : 600,
@@ -318,7 +557,7 @@ export default function PriceMap({ map }) {
       ctx.lineWidth = 1.5;
       ctx.strokeRect(x - 5, y - 5, 10, 10);
     }
-  }, [shown, size, hover, project, breaks, regions, sel, showRail, rail, scale, land, region]);
+  }, [shown, order, size, hover, project, view, breaks, regions, sel, showRail, rail, scale, land, region]);
 
   function pick(e) {
     const cvs = cvsRef.current;
@@ -348,6 +587,30 @@ export default function PriceMap({ map }) {
 
   const hr = hoverRegion >= 0 ? regions[hoverRegion] : null;
   const k = KIND[kind];
+
+  /**
+   * What you are looking at, computed from the viewport.
+   *
+   * This is the replacement for the rule that used to forbid free navigation:
+   * the view named itself because you had picked its name off a list. Now it
+   * names itself from where it actually is — the region whose own centre is
+   * nearest the centre of the frame, and a count of what is in frame. If you
+   * pan into the strait, the count is zero and it says so rather than naming
+   * the nearest town and implying you are over it.
+   */
+  const where = useMemo(() => {
+    const [a, b, c, d] = view;
+    const cy = (a + c) / 2, cx = (b + d) / 2;
+    let inView = 0;
+    for (const p of shown) if (p[1] >= a && p[1] <= c && p[2] >= b && p[2] <= d) inView++;
+    let near = null, best = Infinity;
+    for (const rg of regions) {
+      const dd = (rg[R.LAT] - cy) ** 2 + (rg[R.LON] - cx) ** 2;
+      if (dd < best) { best = dd; near = rg; }
+    }
+    const zoom = (maxLat - minLat) / (c - a);
+    return { near, inView, zoom };
+  }, [view, shown, regions, maxLat, minLat]);
 
   return (
     <>
@@ -392,14 +655,35 @@ export default function PriceMap({ map }) {
       )}
 
       <div className="mapwrap" ref={wrapRef} style={{ height: size.h || undefined }}>
-        <canvas ref={cvsRef} style={{ width: size.w, height: size.h, cursor: hover || hr ? 'pointer' : 'crosshair' }}
-          onMouseMove={e => { const p = pick(e); setHover(p.point); setHoverRegion(p.region); }}
-          onMouseLeave={() => { setHover(null); setHoverRegion(-1); }}
-          onClick={() => { if (hover) router.push(hover[4]); else if (hr) focus(hoverRegion); }}
+        <canvas ref={cvsRef}
+          style={{
+            width: size.w, height: size.h,
+            // touch-action:none so a pinch zooms the map rather than the page,
+            // and a drag pans rather than scrolling it away underneath you.
+            touchAction: 'none',
+            cursor: dragging ? 'grabbing' : (hover || hr ? 'pointer' : 'grab'),
+          }}
+          tabIndex={0}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+          onPointerLeave={() => { if (!dragRef.current) { setHover(null); setHoverRegion(-1); } }}
+          onKeyDown={onKeyDown}
           role="img"
-          aria-label={region
-            ? `${titleCase(region[R.LABEL])}: ${n(region[R.PLOTTED])} ${k.unit} plotted by median price per square foot, with the rest of Singapore dimmed`
-            : `${n(shown.length)} ${k.label} locations plotted by median price per square foot, labelled by ${k.region}`} />
+          aria-label={`${n(shown.length)} ${k.label} locations plotted by median price per square foot. `
+            + (region ? `${titleCase(region[R.LABEL])} is highlighted and the rest of Singapore dimmed. ` : '')
+            + `Currently showing ${n(where.inView)} of them, near ${where.near ? titleCase(where.near[R.LABEL]) : 'no named area'}. `
+            + 'Use the arrow keys to move, plus and minus to zoom, and 0 to see all of Singapore.'} />
+
+        {/* Zoom controls, because a gesture nobody can see is a gesture most
+            people will not try. Over the canvas, out of the way of the island. */}
+        <div className="mapzoom">
+          <button type="button" aria-label="Zoom in" onClick={() => zoomAbout(1 / 1.35)}>+</button>
+          <button type="button" aria-label="Zoom out" onClick={() => zoomAbout(1.35)}>−</button>
+          <button type="button" aria-label="Show all of Singapore"
+            onClick={() => { setViewNow(base); }}>⤢</button>
+        </div>
         {hover && (
           <div className="maptip" style={tipAt(hover[1], hover[2])}>
             <b>{titleCase(hover[5])}</b>
@@ -423,6 +707,29 @@ export default function PriceMap({ map }) {
           </div>
         )}
       </div>
+
+      {/* The view names itself. This is what replaced the rule against free
+          navigation — not a list you pick from, a description computed from
+          wherever you actually are. */}
+      <p className="mapwhere">
+        <span className="lab">In view</span>
+        {/* One span, not several: .mapwhere is a flex row and its gap would
+            otherwise put a space in front of the comma. */}
+        {where.inView === 0
+          ? <span><b>Nothing plotted here.</b> Pan back towards the island, or press 0.</span>
+          : (
+            <span>
+              <b>{n(where.inView)} of {n(shown.length)} {k.unit}</b>
+              {/* At full extent the nearest region is just whatever sits closest
+                  to the middle of the country, which tells a reader nothing. */}
+              {where.zoom >= 1.05 && where.near
+                ? <>, nearest {k.region} <b>{titleCase(where.near[R.LABEL])}</b>{' · '}
+                  <span className="mono">{where.zoom.toFixed(1)}× in</span></>
+                : <> · <span className="mono">all of Singapore</span></>}
+            </span>
+          )}
+        <span className="maphint">Drag to move · scroll or pinch to zoom · arrow keys and +/− once focused · 0 resets</span>
+      </p>
 
       {/* The legend carries the figures, which is the required relief for the
           two palest steps sitting under 3:1 against white. */}

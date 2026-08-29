@@ -14,17 +14,14 @@ export default function Page() {
   const list = projects(NS);
   const i = getIndex();
   return (
-    <main className="shell">
+    <main className="shell wide">
       <Masthead crumbs={[{ href: '/', label: 'Home' }]} title="Landed, by street"
         sub={`${list.length.toLocaleString('en-SG')} streets with a filed transaction since ${i.private?.period?.from ?? ''}, grouped by district.`} />
       <div className="note"><b>Landed is addressed by street, not by project.</b> URA does not publish a
         project name for landed housing, so a street is the finest honest unit available.</div>
       <section className="pane">
-        <ProjectBrowse noun="streets"
-          items={list.map(p => ({
-            slug: p.slug, href: p.href, label: p.label, district: p.district,
-            segment: p.segment, n: p.n, medianPsf: p.medianPsf,
-          }))} />
+        <ProjectBrowse noun="streets" base={`/${NS}/`}
+          items={list.map(p => [p.slug, p.label, p.district, p.segment, p.n, p.medianPsf])} />
         <p className="prov">{i.private?.source} · {i.private?.period?.from} to {i.private?.period?.to} · accessed {i.private?.accessedAt}</p>
       </section>
     </main>

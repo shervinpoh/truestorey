@@ -65,7 +65,17 @@ body{background:var(--paper);color:var(--ink);
 .wide{max-width:1040px}
 
 /* ── type ──────────────────────────────────────────────────────────────── */
-.lab{font-family:"DM Mono",ui-monospace,monospace;font-size:9.5px;letter-spacing:.14em;
+/* ── the mono floor ─────────────────────────────────────────────────────────
+   These were 9 and 9.5px at .14em. Tracked-out uppercase mono is the hardest
+   thing on this site to read, and it is carrying the labels on every figure
+   and — in .prov — the source and period that CEA PG 02-11 s3.1 requires. On a
+   retina Mac it looked deliberate; on a 1080p Windows laptop, which is a large
+   share of Singapore desktop traffic, it was squinting.
+   10px, and .1em rather than .14em: the extra tracking was buying legibility
+   at small sizes and costing it at this one, because it pushes the letters far
+   enough apart that the word stops being a shape. Nothing else changes —
+   colour and case were always what separated these from body text, not size. */
+.lab{font-family:"DM Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.1em;
  text-transform:uppercase;color:var(--mute)}
 .mono{font-family:"DM Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
 /* Schibsted's tabular comma occupies a full digit slot, so "S$1,420,000" sets
@@ -215,7 +225,7 @@ header.mast{padding:30px 0 16px}
  .kpi2>div:last-child{border-bottom:0}}
 
 /* ── section heads ─────────────────────────────────────────────────────── */
-.sh{font-family:"DM Mono",ui-monospace,monospace;font-size:9.5px;letter-spacing:.14em;
+.sh{font-family:"DM Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.1em;
  text-transform:uppercase;color:var(--mute);border-bottom:1px solid var(--ink);
  padding-bottom:7px;margin:26px 0 4px;display:flex;justify-content:space-between;gap:12px}
 
@@ -284,11 +294,38 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--ink)
 .row.tot{border-bottom:0;border-top:1px solid var(--ink);margin-top:4px;padding-top:13px;
  font-size:1.16rem;font-weight:600;letter-spacing:-.03em}
 /* the psf under a price is a caption, not a second column */
-.txn .r .lab{display:inline-block;margin-top:2px}
-.txn{display:flex;justify-content:space-between;gap:12px;padding:11px 0;
- border-bottom:1px solid var(--line2);font-size:13.5px}
-.txn b{font-weight:600;display:block;font-size:14px;letter-spacing:-.015em}
+/* Seven filed sales took four hundred pixels, because each row set as three
+   lines: the price broke to its own line, the psf caption below it picked up
+   the row's 1.5 body leading, and 11px of padding sat under all of it. The row
+   carries four short facts and should read as one line with a caption, so the
+   caption gets its own tighter leading and the padding comes down. */
+.txn .r .lab{display:block;margin-top:1px;line-height:1.25}
+.txn>div>.lab{display:block;margin-top:1px;line-height:1.3}
+.txn{display:flex;justify-content:space-between;gap:12px;padding:8px 0;
+ border-bottom:1px solid var(--line2);font-size:13.5px;line-height:1.3}
+.txn b{font-weight:600;display:block;font-size:14px;letter-spacing:-.015em;line-height:1.3}
 .txn .r{text-align:right;white-space:nowrap}
+
+/* ── the fork ───────────────────────────────────────────────────────────────
+   Which of the two questions this page answers is the one thing it cannot
+   work out for itself, so it asks. Both columns point down the same page —
+   nothing here computes anything that was not already below. */
+.forkwrap{margin:24px 0 6px}
+.fork{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);
+ border:1px solid var(--line);margin-top:14px}
+.forkcol{background:var(--paper);padding:15px 17px 8px}
+.forkcol>.lab{display:block;padding-bottom:9px;border-bottom:1px solid var(--ink);color:var(--ink)}
+.forkcol ul{list-style:none;margin:0;padding:0}
+.forkcol li{border-bottom:1px solid var(--line2)}
+.forkcol li:last-child{border-bottom:0}
+.forkcol a{display:block;padding:11px 0;text-decoration:none;color:var(--ink);min-height:44px}
+.forkcol a b{display:block;font-size:14px;font-weight:600;letter-spacing:-.022em;line-height:1.25}
+.forkcol a span{display:block;font-size:12px;color:var(--ink2);line-height:1.45;margin-top:3px}
+.forkcol a:hover b{box-shadow:inset 0 -2px 0 var(--acc)}
+.forkcol a:hover span{color:var(--ink)}
+@media(max-width:640px){.fork{grid-template-columns:1fr}}
+/* The nav is sticky, so an anchor lands under it without this. */
+#floor,#nearby,#proceeds{scroll-margin-top:74px}
 
 /* ── waterfall ─────────────────────────────────────────────────────────── */
 .wf{display:flex;height:30px;border:1px solid var(--ink);margin:8px 0 4px;overflow:hidden}
@@ -299,8 +336,16 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--ink)
 .wfkey b{width:9px;height:9px;display:inline-block}
 
 /* ── notes, gates, warnings ────────────────────────────────────────────── */
+/* Rule 1 says an accent everywhere is the same as no accent at all, and this
+   is where that was breaking from the inside: /map stacks five of these, and
+   /blindspot four, so the teal rule stopped marking "read this one" and became
+   the most repeated element on the page.
+   The first note in a run keeps the accent. Every one after it drops to a
+   hairline — still a set, still indented, no longer five things all claiming
+   to be the important one. */
 .note{border-left:3px solid var(--acc);padding:2px 0 2px 16px;font-size:13.5px;color:var(--ink2);
  margin:20px 0;line-height:1.6}
+.note + .note{border-left-color:var(--line)}
 .note b{color:var(--ink);font-weight:600}
 .gate{border:1px solid var(--ink);padding:20px;margin:24px 0}
 .gate ol{margin:12px 0 14px;padding-left:18px;font-size:14px}
@@ -312,8 +357,10 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--ink)
 
 /* ── provenance · never delete, rule 6 ─────────────────────────────────── */
 .meta{font-family:"DM Mono",ui-monospace,monospace;font-size:11px;color:var(--ink2);margin:8px 0 0;line-height:1.6}
-.prov{font-family:"DM Mono",ui-monospace,monospace;font-size:9px;letter-spacing:.04em;color:var(--mute);
- margin:14px 0 18px;line-height:1.9}
+/* 10px, not 9. This is the substantiation line — the source and the period
+   behind every figure above it — and it was the smallest text on the page. */
+.prov{font-family:"DM Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.03em;color:var(--mute);
+ margin:14px 0 18px;line-height:1.8}
 .axis + .prov{margin-top:12px}
 /* ── the footer ─────────────────────────────────────────────────────────────
    It was two centred lines of 9px mono, so every page ended in several hundred
@@ -591,6 +638,26 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 .mapfocus span{font-size:12px;color:var(--ink2)}
 .mapfocus a{margin-left:auto;font-size:12.5px;font-weight:600;color:var(--acc-ink);white-space:nowrap}
 @media(max-width:520px){.mapfocus a{margin-left:0}}
+/* Zoom controls. Square, hairline, over the canvas — a gesture nobody can see
+   is a gesture most people never try. 44px, because on a phone this is the
+   only way to zoom that does not need two fingers. */
+.mapzoom{position:absolute;top:10px;right:10px;z-index:4;display:flex;flex-direction:column;gap:-1px}
+.mapzoom button{width:44px;height:44px;border:1px solid var(--ink);background:var(--paper);
+ color:var(--ink);font:inherit;font-size:17px;line-height:1;cursor:pointer;margin-bottom:-1px;
+ display:flex;align-items:center;justify-content:center}
+.mapzoom button:last-child{margin-bottom:0;font-size:14px}
+.mapzoom button:hover{background:var(--acc);border-color:var(--acc-line);color:var(--on-acc)}
+.mapzoom button:active{transform:translateY(1px)}
+
+/* The view names itself, from where it is rather than from a list. */
+.mapwhere{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:12px 0 0;
+ padding:10px 12px;border:1px solid var(--line);font-size:13px;color:var(--ink2)}
+.mapwhere b{color:var(--ink);font-weight:600}
+.mapwhere .lab{flex:0 0 auto}
+.maphint{flex:1 1 100%;font-family:"DM Mono",ui-monospace,monospace;font-size:10px;
+ letter-spacing:.06em;color:var(--mute)}
+@media(prefers-reduced-motion:reduce){.mapzoom button:active{transform:none}}
+
 .maplegend{margin-top:16px}
 .ramp{display:flex;gap:1px;margin-top:7px;flex-wrap:wrap}
 .ramp .step{flex:1 1 96px;min-width:0}
@@ -612,6 +679,13 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 .bandtable thead th{font-family:"DM Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.1em;
  text-transform:uppercase;color:var(--mute);font-weight:400;border-bottom:1px solid var(--line)}
 .bandtable tbody th{font-weight:400;color:var(--ink2);white-space:nowrap;width:1%}
+/* `width:1%` shrinks the row header to its content, which is right for a storey
+   band and wrong for a sentence: "Where the asking price sits" wrapped to three
+   lines in a 760px column with most of the width unused. The rubric is the one
+   table here whose first column is prose. */
+.bandtable.rubric tbody th{white-space:normal;width:auto;min-width:210px;
+ color:var(--ink);padding-right:18px}
+.bandtable.rubric td:last-child{text-align:left;white-space:normal}
 .bandtable td:nth-child(2){white-space:nowrap}
 /* Fixed track, so the bar cannot push the figure onto a second line — the
    figure is the point of the row and must sit on the same baseline as it. */
@@ -626,6 +700,18 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 .planform label span{display:block;font-family:"DM Mono",ui-monospace,monospace;font-size:10px;
  letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-bottom:5px}
 .planform input,.planform select{padding:9px 11px;font-size:14px}
+/* Price is the field people move rather than state, so it gets a slider under
+   its box and the width to make the slider worth dragging. */
+.planform .wide2{grid-column:span 2}
+@media(max-width:480px){.planform .wide2{grid-column:span 1}}
+.planform input[type=range]{margin:8px 0 0;padding:0}
+
+/* ── towns within the ceiling ───────────────────────────────────────────────
+   The affordability answer used to end at a number. This turns it back into
+   somewhere to go — the only new thing on the page is a filter over medians
+   the site already publishes. */
+.within{margin-top:26px}
+.within .prov{margin-top:12px}
 /* The chain, one step per line. Indented continuation rows read as parts of
    the line above them rather than as separate answers. */
 .plansteps{margin-top:22px;border-top:1px solid var(--line)}

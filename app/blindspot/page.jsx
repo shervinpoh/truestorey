@@ -27,15 +27,17 @@ export default function Page() {
           never assigns a point — it only writes the paragraph around figures that are already
           fixed. Same inputs, same score, every time.
         </p>
-        <div className="tw" style={{ overflowX: 'auto' }}>
-          <table className="bandtable">
+        {/* .tablewrap, not .tw — `.tw` is the town-tile button, which brought a
+            tile background and its teal --heat wash along with it. */}
+        <div className="tablewrap">
+          <table className="bandtable rubric">
             <thead>
               <tr><th scope="col">Check</th><th scope="col">Worth</th><th scope="col">Source</th></tr>
             </thead>
             <tbody>
               {Object.values(CHECKS).map(c => (
                 <tr key={c.key}>
-                  <th scope="row" style={{ whiteSpace: 'normal' }}>{c.title}</th>
+                  <th scope="row">{c.title}</th>
                   <td className="mono">up to {c.max}</td>
                   <td style={{ whiteSpace: 'normal', textAlign: 'left' }}>{c.source}</td>
                 </tr>

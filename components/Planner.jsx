@@ -5,6 +5,7 @@ import { plan, maxPrice } from '../lib/calc/plan.js';
 import { SOURCES, RATES_REVIEWED, LTV_REVIEWED } from '../lib/calc/constants.js';
 import { f } from './fmt.js';
 import { Figure } from './Motion.jsx';
+import MoneyInput from './MoneyInput.jsx';
 
 /**
  * TDSR, BSD and ABSD as one answer.
@@ -21,6 +22,7 @@ import { Figure } from './Motion.jsx';
  * `?price=` prefills, so a block page can hand a reader their own figures.
  */
 const money = n => (Number.isFinite(n) ? f(n) : '—');
+const n2 = v => (Number.isFinite(v) ? v.toLocaleString('en-SG') : '—');
 const pc = n => `${(n * 100).toFixed(n * 100 % 1 ? 1 : 0)}%`;
 
 function Row({ label, value, note, strong }) {
@@ -33,7 +35,7 @@ function Row({ label, value, note, strong }) {
   );
 }
 
-export default function Planner() {
+export default function Planner({ towns = [], townSource = null, townPeriod = null }) {
   const q = useSearchParams();
   const [price, setPrice] = useState(Number(q.get('price')) || 650000);
   const [type, setType] = useState(q.get('type') === 'PRIVATE' ? 'PRIVATE' : 'HDB');
@@ -90,14 +92,23 @@ export default function Planner() {
       </div>
 
       <div className="planform">
-        <label><span>Price</span><input type="number" step="10000" value={price} onChange={e => setPrice(e.target.value)} /></label>
-        <label><span>Monthly income, you</span><input type="number" step="500" value={a1} onChange={e => setA1(e.target.value)} /></label>
+        {/* Price gets the slider as well as the box, because it is the one
+            figure people move to explore rather than to state. The rest are
+            facts about you and a slider would only be in the way. */}
+        <label className="wide2"><span>Price</span>
+          <MoneyInput value={price} onChange={setPrice} slider min={100000} max={5000000} step={10000} /></label>
+        <label><span>Monthly income, you</span>
+          <MoneyInput value={a1} onChange={setA1} /></label>
         <label><span>Your age</span><input type="number" value={g1} onChange={e => setG1(e.target.value)} /></label>
-        <label><span>Monthly income, co-applicant</span><input type="number" step="500" value={a2} onChange={e => setA2(e.target.value)} /></label>
+        <label><span>Monthly income, co-applicant</span>
+          <MoneyInput value={a2} onChange={setA2} /></label>
         <label><span>Their age</span><input type="number" value={g2} onChange={e => setG2(e.target.value)} /></label>
-        <label><span>Other monthly repayments</span><input type="number" step="100" value={debts} onChange={e => setDebts(e.target.value)} /></label>
-        <label><span>Cash available</span><input type="number" step="10000" value={cash} onChange={e => setCash(e.target.value)} /></label>
-        <label><span>CPF OA available</span><input type="number" step="10000" value={cpf} onChange={e => setCpf(e.target.value)} /></label>
+        <label><span>Other monthly repayments</span>
+          <MoneyInput value={debts} onChange={setDebts} /></label>
+        <label><span>Cash available</span>
+          <MoneyInput value={cash} onChange={setCash} /></label>
+        <label><span>CPF OA available</span>
+          <MoneyInput value={cpf} onChange={setCpf} /></label>
         <label><span>Buyer profile</span>
           <select value={profile} onChange={e => setProfile(e.target.value)}>
             <option value="SC">Singapore Citizen</option>
@@ -147,6 +158,52 @@ export default function Planner() {
           </p>
         </div>
       </div>
+
+      {/* The number was the end of the road. Someone who learns they can carry
+          S$731,000 immediately wants to know where that buys a flat, and this
+          site holds a filed median for all twenty-six towns — so the answer is
+          a link, not another search.
+
+          It says median PRICE, not "affordable" and not "you can buy here":
+          half the flats filed in a town sit above its median, and this is a
+          record of what was paid, not an assertion about what you would pay.
+          Rule 2 — there is no valuation of anything on this page. */}
+      {towns.length > 0 && Number.isFinite(cap) && (() => {
+        const within = towns.filter(t => Number.isFinite(t.medianPrice) && t.medianPrice <= cap)
+          .sort((a, b) => b.medianPrice - a.medianPrice);
+        return (
+          <div className="within">
+            <div className="sh">
+              <span>Where a median flat is inside {money(cap)}</span>
+              <span>{within.length} of {towns.length} towns</span>
+            </div>
+            {within.length === 0 ? (
+              <p className="hint" style={{ marginTop: 12 }}>
+                No town has a median resale price this low. The cheapest is {towns
+                  .reduce((lo, t) => (t.medianPrice < lo.medianPrice ? t : lo), towns[0]).name} at{' '}
+                {money(Math.min(...towns.map(t => t.medianPrice)))}.
+              </p>
+            ) : (
+              <div className="tiles" style={{ marginTop: 12 }}>
+                {within.map(t => (
+                  <a key={t.slug} className="tile" href={`/hdb/${t.slug}`}>
+                    <span className="n">{t.name}</span>
+                    <span className="v mono">{money(t.medianPrice)}</span>
+                    <span className="b mono">median · ${n2(t.medianPsf)} psf</span>
+                  </a>
+                ))}
+              </div>
+            )}
+            {townSource && (
+              <p className="prov">
+                Median filed resale price per town · {townSource}
+                {townPeriod ? ` · ${townPeriod.from} to ${townPeriod.to}` : ''}.
+                Half of the flats filed in a town sold above its median.
+              </p>
+            )}
+          </div>
+        );
+      })()}
 
       <div className="plansteps">
         <Row label="A bank would assess you for" value={money(r.afford.maxLoan)}

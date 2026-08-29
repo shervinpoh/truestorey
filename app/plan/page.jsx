@@ -2,6 +2,8 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import Masthead from '../../components/Masthead.jsx';
 import Planner from '../../components/Planner.jsx';
+import { allTowns, getIndex } from '../../lib/data/query.js';
+import { titleCase } from '../../lib/name.js';
 
 export const metadata = {
   title: 'Can I afford it — TDSR, downpayment and stamp duty in one answer | Truestorey',
@@ -10,6 +12,14 @@ export const metadata = {
 };
 
 export default function Page() {
+  // Read here rather than in Planner: Planner is a client component, and the
+  // twenty-six town medians are the whole payload — six fields each, resolved
+  // at build because this page is static.
+  const i = getIndex();
+  const towns = allTowns().map(t => ({
+    slug: t.slug, name: titleCase(t.name), medianPrice: t.medianPrice, medianPsf: t.medianPsf,
+  }));
+
   return (
     <main className="shell">
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
@@ -18,7 +28,7 @@ export default function Page() {
 
       <section className="pane">
         <Suspense fallback={<p className="hint">Loading…</p>}>
-          <Planner />
+          <Planner towns={towns} townSource={i.hdb?.source} townPeriod={i.hdb?.period} />
         </Suspense>
       </section>
 

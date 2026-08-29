@@ -123,6 +123,12 @@ export default function Home() {
                       title={`${p.quarter} · ${p.index ?? p.value}`} />
                   ))}
                 </div>
+                {/* Both ends labelled. Sixteen bars with no scale said only
+                    "it went up", which the reader could already see. */}
+                <div className="axis">
+                  <span className="lab">{pts[0].quarter} · {pts[0].index ?? pts[0].value}</span>
+                  <span className="lab">{latest?.quarter} · {latest?.index ?? latest?.value}</span>
+                </div>
                 <div className="statrow">
                   <span className="statnum">{latest?.index ?? latest?.value}</span>
                   {qoq != null && (

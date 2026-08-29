@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { f, num } from './fmt.js';
 import { titleCase } from '../lib/name.js';
 import { Figure } from './Motion.jsx';
+import MoneyInput from './MoneyInput.jsx';
 
 /**
  * Blindspot — four checks, one score, every point traceable.
@@ -105,7 +106,8 @@ export default function BlindspotReport() {
 
         <div className="planform" style={{ marginTop: 16 }}>
           <label><span>What it is being asked for</span>
-            <input type="number" step="10000" value={price} onChange={e => setPrice(e.target.value)} placeholder="1250000" /></label>
+            <MoneyInput value={price} onChange={setPrice} emptyIsBlank
+              placeholder="S$1,250,000" ariaLabel="What it is being asked for" /></label>
           <label><span>Floor area, sq ft</span>
             <input type="number" step="10" value={area} onChange={e => setArea(e.target.value)} placeholder="1292" /></label>
           <label><span>Which is</span>
@@ -113,11 +115,18 @@ export default function BlindspotReport() {
               style={{ background: 'var(--sunk)', color: 'var(--mute)' }} /></label>
         </div>
 
-        <button type="submit" className="mapopt" disabled={!ready || state === 'loading'}
-          style={{ marginTop: 16, padding: '12px 18px' }}>
+        {/* This was a .ghost — a small grey outline button, visually quieter
+            than the three inputs above it. The primary action of the site's
+            flagship tool cannot be the least prominent thing in its own form. */}
+        <button type="submit" className="cta" disabled={!ready || state === 'loading'}>
           {state === 'loading' ? 'Checking…' : 'Run the checks'}
         </button>
-        {!picked && <p className="hint" style={{ marginTop: 10 }}>Pick a block or project to start.</p>}
+        {!picked && (
+          <p className="hint" style={{ marginTop: 12 }}>
+            Start by naming a block or project above — the checks are all measured
+            against what has actually been filed at that address.
+          </p>
+        )}
       </form>
 
       {state === 'error' && (

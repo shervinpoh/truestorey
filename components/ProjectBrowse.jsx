@@ -16,8 +16,22 @@ import Link from 'next/link';
  *
  * Typing skips both levels and searches everything at once, because someone
  * who knows the project name should never have to know its district.
+ *
+ * ITEMS ARE TUPLES, NOT OBJECTS, and that is worth the loss of readability.
+ * This is a client component, so every project it can search has to reach the
+ * browser — all 2,980 of them, serialised into the HTML. As objects that was
+ * 492KB of markup on /condo, more than twice the homepage, and about half of
+ * it was the same seven key names repeated three thousand times. The href went
+ * too: it is `base + slug` on every row, which is twenty bytes of nothing.
+ *
+ * The alternative was searching over the network, which would mean the second
+ * level of this browse could not work offline or before hydration, and would
+ * put a request between typing and seeing a project name. This is the cheaper
+ * trade.
  */
-export default function ProjectBrowse({ items = [], noun = 'projects', unit = 'psf' }) {
+const P = { SLUG: 0, LABEL: 1, DISTRICT: 2, SEGMENT: 3, N: 4, PSF: 5 };
+
+export default function ProjectBrowse({ items = [], base, noun = 'projects', unit = 'psf' }) {
   const [district, setDistrict] = useState(null);
   const [q, setQ] = useState('');
   const term = q.trim().toLowerCase();
@@ -25,11 +39,11 @@ export default function ProjectBrowse({ items = [], noun = 'projects', unit = 'p
   const districts = useMemo(() => {
     const m = new Map();
     for (const p of items) {
-      const d = p.district;
-      if (!m.has(d)) m.set(d, { d, segment: p.segment, n: 0, psf: [] });
+      const d = p[P.DISTRICT];
+      if (!m.has(d)) m.set(d, { d, segment: p[P.SEGMENT], n: 0, psf: [] });
       const e = m.get(d);
       e.n++;
-      if (Number.isFinite(p.medianPsf)) e.psf.push(p.medianPsf);
+      if (Number.isFinite(p[P.PSF])) e.psf.push(p[P.PSF]);
     }
     return [...m.values()].map(e => {
       const s = e.psf.slice().sort((a, b) => a - b);
@@ -43,13 +57,13 @@ export default function ProjectBrowse({ items = [], noun = 'projects', unit = 'p
   }, [districts]);
 
   const shown = useMemo(() => {
-    if (term) return items.filter(p => (p.label + ' ' + p.district).toLowerCase().includes(term));
-    if (district) return items.filter(p => p.district === district);
+    if (term) return items.filter(p => (p[P.LABEL] + ' ' + p[P.DISTRICT]).toLowerCase().includes(term));
+    if (district) return items.filter(p => p[P.DISTRICT] === district);
     return [];
   }, [items, term, district]);
 
   const pRange = useMemo(() => {
-    const v = shown.map(p => p.medianPsf).filter(Number.isFinite);
+    const v = shown.map(p => p[P.PSF]).filter(Number.isFinite);
     return v.length ? [Math.min(...v), Math.max(...v)] : [0, 1];
   }, [shown]);
 
@@ -68,7 +82,7 @@ export default function ProjectBrowse({ items = [], noun = 'projects', unit = 'p
           <span className="filtn" aria-live="polite">{shown.length.toLocaleString('en-SG')} matching</span>
           {shown.length === 0
             ? <p className="hint" style={{ marginTop: 16 }}>Nothing matching &ldquo;{q.trim()}&rdquo;.</p>
-            : <Tiles list={shown.slice(0, 400)} range={pRange} heat={heat} unit={unit} showDistrict />}
+            : <Tiles list={shown.slice(0, 400)} base={base} range={pRange} heat={heat} unit={unit} showDistrict />}
           {shown.length > 400 && (
             <p className="hint" style={{ marginTop: 12 }}>
               Showing the first 400 of {shown.length.toLocaleString('en-SG')}. Narrow the search to see the rest.
@@ -82,7 +96,7 @@ export default function ProjectBrowse({ items = [], noun = 'projects', unit = 'p
             <span aria-hidden="true"> / </span>District {district}
           </div>
           <span className="filtn">{shown.length.toLocaleString('en-SG')} {noun} in District {district}</span>
-          <Tiles list={shown} range={pRange} heat={heat} unit={unit} />
+          <Tiles list={shown} base={base} range={pRange} heat={heat} unit={unit} />
         </>
       ) : (
         <>
@@ -103,14 +117,15 @@ export default function ProjectBrowse({ items = [], noun = 'projects', unit = 'p
   );
 }
 
-function Tiles({ list, range, heat, unit, showDistrict = false }) {
+function Tiles({ list, base, range, heat, unit, showDistrict = false }) {
   return (
     <div className="tiles">
       {list.map(p => (
-        <Link key={p.slug} href={p.href} className="tile" style={{ '--heat': heat(p.medianPsf, range) }}>
-          <span className="n">{p.label}</span>
-          <span className="v mono">${p.medianPsf} {unit}</span>
-          <span className="b mono">{p.n} sale{p.n > 1 ? 's' : ''}{showDistrict ? ` · D${p.district}` : ''}</span>
+        <Link key={p[P.SLUG]} href={base + p[P.SLUG]} className="tile"
+          style={{ '--heat': heat(p[P.PSF], range) }}>
+          <span className="n">{p[P.LABEL]}</span>
+          <span className="v mono">${p[P.PSF]} {unit}</span>
+          <span className="b mono">{p[P.N]} sale{p[P.N] > 1 ? 's' : ''}{showDistrict ? ` · D${p[P.DISTRICT]}` : ''}</span>
         </Link>
       ))}
     </div>

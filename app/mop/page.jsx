@@ -13,7 +13,7 @@ export default function Page() {
   const m = mop();
   const i = getIndex();
   return (
-    <main className="shell">
+    <main className="shell wide">
       <Masthead crumbs={[{ href: '/', label: 'Home' }]} title="When flats can start selling"
         sub={m
           ? `${m.totals.upcomingBlocks.toLocaleString()} blocks reach their fifth year between ${m.generatedForYear} and ${m.generatedForYear + 4} — ${m.totals.upcomingUnits.toLocaleString()} units that could come to market.`

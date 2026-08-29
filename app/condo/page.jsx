@@ -14,15 +14,15 @@ export default function Page() {
   const list = projects(NS);
   const i = getIndex();
   return (
-    <main className="shell">
+    <main className="shell wide">
       <Masthead crumbs={[{ href: '/', label: 'Home' }]} title="Private projects"
         sub={`${list.length.toLocaleString('en-SG')} projects with a filed transaction since ${i.private?.period?.from ?? ''}, grouped by district.`} />
       <section className="pane">
-        <ProjectBrowse noun="projects"
-          items={list.map(p => ({
-            slug: p.slug, href: p.href, label: p.label, district: p.district,
-            segment: p.segment, n: p.n, medianPsf: p.medianPsf,
-          }))} />
+        {/* Tuples, and no href — see the header of ProjectBrowse. Every one of
+            these 2,980 rows is serialised into the HTML so the browse can
+            search without a request, and as objects that was 492KB. */}
+        <ProjectBrowse noun="projects" base={`/${NS}/`}
+          items={list.map(p => [p.slug, p.label, p.district, p.segment, p.n, p.medianPsf])} />
         <p className="prov">{i.private?.source} · {i.private?.period?.from} to {i.private?.period?.to} · accessed {i.private?.accessedAt}</p>
       </section>
     </main>

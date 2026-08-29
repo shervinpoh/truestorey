@@ -28,7 +28,7 @@ export default async function Page({ params }) {
   const i = getIndex();
   const posts = insightsForTown(town);
   return (
-    <main className="shell">
+    <main className="shell wide">
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/hdb', label: 'HDB' }]}
         title={titleCase(t.name)}
         sub={`${t.blocks.length} blocks · ${t.n.toLocaleString('en-SG')} filed resale transactions · median $${t.medianPsf} psf`} />

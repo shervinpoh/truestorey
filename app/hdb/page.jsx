@@ -14,7 +14,7 @@ export default function Page() {
   const i = getIndex();
   const blocks = towns.reduce((a, t) => a + t.blockCount, 0);
   return (
-    <main className="shell">
+    <main className="shell wide">
       <Masthead crumbs={[{ href: '/', label: 'Home' }]} title="HDB, by town"
         sub={`${blocks.toLocaleString('en-SG')} blocks with a filed resale since ${i.hdb?.period?.from ?? ''}. Open a town, then a block — the block is where the numbers mean something.`} />
       <section className="pane">

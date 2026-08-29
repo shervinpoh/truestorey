@@ -4,8 +4,14 @@ import { f, fk, mLabel } from './fmt.js';
 import { titleCase } from '../lib/name.js';
 
 /**
- * One block or one project. Rendered identically by the homepage flow and by
- * the static page at its own URL — one renderer, so the two can never drift.
+ * One block or one project.
+ *
+ * `afterSummary` is rendered between the figures and the monthly chart. It
+ * exists because the fork — the two questions this page answers — has to sit
+ * directly under the numbers to do its job, and this component is one long
+ * run: figures, chart, every filed transaction, then the range note. Appending
+ * the fork after all of that put it nine hundred pixels down the page, which
+ * is the same burial it was written to fix.
  *
  * Compliance, do not strip:
  *  · the headline is an observed psf range, never a point valuation (rule 2)
@@ -13,7 +19,7 @@ import { titleCase } from '../lib/name.js';
  *  · YoY and the trend chart are computed across all types, so both hide when
  *    a single type is selected — otherwise the figure beside them is a lie
  */
-export default function RecordView({ rec, attribution = [], onType }) {
+export default function RecordView({ rec, attribution = [], onType, afterSummary = null }) {
   const [rtype, setRtype] = useState(null);
 
   const types = rec.flatTypes || rec.propertyTypes || [];
@@ -42,12 +48,20 @@ export default function RecordView({ rec, attribution = [], onType }) {
           </div>
         </div>
       </div>
+      {/* Only what the standfirst does NOT already say.
+          This line used to repeat it almost word for word — the masthead read
+          "7 filed resale transactions · Ang Mo Kio · 51 years 11 months of
+          lease left" and then this read "Ang Mo Kio · lease to 2078 · 51 years
+          11 months left · 7 filed transactions", four hundred pixels below on
+          desktop and a third of the first screen on a phone. Two of its three
+          facts were already on the page.
+          What is genuinely only here: the year the lease ends, and a
+          transaction count that moves when the type filter does. */}
       <p className="meta">{[
-        rec.kind === 'HDB' ? titleCase(rec.town) : `District ${rec.district} · ${rec.segment}`,
         rec.kind === 'HDB'
-          ? `lease to ${rec.leaseCommence + 99} · ${rec.remainingLease} left`
-          : (Array.isArray(rec.tenure) ? 'mixed tenure' : rec.tenure),
-        `${rv.n} filed transaction${rv.n === 1 ? '' : 's'}`,
+          ? `Lease to ${rec.leaseCommence + 99}`
+          : (Array.isArray(rec.tenure) ? 'Mixed tenure' : rec.tenure),
+        `${rv.n} filed transaction${rv.n === 1 ? '' : 's'}${rtype ? ` in ${rtype.toLowerCase()}` : ''}`,
       ].filter(Boolean).join(' · ')}</p>
 
       {types.length > 1 && (
@@ -79,6 +93,8 @@ export default function RecordView({ rec, attribution = [], onType }) {
         <p className="prov">{rec.source} · {rec.period?.from} to {rec.period?.to} · accessed {rec.accessedAt}</p>
       )}
 
+      {afterSummary}
+
       {!rtype && rec.series?.length > 1 && (() => {
         const srs = rec.series.slice(-24);
         const vals = srs.map(s => s.median);
@@ -91,9 +107,14 @@ export default function RecordView({ rec, attribution = [], onType }) {
                style={{height:(8+(s.median-mn)/(mx-mn)*88)+'%'}}
                title={`${s.month} · ${f(s.median)} · ${s.n} sale${s.n>1?'s':''}`} />
           ))}</div>
+          {/* The axis used to carry two dates and nothing else, so the one
+              element on a page built around filed figures was the one you
+              could not read a figure off. The ends now carry their own value.
+              A reader who wants the rest hovers a bar, and a reader who wants
+              all of them has the filed sales listed directly below. */}
           <div className="axis">
-            <span className="lab">{mLabel(srs[0].month)}</span>
-            <span className="lab">{mLabel(srs.at(-1).month)}</span>
+            <span className="lab">{mLabel(srs[0].month)} · {fk(srs[0].median)}</span>
+            <span className="lab">{mLabel(srs.at(-1).month)} · {fk(srs.at(-1).median)}</span>
           </div>
         </>);
       })()}
