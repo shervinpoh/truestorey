@@ -72,20 +72,39 @@ When something needs a network call at runtime it goes through plain `fetch`
 (see `lib/ai/providers.js` and `lib/supabase/rest.js`). Adding a dependency
 should feel like a decision, not a reflex.
 
-### Styling
+### Styling — "The Living Property Atlas"
 
-`app/globals.css`, hand-written, with four rules enforced at the top:
+`app/globals.css`, hand-written. Rewritten 29 Aug 2026; the four rules that
+used to be here (bright teal `#00C2CC`, a global `border-radius:0` reset,
+Schibsted + DM Mono, figure-largest) have been **retired on purpose**. Square
+shapes on pure white read as a spreadsheet rather than as authority. Do not
+reinstate them by reflex.
 
-1. **One accent, used loudly.** Teal `#00C2CC`. Green and red are reserved for
-   a price that moved and a school on the 1km line — the accent must never
-   encroach on those.
-2. **No rounded corners, anywhere.** Enforced by a global reset, not trusted.
-3. **No serif.** Schibsted Grotesk + DM Mono. Stacked Homes owns
-   cream-and-serif in this market.
-4. **The figure is the largest thing on the page.**
+1. **Warm ground, two teals.** `--paper #F6F5F2` with a real surface above it.
+   `--acc #164F52` deep teal is the interface — buttons, active nav, structure.
+   `--acc-lit #58BCC3` is *data that is live or selected* and nothing else:
+   never a border, never a background for prose, never decoration. An accent on
+   everything is the same as no accent, which the old file said and then did.
+2. **Radius is a decision, not a default.** `--r1 3px` on a control, `--r2 8px`
+   on a panel. There is no global reset any more. Nothing gets a radius large
+   enough to read as a card in a marketplace.
+3. **Archivo semi-condensed for headings** (`font-variation-settings:"wdth" 88`
+   — it is one variable family, not two), Source Sans 3 for body, IBM Plex Mono
+   for every figure, date, source and identifier. Still no serif: Stacked Homes
+   owns cream-and-serif in this market.
+4. **Green and red stay reserved** for a price that moved and a school on the
+   MOE 1km line. `--warn` is a third thing again — a dataset that could not be
+   measured. Neither teal may encroach on any of them.
+5. **Motion reveals information or it does not ship.** The island filling with
+   data teaches what the map is built from. A spinner does not. Nothing may
+   delay interaction: the homepage search is focusable in the first frame while
+   the island is still animating, and every animation's *finished* state is the
+   un-animated CSS, so reduced-motion, print and no-JS readers get the whole
+   thing.
 
-Do not introduce Tailwind. Its utilities would let rounded corners back past
-the reset, and rule 2 is free differentiation from every competitor.
+Do not introduce Tailwind. Three npm dependencies is the architecture, and its
+utility classes would scatter the palette across markup where no reviewer can
+see it as a system.
 
 ### Motion
 

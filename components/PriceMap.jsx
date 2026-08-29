@@ -84,7 +84,10 @@ import { titleCase } from '../lib/name.js';
 const MAX_ZOOM = 40;
 /** Below this many pixels of movement, a pointer-up is a click, not a drag. */
 const DRAG_SLOP = 4;
-const RAMP = ['#7AD3DC', '#45BECB', '#17A2B0', '#0A8089', '#065E66', '#03403F'];
+/* Sequential, one hue, running from the palette's data mist to its deep
+   teal — so the darkest step on the map is the same colour as the
+   interface, and the map reads as part of the site rather than beside it. */
+const RAMP = ['#CDE9E9', '#9BD6D9', '#6FC4CA', '#3D9AA1', '#256E73', '#164F52'];
 const KIND = [
   { code: 0, key: 'hdb', label: 'HDB', unit: 'blocks', region: 'town' },
   { code: 1, key: 'condo', label: 'Condo', unit: 'projects', region: 'district' },
@@ -469,7 +472,7 @@ export default function PriceMap({ map }) {
       box.x < q.x + q.w + 4 && box.x + box.w + 4 > q.x && box.y < q.y + q.h + 3 && box.y + box.h + 3 > q.y);
 
     const draw = (text, x, y, { weight = 600, size: fs = 11, colour = '#0B0D0F', pad = 0 } = {}) => {
-      ctx.font = `${weight} ${fs}px "DM Mono", ui-monospace, SFMono-Regular, monospace`;
+      ctx.font = `${weight} ${fs}px "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace`;
       const w = ctx.measureText(text).width;
       const box = { x: x - w / 2 - pad, y: y - fs / 2 - pad, w: w + pad * 2, h: fs + pad * 2 };
       if (box.x < 2 || box.y < 2 || box.x + box.w > size.w - 2 || box.y + box.h > size.h - 2) return null;

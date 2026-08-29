@@ -72,33 +72,31 @@ export default function Home() {
 
   return (
     <main className="shell wide">
+      {/* Asymmetric: the claim and the search on the left, the island filling
+          with data on the right. The map is the signature and the search is
+          the job, so neither waits for the other — the input is focusable from
+          the first frame while the shading is still crossing the country. */}
       <section className="hero">
-        <h1>Every block in Singapore, in filed numbers</h1>
-        <p className="sub">What was actually paid, by block and by project — with the
-          source and the period printed beside it. Free, and there is nothing to sign up to.</p>
-        <div className="herosearch">
-          <div className="sh"><span>Look up any block or project</span>
-            <span>{urls.length ? num(urls.length) : ''} pages</span></div>
-          <div style={{ marginTop: 14 }}><Search /></div>
+        <div className="herosay">
+          <h1>Every block in Singapore, in filed numbers</h1>
+          <p className="sub">What was actually paid, by block and by project — with the
+            source and the period printed beside it. Free, and there is nothing to sign up to.</p>
+          <div className="herosearch">
+            <div className="sh"><span>Look up any block or project</span>
+              <span>{urls.length ? num(urls.length) : ''} pages</span></div>
+            <div style={{ marginTop: 14 }}><Search /></div>
+          </div>
+          <dl className="proof">
+            <div><dt>{num(blocks)}</dt><dd>HDB blocks with a filed resale</dd></div>
+            <div><dt>{num(hdbSales + privateSales)}</dt><dd>filed transactions behind them</dd></div>
+            <div><dt>{refreshed || '—'}</dt><dd>last refreshed · daily</dd></div>
+          </dl>
         </div>
-      </section>
-
-      <section className="trust" aria-label="What is behind these figures">
-        <div><span className="tv">{num(blocks)}</span>
-          <span className="lab">HDB blocks with a filed resale</span></div>
-        <div><span className="tv">{num(hdbSales + privateSales)}</span>
-          <span className="lab">filed transactions behind the figures</span></div>
-        <div><span className="tv">{refreshed || '—'}</span>
-          <span className="lab">last refreshed, and it refreshes daily</span></div>
-        <div><span className="tv">Free</span>
-          <span className="lab">no sign-up, no account, no cookies</span></div>
-      </section>
-
-      <section className="pane">
-        <div className="sh"><span>The whole island</span>
-          <Link href="/map">Open the map →</Link></div>
-        <IslandMap areas={boundaries().areas} towns={towns}
-          plotted={urls.length} source={cat.hdbSource} />
+        <div className="heromap">
+          <IslandMap areas={boundaries().areas} towns={towns}
+            plotted={urls.length} source={cat.hdbSource} compact />
+          <Link href="/map" className="islandgo">Open the full map →</Link>
+        </div>
       </section>
 
       {lead && (

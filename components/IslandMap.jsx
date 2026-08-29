@@ -29,7 +29,10 @@ import { simplify } from '../lib/geojson.js';
  */
 
 /* The ramp from PriceMap.jsx. One accent, six steps of it. */
-const RAMP = ['#7AD3DC', '#45BECB', '#17A2B0', '#0A8089', '#065E66', '#03403F'];
+/* Sequential, one hue, running from the palette's data mist to its deep
+   teal — so the darkest step on the map is the same colour as the
+   interface, and the map reads as part of the site rather than beside it. */
+const RAMP = ['#CDE9E9', '#9BD6D9', '#6FC4CA', '#3D9AA1', '#256E73', '#164F52'];
 
 /** Six equal-sized groups, not six equal price steps — the same choice /map
  *  makes, and for the same reason: on a min-max ramp a handful of expensive
@@ -41,7 +44,7 @@ function quantileBreaks(values, bands = 6) {
   return out;
 }
 
-export default function IslandMap({ areas, towns, plotted, source }) {
+export default function IslandMap({ areas, towns, plotted, source, compact = false }) {
   if (!areas?.length) return null;
 
   const psf = new Map(towns.map(t => [t.slug, t.medianPsf]));
@@ -92,18 +95,31 @@ export default function IslandMap({ areas, towns, plotted, source }) {
     <div className="island">
       <svg viewBox={`0 0 ${W} ${H}`} className="islandsvg" role="img"
         aria-label={`Map of Singapore's planning areas shaded by median HDB resale price per square foot, from $${lo} to $${hi}.`}>
-        {areas.map(a => {
-          const v = psf.get(a.slug);
-          return (
+        {/* THE SEQUENCE. Land settles first, then the shading arrives town by
+            town, west to east, over about a second — so the reader watches
+            Singapore fill with data rather than finding it already filled.
+
+            Ordered by longitude rather than at random: a wave crossing the
+            island reads as one movement, and a random order reads as loading.
+            Delay is capped so the last town is never more than ~1.1s behind
+            the first, and NOTHING here gates interaction — the search box is
+            above this, already focusable, and the finished colours are the
+            CSS end state, so a reader who never sees the animation, or has
+            asked not to, sees the completed map. */}
+        {areas
+          .map(a => ({ a, v: psf.get(a.slug) }))
+          .sort((p, q) => (p.a.rings[0]?.[0]?.[0] ?? 0) - (q.a.rings[0]?.[0]?.[0] ?? 0))
+          .map(({ a, v }, idx, all) => (
             /* Unshaded land is --line, not --sunk. At #F5F7F9 on white the
                areas with no HDB were invisible, so the island read as a
                handful of coloured fragments floating in space rather than as
                a country with data on part of it. */
             <path key={a.slug} d={pathOf(a)} fillRule="evenodd"
+              className={v == null ? 'iarea' : 'iarea lit'}
+              style={{ '--d': `${((idx / Math.max(1, all.length - 1)) * 900).toFixed(0)}ms` }}
               fill={v == null ? 'var(--line)' : RAMP[bandOf(v)]}
               stroke="var(--paper)" strokeWidth="1.1" strokeLinejoin="round" />
-          );
-        })}
+          ))}
       </svg>
 
       <div className="islandkey">
@@ -117,19 +133,33 @@ export default function IslandMap({ areas, towns, plotted, source }) {
               one that says less. The bands themselves are on /map. */}
           <div className="rampends"><span>${lo}</span><span>${hi}</span></div>
         </div>
-        <Link href="/map" className="islandgo">
-          Open the map{plotted ? ` — all ${plotted.toLocaleString('en-SG')} blocks and projects` : ''} →
-        </Link>
+        {!compact && (
+          <Link href="/map" className="islandgo">
+            Open the map{plotted ? ` — all ${plotted.toLocaleString('en-SG')} blocks and projects` : ''} →
+          </Link>
+        )}
       </div>
 
-      <p className="prov islandprov">
-        {shaded.length} of {towns.length} HDB towns shaded · {source} · land is URA
-        Master Plan Planning Area Boundary (No Sea), via data.gov.sg.
-        Grey areas have no filed HDB resale — Orchard, Tuas, the catchment and the
-        reserves among them. Central Area and Kallang/Whampoa are grey for a
-        different reason: neither is a single planning area, and splitting them by
-        eye is not something the boundary file supports.
-      </p>
+      {/* In the hero the caveats would crowd the search box, so they compress
+          to the one line that carries the source — rule 6 is satisfied by the
+          source and period being present, not by their length — and the full
+          explanation of what is and is not shaded stays on /map, where there
+          is room for it and where someone reading the map is standing. */}
+      {compact ? (
+        <p className="prov islandprov">
+          {shaded.length} of {towns.length} HDB towns shaded · {source} · land is URA Master Plan
+          Planning Area Boundary (No Sea), via data.gov.sg. Grey areas have no filed HDB resale.
+        </p>
+      ) : (
+        <p className="prov islandprov">
+          {shaded.length} of {towns.length} HDB towns shaded · {source} · land is URA
+          Master Plan Planning Area Boundary (No Sea), via data.gov.sg.
+          Grey areas have no filed HDB resale — Orchard, Tuas, the catchment and the
+          reserves among them. Central Area and Kallang/Whampoa are grey for a
+          different reason: neither is a single planning area, and splitting them by
+          eye is not something the boundary file supports.
+        </p>
+      )}
     </div>
   );
 }

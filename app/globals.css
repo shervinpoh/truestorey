@@ -23,18 +23,52 @@
      Truestorey    #FFFFFF white · Schibsted      · teal   · 0
    ═══════════════════════════════════════════════════════════════════════ */
 
+/* ═══ THE LIVING PROPERTY ATLAS ═══════════════════════════════════════════
+   Warm ground, deep teal, and one bright teal held back for data that is
+   live or selected.
+
+   WHY THIS AND NOT THE OLD PALETTE. It was #00C2CC on pure white with grey
+   hairlines: high contrast, no mid-tone, no warmth and no depth, which read
+   as clinical rather than authoritative. The ground is warm now, there is a
+   real surface above it, and the loud teal has been demoted from "the accent"
+   to "this figure is live" — an accent on everything was the same as no
+   accent, which the old file said out loud and then did anyway.
+
+   TWO TEALS, AND THE DIFFERENCE MATTERS:
+     --acc      #164F52  deep. Structure, buttons, active nav, headings that
+                         need weight. This is the colour of the interface.
+     --acc-lit  #58BCC3  bright. A selected town, a plotted transaction, the
+                         latest bar, a live figure. Never a border, never a
+                         background for prose, never decoration.
+
+   Green and red remain reserved for a price that moved and a school on the
+   MOE 1km line. --warn is a third thing again: a dataset that could not be
+   measured. Never let any of them drift into decoration. */
 :root{
- --paper:#FFFFFF; --card:#FFF; --sunk:#F5F7F9;
- --ink:#0B0D0F; --ink2:#414750; --mute:#7C858F;
- --line:#E4E7EB; --line2:#F0F2F4;
- /* the accent */
- --acc:#00C2CC; --on-acc:#04262A; --acc-soft:#DFF8FA; --acc-line:#00A7B0; --acc-ink:#00767E;
+ --paper:#F6F5F2; --card:#FFFFFF; --sunk:#EFEEE9;
+ /* --mute is darker than it looks like it should be, on purpose: it carries
+    .prov and .lab, which are the source-and-period lines CEA PG 02-11 s3.1
+    requires, at 10px. The first draft was #7B837F — 3.57:1 on this ground,
+    a WCAG AA failure on the one text that has to be readable. 4.81:1. */
+ --ink:#111414; --ink2:#48514F; --mute:#666E6A;
+ --line:#E2E0D9; --line2:#EDEBE5;
+ /* the interface teal, and the data teal */
+ --acc:#164F52; --on-acc:#F2F8F7; --acc-soft:#E7F3F3; --acc-line:#164F52; --acc-ink:#0F3F42;
+ --acc-lit:#58BCC3;
  /* reserved for meaning, never for decoration */
- --up:#0A8A55; --dn:#D23B1F; --upS:#E4F6EE; --dnS:#FCE9E5;
+ --up:#1E7A5F; --dn:#B64D3C; --upS:#E4F1EC; --dnS:#F7E9E5;
+ --warn:#B64D3C;
  /* legacy names kept so no component had to change when the palette did */
  --blue:var(--acc-ink); --bsoft:var(--acc-soft); --bdeep:var(--acc-line); --on-blue:var(--on-acc);
- /* chart series — greys, so the one accented mark actually reads */
- --w1:#0B0D0F; --w2:#5B6165; --w3:#7C858F; --w4:#B9BDBF; --w5:#DCDEDF;
+ /* chart series — warm greys, so the one accented mark actually reads */
+ --w1:#111414; --w2:#5A625F; --w3:#7B837F; --w4:#B6BAB6; --w5:#DAD8D2;
+ /* Lightly rounded, not "SaaS rounded". 3px on a control, 8px on a panel:
+    enough to stop the page reading as a spreadsheet, not enough to read as
+    a card in a marketplace. */
+ --r1:3px; --r2:8px;
+ /* Elevation instead of hairlines, used on surfaces that genuinely sit above
+    the page. Warm-tinted rather than neutral black, or it greys the ground. */
+ --lift:0 1px 2px rgba(17,20,20,.05), 0 12px 34px -18px rgba(17,20,20,.20);
 }
 /* The site is WHITE. It used to follow the operating system, which meant
    anyone with dark mode on their Mac — most people — got a black site, and
@@ -51,14 +85,20 @@
 }
 
 *{box-sizing:border-box}
-/* Rule 2, enforced rather than trusted. */
-*,*::before,*::after{border-radius:0}
+/* The global `border-radius:0` reset is gone. It existed to enforce "no
+   rounded corners, anywhere" — free differentiation from competitors that
+   round everything. That rule has been retired deliberately: square-on-white
+   is what made the site read as a spreadsheet. Radius is now a two-value
+   scale (--r1, --r2) applied on purpose, not a default applied everywhere. */
 html,body{margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
 body{background:var(--paper);color:var(--ink);
- font-family:"Schibsted Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
- font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;
- font-feature-settings:"cv05","ss01"}
+ font-family:"Source Sans 3",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+ font-size:16.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
+/* Archivo carries a width axis, so "semi-condensed" is a setting rather than
+   a second family. Headings get it; nothing else does. */
+h1,h2,h3,.addr,.dirname,.statnum,.big,.tv{font-family:Archivo,"Source Sans 3",sans-serif;
+ font-variation-settings:"wdth" 88}
 ::selection{background:var(--ink);color:var(--paper)}
 
 .shell{max-width:760px;margin:0 auto;padding:0 20px 90px}
@@ -75,9 +115,9 @@ body{background:var(--paper);color:var(--ink);
    at small sizes and costing it at this one, because it pushes the letters far
    enough apart that the word stops being a shape. Nothing else changes —
    colour and case were always what separated these from body text, not size. */
-.lab{font-family:"DM Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.1em;
+.lab{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.1em;
  text-transform:uppercase;color:var(--mute)}
-.mono{font-family:"DM Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
 /* Schibsted's tabular comma occupies a full digit slot, so "S$1,420,000" sets
    as "S$1 , 420 , 000". Tabular alignment is worth having only where figures
    stack in a column AND the face handles it — which here means DM Mono. Every
@@ -113,7 +153,7 @@ a{color:var(--ink)}
 .gnav a.n:hover,.gnav button.n:hover{color:var(--ink)}
 .gnav a.n[aria-current="page"],.gnav button.n[aria-current="true"]{color:var(--ink);font-weight:700;
  box-shadow:0 3px 0 var(--acc)}
-.gnav button.n i{font-style:normal;font-family:"DM Mono",ui-monospace,monospace;font-size:11px;
+.gnav button.n i{font-style:normal;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;
  color:var(--mute)}
 .gnav button.n[aria-expanded="true"]{color:var(--ink);font-weight:700}
 
@@ -153,7 +193,7 @@ a{color:var(--ink)}
 .gnav .navmenu>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:9px;
  border:1px solid var(--ink);padding:0 12px;height:38px;min-width:44px;user-select:none}
 .gnav .navmenu>summary::-webkit-details-marker{display:none}
-.gnav .navmenu>summary:after{content:"+";font-family:"DM Mono",ui-monospace,monospace;
+.gnav .navmenu>summary:after{content:"+";font-family:"IBM Plex Mono",ui-monospace,monospace;
  font-size:14px;line-height:1;color:var(--ink);margin-left:auto}
 .gnav .navmenu[open]>summary:after{content:"\2212"}
 .gnav .navmenu[open]>summary{background:var(--acc);border-color:var(--acc-line)}
@@ -191,7 +231,7 @@ a{color:var(--ink)}
 
 header.mast{padding:30px 0 16px}
 .brand{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-.crumbs{font-family:"DM Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.1em;
+.crumbs{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.1em;
  text-transform:uppercase;color:var(--mute);margin:0 0 14px}
 .crumbs a{color:var(--mute);text-decoration:none}
 .crumbs a:hover{color:var(--ink)}
@@ -210,7 +250,7 @@ header.mast{padding:30px 0 16px}
    headline figures do not. */
 .big span,.big small{font-size:.24em;font-weight:500;letter-spacing:-.01em;color:var(--mute)}
 .figside{padding-bottom:5px}
-.figside .r{font-family:"DM Mono",ui-monospace,monospace;font-size:12.5px;color:var(--ink2);line-height:1.75}
+.figside .r{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12.5px;color:var(--ink2);line-height:1.75}
 /* Rule 4 inverted on a phone. `auto 1fr` gave the side column too little width,
    so "$581 — $745 psf / S$296k median price" wrapped to three lines, and
    `align-items:end` then pinned the figure to the bottom of that taller row —
@@ -221,7 +261,7 @@ header.mast{padding:30px 0 16px}
  .figside{padding-bottom:0}
 }
 
-.pill{display:inline-flex;gap:5px;font-family:"DM Mono",ui-monospace,monospace;font-size:11px;
+.pill{display:inline-flex;gap:5px;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;
  padding:3px 8px;margin-top:8px;border:1px solid var(--line)}
 .pill.u{background:var(--upS);color:var(--up);border-color:var(--up)}
 .pill.d{background:var(--dnS);color:var(--dn);border-color:var(--dn)}
@@ -249,7 +289,7 @@ header.mast{padding:30px 0 16px}
  .kpi2>div:last-child{border-bottom:0}}
 
 /* ── section heads ─────────────────────────────────────────────────────── */
-.sh{font-family:"DM Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.1em;
+.sh{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.1em;
  text-transform:uppercase;color:var(--mute);border-bottom:1px solid var(--ink);
  padding-bottom:7px;margin:26px 0 4px;display:flex;justify-content:space-between;gap:12px}
 
@@ -262,7 +302,7 @@ header.mast{padding:30px 0 16px}
 .seg button[aria-pressed="true"]{background:var(--acc);color:var(--on-acc);font-weight:600}
 .seg button:disabled{opacity:.35;cursor:not-allowed}
 input,textarea,select{width:100%;padding:11px 12px;border:1px solid var(--line);background:var(--paper);
- color:var(--ink);font-family:"DM Mono",ui-monospace,monospace;font-size:15px;-webkit-appearance:none;appearance:none}
+ color:var(--ink);font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:15px;-webkit-appearance:none;appearance:none}
 input::placeholder{color:var(--mute)}
 input:focus,button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--acc-line);outline-offset:1px}
 input[type=range]{-webkit-appearance:none;background:transparent;border:0;padding:0;margin:10px 0 2px}
@@ -293,7 +333,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--ink)
 .tw:before{content:"";position:absolute;inset:0;background:var(--acc);opacity:var(--heat,.05)}
 .tw>*{position:relative}
 .tw .n{font-size:11.5px;font-weight:600;line-height:1.2;display:block;letter-spacing:-.022em}
-.tw .p{font-family:"DM Mono",ui-monospace,monospace;font-size:9.5px;color:var(--mute);margin-top:3px;display:block}
+.tw .p{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:9.5px;color:var(--mute);margin-top:3px;display:block}
 .tw:hover{background:var(--sunk)}
 .tw[aria-pressed="true"]{background:var(--ink)}
 .tw[aria-pressed="true"] .n{color:var(--paper)}
@@ -370,7 +410,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--ink)
 .wf{display:flex;height:30px;border:1px solid var(--ink);margin:8px 0 4px;overflow:hidden}
 .wf span{transition:width .4s cubic-bezier(.2,.75,.3,1)}
 .wfkey{display:flex;flex-wrap:wrap;gap:9px 16px;margin:10px 0 18px}
-.wfkey div{display:flex;align-items:center;gap:6px;font-family:"DM Mono",ui-monospace,monospace;
+.wfkey div{display:flex;align-items:center;gap:6px;font-family:"IBM Plex Mono",ui-monospace,monospace;
  font-size:10px;color:var(--mute)}
 .wfkey b{width:9px;height:9px;display:inline-block}
 
@@ -392,13 +432,13 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--ink)
 .cons{display:flex;gap:9px;align-items:flex-start;margin:10px 0;font-size:12.5px;color:var(--ink2)}
 .cons input{width:15px;height:15px;flex:0 0 auto;margin-top:2px;accent-color:var(--ink)}
 .warn{border:1px solid var(--dn);padding:16px;margin:20px 0;font-size:14px}
-.warn code{background:var(--sunk);padding:2px 6px;font-family:"DM Mono",ui-monospace,monospace;font-size:12.5px}
+.warn code{background:var(--sunk);padding:2px 6px;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12.5px}
 
 /* ── provenance · never delete, rule 6 ─────────────────────────────────── */
-.meta{font-family:"DM Mono",ui-monospace,monospace;font-size:11px;color:var(--ink2);margin:8px 0 0;line-height:1.6}
+.meta{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;color:var(--ink2);margin:8px 0 0;line-height:1.6}
 /* 10px, not 9. This is the substantiation line — the source and the period
    behind every figure above it — and it was the smallest text on the page. */
-.prov{font-family:"DM Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.03em;color:var(--mute);
+.prov{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.03em;color:var(--mute);
  margin:14px 0 18px;line-height:1.8}
 .axis + .prov{margin-top:12px}
 /* ── the footer ─────────────────────────────────────────────────────────────
@@ -433,10 +473,10 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 .sug li.on{background:var(--acc);color:var(--on-acc)}
 .sug li.on .n,.sug li.on .s,.sug li.on .c,.sug li.on .t{color:var(--on-acc)}
 .sug li.on .t{border-color:var(--on-acc)}
-.sug .t{grid-area:t;font-family:"DM Mono",ui-monospace,monospace;font-size:8px;letter-spacing:.1em;
+.sug .t{grid-area:t;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:8px;letter-spacing:.1em;
  color:var(--mute);border:1px solid var(--line);padding:2px 0;text-align:center;align-self:center}
 .sug .n{grid-area:n;font-size:14px;font-weight:600;letter-spacing:-.02em;line-height:1.25}
-.sug .s{grid-area:s;font-family:"DM Mono",ui-monospace,monospace;font-size:10px;color:var(--mute);line-height:1.4}
+.sug .s{grid-area:s;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;color:var(--mute);line-height:1.4}
 .sug .c{grid-area:c;font-size:10.5px;color:var(--mute);align-self:center}
 .sug .c:after{content:" txn"}
 .orline{display:flex;align-items:center;gap:14px;margin:30px 0 12px}
@@ -448,7 +488,7 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 .idx a{display:flex;flex-direction:column;gap:2px;padding:12px 2px;text-decoration:none;color:var(--ink)}
 .idx a:hover{background:var(--sunk)}
 .idx .n{font-size:14.5px;font-weight:600;letter-spacing:-.022em}
-.idx .s{font-size:10.5px;color:var(--mute);font-family:"DM Mono",ui-monospace,monospace}
+.idx .s{font-size:10.5px;color:var(--mute);font-family:"IBM Plex Mono",ui-monospace,monospace}
 .idx .sum{font-size:13px;color:var(--ink2);line-height:1.45;margin-top:4px;display:block}
 .idxbtn{display:flex;flex-direction:column;gap:2px;padding:12px 2px;width:100%;text-align:left;
  background:none;border:0;color:var(--ink);font-family:inherit;cursor:pointer}
@@ -462,7 +502,7 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 .filt{position:relative;margin:0 0 4px}
 .filt input{padding:11px 12px;font-size:15px;border-color:var(--line)}
 .filt input:focus{border-color:var(--ink)}
-.filtn{font-family:"DM Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.1em;
+.filtn{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.1em;
  text-transform:uppercase;color:var(--mute);padding:9px 2px 0;display:block}
 
 /* ── editorial ─────────────────────────────────────────────────────────── */
@@ -471,10 +511,10 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 .feed a{display:block;padding:16px 2px;text-decoration:none;color:var(--ink)}
 .feed a:hover{background:var(--sunk)}
 .fmeta{display:flex;align-items:center;gap:10px;margin-bottom:5px}
-.kind{font-family:"DM Mono",ui-monospace,monospace;font-size:8px;letter-spacing:.14em;
+.kind{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:8px;letter-spacing:.14em;
  text-transform:uppercase;border:1px solid var(--line);padding:2px 6px;color:var(--mute)}
 .kind.deep{border-color:var(--acc-line);background:var(--acc);color:var(--on-acc);font-weight:700}
-.fdate{font-family:"DM Mono",ui-monospace,monospace;font-size:10px;color:var(--mute)}
+.fdate{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;color:var(--mute)}
 .ftitle{font-size:1.06rem;font-weight:600;letter-spacing:-.028em;line-height:1.25;margin:0 0 4px}
 .feed .deep .ftitle{font-size:1.32rem;letter-spacing:-.034em}
 .fsum{font-size:13.5px;color:var(--ink2);line-height:1.5;margin:0;max-width:64ch}
@@ -482,7 +522,7 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 .post p{margin:0 0 18px}
 .post h2{font-size:1.28rem;margin:32px 0 10px;letter-spacing:-.03em}
 .post h3{font-size:1.06rem;margin:26px 0 8px}
-.post h4{font-family:"DM Mono",ui-monospace,monospace;font-size:9.5px;letter-spacing:.14em;
+.post h4{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:9.5px;letter-spacing:.14em;
  text-transform:uppercase;color:var(--mute);margin:24px 0 6px;font-weight:400}
 .post a{color:var(--ink);text-decoration:underline;text-underline-offset:2px}
 .post ul,.post ol{margin:0 0 18px;padding-left:20px}
@@ -490,12 +530,12 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 .post blockquote{margin:24px 0;padding:2px 0 2px 18px;border-left:3px solid var(--acc);
  font-size:1.1rem;line-height:1.45;letter-spacing:-.018em;color:var(--ink2)}
 .post hr{border:0;border-top:1px solid var(--line);margin:30px 0}
-.post code{font-family:"DM Mono",ui-monospace,monospace;font-size:.85em;background:var(--sunk);padding:1px 5px}
+.post code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.85em;background:var(--sunk);padding:1px 5px}
 .post pre{background:var(--sunk);padding:13px 15px;overflow-x:auto;margin:0 0 18px}
 .post pre code{background:none;padding:0;font-size:12.5px}
 .tablewrap{overflow-x:auto;margin:0 0 20px}
 .post table{border-collapse:collapse;width:100%;font-size:14px}
-.post th{text-align:left;font-family:"DM Mono",ui-monospace,monospace;font-size:9px;letter-spacing:.12em;
+.post th{text-align:left;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:9px;letter-spacing:.12em;
  text-transform:uppercase;color:var(--mute);font-weight:400;padding:0 12px 7px 0;border-bottom:1px solid var(--ink)}
 .post td{padding:9px 12px 9px 0;border-bottom:1px solid var(--line2)}
 .post td:last-child,.post th:last-child{text-align:right;padding-right:0}
@@ -512,17 +552,17 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
  padding:10px 2px;border-bottom:1px solid var(--line2);font-size:14.5px}
 .amlist .n{min-width:0;overflow-wrap:anywhere}
 .amlist .d{white-space:nowrap;color:var(--mute);font-size:12px;font-variant-numeric:tabular-nums;
- font-family:"DM Mono",ui-monospace,monospace}
+ font-family:"IBM Plex Mono",ui-monospace,monospace}
 /* one of only two places colour is permitted — see rule 1 */
-.amlist .edge{font-style:normal;color:var(--dn);font-family:"DM Mono",ui-monospace,monospace;
+.amlist .edge{font-style:normal;color:var(--dn);font-family:"IBM Plex Mono",ui-monospace,monospace;
  font-size:10px;letter-spacing:.04em;text-transform:uppercase;margin-left:6px}
-.amtag{font-style:normal;font-family:"DM Mono",ui-monospace,monospace;font-size:8.5px;letter-spacing:.12em;
+.amtag{font-style:normal;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:8.5px;letter-spacing:.12em;
  text-transform:uppercase;color:var(--mute);display:block;margin-bottom:2px}
 .amfold{margin-top:2px}
 .amfold summary{font-size:12.5px;color:var(--ink);cursor:pointer;padding:10px 2px;list-style:none;
  text-decoration:underline;text-underline-offset:2px}
 .amfold summary::-webkit-details-marker{display:none}
-.amfold summary:before{content:"+ ";font-family:"DM Mono",ui-monospace,monospace;text-decoration:none}
+.amfold summary:before{content:"+ ";font-family:"IBM Plex Mono",ui-monospace,monospace;text-decoration:none}
 .amfold[open] summary:before{content:"− "}
 .amfold[open] summary{color:var(--ink2)}
 
@@ -538,7 +578,7 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
  background:var(--sunk)}
 .posthero{margin:0 0 26px;padding:0}
 .posthero img{width:100%;height:auto;display:block;background:var(--sunk)}
-.posthero figcaption{font-family:"DM Mono",ui-monospace,monospace;font-size:9.5px;letter-spacing:.08em;
+.posthero figcaption{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:9.5px;letter-spacing:.08em;
  text-transform:uppercase;color:var(--mute);margin-top:7px}
 
 /* ── tile browse · a grid you can read, not a column you must scroll ────── */
@@ -564,22 +604,48 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 .arow .t a{color:var(--ink);text-decoration:none;border-bottom:2px solid var(--acc)}
 .arow .t a:hover{background:var(--acc);color:var(--on-acc)}
 .arow .s{font-size:12.5px;color:var(--ink2);margin-top:4px;line-height:1.45}
-.src{font-family:"DM Mono",ui-monospace,monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;
+.src{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;
  border:1px solid var(--line);padding:3px 7px;color:var(--mute);white-space:nowrap}
 @media(max-width:620px){.arow{grid-template-columns:1fr;gap:5px}.arow .src{justify-self:start}}
 
 /* ── homepage hero · the search box, first ──────────────────────────────────
    It used to sit below the lede, which on a phone put it two full screens down
    behind an article. The one thing the site is for now opens the page. */
-.hero{padding:34px 0 4px}
-.hero h1{max-width:19ch}
-.hero .sub{font-size:16.5px;max-width:60ch}
+/* Asymmetric: the claim and the search on the left, the island filling with
+   data on the right. Neither waits for the other — the input is focusable from
+   the first frame while the shading is still crossing the country. */
+.hero{padding:38px 0 10px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.02fr);
+ gap:40px 48px;align-items:start}
+.hero h1{max-width:16ch;font-size:clamp(2rem,4.6vw,3.2rem);letter-spacing:-.038em;line-height:1.02}
+.hero .sub{font-size:16.5px;max-width:46ch}
 .herosearch{margin-top:26px}
+.heromap{min-width:0;padding-top:6px}
+.heromap .islandgo{margin-top:14px}
+/* The proof line, as a definition list — these are three claims with three
+   figures, which is what a dl is. */
+/* Grid, not flex-wrap: three claims that must stay on one row or the middle
+   one strands on a line of its own and the whole strip reads as broken. */
+.proof{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:26px 0 0;
+ padding:16px 0 0;border-top:1px solid var(--line)}
+.proof > div{min-width:0}
+.proof dt{font-weight:700;font-size:1.24rem;letter-spacing:-.03em;line-height:1.1;
+ font-family:Archivo,"Source Sans 3",sans-serif;font-variation-settings:"wdth" 88}
+.proof dd{margin:4px 0 0;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;
+ letter-spacing:.1em;text-transform:uppercase;color:var(--mute);line-height:1.5;max-width:22ch}
+@media(max-width:900px){
+ .hero{grid-template-columns:1fr;gap:26px}
+ .heromap{padding-top:0}
+}
 /* The typeahead is the most valuable control on the site and was styled like a
    comment field. Rule 1 says the accent marks what matters; nothing on this
    page matters more. */
-.herosearch .sbox input{border:2px solid var(--ink);padding:17px 16px;font-size:17px}
-.herosearch .sbox input:focus{border-color:var(--acc-line);outline-offset:2px}
+/* The loudest control on the site, and it should look it: deep teal on white,
+   lifted off the warm ground so it reads as the thing to use. */
+.herosearch .sbox input{border:2px solid var(--acc);border-radius:var(--r2);
+ background:var(--card);padding:18px 17px;font-size:17px;box-shadow:var(--lift)}
+.herosearch .sbox input:focus{border-color:var(--acc-lit);outline:2px solid var(--acc-lit);
+ outline-offset:2px}
+.herosearch .sug{border-radius:0 0 var(--r2) var(--r2);border-color:var(--acc)}
 /* Never below 16px: iOS zooms the whole page when a font-size under 16 takes
    focus, and a zoomed page over a typeahead is how you lose the suggestions. */
 @media(max-width:520px){.herosearch .sbox input{padding:15px 13px}
@@ -610,13 +676,41 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
    the site makes and it should be the largest thing on the page. */
 .island{margin-top:16px}
 .islandsvg{display:block;width:100%;height:auto;background:var(--paper)}
+
+/* ── the island arriving ────────────────────────────────────────────────────
+   Land settles, then the shading crosses the country west to east in about a
+   second. The point is not decoration: it is the difference between a reader
+   understanding that this map is BUILT FROM filed transactions and assuming
+   it is a picture of Singapore with colours on it.
+
+   Two rules it obeys. It never gates interaction — the search box sits above
+   it and is focusable from the first frame. And the finished state is the
+   default: `animation-fill-mode` is not doing the work, the un-animated CSS
+   already shows the completed map, so anyone who arrives late, prints the
+   page, or has asked for less movement sees it whole. */
+.iarea{transform-origin:center; animation:iland .5s cubic-bezier(.22,.61,.36,1) both}
+.iarea.lit{animation:ilit .62s cubic-bezier(.22,.61,.36,1) both; animation-delay:var(--d,0ms)}
+@keyframes iland{from{opacity:0} to{opacity:1}}
+/* Shaded areas come up from the neutral land colour rather than from nothing,
+   so the coastline is complete the whole time and only the DATA arrives. */
+/* fill is declared at 0% as well as 35%. Left off the first keyframe it takes
+   the underlying inline value, which made every town flash its final colour,
+   drop to grey, then wash back in. */
+@keyframes ilit{
+  0%{opacity:0;fill:var(--line)}
+  38%{opacity:1;fill:var(--line)}
+  100%{opacity:1}
+}
+@media(prefers-reduced-motion:reduce){
+  .iarea,.iarea.lit{animation:none}
+}
 .islandkey{display:flex;gap:20px 34px;align-items:flex-end;justify-content:space-between;
  flex-wrap:wrap;margin-top:10px}
 .islandramp{flex:1 1 300px;max-width:420px;min-width:0}
 .islandramp .ramp{margin-top:6px;gap:0}
 .islandramp .ramp .step{flex:1 1 0}
 .rampends{display:flex;justify-content:space-between;margin-top:5px;
- font-family:"DM Mono",ui-monospace,monospace;font-size:10px;color:var(--mute)}
+ font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;color:var(--mute)}
 .islandgo{display:inline-block;font-size:13.5px;font-weight:600;color:var(--ink);
  border-bottom:2px solid var(--acc);text-decoration:none;padding-bottom:2px}
 .islandgo:hover{background:var(--acc);color:var(--on-acc);border-color:var(--acc-line)}
@@ -693,7 +787,7 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
  padding:10px 12px;border:1px solid var(--line);font-size:13px;color:var(--ink2)}
 .mapwhere b{color:var(--ink);font-weight:600}
 .mapwhere .lab{flex:0 0 auto}
-.maphint{flex:1 1 100%;font-family:"DM Mono",ui-monospace,monospace;font-size:10px;
+.maphint{flex:1 1 100%;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;
  letter-spacing:.06em;color:var(--mute)}
 @media(prefers-reduced-motion:reduce){.mapzoom button:active{transform:none}}
 
@@ -715,7 +809,7 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 .bandtable{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
 .bandtable th,.bandtable td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line2);
  vertical-align:middle}
-.bandtable thead th{font-family:"DM Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.1em;
+.bandtable thead th{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.1em;
  text-transform:uppercase;color:var(--mute);font-weight:400;border-bottom:1px solid var(--line)}
 .bandtable tbody th{font-weight:400;color:var(--ink2);white-space:nowrap;width:1%}
 /* `width:1%` shrinks the row header to its content, which is right for a storey
@@ -736,7 +830,7 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 /* ── the planner ────────────────────────────────────────────────────────── */
 .planform{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:18px}
 .planform label{display:block}
-.planform label span{display:block;font-family:"DM Mono",ui-monospace,monospace;font-size:10px;
+.planform label span{display:block;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;
  letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-bottom:5px}
 .planform input,.planform select{padding:9px 11px;font-size:14px}
 /* Price is the field people move rather than state, so it gets a slider under
@@ -786,7 +880,7 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 .planfold{border-top:1px solid var(--line);padding-bottom:14px}
 .planfold summary{cursor:pointer;list-style:none;padding:2px 0}
 .planfold summary::-webkit-details-marker{display:none}
-.planfold summary:before{content:"+ ";font-family:"DM Mono",ui-monospace,monospace;color:var(--mute)}
+.planfold summary:before{content:"+ ";font-family:"IBM Plex Mono",ui-monospace,monospace;color:var(--mute)}
 .planfold[open] summary:before{content:"− "}
 
 .plansummary{position:sticky;top:78px}
