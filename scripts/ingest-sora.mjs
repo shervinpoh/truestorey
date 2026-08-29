@@ -26,8 +26,18 @@ const ENDPOINTS = [
     url: `https://eservices.mas.gov.sg/api/action/datastore/search.json?resource_id=9a0bf149-308c-4bd2-832d-76c8e6cb47ed&limit=${DAYS}&sort=end_of_day%20desc` },
   { label: 'MAS eservices · domestic interest rates (unsorted)',
     url: `https://eservices.mas.gov.sg/api/action/datastore/search.json?resource_id=9a0bf149-308c-4bd2-832d-76c8e6cb47ed&limit=${DAYS}` },
-  { label: 'MAS api gateway · domestic interest rates',
-    url: `https://api.mas.gov.sg/api/action/datastore/search.json?resource_id=9a0bf149-308c-4bd2-832d-76c8e6cb47ed&limit=${DAYS}` },
+  /*
+   * api.mas.gov.sg was the third endpoint here and is gone — the host has NO
+   * DNS RECORD, so it never resolved and never could. Its only effect was a
+   * "fetch failed" line in every failure report, which reads as a network
+   * problem at this end rather than a host that does not exist, and sent the
+   * reader looking in the wrong place during an actual MAS outage.
+   *
+   * Both remaining endpoints are on eservices.mas.gov.sg, so they fail
+   * together when MAS is down. That is honest: there is no second source for
+   * SORA, and pretending otherwise with a dead URL was worse than admitting
+   * it. If MAS publishes a real alternative, add it here.
+   */
 ];
 
 const isMaintenance = t => /maintenance\.mas\.gov\.sg|under\s+maintenance|scheduled\s+maintenance/i.test(t);
