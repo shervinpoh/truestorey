@@ -112,14 +112,25 @@ async function main() {
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) { unplaced.push(s.name); continue; }
 
     const units = Number(s.units);
+    const ha = Number(s.siteAreaHa), gpr = Number(s.plotRatio);
+    // Gross floor area is site area x plot ratio — arithmetic on two published
+    // figures, not an estimate. Dividing it by an assumed average unit size to
+    // reach a unit count WOULD be an estimate, and is deliberately not done:
+    // that number would be this repo assigning a figure URA never published.
+    const gfa = Number.isFinite(ha) && Number.isFinite(gpr) ? Math.round(ha * 10_000 * gpr) : null;
+
     out.push({
       name: s.name,
       lat: Math.round(lat * 1e6) / 1e6,
       lon: Math.round(lon * 1e6) / 1e6,
-      // A site with no published yield is kept and counted as zero units, so
-      // it still appears on the page — but it must never inflate the total
-      // with a guess. NEXT.md's shape expects `units`; null is honest.
+      // Null unless URA published a yield for this site. The schedule at
+      // ura.gov.sg/land-sales/current-ura-gls-sites does not carry one.
       units: Number.isFinite(units) && units > 0 ? units : null,
+      siteAreaHa: Number.isFinite(ha) ? ha : null,
+      plotRatio: Number.isFinite(gpr) ? gpr : null,
+      gfaSqm: gfa,
+      use: s.use || null,
+      list: s.list || null,
       status: s.status || null,
       launchDate: s.launchDate || null,
     });
@@ -141,6 +152,7 @@ async function main() {
   }
 
   const withUnits = out.filter(s => s.units != null);
+  const withGfa = out.filter(s => s.gfaSqm != null);
   const payload = {
     source: src.publishedBy || 'URA Government Land Sales programme',
     sourceUrl: src.sourceUrl || null,
@@ -153,6 +165,8 @@ async function main() {
       listed: sites.length,
       placed: out.length,
       withPublishedUnits: withUnits.length,
+      withGrossFloorArea: withGfa.length,
+      totalGfaSqm: withGfa.reduce((n, s) => n + s.gfaSqm, 0),
       unplaced: unplaced.length,
     },
     sites: out,
@@ -163,7 +177,8 @@ async function main() {
   console.log(`\n  programme        : ${src.programme}`);
   console.log(`  sites listed     : ${sites.length}`);
   console.log(`  placed           : ${out.length}`);
-  console.log(`  with unit yields : ${withUnits.length}`);
+  console.log(`  with unit yields : ${withUnits.length}${withUnits.length ? '' : '  (URA does not publish yields on this schedule)'}`);
+  console.log(`  with floor area  : ${withGfa.length}  (${withGfa.reduce((n, s) => n + s.gfaSqm, 0).toLocaleString('en-SG')} sqm total)`);
   if (unplaced.length) {
     console.log(`  NOT placed       : ${unplaced.length} — ${unplaced.join(', ')}`);
     console.log('     add lat/lon by hand for these, or correct the name.');
