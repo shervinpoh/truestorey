@@ -8,14 +8,22 @@ const INTENT = ['Selling', 'Buying', 'Both', 'Just looking'];
 const WHEN   = ['Within 3 months', '3–6 months', '6–12 months', 'No fixed date'];
 
 /**
- * Lead capture. Name and mobile are the only required fields — everything else
- * is optional, because a lead you can call beats a complete row you never got.
+ * Lead capture. Name and EMAIL are the required fields; mobile is optional.
+ *
+ * It used to be name and mobile, with email optional, and that was incoherent
+ * on its own terms: consent has been email-only since 24 Aug 2026, this form
+ * says in as many words that no phone call and no WhatsApp come from it, and
+ * the number was nonetheless the field you could not submit without — while
+ * the address it can actually reply to was the one you could skip. It demanded
+ * the channel it had promised not to use and made the consented one optional.
  *
  * Compliance, do not weaken:
  *  · consent is EMAIL ONLY as of 24 Aug 2026 — no phone, no WhatsApp
  *  · the tick is optional; an unticked form still saves, with consent "No"
  *  · the wording comes from lib/consent.js, the same file the server logs from
- *  · submitting is NOT consent; an untickd form still saves, with consent "No"
+ *  · submitting is NOT consent; an unticked form still saves, with consent "No"
+ *  · an email address is not consent either. It is how the answer gets back to
+ *    the person who asked, and nothing else happens without the tick.
  */
 export default function LeadForm({ context = null }) {
   const [v, setV] = useState({
@@ -30,7 +38,8 @@ export default function LeadForm({ context = null }) {
     if (!started.current) { started.current = true; track(EVENTS.LEAD_START, { href: context?.href || '' }); }
     setV({ ...v, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value });
   };
-  const ready = v.name.trim().length > 1 && v.mobile.replace(/\D/g, '').length >= 8;
+  const ready = v.name.trim().length > 1
+    && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.email.trim());
 
   async function submit(e) {
     e.preventDefault();
@@ -97,15 +106,20 @@ export default function LeadForm({ context = null }) {
           <input id="lf-name" value={v.name} onChange={set('name')} autoComplete="name" required />
         </div>
         <div>
-          <label className="lab" htmlFor="lf-mob">Mobile</label>
-          <input id="lf-mob" value={v.mobile} onChange={set('mobile')} inputMode="tel"
-                 autoComplete="tel" placeholder="9123 4567" required />
+          <label className="lab" htmlFor="lf-email">Email</label>
+          <input id="lf-email" type="email" value={v.email} onChange={set('email')}
+                 autoComplete="email" placeholder="you@example.com" required />
         </div>
       </div>
 
       <div className="fld">
-        <label className="lab" htmlFor="lf-email">Email — optional</label>
-        <input id="lf-email" type="email" value={v.email} onChange={set('email')} autoComplete="email" />
+        <label className="lab" htmlFor="lf-mob">Mobile — optional</label>
+        <input id="lf-mob" value={v.mobile} onChange={set('mobile')} inputMode="tel"
+               autoComplete="tel" placeholder="9123 4567" />
+        <p className="hint" style={{ margin: '6px 0 0', fontSize: 12 }}>
+          Only if you would rather be reached that way. Nothing on this site texts or calls you
+          without you asking first, so leaving it blank costs you nothing.
+        </p>
       </div>
 
       <div className="fld">
@@ -147,8 +161,8 @@ export default function LeadForm({ context = null }) {
           <label htmlFor="lf-ce">{CONSENT_COPY.email}</label>
         </div>
         <p className="hint" style={{ margin: '10px 0 0' }}>
-          Leave it unticked and the form still sends — you get the reply to what you asked, and
-          nothing after it. No phone calls and no WhatsApp come from this form.
+          Leave it unticked and the form still sends — you get the reply to what you asked, at the
+          address you gave, and nothing after it. No phone calls and no WhatsApp come from this form.
         </p>
       </div>
 

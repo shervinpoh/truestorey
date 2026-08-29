@@ -72,17 +72,38 @@ export async function POST(req) {
     return NextResponse.json({ error: 'Please give me a name I can use.' }, { status: 400 });
   }
 
-  const cleanMobile = normaliseMobile(mobile);
-  if (!cleanMobile) {
+  /*
+   * EMAIL IS REQUIRED AND MOBILE IS NOT. This was the other way round, and the
+   * other way round was incoherent: consent has been email-only since 24 Aug
+   * 2026, the form says in as many words that no phone call and no WhatsApp
+   * come from it, and yet the number was the field you could not submit
+   * without while the address it can actually reply to was optional.
+   *
+   * So it demanded the one channel it had promised never to use, and someone
+   * who left the address blank had consented to nothing and handed over a
+   * number with no stated purpose — which is the PDPA s20 point, not merely an
+   * odd look. A number kept for a use that does not exist is a number that
+   * should not have been collected.
+   *
+   * Mobile is still accepted, still validated when given, and still the fastest
+   * way to reach someone who wants to be reached that way. It is just not the
+   * price of asking a question any more.
+   */
+  const cleanEmail = String(email || '').trim().slice(0, 160);
+  if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(cleanEmail)) {
     return NextResponse.json(
-      { error: 'That does not look like a Singapore mobile number.' }, { status: 400 });
+      { error: 'Please give me an email address I can reply to.' }, { status: 400 });
   }
 
-  const cleanEmail = String(email || '').trim().slice(0, 160);
-  if (cleanEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(cleanEmail)) {
-    return NextResponse.json({ error: 'That email address does not look right.' }, { status: 400 });
+  const cleanMobile = mobile ? normaliseMobile(mobile) : '';
+  if (mobile && !cleanMobile) {
+    return NextResponse.json(
+      { error: 'That does not look like a Singapore mobile number. Leave it blank if you would rather not.' },
+      { status: 400 });
   }
-  // Consent to be emailed is meaningless without an address to email.
+  // Consent to be emailed is meaningless without an address to email. Still
+  // asserted rather than assumed: an address is now always present, and an
+  // address is still not a tick.
   const emailOptIn = Boolean(consentEmail) && Boolean(cleanEmail);
 
   if (!process.env.CRM_WEBHOOK_URL || !process.env.CRM_WEBHOOK_SECRET) {

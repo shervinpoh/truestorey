@@ -79,6 +79,11 @@ const nextConfig = {
     '/api/lookup': ['./data/index.json'],
     '/api/record': ['./data/records/**', './data/index.json'],
     '/api/catalogue': ['./data/index.json'],
+    // /compare resolves its records from ?a=&b=&c= at request time, so it is a
+    // dynamic route reading the same shards /api/record does. Without this it
+    // renders "could not be found" for every address in production and works
+    // perfectly in dev, which is the failure this whole map exists to prevent.
+    '/compare': ['./data/records/**', './data/index.json'],
     // An article rendered on demand needs the guides and insights readers.
     '/insights/[slug]': ['./content/**'],
     '/studio': ['./content/**'],

@@ -70,7 +70,7 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
       <section className="pane" id="overview">
         <RecordView rec={rec} attribution={attribution}
           onType={(t, rv) => setMedian(rv.medianPrice)}
-          afterSummary={<Fork price={price} planHref={planHref}
+          afterSummary={<Fork price={price} planHref={planHref} href={rec.href}
             hdb={hdb} hasFloor={hasFloor} hasNear={hasNear} />} />
       </section>
 
@@ -114,7 +114,7 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
 }
 
 /** The two questions, and where on this page each one is answered. */
-function Fork({ price, planHref, hdb, hasFloor, hasNear }) {
+function Fork({ price, planHref, href, hdb, hasFloor, hasNear }) {
   return (
     <div className="forkwrap">
       <div className="sh"><span>Which of these are you</span></div>
@@ -131,6 +131,9 @@ function Fork({ price, planHref, hdb, hasFloor, hasNear }) {
             {hasNear && <li><a href="#nearby">
               <b>What is within reach of it</b>
               <span>Schools, stations and shops, at straight-line distance</span></a></li>}
+            <li><a href={`/compare?a=${encodeURIComponent(href)}`}>
+              <b>Put it beside another block</b>
+              <span>Two or three side by side, in a link you can send to whoever else is deciding</span></a></li>
           </ul>
         </div>
         <div className="forkcol">
