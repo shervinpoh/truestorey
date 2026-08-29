@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { f, fk, mLabel } from './fmt.js';
 import { titleCase } from '../lib/name.js';
+import { Grow } from './Motion.jsx';
 
 /**
  * One block or one project.
@@ -103,11 +104,13 @@ export default function RecordView({ rec, attribution = [], onType, afterSummary
         return (<>
           <div className="sh" id="history"><span>Median price by month</span>
             <span>{srs.length} months with a sale</span></div>
-          <div className="bars">{srs.map((s,i)=>(
-            <i key={s.month} className={i===srs.length-1?'last':''}
-               style={{height:(8+(s.median-mn)/(mx-mn)*88)+'%'}}
-               title={`${s.month} · ${f(s.median)} · ${s.n} sale${s.n>1?'s':''}`} />
-          ))}</div>
+          <Grow>
+            <div className="bars">{srs.map((s,i)=>(
+              <i key={s.month} className={i===srs.length-1?'last':''}
+                 style={{height:(8+(s.median-mn)/(mx-mn)*88)+'%','--i':i}}
+                 title={`${s.month} · ${f(s.median)} · ${s.n} sale${s.n>1?'s':''}`} />
+            ))}</div>
+          </Grow>
           {/* The axis used to carry two dates and nothing else, so the one
               element on a page built around filed figures was the one you
               could not read a figure off. The ends now carry their own value.

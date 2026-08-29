@@ -34,3 +34,8 @@ data/.zoning-raw.geojson
 
 # Raw URA planning download. Kept for diagnosis, never versioned.
 data/.planning-raw.json
+
+# Photographs straight off a phone. Eight megabytes each and full of GPS —
+# `npm run photos` strips the EXIF, resizes, and writes the publishable
+# derivatives to public/photos/. Only those are versioned.
+photos-in/

@@ -27,6 +27,7 @@
     "note": "node scripts/new-note.mjs",
     "sync": "node scripts/sync.mjs",
     "due": "node scripts/sync.mjs --due",
+    "photos": "node scripts/ingest-photos.mjs",
     "images": "node scripts/check-images.mjs",
     "ingest:archive": "node scripts/ingest-archive.mjs",
     "probe:archive": "node scripts/ingest-archive.mjs --probe",

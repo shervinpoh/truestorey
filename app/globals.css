@@ -341,6 +341,21 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--ink)
 .tw[aria-pressed="true"]:before{opacity:0}
 
 /* ── charts · greys, one ink mark ──────────────────────────────────────── */
+/* ── bars that grow out of the axis ─────────────────────────────────────────
+   The un-classed state is the FINISHED chart, on purpose. Bars are the
+   content; a reader with no JavaScript, with reduced motion, or printing the
+   page gets them at full height. Only once Motion.jsx confirms it can animate
+   does data-anim="ready" collapse them, and only then does .in play them up. */
+.grow[data-anim="ready"] .bars i{transform:scaleY(0)}
+.grow .bars i{transform-origin:bottom center}
+.grow.in .bars i{animation:barup .55s cubic-bezier(.22,.61,.36,1) both;
+ animation-delay:calc(var(--i,0) * 32ms)}
+@keyframes barup{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@media(prefers-reduced-motion:reduce){
+ .grow[data-anim="ready"] .bars i{transform:none}
+ .grow.in .bars i{animation:none}
+}
+
 .bars{display:flex;align-items:flex-end;gap:2px;height:104px;margin-top:10px;
  border-bottom:1px solid var(--ink)}
 .bars i{flex:1;background:var(--ink);opacity:.17;min-height:2px;transition:opacity .2s}

@@ -159,3 +159,58 @@ export function Reveal({ children, className = '' }) {
 
   return <div ref={ref} className={`reveal${on ? ' in' : ''} ${className}`.trim()}>{children}</div>;
 }
+
+/**
+ * Grows a bar chart out of its own axis, once, when it is first seen.
+ *
+ * THE ORDER OF THE TWO CLASSES IS THE WHOLE THING, and it is not the order
+ * Reveal uses. `.reveal` starts at opacity 0 in the stylesheet, so a reader
+ * with no JavaScript gets nothing — a tradeoff this file already made for
+ * prose. A bar chart cannot make it: the bars ARE the content, and an invisible
+ * chart is worse than a chart that does not move.
+ *
+ * So the un-classed state is the FINISHED chart. On mount — and only if the
+ * browser can actually animate and the reader has not asked it not to — this
+ * sets `data-anim="ready"`, which is what collapses the bars. Only then does
+ * intersection add `.in` and play them back up. No JavaScript, reduced motion,
+ * print: the chart is simply there at full height, which is the correct
+ * failure. And because `ready` is set in a layout effect rather than after
+ * paint, the collapse never flashes.
+ */
+export function Grow({ children, className = '' }) {
+  const ref = useRef(null);
+  const [phase, setPhase] = useState('');       // '' | 'ready' | 'in'
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (still() || typeof IntersectionObserver === 'undefined') return;   // stays finished
+    setPhase('ready');
+    const io = new IntersectionObserver(e => {
+      if (e[0].isIntersecting) { setPhase('in'); io.disconnect(); }
+    }, { threshold: 0.25 });
+    io.observe(el);
+
+    /* A failsafe, because `ready` has already collapsed the bars.
+     *
+     * Everything above assumes the observer eventually fires. If it does not —
+     * a backgrounded tab that never gets a rendering opportunity, a browser
+     * throttling observers, anything unforeseen — the chart is left at
+     * scaleY(0) and the bars are simply gone. That is a worse outcome than no
+     * animation, and it is exactly the failure this component was written to
+     * avoid; it just arrives by a different route than "no JavaScript".
+     *
+     * So the animation also plays on a timer. If the chart was off screen the
+     * whole time, it plays unseen and ends finished, which costs nothing. What
+     * cannot happen is a chart that stays collapsed. */
+    const failsafe = setTimeout(() => { setPhase('in'); io.disconnect(); }, 4000);
+    return () => { io.disconnect(); clearTimeout(failsafe); };
+  }, []);
+
+  return (
+    <div ref={ref} className={`grow${phase === 'in' ? ' in' : ''} ${className}`.trim()}
+      data-anim={phase === 'ready' || phase === 'in' ? 'ready' : undefined}>
+      {children}
+    </div>
+  );
+}
