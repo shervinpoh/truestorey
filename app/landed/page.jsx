@@ -25,7 +25,7 @@ export default function Page() {
             slug: p.slug, href: p.href, label: p.label, district: p.district,
             segment: p.segment, n: p.n, medianPsf: p.medianPsf,
           }))} />
-        <p className="prov">{i.private?.source} \u00b7 {i.private?.period?.from} to {i.private?.period?.to} \u00b7 accessed {i.private?.accessedAt}</p>
+        <p className="prov">{i.private?.source} · {i.private?.period?.from} to {i.private?.period?.to} · accessed {i.private?.accessedAt}</p>
       </section>
     </main>
   );

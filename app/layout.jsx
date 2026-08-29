@@ -1,6 +1,7 @@
 import './globals.css';
 import Track from '../components/Track.jsx';
 import NavHere from '../components/NavHere.jsx';
+import SiteFooter from '../components/SiteFooter.jsx';
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://truestorey.sg'),
@@ -31,15 +32,7 @@ export default function RootLayout({ children }) {
         <Track />
         <NavHere />
         {children}
-        {/* CEA PG 02-11 s7.1 — particulars required on every page. Do not remove. */}
-        <footer className="site">
-          <div className="shell">
-            <span className="lab">
-              {a.name} · CEA Reg. No. {a.cea} · {a.agency} · Licence No. {a.lic} · {a.phone}<br />
-              Figures are derived from public government data and are not a valuation or an offer.
-            </span>
-          </div>
-        </footer>
+        <SiteFooter name={a.name} cea={a.cea} agency={a.agency} lic={a.lic} phone={a.phone} />
       </body>
     </html>
   );

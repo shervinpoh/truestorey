@@ -16,15 +16,23 @@ export default function Page() {
   return (
     <main className="shell">
       <Masthead crumbs={[{ href: '/', label: 'Home' }]} title="HDB, by town"
-        sub={`${blocks.toLocaleString('en-SG')} blocks with a filed resale since ${i.hdb?.period?.from ?? ''}. Open a town, then a block \u2014 the block is where the numbers mean something.`} />
+        sub={`${blocks.toLocaleString('en-SG')} blocks with a filed resale since ${i.hdb?.period?.from ?? ''}. Open a town, then a block — the block is where the numbers mean something.`} />
       <section className="pane">
-        <TownTiles placeholder="Filter towns\u2026"
+        {/* Real characters, not backslash escapes. Neither a JSX attribute nor
+            JSX text is a JS string literal, so neither processes them — this
+            file, /condo, /landed and /hdb/[town] all shipped a provenance line
+            with the escape sequence for a middot printed where the middot
+            should be — on the one line CEA PG 02-11 s3.1 is about. Escapes
+            survive only inside a template literal, which is why the `sub`
+            above read correctly and everything below it did not.
+            test/jsx-escapes.test.js now fails on a new one. */}
+        <TownTiles placeholder="Filter towns…"
           items={towns.map(t => ({
             key: t.slug, href: t.href, n: titleCase(t.name), value: t.medianPsf,
             s: `$${t.medianPsf} psf median`,
             b: `${t.blockCount.toLocaleString('en-SG')} blocks`,
           }))} />
-        <p className="prov">{i.hdb?.source} \u00b7 {i.hdb?.period?.from} to {i.hdb?.period?.to} \u00b7 accessed {i.hdb?.accessedAt}</p>
+        <p className="prov">{i.hdb?.source} · {i.hdb?.period?.from} to {i.hdb?.period?.to} · accessed {i.hdb?.accessedAt}</p>
       </section>
     </main>
   );

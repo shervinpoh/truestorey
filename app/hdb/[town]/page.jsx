@@ -31,7 +31,7 @@ export default async function Page({ params }) {
     <main className="shell">
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/hdb', label: 'HDB' }]}
         title={titleCase(t.name)}
-        sub={`${t.blocks.length} blocks \u00b7 ${t.n.toLocaleString('en-SG')} filed resale transactions \u00b7 median $${t.medianPsf} psf`} />
+        sub={`${t.blocks.length} blocks · ${t.n.toLocaleString('en-SG')} filed resale transactions · median $${t.medianPsf} psf`} />
 
       <section className="pane">
         <div className="figwrap">
@@ -50,13 +50,13 @@ export default async function Page({ params }) {
 
       <section className="pane">
         <div className="sh"><span>Every block in {titleCase(t.name)}</span><span>{t.blocks.length}</span></div>
-        <TownTiles placeholder="Filter by block number or street\u2026"
+        <TownTiles placeholder="Filter by block number or street…"
           items={t.blocks.map(b => ({
             key: b.slug, href: b.href, n: `Blk ${b.block}`, value: b.medianPsf,
             s: `$${b.medianPsf} psf`,
             b: titleCase(b.street),
           }))} />
-        <p className="prov">{i.hdb?.source} \u00b7 {i.hdb?.period?.from} to {i.hdb?.period?.to} \u00b7 accessed {i.hdb?.accessedAt}</p>
+        <p className="prov">{i.hdb?.source} · {i.hdb?.period?.from} to {i.hdb?.period?.to} · accessed {i.hdb?.accessedAt}</p>
       </section>
 
       {posts.length > 0 && (
@@ -67,7 +67,7 @@ export default async function Page({ params }) {
               <li key={p.slug}>
                 <Link href={p.href}>
                   <span className="n">{p.title}</span>
-                  <span className="s">{p.date} \u00b7 {p.minutes} min</span>
+                  <span className="s">{p.date} · {p.minutes} min</span>
                 </Link>
               </li>
             ))}

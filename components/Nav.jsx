@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { NAV, isHere, topLinks } from '../lib/nav.js';
 
 /**
  * The global nav.
@@ -12,44 +13,66 @@ import Link from 'next/link';
  * Server component. `here` is the pathname prefix, used for aria-current —
  * which is also what the underline hangs off, so the styling and the
  * accessibility state can never disagree.
- */
-/*
- * Landed used to be folded under a "Private" link that pointed at /condo, so
- * /landed existed and nothing on the site led to it — 786 streets unreachable
- * unless you typed the URL. Each property type now gets its own entry.
  *
- * Nothing is listed here that does not resolve. A nav link to a page that
- * does not exist yet is worse than a shorter nav.
+ * Two presentations of ONE list, which lives in lib/nav.js and is also what
+ * the footer renders. Above 800px it is the flat row it always was. Below, it
+ * is a disclosure panel that groups the same links under three headings and,
+ * because a panel has room the row never had, names the individual tools
+ * instead of hiding them behind /tools.
+ *
+ * The row used to be `overflow-x:auto` with `scrollbar-width:none`, so at
+ * 375px it carried 594px of links inside a 335px box with nothing on screen to
+ * say so — no scrollbar, no fade, no chevron. Six of eleven links did not
+ * exist for a mobile reader, which on this site is most of them. Tools was the
+ * expensive one: every calculator the site is built around sat behind it.
  */
-const LINKS = [
-  { href: '/insights', label: 'Latest', match: ['/insights'] },
-  { href: '/archive', label: 'Policy & data', match: ['/archive'] },
-  { href: '/map', label: 'Map', match: ['/map'] },
-  { href: '/hdb', label: 'HDB', match: ['/hdb'] },
-  { href: '/condo', label: 'Condo', match: ['/condo'] },
-  { href: '/landed', label: 'Landed', match: ['/landed'] },
-  { href: '/market', label: 'Rates', match: ['/market'] },
-  { href: '/mop', label: 'MOP', match: ['/mop'] },
-  { href: '/tools', label: 'Tools', match: ['/tools', '/plan', '/floors', '/yield', '/blindspot', '/floorplan', '/neighbourhood'] },
-  { href: '/guides', label: 'Guides', match: ['/guides'] },
-  { href: '/about', label: 'About', match: ['/about'] },
-];
-
 export default function Nav({ here = '' }) {
+  // The section you are already in, named on the closed menu. A reader who
+  // taps "Menu" and cannot see where they were has lost their place.
+  const open = NAV.find(g => g.items.some(i => isHere(i, here)));
+
   return (
     <nav className="gnav" aria-label="Primary">
       <div className="in">
         <Link href="/" className="mk">True<b>storey</b></Link>
-        <ul>
-          {LINKS.map(l => {
-            const on = l.match.some(m => here === m || here.startsWith(m + '/'));
-            return (
-              <li key={l.href}>
-                <Link href={l.href} className="n" aria-current={on ? 'page' : undefined}>{l.label}</Link>
-              </li>
-            );
-          })}
+
+        {/* Desktop: the flat row. */}
+        <ul className="navrow">
+          {topLinks().map(l => (
+            <li key={l.href}>
+              <Link href={l.href} className="n"
+                aria-current={isHere(l, here) ? 'page' : undefined}>{l.label}</Link>
+            </li>
+          ))}
         </ul>
+
+        {/* Mobile: the same links, grouped, behind a disclosure.
+            Keyed on the pathname so a client-side navigation returns a fresh
+            element — otherwise the panel stays open behind the page you just
+            opened, because App Router never recreates the node. */}
+        <details className="navmenu" key={here}>
+          <summary aria-label="Menu">
+            <span className="lab">Menu</span>
+            {open ? <span className="navwhere">{open.group}</span> : null}
+          </summary>
+          <div className="navpanel">
+            {NAV.map(g => (
+              <div className="navgroup" key={g.group}>
+                <span className="lab">{g.group}</span>
+                <ul>
+                  {g.items.map(l => (
+                    <li key={l.href}>
+                      <Link href={l.href}
+                        aria-current={isHere(l, here) ? 'page' : undefined}>
+                        {l.panelLabel || l.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </details>
       </div>
     </nav>
   );
