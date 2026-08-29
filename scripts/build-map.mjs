@@ -51,6 +51,12 @@ async function main() {
   try { geo = await read('geo.json'); }
   catch { console.error('No data/geo.json. Run `npm run geocode` first.'); process.exit(1); }
 
+  // HDB's own published storey count per block, from ingest:mop. Absent for a
+  // block means HDB publishes no height for it and the map draws it flat; it
+  // is never defaulted. Missing entirely (mop.json not built) means every
+  // column is flat, which is the correct degradation.
+  const storeys = await read('mop.json').then(m => m.storeys || {}).catch(() => ({}));
+
   const points = [];
   const skipped = { noCoord: 0, weak: 0, noPsf: 0 };
   // Every record's median, whether or not it could be placed on the map. The
@@ -86,6 +92,18 @@ async function main() {
           r.label,
           r.n,
           ns === 'hdb' ? `hdb:${r.town}` : `${ns}:${r.district}`,
+          /*
+           * Published storey count, HDB only, or 0.
+           *
+           * The map extrudes columns from this and from nothing else. URA
+           * publishes no floor count for private property, so a condo is 0 and
+           * is drawn flat — the alternative was inferring a height from the
+           * highest floor that happened to sell, which is a lower bound on the
+           * building rather than its height, and would put invented towers on
+           * a map whose whole claim is that it draws only what the data says.
+           * Rule 13.
+           */
+          (ns === 'hdb' && storeys[`${r.block}|${r.street}`]) || 0,
         ]);
       }
     }

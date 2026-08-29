@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 
 /**
  * Motion, on a short leash.
@@ -158,6 +159,39 @@ export function Reveal({ children, className = '' }) {
   }, []);
 
   return <div ref={ref} className={`reveal${on ? ' in' : ''} ${className}`.trim()}>{children}</div>;
+}
+
+/**
+ * Run a state change inside a native View Transition.
+ *
+ * WHAT THIS IS NOT. It is not page-to-page transitions. Those need Next's
+ * `experimental.viewTransition`, which is a wrapper over React's
+ * `unstable_ViewTransition` — a component the installed React 19.2.8 does not
+ * export at all. Turning the flag on means running a React experimental build,
+ * and this site publishes under a CEA registration; an unstable React
+ * underneath a filed-transaction figure is not a trade worth making for a
+ * cross-fade. When React ships it, this is where it goes.
+ *
+ * WHAT IT IS. Same-document transitions on the state changes where the figures
+ * actually move: switching flat type on a record page rewrites the median, the
+ * range, the spread, the chart and every transaction row at once. Without this
+ * the whole page swaps between frames, which reads as a flicker; with it the
+ * old numbers cross-fade to the new ones and the change is legible as a change.
+ *
+ * flushSync is required, not decorative. startViewTransition snapshots the DOM
+ * when the callback returns, and a React state update scheduled normally has
+ * not rendered by then — the "after" snapshot would be identical to the
+ * "before" one and nothing would animate.
+ *
+ * Falls through to a plain call on browsers without the API and whenever the
+ * reader has asked for less movement, so the result is identical either way.
+ */
+export function withTransition(update) {
+  if (typeof document === 'undefined' || !document.startViewTransition || still()) {
+    update();
+    return;
+  }
+  document.startViewTransition(() => flushSync(update));
 }
 
 /**

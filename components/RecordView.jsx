@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { f, fk, mLabel } from './fmt.js';
 import { titleCase } from '../lib/name.js';
-import { Grow } from './Motion.jsx';
+import { Grow, withTransition } from './Motion.jsx';
 
 /**
  * One block or one project.
@@ -30,7 +30,14 @@ export default function RecordView({ rec, attribution = [], onType, afterSummary
     ? (rec.recent || []).filter(t => (t.flatType || t.propertyType) === rtype)
     : (rec.recent || []);
 
-  const pick = t => { setRtype(t); onType?.(t, t && rec.byType?.[t] ? { ...rec, ...rec.byType[t] } : rec); };
+  /* Wrapped, because changing flat type rewrites the median, the range, the
+     spread, the chart and every transaction row in the same frame. Unwrapped
+     that reads as a flicker; inside a transition it reads as the figures
+     changing, which is what actually happened. */
+  const pick = t => withTransition(() => {
+    setRtype(t);
+    onType?.(t, t && rec.byType?.[t] ? { ...rec, ...rec.byType[t] } : rec);
+  });
 
   return (
     <>

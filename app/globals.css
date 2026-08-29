@@ -341,6 +341,24 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--ink)
 .tw[aria-pressed="true"]:before{opacity:0}
 
 /* ── charts · greys, one ink mark ──────────────────────────────────────── */
+/* ── view transitions ───────────────────────────────────────────────────────
+   Only on same-document state changes, and only where the figures genuinely
+   change: switching flat type rewrites the median, the range, the spread, the
+   chart and every transaction row in one frame. Page-to-page transitions are
+   NOT here — they need React's unstable_ViewTransition, which this React does
+   not ship, and an experimental React under a filed figure is not a trade
+   worth making for a cross-fade.
+
+   Short, because this is feedback rather than choreography: long enough to see
+   that the numbers changed, short enough that nobody reading one waits. */
+::view-transition-old(root){animation:vtout .16s ease both}
+::view-transition-new(root){animation:vtin .22s ease both}
+@keyframes vtout{to{opacity:0}}
+@keyframes vtin{from{opacity:0}}
+@media(prefers-reduced-motion:reduce){
+  ::view-transition-old(root),::view-transition-new(root){animation:none}
+}
+
 /* ── bars that grow out of the axis ─────────────────────────────────────────
    The un-classed state is the FINISHED chart, on purpose. Bars are the
    content; a reader with no JavaScript, with reduced motion, or printing the

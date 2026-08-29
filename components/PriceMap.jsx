@@ -109,6 +109,7 @@ export default function PriceMap({ map }) {
   const [kind, setKind] = useState(0);
   const [sel, setSel] = useState(-1);
   const [showRail, setShowRail] = useState(false);
+  const [raise3d, setRaise3d] = useState(false);
   const [hover, setHover] = useState(null);
   const [hoverRegion, setHoverRegion] = useState(-1);
   const [size, setSize] = useState({ w: 0, h: 0 });
@@ -386,6 +387,11 @@ export default function PriceMap({ map }) {
   }, [view]);
 
   const scale = (maxLat - minLat) / (view[2] - view[0]);
+  /* Raised only above a zoom threshold. At island scale 9,477 columns overlap
+     into a hairbrush that says less than the flat map does, so asking for
+     height at full extent turns it on and it takes effect as you come in. */
+  const RAISE_AT = 2.6;
+  const raised = raise3d && kind === 0 && scale >= RAISE_AT;
 
   const bandOf = psf => {
     let b = 0;
@@ -451,17 +457,75 @@ export default function PriceMap({ map }) {
     // the draw, which was invisible when the viewport only moved on a dropdown
     // change and is a dropped frame per pointermove now that it can be dragged.
     const r = Math.min(6, (shown.length > 6000 ? 2 : 3) * Math.max(1, scale * 0.55));
-    for (const pass of sel >= 0 ? [false, true] : [true]) {
-      ctx.globalAlpha = pass ? 1 : 0.13;               // dim, never hide
-      for (const p of order) {
-        if (sel >= 0 && (p[7] === sel) !== pass) continue;
-        const [x, y] = project(p[1], p[2], size.w, size.h);
-        if (x < -4 || y < -4 || x > size.w + 4 || y > size.h + 4) continue;
-        ctx.fillStyle = RAMP[bandOf(p[3])];
-        ctx.fillRect(x - r / 2, y - r / 2, r, r);      // square, like everything else here
+
+    if (!raised) {
+      for (const pass of sel >= 0 ? [false, true] : [true]) {
+        ctx.globalAlpha = pass ? 1 : 0.13;             // dim, never hide
+        for (const p of order) {
+          if (sel >= 0 && (p[7] === sel) !== pass) continue;
+          const [x, y] = project(p[1], p[2], size.w, size.h);
+          if (x < -4 || y < -4 || x > size.w + 4 || y > size.h + 4) continue;
+          ctx.fillStyle = RAMP[bandOf(p[3])];
+          ctx.fillRect(x - r / 2, y - r / 2, r, r);    // square, like everything else here
+        }
       }
+      ctx.globalAlpha = 1;
+    } else {
+      /* ── raised: every block stood up to its published height ─────────────
+       *
+       * WHAT IS AND IS NOT CLAIMED. The height is HDB's own max_floor_lvl for
+       * that block and nothing else — no inference, no default, no height
+       * derived from which floor happened to sell. A block HDB publishes no
+       * count for is drawn flat, and so is every condo and every landed
+       * street, because URA publishes no floor count at all. That asymmetry is
+       * stated in the legend rather than papered over.
+       *
+       * These are MARKS, not buildings. A column is a fixed narrow width at a
+       * coordinate — the same square the flat view draws, given height. It is
+       * not a footprint: the repo holds no building outlines, and drawing a
+       * box the size of a block would be inventing one. Rule 13.
+       *
+       * Painter's algorithm, north first. Screen y increases southward, so
+       * sorting by descending latitude draws the far side of the island before
+       * the near side and a tower never paints over one in front of it.
+       *
+       * Only above a zoom threshold. At island scale 9,477 columns is a
+       * hairbrush, so the flat view stays until there is room to stand them up.
+       */
+      /* Pixels of rise per storey. Tied to zoom so a column is always tall
+         enough to read against the dot it stands on — at the old 0.85 cap a
+         twelve-storey block rose ten pixels on a six-pixel mark, which is a
+         smudge rather than a building. Capped so that a fifty-storey block
+         cannot run off the top of the frame. */
+      const raise = Math.min(2.2, 0.42 * scale);
+      const w = Math.max(2, Math.min(7, r * 1.1));
+      const draw = order
+        .filter(p => sel < 0 || p[7] === sel || true)
+        .map(p => ({ p, xy: project(p[1], p[2], size.w, size.h) }))
+        .filter(({ xy }) => xy[0] > -20 && xy[1] > -140 && xy[0] < size.w + 20 && xy[1] < size.h + 20)
+        .sort((a, b) => b.p[1] - a.p[1]);              // north (higher lat) first
+
+      for (const { p, xy } of draw) {
+        const [x, y] = xy;
+        const dim = sel >= 0 && p[7] !== sel;
+        ctx.globalAlpha = dim ? 0.13 : 1;
+        const band = bandOf(p[3]);
+        const h = p[8] > 0 ? p[8] * raise : 0;
+        if (h < 1.2) {                                  // no published height: flat mark
+          ctx.fillStyle = RAMP[band];
+          ctx.fillRect(x - r / 2, y - r / 2, r, r);
+          continue;
+        }
+        // The shaft, then a lighter cap, so a tower reads as standing rather
+        // than as a stripe. Two tones only — this is a data mark with a top,
+        // not an attempt at a lit 3D model.
+        ctx.fillStyle = RAMP[band];
+        ctx.fillRect(x - w / 2, y - h, w, h);
+        ctx.fillStyle = RAMP[Math.max(0, band - 2)];
+        ctx.fillRect(x - w / 2, y - h - 1.6, w, 1.9);
+      }
+      ctx.globalAlpha = 1;
     }
-    ctx.globalAlpha = 1;
 
     // ── labels ────────────────────────────────────────────────────────────
     // Biggest region first, and anything that would overlap is dropped. A map
@@ -560,7 +624,7 @@ export default function PriceMap({ map }) {
       ctx.lineWidth = 1.5;
       ctx.strokeRect(x - 5, y - 5, 10, 10);
     }
-  }, [shown, order, size, hover, project, view, breaks, regions, sel, showRail, rail, scale, land, region]);
+  }, [shown, order, size, hover, project, view, breaks, regions, sel, showRail, rail, scale, land, region, raised]);
 
   function pick(e) {
     const cvs = cvsRef.current;
@@ -641,6 +705,15 @@ export default function PriceMap({ map }) {
         <button className="mapopt" aria-pressed={showRail} onClick={() => setShowRail(v => !v)}>
           {showRail ? '✓ ' : ''}MRT and LRT stations
         </button>
+        {/* HDB only, because HDB is the only source that publishes a storey
+            count. Offered at any zoom and applied once there is room — asking
+            for it at island scale and getting a hairbrush would read as
+            broken rather than as "come closer". */}
+        {kind === 0 && (
+          <button className="mapopt" aria-pressed={raise3d} onClick={() => setRaise3d(v => !v)}>
+            {raise3d ? '✓ ' : ''}Stand the blocks up
+          </button>
+        )}
         {sel >= 0 && (
           <button className="mapopt" onClick={() => focus(-1)}>Show all of Singapore</button>
         )}
@@ -731,7 +804,13 @@ export default function PriceMap({ map }) {
                 : <> · <span className="mono">all of Singapore</span></>}
             </span>
           )}
-        <span className="maphint">Drag to move · scroll or pinch to zoom · arrow keys and +/− once focused · 0 resets</span>
+                <span className="maphint">Drag to move · scroll or pinch to zoom · arrow keys and +/− once focused · 0 resets</span>
+        {raise3d && !raised && (
+          <span className="maphint">Blocks stand up once you are closer in — keep zooming.</span>
+        )}
+        {raised && (
+          <span className="maphint">Height is HDB’s own published storey count for each block. Nothing is inferred; a block without one stays flat.</span>
+        )}
       </p>
 
       {/* The legend carries the figures, which is the required relief for the

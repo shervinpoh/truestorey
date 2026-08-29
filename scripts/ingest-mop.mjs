@@ -101,6 +101,20 @@ export async function ingestMop() {
       yearCompleted,
       earliestMop: yearCompleted + 5,          // EARLIEST POSSIBLE, not the MOP date
       units: num(pick(r, 'total_dwelling_units', 'totaldwellingunits')),
+      /*
+       * HDB's own published storey count for the block.
+       *
+       * This field was being downloaded and discarded on every run. It is the
+       * only honest source of building height on the site: a storey range on a
+       * transaction says which floor SOLD, which is a lower bound on the
+       * building and not its height, and inferring a height from a lower bound
+       * across a whole town is exactly the kind of confident-and-wrong this
+       * site exists not to publish.
+       *
+       * The map extrudes columns from this and from nothing else. A block
+       * without it is drawn flat rather than drawn at a guessed height.
+       */
+      maxFloor: num(pick(r, 'max_floor_lvl', 'maxfloorlvl')),
       firstResaleSeen: ev?.firstMonth || null, // observed fact, or null
       resalesSeen: ev?.n || 0,
     });
@@ -129,11 +143,29 @@ export async function ingestMop() {
 
   const unlockedNoResale = blocks.filter(b => b.earliestMop <= thisYear && b.resalesSeen === 0);
 
+  /*
+   * A flat lookup of published storey counts, keyed the way every other block
+   * lookup on this site is keyed: BLOCK|STREET.
+   *
+   * Emitted separately rather than dug out of towns→byYear→list, because the
+   * map builder needs it by address and walking a nested tree to answer "how
+   * tall is 406 Ang Mo Kio Ave 10" would be the kind of join that quietly
+   * mismatches. Blocks HDB does not publish a height for are simply absent —
+   * a missing key means "draw this flat", never "assume a default".
+   */
+  const storeys = {};
+  for (const b of blocks) {
+    if (Number.isFinite(b.maxFloor) && b.maxFloor > 0) storeys[`${b.block}|${b.street}`] = b.maxFloor;
+  }
+
   const out = {
     source: 'HDB Property Information (data.gov.sg)',
     resourceId: RESOURCE_ID,
     licence: 'Singapore Open Data Licence v1.0',
     accessedAt,
+    storeys,
+    storeysNote: 'max_floor_lvl as published by HDB, per block. Absent means HDB '
+               + 'publishes no storey count for that block; it is never defaulted.',
     generatedForYear: thisYear,
     caveat: 'MOP runs five years from key collection, which this dataset does not carry. '
           + 'Years shown are the earliest possible, derived from year of completion. '
