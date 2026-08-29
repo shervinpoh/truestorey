@@ -31,6 +31,7 @@ const CACHE = path.join(process.cwd(), 'data', 'geocache.json');
 
 let cache = null;
 let dirty = 0;
+let warnedToken = false;
 
 export async function loadCache() {
   if (cache) return cache;
@@ -258,6 +259,21 @@ async function doSearch(q, key) {
    * So: results win. Only an error WITH NO RESULTS is a failure, and that is
    * still not cached, because caching a wifi blip would bake it in forever.
    */
+  /*
+   * A TOKEN THAT IS SET AND NOT WORKING MUST SAY SO.
+   *
+   * OneMap issues 3-day tokens (forever: false), so one WILL expire mid-week,
+   * and today an expired token degrades quietly back to the unauthenticated
+   * path, which still answers. That is fine until OneMap enforces auth, at
+   * which point the same silence becomes an empty geocoder — the failure this
+   * file has already had twice. Warn once, at the moment the evidence exists.
+   */
+  if (error && process.env.ONEMAP_TOKEN && /token|auth/i.test(String(error)) && !warnedToken) {
+    warnedToken = true;
+    console.warn(`\n  ONEMAP_TOKEN is set but OneMap still says: ${String(error).slice(0, 80)}`);
+    console.warn('  It is probably expired — they last 3 days. Re-issue at onemap.gov.sg/apidocs.');
+    console.warn('  Geocoding continues unauthenticated for now, which still returns results.\n');
+  }
   if (error && !results?.length) return { results: [], error, uncached: true };
   const slim = results.slice(0, 6).map(r => ({
     name: r.SEARCHVAL, blk: r.BLK_NO, road: r.ROAD_NAME, building: r.BUILDING,
