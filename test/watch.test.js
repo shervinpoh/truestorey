@@ -176,3 +176,18 @@ test('the watermark only moves after a send that succeeded', () => {
   assert.ok(fail > 0 && mark > fail, 'markWatchSent must come after the failure path returns');
   assert.match(s, /if \(failed\) process\.exit\(1\)/);
 });
+
+/* Follow.jsx set the rule — "an empty promise is worse than no promise" — and
+ * the watch form broke it: with no sender configured it still rendered, still
+ * took an address, and only then said email was off. It had the address by
+ * then, which is the same objection that deleted the mobile field. */
+test('nothing collects an address unless it can actually be used', () => {
+  const route = src('app/api/watch/route.js');
+  const gate = route.indexOf('mailConfigured()');
+  const write = route.indexOf('upsertWatch(');
+  assert.ok(gate > 0 && gate < write, 'the sender check must come before the write');
+
+  // And the form is not rendered at all when the server says it cannot send.
+  assert.match(src('components/RecordPage.jsx'), /hdb && canWatch &&/);
+  assert.match(src('app/hdb/[town]/[block]/page.jsx'), /canWatch=\{mailConfigured\(\)\}/);
+});

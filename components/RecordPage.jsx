@@ -46,7 +46,7 @@ import { EVENTS } from '../lib/analytics.js';
  * The proceeds waterfall re-anchors when the flat-type filter moves, so the
  * slider is never centred on a median that is no longer on screen.
  */
-export default function RecordPage({ rec, attribution, crumbs, posts = [], near = null, nearManifest = null, storey = null }) {
+export default function RecordPage({ rec, attribution, crumbs, posts = [], near = null, nearManifest = null, storey = null, canWatch = false }) {
   const [median, setMedian] = useState(rec.medianPrice);
 
   useEffect(() => { track(EVENTS.RECORD, { href: rec.href, kind: rec.kind }); }, [rec.href]);
@@ -85,7 +85,14 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
           there is no equivalent per-project feed for private transactions.
           Offering it on a condo page would promise a thing that cannot be
           delivered — see scripts/send-digest.mjs. */}
-      {hdb && (
+      {/*
+          `canWatch` is resolved on the server from whether a sending key
+          actually exists. Follow.jsx set the precedent and the reasoning is
+          its: "an empty promise is worse than no promise". A form that takes
+          an address and then says email is not switched on has already
+          collected the address — which is the same objection that removed the
+          mobile field from the lead form. */}
+      {hdb && canWatch && (
         <section className="pane">
           <WatchBlock href={rec.href} label={titleCase(rec.label)} />
         </section>

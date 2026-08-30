@@ -51,8 +51,22 @@ function throttled(ip) {
 const looksLikeEmail = s => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(s || '').trim());
 
 export async function POST(req) {
-  if (!dbConfigured()) {
-    return NextResponse.json({ error: 'Updates are not available on this deployment.' }, { status: 503 });
+  /*
+   * BOTH HALVES, BEFORE ANYTHING IS READ OR WRITTEN.
+   *
+   * The mail check used to sit after the upsert, so a deployment with a
+   * database and no sender wrote the row and THEN said it could not send. That
+   * is an email address collected and stored for a purpose that cannot be
+   * carried out — the same objection that removed the mobile field from the
+   * lead form, arrived at from the other direction.
+   *
+   * The form is also hidden when this is false, so reaching here means a
+   * direct post rather than a person filling something in.
+   */
+  if (!dbConfigured() || !mailConfigured()) {
+    return NextResponse.json(
+      { error: 'Updates are not switched on for this deployment. Nothing was saved.' },
+      { status: 503 });
   }
 
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
@@ -109,19 +123,6 @@ export async function POST(req) {
 
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '');
   const token = data?.confirm_token || confirm_token;
-
-  if (!mailConfigured()) {
-    /*
-     * Say what could not be done. The row exists and is unconfirmed, so
-     * nothing will ever be sent to it — reporting success here would be the
-     * silent-truncation failure this repo keeps writing tests about.
-     */
-    return NextResponse.json({
-      ok: false,
-      error: 'Sign-up is recorded, but email is not switched on for this deployment yet, '
-           + 'so no confirmation can be sent. Nothing will be emailed until it is.',
-    }, { status: 503 });
-  }
 
   const url = `${siteUrl}/api/watch/confirm?t=${encodeURIComponent(token)}`;
   const res = await send({

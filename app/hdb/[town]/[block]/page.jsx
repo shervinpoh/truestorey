@@ -3,6 +3,7 @@ import { recordAt, getIndex, allUrls, nearby, nearbyManifest, storeyFor } from '
 import { ogForRecord } from '../../../../lib/og.js';
 import { titleCase } from '../../../../lib/name.js';
 import RecordPage from '../../../../components/RecordPage.jsx';
+import { configured as mailConfigured } from '../../../../lib/email.js';
 import { insightsForBlock, insightsForTown } from '../../../../lib/insights.js';
 
 export const dynamicParams = true;   // the tail renders on demand and is then cached
@@ -33,7 +34,7 @@ export default async function Page({ params }) {
   const rec = recordAt('hdb', town, block);
   if (!rec) notFound();
   return (
-    <RecordPage rec={rec} storey={storeyFor(rec)} near={nearby(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []}
+    <RecordPage canWatch={mailConfigured()} rec={rec} storey={storeyFor(rec)} near={nearby(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []}
       posts={[...insightsForBlock(rec.href), ...insightsForTown(town)]
         .filter((p, k, a) => a.findIndex(x => x.slug === p.slug) === k).slice(0, 4)}
       crumbs={[{ href: '/', label: 'Home' }, { href: '/hdb', label: 'HDB' },
