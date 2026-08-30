@@ -1284,3 +1284,33 @@ sup.cite a:hover{text-decoration:underline}
    space is tight, so this keeps the arrow and drops nothing else — it is the
    phone where the breadcrumb being off-screen actually hurts. */
 @media(max-width:560px){ .backup{margin-left:10px;font-size:10px} }
+
+/* ── the progressive payment ladder ─────────────────────────────────────── */
+/* A ladder, not a table: the order is the content, and a percentage column
+   that can be scanned down beats nine rows of equal weight. */
+.ladder{list-style:none;margin:12px 0 0;padding:0;border-top:1px solid var(--line)}
+.ladder li{border-bottom:1px solid var(--line2)}
+.ladder button{display:grid;grid-template-columns:52px 1fr auto;gap:14px;align-items:baseline;
+ width:100%;text-align:left;background:none;border:0;cursor:pointer;font-family:inherit;
+ padding:13px 2px;min-height:44px;color:var(--ink2)}
+.ladder button:hover{background:var(--sunk)}
+.ladder .pct{font-size:15px;font-weight:600;color:var(--acc);font-variant-numeric:tabular-nums}
+.ladder .what b{display:block;font-size:14px;color:var(--ink);font-weight:600}
+.ladder .what small{display:block;font-size:11.5px;color:var(--mute);margin-top:2px;
+ font-family:"IBM Plex Mono",ui-monospace,monospace}
+.ladder .mth{font-size:13px;white-space:nowrap;color:var(--ink2)}
+.ladder .mth i{font-style:normal;font-size:10px;color:var(--mute);margin-left:2px}
+/* TOP is the moment the keys change hands, and completion is the moment the
+   money stops. Both are worth finding without reading. */
+.ladder li.st-top .pct,.ladder li.st-completion .pct{color:var(--acc-ink)}
+.ladder li.st-top{background:var(--acc-soft)}
+.ladderdet{padding:2px 2px 16px 66px}
+/* The statutory text, set apart so it reads as a quotation rather than as the
+   site's own prose — because it is one. */
+.ladderdet .quote{margin:0;padding-left:14px;border-left:2px solid var(--acc);
+ font-size:13.5px;line-height:1.6;color:var(--ink2)}
+@media(max-width:560px){
+  .ladder button{grid-template-columns:44px 1fr;row-gap:4px}
+  .ladder .mth{grid-column:2;text-align:left}
+  .ladderdet{padding-left:0}
+}
