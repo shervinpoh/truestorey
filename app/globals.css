@@ -52,12 +52,33 @@
     a WCAG AA failure on the one text that has to be readable. 4.81:1. */
  --ink:#111414; --ink2:#48514F; --mute:#666E6A;
  --line:#E2E0D9; --line2:#EDEBE5;
+ /*
+  * --edge is the boundary of a thing you OPERATE. --line is the boundary of a
+  * thing you look at.
+  *
+  * They were one token, and at 1.21:1 against --paper the edge of an input was
+  * essentially invisible — WCAG 1.4.11 asks 3:1 of any boundary needed to
+  * identify a control, and this was a quarter of that. The reflex fix is to
+  * darken --line, and it is wrong: fifty-three rules use it, most of them
+  * hairlines between table rows and around panels, and darkening those turns a
+  * warm editorial page into a spreadsheet — the exact thing the 29 Aug rewrite
+  * of this file was undoing.
+  *
+  * So the two roles separate and only the control half moves. #8C8B87 is the
+  * lightest warm grey on this hue that clears 3:1 on both grounds: 3.13:1 on
+  * --paper and 3.41:1 on --card. A decorative rule stays --line and is not
+  * required to clear anything, because it identifies nothing.
+  */
+ --edge:#8C8B87;
  /* the interface teal, and the data teal */
  --acc:#164F52; --on-acc:#F2F8F7; --acc-soft:#E7F3F3; --acc-line:#164F52; --acc-ink:#0F3F42;
  --acc-lit:#58BCC3;
  /* reserved for meaning, never for decoration */
- --up:#1E7A5F; --dn:#B64D3C; --upS:#E4F1EC; --dnS:#F7E9E5;
- --warn:#B64D3C;
+ /* --dn was #B64D3C — 4.31:1 on its own pill ground at 11px, just under the
+    4.5 WCAG asks of body text. #AE4736 is 4.73:1, the smallest step that
+    clears it, so a price that fell still reads as the same red. */
+ --up:#1E7A5F; --dn:#AE4736; --upS:#E4F1EC; --dnS:#F7E9E5;
+ --warn:#AE4736;
  /* legacy names kept so no component had to change when the palette did */
  --blue:var(--acc-ink); --bsoft:var(--acc-soft); --bdeep:var(--acc-line); --on-blue:var(--on-acc);
  /* chart series — warm greys, so the one accented mark actually reads */
@@ -294,12 +315,12 @@ header.mast{padding:30px 0 16px}
  padding-bottom:7px;margin:26px 0 4px;display:flex;justify-content:space-between;gap:12px}
 
 /* ── controls ──────────────────────────────────────────────────────────── */
-.seg{display:flex;border:1px solid var(--line);flex-wrap:wrap;background:none}
+.seg{display:flex;border:1px solid var(--edge);flex-wrap:wrap;background:none}
 /* 44px minimum: these were 36, which is under the touch target on every phone
    this site is mostly read on. */
 .seg button{flex:1 1 auto;min-width:72px;min-height:44px;padding:9px 6px;border:0;background:none;
  color:var(--ink2);cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:500;
- border-right:1px solid var(--line)}
+ border-right:1px solid var(--edge)}
 /* The second question, subordinate to the one above it — an EC's two financing
    treatments, not a third kind of home. */
 .subseg{border-color:var(--line2)}
@@ -309,7 +330,7 @@ header.mast{padding:30px 0 16px}
 .seg button:hover{background:var(--sunk);color:var(--ink)}
 .seg button[aria-pressed="true"]{background:var(--acc);color:var(--on-acc);font-weight:600}
 .seg button:disabled{opacity:.35;cursor:not-allowed}
-input,textarea,select{width:100%;padding:11px 12px;border:1px solid var(--line);background:var(--paper);
+input,textarea,select{width:100%;padding:11px 12px;border:1px solid var(--edge);background:var(--paper);
  color:var(--ink);font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:15px;-webkit-appearance:none;appearance:none}
 input::placeholder{color:var(--mute)}
 input:focus,button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--acc-line);outline-offset:1px}
@@ -326,7 +347,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--ink)
 .cta:hover{background:var(--paper);color:var(--ink);border-color:var(--ink)}
 .cta:disabled{opacity:.4;cursor:not-allowed}
 .cta:disabled:hover{background:var(--acc);color:var(--on-acc)}
-.ghost{background:none;border:1px solid var(--line);color:var(--ink2);padding:9px 14px;font-size:13px;
+.ghost{background:none;border:1px solid var(--edge);color:var(--ink2);padding:9px 14px;font-size:13px;
  cursor:pointer;font-family:inherit;margin-top:14px;width:auto}
 .ghost:hover{border-color:var(--ink);color:var(--ink)}
 .linkish{background:none;border:0;padding:0;font:inherit;color:var(--ink);text-decoration:underline;
@@ -404,7 +425,11 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--ink)
 .chartread em{font-style:normal;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;
  letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-left:auto}
 .chartplot{cursor:crosshair;touch-action:pan-y;margin-top:4px}
-.chartplot:focus-visible{outline:2px solid var(--acc-lit);outline-offset:3px}
+/* --acc-lit was the ring here and on the hero search. Two objections, and they
+   agree: the palette reserves --acc-lit for data that is live or selected and
+   says it is "never a border", and at 2.05:1 on --paper it was under the 3:1
+   WCAG asks of a focus indicator. --acc is 8.47:1. */
+.chartplot:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
 /* The bar under the pointer takes the bright teal — this is the one place
    --acc-lit is exactly right: data that is selected, live, and momentary. */
 .chartplot i.on{opacity:1;background:var(--acc-lit)}
@@ -714,7 +739,7 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
    lifted off the warm ground so it reads as the thing to use. */
 .herosearch .sbox input{border:2px solid var(--acc);border-radius:var(--r2);
  background:var(--card);padding:18px 17px;font-size:17px;box-shadow:var(--lift)}
-.herosearch .sbox input:focus{border-color:var(--acc-lit);outline:2px solid var(--acc-lit);
+.herosearch .sbox input:focus{border-color:var(--acc);outline:2px solid var(--acc);
  outline-offset:2px}
 .herosearch .sug{border-radius:0 0 var(--r2) var(--r2);border-color:var(--acc)}
 /* Never below 16px: iOS zooms the whole page when a font-size under 16 takes
@@ -832,7 +857,7 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 .mapjump .filtn{display:block;margin-bottom:5px}
 .mapjump select{padding:9px 11px;font-size:14px;border-color:var(--line);background:var(--paper)}
 .mapjump select:focus{border-color:var(--ink);outline:none}
-.mapopt{padding:10px 12px;border:1px solid var(--line);background:var(--paper);color:var(--ink2);
+.mapopt{padding:10px 12px;border:1px solid var(--edge);background:var(--paper);color:var(--ink2);
  font:inherit;font-size:12.5px;cursor:pointer;white-space:nowrap}
 .mapopt:hover{background:var(--sunk);color:var(--ink)}
 .mapopt[aria-pressed="true"]{background:var(--acc);border-color:var(--acc-line);color:var(--on-acc);font-weight:600}
@@ -1164,7 +1189,7 @@ input[type=range]:active::-moz-range-thumb{transform:scale(1.15);cursor:grabbing
  animation:blink 1s steps(2,start) infinite}
 @keyframes blink{to{visibility:hidden}}
 .srcs{list-style:none;margin:6px 0 0;padding:0;display:flex;gap:8px;flex-wrap:wrap}
-.srcs a{display:inline-flex;align-items:center;gap:7px;font-size:11px;border:1px solid var(--line);
+.srcs a{display:inline-flex;align-items:center;gap:7px;font-size:11px;border:1px solid var(--edge);
  padding:6px 9px;border-radius:var(--r1);color:var(--ink2);text-decoration:none}
 .srcs a:hover{border-color:var(--ink);color:var(--ink)}
 /* The chip number is the superscript number in the prose above it. Same figure,
@@ -1225,7 +1250,7 @@ sup.cite a:hover{text-decoration:underline}
 .nextq{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
 .nextq button{display:block;width:100%;min-height:44px;text-align:left;cursor:pointer;
  font-family:inherit;font-size:13.5px;color:var(--ink2);background:var(--card);
- border:1px solid var(--line);border-radius:var(--r1);padding:11px 13px}
+ border:1px solid var(--edge);border-radius:var(--r1);padding:11px 13px}
 .nextq button:before{content:"→";font-family:"IBM Plex Mono",ui-monospace,monospace;
  color:var(--acc);margin-right:9px}
 .nextq button:hover{border-color:var(--acc);color:var(--ink);background:var(--acc-soft)}
