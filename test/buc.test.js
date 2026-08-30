@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { progressive, totalPct, STAGES, BUC_SOURCE, NOTICE_DAYS } from '../lib/calc/buc.js';
+import { progressive, totalPct, STAGES, BUC_SOURCE, NOTICE_DAYS, STAMPING } from '../lib/calc/buc.js';
 
 /* The schedule is statute. If it does not account for the whole price, it is
  * not the schedule. */
@@ -112,4 +112,32 @@ test('the schedule carries its source and the version it was read against', () =
   assert.match(BUC_SOURCE.name, /Housing Developers Rules/);
   assert.match(BUC_SOURCE.url, /^https:\/\/sso\.agc\.gov\.sg\//);
   assert.match(BUC_SOURCE.versionAsAt, /^\d{4}-\d{2}-\d{2}$/);
+});
+
+/* ── stamp duty timing ──────────────────────────────────────────────────────
+ *
+ * "Stamp Duty must be paid within 14 days of signing the S&P" is correct and
+ * it is half the rule. It omits the 30-day limb, which is the one a foreign
+ * buyer needs, and the penalties — and the penalty is the part that changes
+ * behaviour. Four times the duty on a S$1.5m purchase is not a late fee.
+ */
+test('the stamping deadline carries both limbs and both penalties', () => {
+  assert.equal(STAMPING.withinDaysInSingapore, 14);
+  assert.equal(STAMPING.withinDaysAbroad, 30);
+  assert.equal(STAMPING.penalties.length, 2);
+  assert.match(STAMPING.penalties[1].rule, /FOUR TIMES/);
+  // s 47: the clock starts the day AFTER execution. Off by one in the buyer's
+  // favour, and the kind of detail a paraphrase loses.
+  assert.match(STAMPING.clockStarts, /day after/);
+  assert.match(STAMPING.source, /Stamp Duties Act 1929/);
+  assert.match(STAMPING.url, /^https:\/\/sso\.agc\.gov\.sg\//);
+});
+
+/* Duty is money ON TOP of the price. Folding it into a stage percentage would
+ * corrupt a statutory schedule with a figure the schedule does not contain. */
+test('stamp duty never enters the statutory ladder', () => {
+  const r = progressive({ price: 1_500_000 });
+  assert.equal(totalPct(), 100);
+  assert.equal(Math.round(r.rows.reduce((a, x) => a + x.due, 0)), 1_500_000,
+    'the stages must still sum to exactly the price, with no duty mixed in');
 });

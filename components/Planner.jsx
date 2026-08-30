@@ -8,6 +8,7 @@ import { f } from './fmt.js';
 import { titleCase } from '../lib/name.js';
 import { Figure } from './Motion.jsx';
 import MoneyInput from './MoneyInput.jsx';
+import Row from './PlanRow.jsx';
 
 /**
  * TDSR, BSD and ABSD as one answer.
@@ -48,15 +49,6 @@ const n2 = v => (Number.isFinite(v) ? v.toLocaleString('en-SG') : '—');
    beside "MSR 30%". */
 const pc = n => { const v = Math.round(n * 1000) / 10; return `${v.toFixed(v % 1 ? 1 : 0)}%`; };
 
-function Row({ label, value, note, strong }) {
-  return (
-    <div className={`planrow${strong ? ' strong' : ''}`}>
-      <span className="l">{label}</span>
-      <span className="v mono">{value}</span>
-      {note && <span className="n">{note}</span>}
-    </div>
-  );
-}
 
 /**
  * Where the figures came from, when they came from a block page.

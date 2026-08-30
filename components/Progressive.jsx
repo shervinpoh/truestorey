@@ -1,10 +1,12 @@
 'use client';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { progressive, STAGES, BUC_SOURCE, NOTICE_DAYS } from '../lib/calc/buc.js';
+import { progressive, STAGES, BUC_SOURCE, NOTICE_DAYS, STAMPING } from '../lib/calc/buc.js';
+import { bsd, absd } from '../lib/calc/stampDuty.js';
 import { f } from './fmt.js';
 import { Figure } from './Motion.jsx';
 import MoneyInput from './MoneyInput.jsx';
+import Row from './PlanRow.jsx';
 
 /**
  * The progressive payment ladder for a home still under construction.
@@ -32,12 +34,28 @@ export default function Progressive() {
   const [fee, setFee] = useState(0.05);
   const [rate, setRate] = useState(2.5);
   const [tenure, setTenure] = useState(25);
+  const [profile, setProfile] = useState('SC');
+  const [owned, setOwned] = useState(1);
   const [open, setOpen] = useState(null);
 
   const r = useMemo(() => progressive({
     price: Number(price) || 0, ltv,
     bookingFeePct: fee, rate: (Number(rate) || 0) / 100, tenureYears: Number(tenure) || 25,
   }), [price, ltv, fee, rate, tenure]);
+
+  /*
+   * Stamp duty is NOT part of the price, so it is not part of the ladder — it
+   * is money on top, due on its own clock. Folding it into a stage percentage
+   * would corrupt a statutory schedule with a figure the schedule does not
+   * contain; leaving it off the upfront total would understate what a buyer
+   * needs by tens of thousands. So it sits beside the ladder, added to the
+   * headline, and dated separately.
+   */
+  const duty = useMemo(() => {
+    const p = Number(price) || 0;
+    const b = bsd(p), a = absd(p, profile, Number(owned) || 1);
+    return { bsd: b.total, absd: a.total, absdRate: a.rate, total: b.total + a.total };
+  }, [price, profile, owned]);
 
   // The stage at which the bank first pays anything — the answer to "when
   // does my mortgage start", which is not a date but a milestone.
@@ -59,6 +77,20 @@ export default function Progressive() {
                   <option value={0.55}>55% — extended tenure</option>
                   <option value={0.45}>45% — second housing loan</option>
                   <option value={0.35}>35% — third or later</option>
+                </select>
+              </label>
+              <label><span>Buyer profile</span>
+                <select value={profile} onChange={e => setProfile(e.target.value)}>
+                  <option value="SC">Singapore Citizen</option>
+                  <option value="SPR">Permanent Resident</option>
+                  <option value="FOREIGNER">Foreigner</option>
+                </select>
+              </label>
+              <label><span>Properties owned after this</span>
+                <select value={owned} onChange={e => setOwned(Number(e.target.value))}>
+                  <option value={1}>This is my only one</option>
+                  <option value={2}>My second</option>
+                  <option value={3}>My third or more</option>
                 </select>
               </label>
               <label><span>Booking fee</span>
@@ -100,11 +132,12 @@ export default function Progressive() {
           <div className="plansumin">
             <div className="plansumfig">
               <span className="lab">Before the bank pays anything</span>
-              <Figure value={r.cashCpfTotal} format={money} />
+              <Figure value={r.cashCpfTotal + duty.total} format={money} />
               <p className="hint">
-                {pc(1 - ltv)} of the price, out of your own cash and CPF, spread across the first
-                {firstDraw >= 0 ? ` ${firstDraw + 1} stages` : ' stages'} — before that the bank has
-                disbursed nothing. Stamp duty is on top of this.
+                {money(r.cashCpfTotal)} of the price — {pc(1 - ltv)}, out of your own cash and CPF,
+                across the first {firstDraw >= 0 ? firstDraw + 1 : ''} stages, before the bank has
+                disbursed anything — plus {money(duty.total)} of stamp duty, which is not part of
+                the price and runs on its own clock.
               </p>
             </div>
             <div className="plansumfig">
@@ -167,6 +200,27 @@ export default function Progressive() {
         ))}
       </ul>
 
+      <div className="sh" style={{ marginTop: 26 }}>
+        <span>Stamp duty</span><span>on top of the price, on its own clock</span>
+      </div>
+      <div className="plansteps">
+        <Row label="Buyer's Stamp Duty" value={money(duty.bsd)} note="progressive, on the price" />
+        <Row label="Additional Buyer's Stamp Duty" value={money(duty.absd)}
+          note={duty.absd === 0 ? 'none — first residential property as a citizen' : `${pc(duty.absdRate)} at this profile and count`} />
+        <Row label="Due" value={`${STAMPING.withinDaysInSingapore} days`}
+          note={`from the day after the agreement is first executed in Singapore — ${STAMPING.withinDaysAbroad} days if it is executed abroad`} strong />
+      </div>
+      <div className="note">
+        {/* The competitor states the 14 days and stops. The penalty is the part
+            that changes what somebody does, and four times the duty on a
+            purchase this size is not a late fee. */}
+        <b>Miss it and the penalty is not a late fee.</b> Stamped {STAMPING.penalties[0].after} of
+        that deadline, it is {STAMPING.penalties[0].rule}. {STAMPING.penalties[1].after
+          .replace(/^after/, 'Later than')} it is {STAMPING.penalties[1].rule} — on this purchase,
+        four times {money(duty.total)}. The clock starts {STAMPING.clockStarts}, not on the day
+        itself.
+      </div>
+
       <div className="note" style={{ marginTop: 20 }}>
         <b>There is no calendar here, and that is the point.</b> Every construction stage above falls
         due within {NOTICE_DAYS} days of a notice from the developer that the stage is finished. The
@@ -189,8 +243,11 @@ export default function Progressive() {
         <a href={BUC_SOURCE.url} target="_blank" rel="noopener noreferrer">{BUC_SOURCE.url}</a><br />
         Percentages and wording are the Rules&rsquo;. The rate and tenure are yours. Your project&rsquo;s
         agreement may carry modifications approved by the Controller of Housing — the Second or Third
-        Schedule of that agreement is where they would be. This plans a purchase from figures you
-        typed; it does not value any property and it is not financial advice.
+        Schedule of that agreement is where they would be.<br />
+        Stamp duty timing: {STAMPING.source} · read against the version current as at{' '}
+        {STAMPING.versionAsAt} · <a href={STAMPING.url} target="_blank" rel="noopener noreferrer">{STAMPING.url}</a><br />
+        This plans a purchase from figures you typed; it does not value any property and it is not
+        financial advice.
       </p>
 
       <div className="sh" style={{ marginTop: 26 }}><span>The rest of it</span></div>
