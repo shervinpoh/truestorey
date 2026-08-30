@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import Masthead from '../../components/Masthead.jsx';
 import Planner from '../../components/Planner.jsx';
-import { allTowns, getIndex } from '../../lib/data/query.js';
+import { allTowns, allDistricts, getIndex } from '../../lib/data/query.js';
 import { titleCase } from '../../lib/name.js';
 
 export const metadata = {
@@ -15,10 +15,42 @@ export default function Page() {
   // Read here rather than in Planner: Planner is a client component, and the
   // twenty-six town medians are the whole payload — six fields each, resolved
   // at build because this page is static.
+  //
+  // Three lists, because the answer to "where is this inside my budget" depends
+  // entirely on what you said you were buying. Sending only the towns is what
+  // put HDB medians under S$1m beneath a S$5.1m private budget.
   const i = getIndex();
-  const towns = allTowns().map(t => ({
-    slug: t.slug, name: titleCase(t.name), medianPrice: t.medianPrice, medianPsf: t.medianPsf,
-  }));
+  // Every href is resolved here, as a string. A function cannot cross into a
+  // client component — React throws "Functions cannot be passed directly to
+  // Client Components" and the whole panel disappears.
+  const markets = {
+    HDB: {
+      label: 'town', plural: 'towns', unit: 'flat',
+      source: i.hdb?.source, period: i.hdb?.period,
+      items: allTowns().map(t => ({
+        key: t.slug, href: `/hdb/${t.slug}`, name: titleCase(t.name),
+        medianPrice: t.medianPrice, medianPsf: t.medianPsf,
+      })),
+    },
+    EC: {
+      label: 'district', plural: 'districts', unit: 'EC',
+      source: i.private?.source, period: i.private?.period,
+      note: 'Executive condominiums only — resale and subsale filed with URA. Ten districts have them; the rest were never built with any.',
+      items: allDistricts('Executive Condominium').map(d => ({
+        key: d.district, href: '/condo', name: d.name,
+        medianPrice: d.medianPrice, medianPsf: d.medianPsf,
+      })),
+    },
+    PRIVATE: {
+      label: 'district', plural: 'districts', unit: 'home',
+      source: i.private?.source, period: i.private?.period,
+      note: 'All private residential types together, landed included — a district median is a wide thing.',
+      items: allDistricts().map(d => ({
+        key: d.district, href: '/condo', name: d.name,
+        medianPrice: d.medianPrice, medianPsf: d.medianPsf,
+      })),
+    },
+  };
 
   return (
     // Wide, because the calculator is two columns now: inputs beside a sticky
@@ -31,7 +63,7 @@ export default function Page() {
 
       <section className="pane">
         <Suspense fallback={<p className="hint">Loading…</p>}>
-          <Planner towns={towns} townSource={i.hdb?.source} townPeriod={i.hdb?.period} />
+          <Planner markets={markets} />
         </Suspense>
       </section>
 

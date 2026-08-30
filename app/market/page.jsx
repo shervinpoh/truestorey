@@ -16,7 +16,11 @@ export default function Page() {
       <Masthead crumbs={[{ href: '/', label: 'Home' }]} title="How the market actually sits"
         sub="Two numbers move everything else: what resale prices are doing, and what borrowing costs. Both here, both sourced, both dated." />
       <section className="pane">
-        <MarketView idx={idx} rates={rates} mop={m} />
+        {/* Four numbers, not the register. This passed `m` whole — 2.6MB of
+            HTML, every block back to 1986 serialised twice, so that the supply
+            panel could print two totals and a year range. Same bug /mop had. */}
+        <MarketView idx={idx} rates={rates}
+          mop={m && { totals: m.totals, generatedForYear: m.generatedForYear }} />
         {!idx && !rates && (
           <div className="warn">
             <p style={{marginTop:0}}><b>Market data not downloaded yet.</b> In Terminal:</p>

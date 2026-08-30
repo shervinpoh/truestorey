@@ -175,7 +175,7 @@ so a change in one place and not the other goes red before it ships.
 
 **`device_bash` over the Cowork bridge runs Linux with no network.** It cannot
 run `next dev`, `next build` or any ingest. Plain node scripts, `npm test` and
-python-pptx all work. This does not apply to Claude Code running locally.
+python-pptx all work. This does not apply to Codex running locally.
 
 **The tracer cannot see a runtime path, in both directions.**
 `next.config.mjs` sets `outputFileTracingIncludes` because the data layer reads

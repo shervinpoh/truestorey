@@ -25,7 +25,21 @@ import { flushSync } from 'react-dom';
  *    A number that only exists after an animation is a number search engines
  *    and screen readers never see.
  */
-const still = () =>
+/**
+ * Should nothing move?
+ *
+ * EXPORTED BECAUSE IT WAS BEING ANSWERED IN ONLY HALF THE PLACES THAT MOVE.
+ * The components in this file honoured it and the ones outside it did not: the
+ * map flew to a town over 380ms and Blindspot smooth-scrolled a whole report
+ * into view, both of them large viewport movements, both unconditional. A
+ * reader who has asked the operating system for less motion had asked
+ * everything on the page, not only the parts that happen to live in this file.
+ *
+ * Read at call time, never cached. The setting can change while a page is
+ * open, and a latched answer would keep animating for someone who has just
+ * turned it off.
+ */
+export const still = () =>
   typeof window === 'undefined' ||
   !window.matchMedia ||
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;

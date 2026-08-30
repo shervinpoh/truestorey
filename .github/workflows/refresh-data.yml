@@ -95,6 +95,29 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
+      # Only when the data actually moved. The digest reports what has been
+      # filed since the last one, so a run that refreshed nothing has nothing
+      # to report — and sending on a fixed clock rather than on new data is how
+      # a "block update" becomes a weekly email that says nothing happened.
+      #
+      # It reads the committed data/hdb.json, so it must come after the commit
+      # step, not before it: sending off an uncommitted refresh would move a
+      # watermark past news the deployed site cannot yet show.
+      #
+      # continue-on-error, because a failed send must not fail the data
+      # refresh. The script exits non-zero on any failed send and leaves those
+      # watermarks alone, so tomorrow's run retries the same news.
+      - name: Send block digests
+        if: steps.commit.outputs.changed == 'true'
+        continue-on-error: true
+        env:
+          SUPABASE_URL:        ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          RESEND_API_KEY:      ${{ secrets.RESEND_API_KEY }}
+          DIGEST_FROM:         ${{ secrets.DIGEST_FROM }}
+          NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+        run: node scripts/send-digest.mjs
+
       # Last, so a source being down is loud rather than silent, but only after
       # everything that could still be refreshed has been.
       - name: Report a failed source

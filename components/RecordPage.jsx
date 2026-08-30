@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import RecordView from './RecordView.jsx';
 import Proceeds from './Proceeds.jsx';
 import Gate from './Gate.jsx';
+import WatchBlock from './WatchBlock.jsx';
 import Search from './Search.jsx';
 import Masthead from './Masthead.jsx';
 import Amenities from './Amenities.jsx';
@@ -79,6 +80,16 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
       {hasNear
         ? <div id="nearby"><Amenities near={near} manifest={nearManifest} /></div>
         : <Amenities near={near} manifest={nearManifest} />}
+
+      {/* HDB only: the digest is built on HDB's monthly resale register, and
+          there is no equivalent per-project feed for private transactions.
+          Offering it on a condo page would promise a thing that cannot be
+          delivered — see scripts/send-digest.mjs. */}
+      {hdb && (
+        <section className="pane">
+          <WatchBlock href={rec.href} label={titleCase(rec.label)} />
+        </section>
+      )}
 
       <section className="pane" id="proceeds">
         <Proceeds median={median} onEngage={() => track(EVENTS.PROCEEDS, { href: rec.href })} />

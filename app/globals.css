@@ -295,8 +295,16 @@ header.mast{padding:30px 0 16px}
 
 /* ── controls ──────────────────────────────────────────────────────────── */
 .seg{display:flex;border:1px solid var(--line);flex-wrap:wrap;background:none}
-.seg button{flex:1 1 auto;min-width:72px;padding:9px 6px;border:0;background:none;color:var(--ink2);
- cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:500;border-right:1px solid var(--line)}
+/* 44px minimum: these were 36, which is under the touch target on every phone
+   this site is mostly read on. */
+.seg button{flex:1 1 auto;min-width:72px;min-height:44px;padding:9px 6px;border:0;background:none;
+ color:var(--ink2);cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:500;
+ border-right:1px solid var(--line)}
+/* The second question, subordinate to the one above it — an EC's two financing
+   treatments, not a third kind of home. */
+.subseg{border-color:var(--line2)}
+.subseg button{font-size:12px;min-height:40px}
+.subseg button[aria-pressed="true"]{background:var(--acc-soft);color:var(--acc-ink)}
 .seg button:last-child{border-right:0}
 .seg button:hover{background:var(--sunk);color:var(--ink)}
 .seg button[aria-pressed="true"]{background:var(--acc);color:var(--on-acc);font-weight:600}
@@ -1156,9 +1164,86 @@ input[type=range]:active::-moz-range-thumb{transform:scale(1.15);cursor:grabbing
  animation:blink 1s steps(2,start) infinite}
 @keyframes blink{to{visibility:hidden}}
 .srcs{list-style:none;margin:6px 0 0;padding:0;display:flex;gap:8px;flex-wrap:wrap}
-.srcs a{display:inline-block;font-size:11px;border:1px solid var(--line);padding:4px 8px;
- color:var(--ink2);text-decoration:none}
+.srcs a{display:inline-flex;align-items:center;gap:7px;font-size:11px;border:1px solid var(--line);
+ padding:6px 9px;border-radius:var(--r1);color:var(--ink2);text-decoration:none}
 .srcs a:hover{border-color:var(--ink);color:var(--ink)}
+/* The chip number is the superscript number in the prose above it. Same figure,
+   same mono, so the eye can carry one to the other. */
+.srcn{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;line-height:1;
+ background:var(--acc-soft);color:var(--acc-ink);padding:3px 5px;border-radius:2px}
+
+/* Markdown the model emits, rendered rather than printed. `**bold**` and the
+   bare `[2][3][15]` clusters used to reach the page as literal characters. */
+.answer h3.ansh{font-size:1rem;font-weight:700;letter-spacing:-.01em;color:var(--ink);margin:18px 0 8px}
+.answer .ansl{margin:0 0 12px;padding-left:20px}
+.answer .ansl li{margin:0 0 6px}
+.answer code{font-size:.9em;background:var(--sunk);padding:1px 4px;border-radius:2px}
+/* Prose links are underlined; the source chips and the footnotes are not — they
+   are already bounded by a border and a raised baseline, and underlining them
+   as well turned the sources row into a stack of blue-book citations. */
+.answer a{color:var(--acc);text-decoration:underline;text-underline-offset:2px}
+.answer .srcs a{text-decoration:none}
+.answer table.anst{border-collapse:collapse;width:100%;font-size:13.5px;margin:0 0 4px}
+.answer table.anst th,.answer table.anst td{border-bottom:1px solid var(--line2);
+ padding:7px 10px 7px 0;text-align:left;vertical-align:top}
+.answer table.anst th{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;
+ letter-spacing:.1em;text-transform:uppercase;color:var(--mute);font-weight:400}
+/* A footnote, not debris. `2,3,15` raised once beats three sets of brackets. */
+sup.cite{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:9.5px;line-height:0;
+ margin-left:2px;white-space:nowrap}
+sup.cite a{color:var(--acc);text-decoration:none;padding:0 1px}
+sup.cite a:hover{text-decoration:underline}
+
+/* ── MOP: the island, and the blocks by name ────────────────────────────── */
+.mopmap{margin-top:12px}
+.mopsvg{width:100%;height:auto;display:block;background:var(--paper);border:1px solid var(--line);
+ border-radius:var(--r2)}
+.mopdots circle{fill:var(--acc);opacity:.5;cursor:pointer;transition:opacity .18s,fill .18s}
+.mopdots:hover circle{opacity:.85}
+.mopdots circle.dim{opacity:.16}
+/* --acc-lit is data that is live or selected, and this is the selection. */
+.mopdots.lit circle{fill:var(--acc-lit);opacity:1;stroke:var(--acc-ink);stroke-width:.9}
+@media(prefers-reduced-motion:reduce){.mopdots circle{transition:none}}
+
+.mopyear + .mopyear{margin-top:14px;padding-top:12px;border-top:1px solid var(--line2)}
+.blocklist{list-style:none;margin:8px 0 0;padding:0}
+.blocklist a{display:grid;grid-template-columns:64px 1fr auto auto;gap:10px;align-items:baseline;
+ padding:8px 0;border-bottom:1px solid var(--line2);text-decoration:none;color:var(--ink2);
+ font-size:13px}
+.blocklist a:hover{background:var(--sunk);color:var(--ink)}
+.blocklist .bk{font-weight:600;color:var(--ink)}
+.blocklist .un{font-size:12px;white-space:nowrap}
+.blocklist .fl{font-size:11px;color:var(--mute);white-space:nowrap;min-width:104px;text-align:right}
+/* An absence stated as one, not a blank cell. */
+.blocklist .fl.none{color:var(--warn)}
+@media(max-width:620px){
+  .blocklist a{grid-template-columns:56px 1fr;row-gap:2px}
+  .blocklist .un,.blocklist .fl{grid-column:2;text-align:left;min-width:0}
+}
+
+/* The follow-ups the answer used to offer in a sentence you could not click. */
+.nextq{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.nextq button{display:block;width:100%;min-height:44px;text-align:left;cursor:pointer;
+ font-family:inherit;font-size:13.5px;color:var(--ink2);background:var(--card);
+ border:1px solid var(--line);border-radius:var(--r1);padding:11px 13px}
+.nextq button:before{content:"→";font-family:"IBM Plex Mono",ui-monospace,monospace;
+ color:var(--acc);margin-right:9px}
+.nextq button:hover{border-color:var(--acc);color:var(--ink);background:var(--acc-soft)}
 .drop{border:1px dashed var(--line);padding:26px 20px;text-align:center;background:var(--sunk)}
 .dropimg{max-width:100%;max-height:340px;display:block;margin:0 auto;border:1px solid var(--line)}
 @media(prefers-reduced-motion:reduce){.caret{animation:none}}
+
+/* ── block watch ────────────────────────────────────────────────────────── */
+/* The one place an email is asked for on a site where nothing is gated, so it
+   reads as an offer rather than as a wall: a bordered panel, not a modal, not
+   an overlay, and never in front of anything. */
+.watchbox{margin-top:26px;padding:18px 20px 16px;border:1px solid var(--line);
+ border-radius:var(--r2);background:var(--card);position:relative}
+.watchrow{display:flex;gap:8px;flex-wrap:wrap}
+.watchrow input{flex:1 1 220px;width:auto}
+.watchrow button{flex:0 0 auto;padding:11px 16px;min-height:44px}
+.watchtick{display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:13px;
+ color:var(--ink2);cursor:pointer;line-height:1.5}
+/* 18px and a real hit area — a consent tick that is hard to hit is a consent
+   tick people mis-hit, and PDPA s14 wants a deliberate act. */
+.watchtick input{width:18px;height:18px;flex:0 0 18px;margin-top:2px;accent-color:var(--acc)}

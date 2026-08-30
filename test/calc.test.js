@@ -2,10 +2,11 @@ import { test } from 'node:test';
 import assert from 'node:assert';
 import { bsd, absd, ssd } from '../lib/calc/stampDuty.js';
 import { saleProceeds, cpfAccruedInterest } from '../lib/calc/proceeds.js';
-import { CPF_OA_RATE } from '../lib/calc/constants.js';
+import { CPF_OA_RATE, HDB_LOAN_CASH_MIN_REVIEWED } from '../lib/calc/constants.js';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { affordability } from '../lib/calc/affordability.js';
+import { plan } from '../lib/calc/plan.js';
 
 test('BSD on $1,000,000 = $24,600', () => {
   assert.strictEqual(bsd(1_000_000).total, 24_600);
@@ -105,4 +106,71 @@ test('Proceeds.jsx uses the tested module and does not floor the result', () => 
   assert.ok(!/0\.025|1\.09\b/.test(src),
     'A rate literal is back in Proceeds.jsx. Rates come from ' +
     'lib/calc/constants.js; two copies is how the stress rate drifted before.');
+});
+
+/* ── MSR, TDSR and tenure, by what is actually being bought ──────────────────
+ *
+ * The guide has said "MSR 30% — HDB flats and ECs bought from developer only"
+ * since it was written. The calculators had two categories where there are
+ * four, so an EC could not be expressed: sent as HDB it was assessed over 25
+ * years instead of 30, and sent as private it escaped MSR. /tools offered a
+ * button reading "HDB or EC" and took the first of those.
+ */
+test('MSR applies to an HDB flat and to a new EC, and to nothing else', () => {
+  const who = { applicants: [{ fixedIncome: 9000, age: 35 }], monthlyDebts: 500 };
+  assert.strictEqual(affordability({ ...who, propertyType: 'HDB' }).msrApplies, true);
+  assert.strictEqual(affordability({ ...who, propertyType: 'EC_DEVELOPER' }).msrApplies, true);
+  assert.strictEqual(affordability({ ...who, propertyType: 'EC_RESALE' }).msrApplies, false);
+  assert.strictEqual(affordability({ ...who, propertyType: 'PRIVATE' }).msrApplies, false);
+});
+
+test('an EC runs to 30 years on both sides of its MOP, an HDB flat to 25', () => {
+  const who = { applicants: [{ fixedIncome: 9000, age: 30 }] };
+  assert.strictEqual(affordability({ ...who, propertyType: 'HDB' }).tenureCap, 25);
+  assert.strictEqual(affordability({ ...who, propertyType: 'EC_DEVELOPER' }).tenureCap, 30);
+  assert.strictEqual(affordability({ ...who, propertyType: 'EC_RESALE' }).tenureCap, 30);
+  assert.strictEqual(affordability({ ...who, propertyType: 'PRIVATE' }).tenureCap, 30);
+});
+
+/* The exact regression: same MSR limit, different tenure, S$54,023 apart. */
+test('a new EC is not an HDB flat with a shorter tenure', () => {
+  const who = { applicants: [{ fixedIncome: 9000, age: 35 }], monthlyDebts: 500 };
+  const hdb = affordability({ ...who, propertyType: 'HDB' });
+  const ec = affordability({ ...who, propertyType: 'EC_DEVELOPER' });
+  assert.strictEqual(hdb.bindingConstraint, 'MSR');
+  assert.strictEqual(ec.bindingConstraint, 'MSR');
+  assert.strictEqual(hdb.maxMonthlyRepayment, ec.maxMonthlyRepayment);   // same MSR
+  assert.ok(ec.maxLoan > hdb.maxLoan + 50_000, `EC should clear more: ${ec.maxLoan} vs ${hdb.maxLoan}`);
+});
+
+/* A resale EC must not be assessed on MSR — that is the whole point of asking
+ * which side of the MOP it is on. */
+test('a resale EC borrows on TDSR alone', () => {
+  const who = { applicants: [{ fixedIncome: 9000, age: 35 }], monthlyDebts: 500 };
+  const dev = affordability({ ...who, propertyType: 'EC_DEVELOPER' });
+  const resale = affordability({ ...who, propertyType: 'EC_RESALE' });
+  assert.strictEqual(resale.bindingConstraint, 'TDSR');
+  assert.strictEqual(resale.msrCapacity, null);
+  assert.ok(resale.maxLoan > dev.maxLoan);
+});
+
+/* An EC is bank financing on both sides. Only an HDB flat can be HDB-financed,
+ * and only an HDB loan has no cash floor. */
+test('only an HDB flat on an HDB loan escapes the cash floor', () => {
+  const base = {
+    price: 650_000, applicants: [{ fixedIncome: 6000, age: 35 }, { fixedIncome: 5000, age: 32 }],
+    cashAvailable: 80_000, cpfAvailable: 120_000,
+  };
+  assert.strictEqual(plan({ ...base, propertyType: 'HDB', hdbLoan: true }).cashFloor, 0);
+  assert.ok(plan({ ...base, propertyType: 'HDB', hdbLoan: false }).cashFloor > 0);
+  assert.ok(plan({ ...base, propertyType: 'EC_DEVELOPER', hdbLoan: true }).cashFloor > 0);
+  assert.strictEqual(affordability({ ...base, propertyType: 'EC_DEVELOPER' }).actualRateIfHdbLoan, null);
+});
+
+/* The unreviewed figure lowers the cash needed, so it must announce itself. */
+test('an unreviewed cash floor is reported as unreviewed', () => {
+  const base = { price: 650_000, applicants: [{ fixedIncome: 6000, age: 35 }] };
+  assert.strictEqual(plan({ ...base, propertyType: 'HDB', hdbLoan: true }).cashFloorUnverified,
+    HDB_LOAN_CASH_MIN_REVIEWED === null);
+  assert.strictEqual(plan({ ...base, propertyType: 'HDB', hdbLoan: false }).cashFloorUnverified, false);
 });

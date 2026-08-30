@@ -79,6 +79,12 @@ const nextConfig = {
     '/api/lookup': ['./data/index.json'],
     '/api/record': ['./data/records/**', './data/index.json'],
     '/api/catalogue': ['./data/index.json'],
+    // A watch is refused unless the block exists, and recordByHref reads a
+    // shard by a path built at request time — the exact pattern the tracer
+    // cannot follow. Without this the route rejects every real address in
+    // production with "not a block this site holds transactions for", and
+    // works perfectly in dev.
+    '/api/watch': ['./data/records/**', './data/index.json'],
     // /compare resolves its records from ?a=&b=&c= at request time, so it is a
     // dynamic route reading the same shards /api/record does. Without this it
     // renders "could not be found" for every address in production and works

@@ -1,5 +1,7 @@
 'use client';
 import { useRef, useState } from 'react';
+import AnswerText from './AnswerText.jsx';
+import { splitAnswer, citedIndexes } from '../lib/answer.js';
 
 /**
  * Live retrieval, streamed, with the sources as links.
@@ -12,6 +14,14 @@ import { useRef, useState } from 'react';
  * The sources panel is not a footnote. Rule 9 — this site links reporting and
  * never reproduces it — and a retrieval answer without its links is exactly
  * the thing that rule forbids.
+ *
+ * THE SOURCES LIST IS WHAT THE ANSWER CITED, NOT WHAT THE SEARCH TOUCHED. The
+ * provider returns up to twenty results and the prose typically cites four, so
+ * listing all twenty put Britannica, hotels.com and a travel blog under the
+ * heading "Sources" beside claims that came from URA. That is a provenance
+ * claim the answer does not support. The numbers on the chips are the same
+ * numbers as the superscripts above them, so a reader can follow any sentence
+ * to the page it came from — which is the only thing this panel is for.
  */
 const SUGGESTIONS = [
   'What has been announced for Bishan in the last six months?',
@@ -127,7 +137,8 @@ export default function NeighbourhoodChat() {
           t.role === 'user' ? (
             <p key={i} className="askq"><b>{t.content}</b></p>
           ) : (
-            <Answer key={i} text={t.content} sources={t.sources} />
+            <Answer key={i} text={t.content} sources={t.sources}
+              onAsk={i === turns.length - 1 && state === 'idle' ? ask : null} />
           )
         ))}
         {live && <Answer text={live} sources={sources} streaming />}
@@ -137,24 +148,81 @@ export default function NeighbourhoodChat() {
   );
 }
 
-function Answer({ text, sources = [], streaming = false }) {
+function Answer({ text, sources = [], streaming = false, onAsk = null }) {
+  const { offIsland, body, followUps } = splitAnswer(text);
+
+  /*
+   * A question about somewhere else is refused, not answered. The refusal is
+   * written here rather than by the model, so it says the same thing every
+   * time and in the site's own voice; what arrives from the route is only the
+   * subject, so the reader is told which of their own words put the question
+   * out of scope instead of being told "Singapore only" and left guessing.
+   */
+  if (offIsland) {
+    return (
+      <div className="answer">
+        <div className="note" style={{ marginTop: 0 }}>
+          <b>This tracker covers Singapore only.</b> It read <span className="mono">{offIsland}</span> in
+          that question and stopped there — it does not answer on markets outside Singapore, not
+          even partly, because a half-answer about somewhere else is the last thing a Singapore
+          property site should publish. Ask about a town, an estate, a project or a policy here.
+        </div>
+      </div>
+    );
+  }
+
+  const used = citedIndexes(body);
+  const shown = used.map(n => ({ n, url: sources[n - 1] })).filter(s => s.url);
+
   return (
     <div className="answer">
-      {text.split(/\n\n+/).filter(Boolean).map((p, i) => <p key={i}>{p}</p>)}
+      <AnswerText text={body} sources={sources} />
       {streaming && <span className="caret" aria-hidden="true" />}
-      {sources.length > 0 && (
+
+      {shown.length > 0 && (
         <>
           <span className="filtn" style={{ display: 'block', marginTop: 14 }}>Sources</span>
           <ul className="srcs">
-            {sources.map(u => (
-              <li key={u}>
-                <a href={u} target="_blank" rel="noopener noreferrer nofollow">{host(u)}</a>
+            {shown.map(s => (
+              <li key={s.n}>
+                <a href={s.url} target="_blank" rel="noopener noreferrer nofollow">
+                  <span className="srcn">{s.n}</span>{host(s.url)}
+                </a>
               </li>
             ))}
           </ul>
           <p className="hint" style={{ marginTop: 8 }}>
             Linked, not reproduced. Open the source before relying on anything above.
           </p>
+        </>
+      )}
+
+      {/* Absence of evidence must never read as evidence. An answer that cited
+          nothing is not a sourced answer, and saying nothing here would let it
+          pass as one. */}
+      {!streaming && body.trim() && shown.length === 0 && (
+        <div className="warn" style={{ marginTop: 12 }}>
+          <p style={{ margin: 0 }}><b>Nothing above carries a source.</b> Retrieval came back
+            without citations, so treat this as unverified and check it before relying on it.</p>
+        </div>
+      )}
+
+      {/*
+        * IT USED TO OFFER AND YOU COULD NOT TAKE IT UP. Answers ended with "If
+        * you want, I can also give: the Singapore property angle — the list of
+        * states — the district called East Coast", which is a menu printed as a
+        * sentence: nothing to click, and no way to accept short of retyping the
+        * offer yourself. The route now forbids offering in prose and requires a
+        * trailer instead, which arrives here as buttons that ask the question.
+        */}
+      {onAsk && followUps.length > 0 && (
+        <>
+          <span className="filtn" style={{ display: 'block', marginTop: 16 }}>Ask next</span>
+          <ul className="nextq">
+            {followUps.map(f => (
+              <li key={f}><button type="button" onClick={() => onAsk(f)}>{f}</button></li>
+            ))}
+          </ul>
         </>
       )}
     </div>

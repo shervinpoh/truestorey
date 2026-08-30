@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { f, num } from './fmt.js';
 import { titleCase } from '../lib/name.js';
-import { Figure } from './Motion.jsx';
+import { Figure, still } from './Motion.jsx';
 import MoneyInput from './MoneyInput.jsx';
 
 /**
@@ -62,7 +62,12 @@ export default function BlindspotReport() {
       const j = await res.json();
       if (!res.ok) throw new Error(j.error || 'That did not work.');
       setReport(j); setState('done');
-      requestAnimationFrame(() => box.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      // Jump rather than glide for a reader who has asked for less motion.
+      // The report can be a screen and a half, so this is one of the longest
+      // travels on the site — and arriving is the point, not the journey.
+      requestAnimationFrame(() => box.current?.scrollIntoView({
+        behavior: still() ? 'auto' : 'smooth', block: 'start',
+      }));
     } catch (err) {
       setError(err.message); setState('error');
     }

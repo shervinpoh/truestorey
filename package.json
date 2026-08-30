@@ -40,7 +40,8 @@
     "preflight": "node scripts/preflight.mjs",
     "ingest:zoning": "node scripts/ingest-zoning.mjs",
     "ingest:gls": "node scripts/ingest-gls.mjs",
-    "ingest:planning": "node --env-file=.env.local scripts/ingest-planning.mjs"
+    "ingest:planning": "node --env-file=.env.local scripts/ingest-planning.mjs",
+    "digest": "node --env-file=.env.local scripts/send-digest.mjs"
   },
   "dependencies": {
     "next": "^15.0.0",

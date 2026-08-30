@@ -8,14 +8,26 @@ const INTENT = ['Selling', 'Buying', 'Both', 'Just looking'];
 const WHEN   = ['Within 3 months', '3–6 months', '6–12 months', 'No fixed date'];
 
 /**
- * Lead capture. Name and EMAIL are the required fields; mobile is optional.
+ * Lead capture. Name and EMAIL, and nothing else that identifies a person.
  *
- * It used to be name and mobile, with email optional, and that was incoherent
- * on its own terms: consent has been email-only since 24 Aug 2026, this form
- * says in as many words that no phone call and no WhatsApp come from it, and
- * the number was nonetheless the field you could not submit without — while
- * the address it can actually reply to was the one you could skip. It demanded
- * the channel it had promised not to use and made the consented one optional.
+ * ── THE MOBILE FIELD IS GONE, 30 AUG 2026 ───────────────────────────────────
+ *
+ * It was already optional, and before that it was mandatory while email was
+ * optional — demanding the channel this form promises not to use and making
+ * the consented one skippable. Removing the requirement fixed half of it and
+ * left the rest standing: a field labelled "only if you would rather be
+ * reached that way", sitting eight lines above a sentence promising that no
+ * call and no WhatsApp ever come from this form. It invited a number for a
+ * channel it then swore never to use.
+ *
+ * So the field is deleted rather than reworded. Collecting a number with no
+ * purpose behind it is its own problem — PDPA s18 permits collection for a
+ * purpose a reasonable person would consider appropriate, and "we asked, then
+ * promised not to use it" is not one. The way to reach him by phone is the
+ * WhatsApp link in the footer, which the reader starts and can therefore stop.
+ *
+ * `mobile` stays in the payload as an empty string so an older CRM column keeps
+ * receiving the shape it expects; nothing on this page can fill it.
  *
  * Compliance, do not weaken:
  *  · consent is EMAIL ONLY as of 24 Aug 2026 — no phone, no WhatsApp
@@ -113,16 +125,6 @@ export default function LeadForm({ context = null }) {
       </div>
 
       <div className="fld">
-        <label className="lab" htmlFor="lf-mob">Mobile — optional</label>
-        <input id="lf-mob" value={v.mobile} onChange={set('mobile')} inputMode="tel"
-               autoComplete="tel" placeholder="9123 4567" />
-        <p className="hint" style={{ margin: '6px 0 0', fontSize: 12 }}>
-          Only if you would rather be reached that way. Nothing on this site texts or calls you
-          without you asking first, so leaving it blank costs you nothing.
-        </p>
-      </div>
-
-      <div className="fld">
         <label className="lab" htmlFor="lf-unit">Your floor or stack</label>
         <input id="lf-unit" value={v.unit} onChange={set('unit')} placeholder="e.g. 11th floor, facing the park" />
         <p className="hint" style={{margin:'5px 0 0',fontSize:12}}>Optional — but it&apos;s the single biggest thing the public data can&apos;t see.</p>
@@ -162,7 +164,7 @@ export default function LeadForm({ context = null }) {
         </div>
         <p className="hint" style={{ margin: '10px 0 0' }}>
           Leave it unticked and the form still sends — you get the reply to what you asked, at the
-          address you gave, and nothing after it. No phone calls and no WhatsApp come from this form.
+          address you gave, and nothing after it. This form asks for no phone number and stores none.
         </p>
       </div>
 
@@ -176,7 +178,7 @@ export default function LeadForm({ context = null }) {
         {state==='sending' ? 'Sending…' : 'Run my actual numbers'}
       </button>
       <p className="lab" style={{marginTop:10,textTransform:'none',letterSpacing:0,fontSize:11,lineHeight:1.6}}>
-        Ticking neither box is fine — the tools work either way, and I&apos;ll still reply to this enquiry.
+        Leaving it unticked is fine — the tools work either way, and I&apos;ll still reply to this enquiry.
         I don&apos;t sell or share your details.
       </p>
     </form>

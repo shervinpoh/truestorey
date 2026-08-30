@@ -130,3 +130,55 @@ test('reduced motion is decided before any work happens', () => {
     'their OS for less movement should never have an observer attached at all.'
   );
 });
+
+/* ── reduced motion, everywhere something moves ─────────────────────────────
+ *
+ * prefers-reduced-motion was honoured by the components in Motion.jsx and by
+ * nothing outside it. The map eased its viewport onto a town over 380ms and
+ * Blindspot smooth-scrolled a screen-and-a-half report into view — the two
+ * largest movements on the site, both unconditional. Someone who asks the
+ * operating system for less motion is asking the whole page.
+ *
+ * Source-read for the same reason the rest of this file is: Node does not
+ * strip JSX, and a transform would cost more than the three-dependency rule
+ * is worth.
+ */
+const readSrc = f => readFileSync(new URL(`../components/${f}`, import.meta.url), 'utf8');
+
+test('still() is exported, so it has one definition rather than one per file', () => {
+  assert.match(readSrc('Motion.jsx'), /export const still = \(\) =>/);
+});
+
+test('every viewport movement outside Motion.jsx asks first', () => {
+  for (const f of ['PriceMap.jsx', 'BlindspotReport.jsx', 'SectionNav.jsx']) {
+    const src = readSrc(f);
+    assert.match(src, /import \{[^}]*\bstill\b[^}]*\} from '\.\/Motion\.jsx'/,
+      `${f} moves the viewport without importing still()`);
+    assert.match(src, /still\(\)/, `${f} imports still() and never calls it`);
+  }
+});
+
+test('no smooth scroll is unconditional', () => {
+  for (const f of ['BlindspotReport.jsx', 'SectionNav.jsx']) {
+    const src = readSrc(f);
+    for (const m of src.matchAll(/behavior:\s*([^,}]+)/g)) {
+      assert.match(m[1], /still\(\)/,
+        `${f} has a scroll behavior that ignores reduced motion: ${m[1].trim()}`);
+    }
+  }
+});
+
+/* The map's box is reserved by CSS before hydration. It carried
+ * `height: size.h` with size starting at { w: 0, h: 0 }, so the server drew a
+ * zero-height map and hydration shoved the legend, the town list and the rest
+ * of the page down by ~720px on desktop after paint. */
+test('the map reserves its own box before any JavaScript runs', () => {
+  const src = readSrc('PriceMap.jsx');
+  assert.match(src, /className="mapwrap"[^>]*style=\{\{ aspectRatio: aspect \}\}/,
+    'the map wrapper no longer reserves its aspect ratio in CSS');
+  assert.doesNotMatch(src, /className="mapwrap"[^>]*height: size\.h/,
+    'the wrapper height is back to being set only after hydration');
+  // Height measured from the box, never recomputed from the ratio — two
+  // roundings of one number put the canvas a pixel proud of its own wrapper.
+  assert.match(src, /h: el\.clientHeight/);
+});

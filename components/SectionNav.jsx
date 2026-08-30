@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
+import { still } from './Motion.jsx';
 
 /**
  * A record page's own table of contents, pinned under the global nav.
@@ -72,7 +73,7 @@ export default function SectionNav() {
     if (!chip) return;
     const bar = barRef.current;
     const left = chip.offsetLeft - bar.clientWidth / 2 + chip.clientWidth / 2;
-    bar.scrollTo({ left: Math.max(0, left), behavior: 'smooth' });
+    bar.scrollTo({ left: Math.max(0, left), behavior: still() ? 'auto' : 'smooth' });
   }, [active]);
 
   if (items.length < 2) return null;

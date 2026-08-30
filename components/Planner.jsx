@@ -33,12 +33,20 @@ import MoneyInput from './MoneyInput.jsx';
  *
  * The inputs are grouped because eleven fields in one grid have no shape:
  * what you are buying, who is buying, what you have, what you already carry.
- * The financing assumption is folded away — it has one sensible answer for
- * almost everyone and it is the field least worth reading past.
+ *
+ * NOTHING CONSEQUENTIAL IS FOLDED AWAY ANY MORE. "Financing assumption" used
+ * to be a disclosure triangle, on the reasoning that it had one sensible
+ * answer for almost everyone — which was fair while it changed no figure on
+ * the page, and stopped being fair the moment it decided the cash floor. Who
+ * is lending is now asked beside what is being bought, and both answers are
+ * priced in the hint so the choice is visible rather than inferred.
  */
 const money = n => (Number.isFinite(n) ? f(n) : '—');
 const n2 = v => (Number.isFinite(v) ? v.toLocaleString('en-SG') : '—');
-const pc = n => `${(n * 100).toFixed(n * 100 % 1 ? 1 : 0)}%`;
+/* Rounded before the remainder is tested, or 0.55 * 100 comes out as
+   55.000000000000004, takes the decimal branch, and prints "TDSR 55.0%"
+   beside "MSR 30%". */
+const pc = n => { const v = Math.round(n * 1000) / 10; return `${v.toFixed(v % 1 ? 1 : 0)}%`; };
 
 function Row({ label, value, note, strong }) {
   return (
@@ -106,47 +114,57 @@ function FromProperty({ href }) {
 }
 
 /**
- * Towns whose median filed resale price sits inside the ceiling.
+ * Where a median home is inside the ceiling — in the market you said you were
+ * buying in.
  *
- * Twenty-two tiles between the answer and the arithmetic that produced it is
+ * IT USED TO IGNORE THE PROPERTY TYPE ENTIRELY. Whatever you selected, this
+ * listed HDB town medians, so a private buyer with a S$5.1m budget was shown
+ * towns whose median flat is S$700k–S$960k and told that 26 of 26 qualified.
+ * The tiles were correct data answering a question nobody had asked.
+ *
+ * Twenty-eight tiles between the answer and the arithmetic that produced it is
  * a wall, so five show and the rest are one click away. Sorted nearest the
  * ceiling first by default, because the interesting end of "what can I afford"
  * is the top of it, not the bottom.
  *
- * It says median PRICE. Half the flats filed in a town sold above its median,
- * which is the qualifier printed below — this is somewhere to start looking,
- * not a claim that a flat exists at this price.
+ * It says median PRICE. Half of what was filed sold above it — this is
+ * somewhere to start looking, not a claim that a home exists at this price.
  */
-function TownsWithin({ towns, cap, source, period }) {
+function MarketWithin({ market, cap }) {
   const [all, setAll] = useState(false);
   const [sort, setSort] = useState('closest');
 
+  const items = market?.items || [];
   const within = useMemo(() => {
-    const list = towns.filter(t => Number.isFinite(t.medianPrice) && t.medianPrice <= cap);
+    const list = items.filter(t => Number.isFinite(t.medianPrice) && t.medianPrice <= cap);
     const by = {
       closest: (a, b) => b.medianPrice - a.medianPrice,
       cheapest: (a, b) => a.medianPrice - b.medianPrice,
       psf: (a, b) => b.medianPsf - a.medianPsf,
     }[sort];
     return list.slice().sort(by);
-  }, [towns, cap, sort]);
+  }, [items, cap, sort]);
 
-  if (!Number.isFinite(cap)) return null;
+  if (!Number.isFinite(cap) || !items.length) return null;
 
   const shown = all ? within : within.slice(0, 5);
+  // Two nouns, not one: what the tiles ARE (a town, a district) and what is
+  // being priced inside them (a flat, an EC, a home). Using the container for
+  // both produced "Where a median town is inside S$731,000".
+  const noun = market.label, nouns = market.plural, unit = market.unit;
 
   return (
     <div className="within">
       <div className="sh">
-        <span>Where a median flat is inside {money(cap)}</span>
-        <span>{within.length} of {towns.length} towns</span>
+        <span>Where a median {unit} is inside {money(cap)}</span>
+        <span>{within.length} of {items.length} {nouns}</span>
       </div>
 
       {within.length === 0 ? (
         <p className="hint" style={{ marginTop: 12 }}>
-          No town has a median resale price this low. The cheapest is{' '}
-          {towns.reduce((lo, t) => (t.medianPrice < lo.medianPrice ? t : lo), towns[0]).name} at{' '}
-          {money(Math.min(...towns.map(t => t.medianPrice)))}.
+          No {noun} has a median this low. The cheapest is{' '}
+          {items.reduce((lo, t) => (t.medianPrice < lo.medianPrice ? t : lo), items[0]).name} at{' '}
+          {money(Math.min(...items.map(t => t.medianPrice)))}.
         </p>
       ) : (
         <>
@@ -164,7 +182,7 @@ function TownsWithin({ towns, cap, source, period }) {
 
           <div className="tiles" style={{ marginTop: 12 }}>
             {shown.map(t => (
-              <a key={t.slug} className="tile" href={`/hdb/${t.slug}`}>
+              <a key={t.key} className="tile" href={t.href}>
                 <span className="n">{t.name}</span>
                 <span className="v mono">{money(t.medianPrice)}</span>
                 <span className="b mono">median · ${n2(t.medianPsf)} psf</span>
@@ -178,27 +196,95 @@ function TownsWithin({ towns, cap, source, period }) {
                 {all ? 'Show the closest five' : `View all ${within.length}`}
               </button>
             )}
-            <Link href="/map">See these towns on the price map →</Link>
+            <Link href="/map">See these on the price map →</Link>
           </div>
         </>
       )}
 
-      {source && (
-        <p className="prov">
-          Median filed resale price per town · {source}
-          {period ? ` · ${period.from} to ${period.to}` : ''}.<br />
-          Town medians are somewhere to start looking, not a guarantee that a flat is
-          available at this price — half of the flats filed in a town sold above its median.
-        </p>
-      )}
+      <p className="prov">
+        Median filed price per {noun} · {market.source}
+        {market.period ? ` · ${market.period.from} to ${market.period.to}` : ''}.<br />
+        {market.note ? <>{market.note}<br /></> : null}
+        A median is somewhere to start looking, not a guarantee that a home is available at
+        this price — half of what was filed sold above it.
+      </p>
     </div>
   );
 }
 
-export default function Planner({ towns = [], townSource = null, townPeriod = null }) {
+/**
+ * What is being bought, in the two questions that actually change the maths.
+ *
+ * The first row is the kind of home. The second only appears for an EC, and it
+ * is the one nobody expects: from the developer an EC is assessed on MSR like
+ * an HDB flat, and a resale EC is not assessed on MSR at all. Same building,
+ * same buyer, a different borrowing limit — so it is asked rather than assumed,
+ * and the consequence is printed underneath rather than left in a footnote.
+ */
+function BuyingWhat({ type, setType, hdbLoan, setHdbLoan, price }) {
+  const family = type === 'HDB' ? 'HDB' : type.startsWith('EC') ? 'EC' : 'PRIVATE';
+  const bankCash = Math.ceil((Number(price) || 0) * 0.05);
+  return (
+    <>
+      <div className="seg" role="group" aria-label="What you are buying">
+        <button aria-pressed={family === 'HDB'} onClick={() => setType('HDB')}>HDB resale</button>
+        <button aria-pressed={family === 'EC'} onClick={() => setType('EC_DEVELOPER')}>Executive condo</button>
+        <button aria-pressed={family === 'PRIVATE'} onClick={() => setType('PRIVATE')}>Private</button>
+      </div>
+
+      {/*
+        * WHO IS LENDING, ASKED IN THE OPEN.
+        *
+        * This lived inside a collapsed "Financing assumption" fold, described
+        * as the field least worth reading past. That was true while it changed
+        * nothing — it had quietly stopped affecting any figure after HDB's LTV
+        * levelled with the banks in Aug 2024. Now that it decides the cash
+        * floor it is the second most consequential control on the page, and a
+        * question worth S$32,500 on a S$650,000 flat does not belong behind a
+        * disclosure triangle. Both answers are priced here, so the choice is
+        * visible rather than inferred from a number that moved.
+        */}
+      {family === 'HDB' && (
+        <>
+          <div className="seg subseg" role="group" aria-label="Who the loan is from" style={{ marginTop: 8 }}>
+            <button aria-pressed={hdbLoan} onClick={() => setHdbLoan(true)}>HDB concessionary loan</button>
+            <button aria-pressed={!hdbLoan} onClick={() => setHdbLoan(false)}>A bank loan</button>
+          </div>
+          <p className="hint" style={{ margin: '8px 0 0' }}>
+            {hdbLoan
+              ? <><b>No cash floor.</b> The whole 25% downpayment can come from CPF OA. A bank loan on the same flat would need {money(bankCash)} of it in cash that CPF cannot cover.</>
+              : <><b>{money(bankCash)} must be cash.</b> Five per cent of the price, which CPF cannot cover however large the OA balance is. An HDB loan has no cash floor.</>}
+            {' '}Both are assessed on MSR and TDSR, and both cap at 75%.
+          </p>
+        </>
+      )}
+
+      {family === 'EC' && (
+        <>
+          <div className="seg subseg" role="group" aria-label="Which kind of EC purchase" style={{ marginTop: 8 }}>
+            <button aria-pressed={type === 'EC_DEVELOPER'}
+              onClick={() => setType('EC_DEVELOPER')}>From the developer</button>
+            <button aria-pressed={type === 'EC_RESALE'}
+              onClick={() => setType('EC_RESALE')}>Resale, past MOP</button>
+          </div>
+          <p className="hint" style={{ margin: '8px 0 0' }}>
+            {type === 'EC_DEVELOPER'
+              ? <><b>MSR applies.</b> A new EC is assessed on the 30% servicing ratio as well as TDSR, the way an HDB flat is — and repaid over 30 years, the way private property is. Bank financing only; there is no HDB loan on an EC.</>
+              : <><b>MSR does not apply.</b> Past its MOP an EC is private property for financing, so only TDSR binds. Bank financing only.</>}
+          </p>
+        </>
+      )}
+    </>
+  );
+}
+
+const VALID_TYPES = ['HDB', 'EC_DEVELOPER', 'EC_RESALE', 'PRIVATE'];
+
+export default function Planner({ markets = {} }) {
   const q = useSearchParams();
   const [price, setPrice] = useState(Number(q.get('price')) || 650000);
-  const [type, setType] = useState(q.get('type') === 'PRIVATE' ? 'PRIVATE' : 'HDB');
+  // Record pages hand over HDB or PRIVATE; the EC branches are chosen here.
+  const [type, setType] = useState(VALID_TYPES.includes(q.get('type')) ? q.get('type') : 'HDB');
   const [hdbLoan, setHdbLoan] = useState(true);
   const [a1, setA1] = useState(6000); const [g1, setG1] = useState(34);
   const [a2, setA2] = useState(5000); const [g2, setG2] = useState(32);
@@ -228,6 +314,9 @@ export default function Planner({ towns = [], townSource = null, townPeriod = nu
   const r = useMemo(() => plan({ ...input, price: Number(price) || 0 }), [input, price]);
   const cap = useMemo(() => maxPrice(input), [input]);
 
+  const market = type === 'HDB' ? markets.HDB : type.startsWith('EC') ? markets.EC : markets.PRIVATE;
+  const priceMax = type === 'HDB' ? 1_500_000 : type.startsWith('EC') ? 3_000_000 : 10_000_000;
+
   return (
     <>
       {r.ratesUnverified && (
@@ -239,20 +328,35 @@ export default function Planner({ towns = [], townSource = null, townPeriod = nu
         </div>
       )}
 
+      {/* This one names a single figure rather than the whole rate table,
+          because it lowers the cash needed and that is the direction where
+          being wrong leaves a buyer short on completion day. */}
+      {r.cashFloorUnverified && (
+        <div className="warn" style={{ marginBottom: 18 }}>
+          <p style={{ margin: 0 }}>
+            <b>The cash floor for an HDB concessionary loan has not been re-checked.</b>{' '}
+            This plans on the whole downpayment coming from CPF OA, which is what HDB
+            publishes — but it has not been confirmed here, and it is the figure that
+            decides whether you can complete. Confirm it with HDB before relying on it,
+            or switch “Loan from” to a bank for the more conservative number.
+          </p>
+        </div>
+      )}
+
       <FromProperty href={from} />
 
       <div className="planlayout">
         <div className="planinputs">
           <fieldset className="plangroup">
             <legend className="lab">What you are buying</legend>
-            <div className="seg" role="group" aria-label="What you are buying">
-              <button aria-pressed={type === 'HDB'} onClick={() => setType('HDB')}>HDB resale</button>
-              <button aria-pressed={type === 'PRIVATE'} onClick={() => setType('PRIVATE')}>Private</button>
-            </div>
+            <BuyingWhat type={type} setType={setType} hdbLoan={hdbLoan} setHdbLoan={setHdbLoan} price={price} />
             <div className="planform">
+              {/* The slider's range follows the market. A single 100k–5m track
+                  spends four fifths of its travel on prices no HDB flat has
+                  ever filed at, and runs out before a private buyer's. */}
               <label className="wide2"><span>Price</span>
                 <MoneyInput value={price} onChange={setPrice} slider
-                  min={100000} max={5000000} step={10000} /></label>
+                  min={100000} max={priceMax} step={priceMax > 3000000 ? 50000 : 10000} /></label>
             </div>
           </fieldset>
 
@@ -313,24 +417,6 @@ export default function Planner({ towns = [], townSource = null, townPeriod = nu
             </div>
           </fieldset>
 
-          {type === 'HDB' && (
-            <details className="plangroup planfold">
-              <summary><span className="lab">Financing assumption</span></summary>
-              <div className="planform">
-                <label><span>Loan from</span>
-                  <select value={hdbLoan ? 'hdb' : 'bank'}
-                    onChange={e => setHdbLoan(e.target.value === 'hdb')}>
-                    <option value="hdb">HDB concessionary</option>
-                    <option value="bank">A bank</option>
-                  </select>
-                </label>
-              </div>
-              <p className="hint" style={{ margin: '10px 0 0' }}>
-                An HDB loan is assessed on MSR as well as TDSR, and carries a different
-                loan-to-value ceiling. Change this only if you know which you are taking.
-              </p>
-            </details>
-          )}
         </div>
 
         {/* The answer, kept in view while the inputs above it move. */}
@@ -368,7 +454,7 @@ export default function Planner({ towns = [], townSource = null, townPeriod = nu
         <span><i className="lab">Cash needed</i> <b className="mono">{money(r.cashNeeded)}</b></span>
       </div>
 
-      <TownsWithin towns={towns} cap={cap} source={townSource} period={townPeriod} />
+      <MarketWithin market={market} cap={cap} />
 
       <div className="plansteps">
         <Row label="A bank would assess you for" value={money(r.afford.maxLoan)}
@@ -376,7 +462,10 @@ export default function Planner({ towns = [], townSource = null, townPeriod = nu
         <Row label={`The ${pc(r.ltv.rate)} ceiling on this price allows`} value={money(r.ltv.cap)} note={r.ltv.why} />
         <Row label="So the loan is" value={money(r.loan)} note={`limited by ${r.limitedBy}`} strong />
         <Row label="Downpayment" value={money(r.downpayment)} note="price less the loan" />
-        <Row label="— of which must be cash" value={money(r.cashFloor)} note={`${pc(r.ltv.cashMin)} of price, CPF not allowed`} />
+        <Row label="— of which must be cash" value={money(r.cashFloor)}
+          note={r.ltv.cashMin === 0
+            ? 'none — an HDB loan takes the downpayment from CPF OA'
+            : `${pc(r.ltv.cashMin)} of price, CPF not allowed`} />
         <Row label="— covered by CPF" value={money(r.cpfTowardsDown)} note="as far as your OA goes" />
         <Row label="Buyer's Stamp Duty" value={money(r.duties.bsd)} note="progressive, on the price" />
         <Row label="Additional Buyer's Stamp Duty" value={money(r.duties.absd)}
@@ -387,9 +476,10 @@ export default function Planner({ towns = [], townSource = null, townPeriod = nu
       </div>
 
       <p className="prov" style={{ marginTop: 22 }}>
-        TDSR {pc(r.assumptions.tdsrLimit)}{r.assumptions.msrLimit ? ` · MSR ${pc(r.assumptions.msrLimit)}` : ''} ·
-        stress rate {pc(r.assumptions.stressRate)} · LTV {pc(r.assumptions.ltvRate)} ·
-        cash floor {pc(r.assumptions.cashMin)}<br />
+        TDSR {pc(r.assumptions.tdsrLimit)}
+        {r.assumptions.msrLimit ? ` · MSR ${pc(r.assumptions.msrLimit)}` : ' · MSR does not apply to this purchase'} ·
+        tenure to {r.assumptions.tenureCap} years · stress rate {pc(r.assumptions.stressRate)} ·
+        LTV {pc(r.assumptions.ltvRate)} · cash floor {pc(r.assumptions.cashMin)}<br />
         {SOURCES.bsd.name} · {SOURCES.absd.name} · rates last reviewed {RATES_REVIEWED}
         {LTV_REVIEWED ? ` · LTV reviewed ${LTV_REVIEWED}` : ' · LTV not yet reviewed'}<br />
         This plans a purchase from figures you typed. It does not value any property, and it is not

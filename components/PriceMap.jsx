@@ -1,5 +1,6 @@
 'use client';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { still } from './Motion.jsx';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { titleCase } from '../lib/name.js';
@@ -136,8 +137,14 @@ export default function PriceMap({ map }) {
     const el = wrapRef.current;
     if (!el) return;
     const ro = new ResizeObserver(() => {
+      // Height is MEASURED, not recomputed. The wrapper's height now comes
+      // from a CSS aspect-ratio, so deriving it here from the same ratio would
+      // be two roundings of one number: at 998px wide the CSS box is 730 and
+      // Math.round(998 / 1.36531) is 731, and the canvas would sit one pixel
+      // proud of the box that reserved it. Reading the box back can never
+      // disagree with the box.
       const w = el.clientWidth;
-      setSize({ w, h: Math.round(w / aspect) });
+      setSize({ w, h: el.clientHeight || Math.round(w / aspect) });
     });
     ro.observe(el);
     return () => ro.disconnect();
@@ -201,6 +208,16 @@ export default function PriceMap({ map }) {
     cancelAnimationFrame(animRef.current);
     targetRef.current = target;
     if (typeof document !== 'undefined' && document.hidden) {
+      viewRef.current = target;
+      setView(target);
+      targetRef.current = null;
+      return;
+    }
+    // Reduced motion lands the move instead of easing it. Selecting a town
+    // repaints the whole map, which is about the largest movement on this
+    // site — exactly the thing the setting is asking not to happen. The
+    // destination is identical either way; only the 380ms of travel goes.
+    if (still()) {
       viewRef.current = target;
       setView(target);
       targetRef.current = null;
@@ -730,7 +747,22 @@ export default function PriceMap({ map }) {
         </div>
       )}
 
-      <div className="mapwrap" ref={wrapRef} style={{ height: size.h || undefined }}>
+      {/*
+        * THE BOX IS RESERVED IN CSS, BEFORE ANY JAVASCRIPT RUNS.
+        *
+        * This carried `height: size.h`, and size starts at { w: 0, h: 0 }
+        * because only a ResizeObserver can fill it in. So the server rendered
+        * a zero-height map, hydration measured the width, and everything below
+        * the canvas — the legend, the town list, the whole page — was shoved
+        * down by ~720px on desktop and ~255px on mobile, after paint.
+        *
+        * `aspect` comes from map.bbox, which is present at render on the
+        * server too, so the aspect ratio is known before the width is. The
+        * canvas keeps explicit pixel dimensions because its backing store is
+        * sized from the same numbers and a percentage would let the two drift
+        * by a subpixel and blur every label.
+        */}
+      <div className="mapwrap" ref={wrapRef} style={{ aspectRatio: aspect }}>
         <canvas ref={cvsRef}
           style={{
             width: size.w, height: size.h,
@@ -837,7 +869,31 @@ export default function PriceMap({ map }) {
         <p className="hint" style={{ margin: '6px 0 0' }}>
           {land
             ? <>The land is {land.source}, simplified and stored in this repo — there is still no tile
-              server and no map library. A {k.region} name sits at the centroid of its own area.</>
+              server and no map library.{' '}
+              {/*
+                * THE THREE VIEWS DO NOT BEHAVE THE SAME AND THIS USED TO CLAIM
+                * THEY DID. "A {region} name sits at the centroid of its own
+                * area" is true for HDB — a town label slugs to a planning-area
+                * name, so it anchors to that area and picking a town shades it
+                * — and false for condo and landed, where the label is "D01",
+                * matches no planning area, anchors to the median of its own
+                * projects, and shades nothing when picked. That difference is
+                * the first thing a reader notices switching between them.
+                *
+                * The fix is not to draw the districts. A postal district is not
+                * a planning area, no district boundary is published in any
+                * dataset here, and deriving one from the other would be
+                * inventing a shape and presenting it as URA's. Rule 13. So the
+                * asymmetry is explained instead of hidden.
+                */}
+              {kind === 0
+                ? <>A town name sits at the centroid of its own planning area, and picking one
+                  shades that area.</>
+                : <>A district name sits at the median coordinate of its own {k.unit}, because no
+                  district boundary is published in any dataset here — a postal district is not a
+                  planning area, and drawing one from the other would be inventing a shape. So
+                  picking a district dims everything outside it instead of outlining it.</>}
+            </>
             : <>A {k.region} name sits at the median coordinate of its own {k.unit}, because no
               boundary data has been ingested yet.</>}
           {' '}Names that would overlap are dropped rather than overprinted.

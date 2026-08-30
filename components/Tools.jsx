@@ -219,13 +219,29 @@ function Afford() {
 
   return (
     <>
+      {/*
+        * THIS BUTTON USED TO READ "HDB or EC" AND SEND propertyType: 'HDB'.
+        * It got MSR right and the tenure wrong. An EC is private property and
+        * runs to 30 years, not 25, so an EC buyer was assessed over the shorter
+        * term and told they could borrow about S$54,000 less than they can — on
+        * a S$9,000 household, S$511,522 against S$565,545. A resale EC has the
+        * opposite problem in the other direction: MSR does not apply to it at
+        * all, and lumping it in with HDB applied one.
+        *
+        * Four buttons rather than two, because there are four answers.
+        */}
       <div className="seg">
-        {['HDB', 'PRIVATE'].map(k => (
-          <button key={k} aria-pressed={kind === k} onClick={() => setKind(k)}>
-            {k === 'HDB' ? 'HDB or EC' : 'Private'}
-          </button>
-        ))}
+        {[['HDB', 'HDB flat'], ['EC_DEVELOPER', 'New EC'], ['EC_RESALE', 'Resale EC'], ['PRIVATE', 'Private']]
+          .map(([k, label]) => (
+            <button key={k} aria-pressed={kind === k} onClick={() => setKind(k)}>{label}</button>
+          ))}
       </div>
+      <p className="hint" style={{ margin: '8px 0 0' }}>
+        {kind === 'HDB' ? 'MSR and TDSR both apply, over 25 years.'
+          : kind === 'EC_DEVELOPER' ? 'Bought from the developer, an EC is assessed on MSR as well as TDSR — over 30 years, because it is private property.'
+          : kind === 'EC_RESALE' ? 'Past its MOP an EC is private for financing: TDSR only, over 30 years.'
+          : 'TDSR only, over 30 years. MSR does not apply to private property.'}
+      </p>
       <div className="f2">
         <div><span className="lab">Fixed monthly income</span><input type="number" value={income}
           onChange={e => setIncome(e.target.value)} min="0" step="500" /></div>
