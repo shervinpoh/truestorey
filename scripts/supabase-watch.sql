@@ -37,7 +37,23 @@ create table if not exists block_watch (
 
 -- One watch per address per block. A second submission updates rather than
 -- duplicating, so a keen reader cannot mail-bomb themselves.
-create unique index if not exists block_watch_email_href on block_watch (lower(email), href);
+--
+-- ⚠ THE INDEX MUST BE ON THE PLAIN COLUMNS, NOT ON lower(email).
+-- This was `(lower(email), href)` and every upsert failed with "there is no
+-- unique or exclusion constraint matching the ON CONFLICT specification".
+-- PostgREST's on_conflict=email,href generates ON CONFLICT (email, href), and
+-- Postgres will not match that against a functional index. The bug only
+-- appeared on a write; the digest reads, so a read-only check passed.
+--
+-- The case-folding it was there for is now enforced by the database instead of
+-- assumed from the route: the check constraint below makes a non-lowercase
+-- address impossible, so a plain unique index is genuinely unique per person.
+-- App-level normalisation and a DB-level constraint that disagree is the
+-- two-implementations failure this repo keeps writing tests about.
+alter table block_watch drop constraint if exists block_watch_email_lower;
+alter table block_watch add constraint block_watch_email_lower check (email = lower(email));
+drop index if exists block_watch_email_href;
+create unique index if not exists block_watch_email_href on block_watch (email, href);
 create index if not exists block_watch_href on block_watch (href);
 create index if not exists block_watch_unsub on block_watch (unsub_token);
 create index if not exists block_watch_confirm on block_watch (confirm_token);
