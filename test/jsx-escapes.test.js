@@ -74,3 +74,16 @@ test('no unicode escape sequences in any .jsx file', () => {
 
   assert.deepEqual(bad, [], `unicode escapes in JSX:\n${bad.join('\n')}`);
 });
+
+/* JSX turns a line break between text and an expression into a SPACE, so
+ * `block\n{n === 1 ? '' : 's'}` renders as "346 block s". Caught in the
+ * locator caption; the same shape appears wherever a plural is split over two
+ * lines, which is easy to do while wrapping at 80 columns. */
+test('a plural is never split across a line from its noun', () => {
+  const dir = new URL('../components/', import.meta.url);
+  for (const f of readdirSync(dir).filter(n => n.endsWith('.jsx'))) {
+    const src = readFileSync(new URL(f, dir), 'utf8');
+    assert.doesNotMatch(src, /[A-Za-z]\n\s*\{[^}]*\?\s*''\s*:\s*'s'\s*\}/,
+      `${f} splits a word from its plural across a line — JSX will put a space there`);
+  }
+});

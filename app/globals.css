@@ -1314,3 +1314,19 @@ sup.cite a:hover{text-decoration:underline}
   .ladder .mth{grid-column:2;text-align:left}
   .ladderdet{padding-left:0}
 }
+
+/* Announced, not shown. A live region that is display:none is not announced at
+   all, and one that is visible shifts the page on every keystroke — so it is
+   clipped instead, which is the only technique that does both. */
+.vh{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+ clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+
+/* ── the block locator ──────────────────────────────────────────────────── */
+.locator{margin:20px 0 0;padding:0}
+.locator svg{width:100%;height:auto;display:block;background:var(--paper);
+ border:1px solid var(--line);border-radius:var(--r2)}
+.locator .near{fill:var(--acc);opacity:.28}
+/* --acc-lit is data that is live or selected. This block, on its own page, is
+   the most selected thing on the site. */
+.locator .here{fill:var(--acc-lit);stroke:var(--acc-ink);stroke-width:1.4}
+.locator figcaption{margin-top:8px}

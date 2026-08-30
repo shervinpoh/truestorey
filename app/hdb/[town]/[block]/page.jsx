@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
-import { recordAt, getIndex, allUrls, nearby, nearbyManifest, storeyFor } from '../../../../lib/data/query.js';
+import { recordAt, getIndex, allUrls, nearby, nearbyManifest, storeyFor, town as townOf, boundaries, geoRecords } from '../../../../lib/data/query.js';
+import { simplify } from '../../../../lib/geojson.js';
 import { ogForRecord } from '../../../../lib/og.js';
 import { titleCase } from '../../../../lib/name.js';
 import RecordPage from '../../../../components/RecordPage.jsx';
@@ -34,10 +35,40 @@ export default async function Page({ params }) {
   const rec = recordAt('hdb', town, block);
   if (!rec) notFound();
   return (
-    <RecordPage canWatch={mailConfigured()} rec={rec} storey={storeyFor(rec)} near={nearby(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []}
+    <RecordPage canWatch={mailConfigured()} locator={locatorFor(rec)} rec={rec} storey={storeyFor(rec)} near={nearby(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []}
       posts={[...insightsForBlock(rec.href), ...insightsForTown(town)]
         .filter((p, k, a) => a.findIndex(x => x.slug === p.slug) === k).slice(0, 4)}
       crumbs={[{ href: '/', label: 'Home' }, { href: '/hdb', label: 'HDB' },
                { href: `/hdb/${town}`, label: rec.town }]} />
   );
+}
+
+/**
+ * The outline and the neighbours for one block's locator.
+ *
+ * Resolved here so the client ships coordinates and nothing else — no boundary
+ * file, no geocode table. A town of 400 blocks is about 12KB of pairs.
+ *
+ * The area is matched on the town's own slug, the same join IslandMap makes.
+ * Two of twenty-six towns have no planning area of that name and get no
+ * outline; that is documented in Locator.jsx and is not a bug.
+ */
+function locatorFor(rec) {
+  const geo = geoRecords();
+  const here = geo[rec.href];
+  if (!here) return null;                      // rule 12 — no coordinate, no map
+
+  const area = (boundaries().areas || []).find(a => a.slug === rec.townSlug);
+  const t = townOf(rec.townSlug);
+  const points = [];
+  for (const b of t?.blocks || []) {
+    if (b.href === rec.href) continue;
+    const g = geo[b.href];
+    if (g) points.push({ href: b.href, lat: +g.lat.toFixed(5), lon: +g.lon.toFixed(5) });
+  }
+  return {
+    here: { lat: +here.lat.toFixed(5), lon: +here.lon.toFixed(5) },
+    points,
+    area: area ? { rings: area.rings.map(r => simplify(r, 0.0004).map(([lo, la]) => [+lo.toFixed(5), +la.toFixed(5)])) } : null,
+  };
 }

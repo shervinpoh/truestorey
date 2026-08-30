@@ -4,6 +4,7 @@ import RecordView from './RecordView.jsx';
 import Proceeds from './Proceeds.jsx';
 import Gate from './Gate.jsx';
 import WatchBlock from './WatchBlock.jsx';
+import Locator from './Locator.jsx';
 import Search from './Search.jsx';
 import Masthead from './Masthead.jsx';
 import Amenities from './Amenities.jsx';
@@ -46,7 +47,7 @@ import { EVENTS } from '../lib/analytics.js';
  * The proceeds waterfall re-anchors when the flat-type filter moves, so the
  * slider is never centred on a median that is no longer on screen.
  */
-export default function RecordPage({ rec, attribution, crumbs, posts = [], near = null, nearManifest = null, storey = null, canWatch = false }) {
+export default function RecordPage({ rec, attribution, crumbs, posts = [], near = null, nearManifest = null, storey = null, canWatch = false, locator = null }) {
   const [median, setMedian] = useState(rec.medianPrice);
 
   useEffect(() => { track(EVENTS.RECORD, { href: rec.href, kind: rec.kind }); }, [rec.href]);
@@ -71,8 +72,15 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
       <section className="pane" id="overview">
         <RecordView rec={rec} attribution={attribution}
           onType={(t, rv) => setMedian(rv.medianPrice)}
-          afterSummary={<Fork price={price} planHref={planHref} href={rec.href}
-            hdb={hdb} hasFloor={hasFloor} hasNear={hasNear} />} />
+          afterSummary={<>
+            {/* Where it is, before what it costs over time. Codex's note was
+                that a record opens with a figure and becomes a ledger without
+                ever saying where — and the fork below is the other half of
+                that: what you can DO from here. */}
+            {locator && <Locator {...locator} label={titleCase(rec.label)} />}
+            <Fork price={price} planHref={planHref} href={rec.href}
+              hdb={hdb} hasFloor={hasFloor} hasNear={hasNear} />
+          </>} />
       </section>
 
       {hasFloor && <div id="floor"><Storey data={storey} label={titleCase(rec.label)} /></div>}
