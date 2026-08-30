@@ -83,3 +83,28 @@ test('every upcoming-MOP block still resolves through the shared href', async ()
   // makes /mop's map worth drawing at all.
   assert.ok(placed / total > 0.9, `only ${placed}/${total} upcoming MOP blocks resolve`);
 });
+
+/* ── one step up ────────────────────────────────────────────────────────────
+ *
+ * The back link is derived from the path, so its label goes through titleCase
+ * — which only repairs text that is SHOUTING, by design. A slug is lowercase,
+ * so it shipped as "Back to ang mo kio" until it was shouted at first.
+ */
+test('the back link names where it goes, cased like a place', async () => {
+  const { parentOf } = await import('../lib/nav.js');
+  assert.deepEqual(parentOf('/hdb/ang-mo-kio/406-ang-mo-kio-ave-10'),
+    { href: '/hdb/ang-mo-kio', label: 'Ang Mo Kio' });
+  assert.deepEqual(parentOf('/hdb/kallang-whampoa/1a-jln-tenteram'),
+    { href: '/hdb/kallang-whampoa', label: 'Kallang Whampoa' });
+  assert.equal(parentOf('/condo/the-sail-marina-bay').href, '/condo');
+  assert.equal(parentOf('/insights/some-note').label, 'Insights');
+  assert.equal(parentOf('/plan').label, 'Home');
+});
+
+/* Home has nothing above it, and a back control there is a control that lies. */
+test('the homepage has no step up', () => {
+  return import('../lib/nav.js').then(({ parentOf }) => {
+    assert.equal(parentOf('/'), null);
+    assert.equal(parentOf(''), null);
+  });
+});

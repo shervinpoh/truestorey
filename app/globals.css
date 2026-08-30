@@ -1272,3 +1272,15 @@ sup.cite a:hover{text-decoration:underline}
 /* 18px and a real hit area — a consent tick that is hard to hit is a consent
    tick people mis-hit, and PDPA s14 wants a deliberate act. */
 .watchtick input{width:18px;height:18px;flex:0 0 18px;margin-top:2px;accent-color:var(--acc)}
+
+/* One step up, in the sticky nav. Quiet — it is an exit, not an invitation,
+   and it must not compete with the three headings it sits beside. */
+.backup{display:inline-flex;align-items:center;gap:6px;margin-left:14px;padding:6px 0;
+ font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.06em;
+ color:var(--mute);text-decoration:none;white-space:nowrap;min-height:44px}
+.backup:hover{color:var(--ink)}
+.backup span{font-size:13px;line-height:1}
+/* Below the nav's collapse point the three headings become a disclosure and
+   space is tight, so this keeps the arrow and drops nothing else — it is the
+   phone where the breadcrumb being off-screen actually hurts. */
+@media(max-width:560px){ .backup{margin-left:10px;font-size:10px} }

@@ -97,6 +97,32 @@ const KIND = [
 // region tuple: [label, href, lat, lon, psf, sales, members, plotted]
 const R = { LABEL: 0, HREF: 1, LAT: 2, LON: 3, PSF: 4, SALES: 5, MEMBERS: 6, PLOTTED: 7 };
 
+/**
+ * What a region is called.
+ *
+ * THE MAP CALLED THE SAME PLACE TWO THINGS. An HDB town read "ANG MO KIO" and
+ * a district read "D01" — a place name in one tab and a database code in the
+ * next, in the same control, on the same map. Worse, the rest of the site had
+ * already settled on "District 1": ProjectBrowse and FloorView both write it
+ * out. The map was the only surface still printing the raw key.
+ *
+ * WHAT IS NOT DONE HERE, AND WHY. The obvious next step is to give a district
+ * its locality names, so D15 reads "Katong · Joo Chiat" and a reader can see
+ * how it relates to the East Coast they know. That needs URA's published
+ * district list as a source, transcribed the way data/sources/gls-programme
+ * .json is. Writing twenty-eight of them from memory onto a page that carries
+ * a CEA registration number is exactly the thing rule 13 refuses for geometry,
+ * and the reasoning does not change because these are words.
+ *
+ * An HDB town and a postal district are also genuinely different shapes that
+ * merely overlap — East Coast is a planning area, D15 is a postal district,
+ * and naming one after the other would be wrong rather than helpful. The
+ * caption under the map says so.
+ */
+const regionName = label => (/^D\d{1,2}$/.test(String(label))
+  ? `District ${Number(String(label).slice(1))}`
+  : titleCase(label));
+
 const EASE = t => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
 const n = v => (Number.isFinite(v) ? v.toLocaleString('en-SG') : '—');
 
@@ -617,6 +643,22 @@ export default function PriceMap({ map }) {
       };
       let box = null;
       for (const [dx, dy] of NUDGE) {
+        /*
+         * THE MAP FACE KEEPS THE SHORT FORM, ON PURPOSE.
+         *
+         * Everywhere with room to set type — the picker, the tooltip, the
+         * caption, the aria-label — now reads "District 15". Here it stays
+         * "D15", because "DISTRICT 15" is three times the width and districts
+         * 1 to 15 are all stacked into the central south. At 1000px for the
+         * whole island those labels collide, and this layout DROPS a label it
+         * cannot place rather than overprint it — so spelling it out would
+         * silently delete half the districts from the map to gain a word.
+         *
+         * A map face abbreviating what its legend spells out is ordinary
+         * cartography, and D15 is what the market calls it anyway. The
+         * inconsistency worth fixing was a code against a PLACE NAME, and that
+         * one is fixed.
+         */
         box = draw(titleCase(rg[R.LABEL]).toUpperCase(), x + dx, y + dy, opts);
         if (box) break;
       }
@@ -714,7 +756,7 @@ export default function PriceMap({ map }) {
             <option value={-1}>All of Singapore</option>
             {regions.map((rg, i) => (
               <option key={rg[R.LABEL]} value={i}>
-                {titleCase(rg[R.LABEL])}{Number.isFinite(rg[R.PSF]) ? ` — $${n(rg[R.PSF])} psf` : ''}
+                {regionName(rg[R.LABEL])}{Number.isFinite(rg[R.PSF]) ? ` — $${n(rg[R.PSF])} psf` : ''}
               </option>
             ))}
           </select>
@@ -780,8 +822,8 @@ export default function PriceMap({ map }) {
           onKeyDown={onKeyDown}
           role="img"
           aria-label={`${n(shown.length)} ${k.label} locations plotted by median price per square foot. `
-            + (region ? `${titleCase(region[R.LABEL])} is highlighted and the rest of Singapore dimmed. ` : '')
-            + `Currently showing ${n(where.inView)} of them, near ${where.near ? titleCase(where.near[R.LABEL]) : 'no named area'}. `
+            + (region ? `${regionName(region[R.LABEL])} is highlighted and the rest of Singapore dimmed. ` : '')
+            + `Currently showing ${n(where.inView)} of them, near ${where.near ? regionName(where.near[R.LABEL]) : 'no named area'}. `
             + 'Use the arrow keys to move, plus and minus to zoom, and 0 to see all of Singapore.'} />
 
         {/* Zoom controls, because a gesture nobody can see is a gesture most
@@ -801,7 +843,7 @@ export default function PriceMap({ map }) {
         )}
         {!hover && hr && (
           <div className="maptip" style={tipAt(hr[R.LAT], hr[R.LON])}>
-            <b>{titleCase(hr[R.LABEL])}</b>
+            <b>{regionName(hr[R.LABEL])}</b>
             <span className="mono">
               {Number.isFinite(hr[R.PSF]) ? `$${n(hr[R.PSF])} psf median` : 'no median'}
               {' · '}{n(hr[R.PLOTTED])} {k.unit}
@@ -831,7 +873,7 @@ export default function PriceMap({ map }) {
               {/* At full extent the nearest region is just whatever sits closest
                   to the middle of the country, which tells a reader nothing. */}
               {where.zoom >= 1.05 && where.near
-                ? <>, nearest {k.region} <b>{titleCase(where.near[R.LABEL])}</b>{' · '}
+                ? <>, nearest {k.region} <b>{regionName(where.near[R.LABEL])}</b>{' · '}
                   <span className="mono">{where.zoom.toFixed(1)}× in</span></>
                 : <> · <span className="mono">all of Singapore</span></>}
             </span>

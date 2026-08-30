@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { NAV, isHere } from '../lib/nav.js';
+import BackLink from './BackLink.jsx';
 
 /**
  * The global nav.
@@ -68,6 +69,12 @@ export default function Nav({ here = '' }) {
     <nav className="gnav" aria-label="Primary" ref={navRef}>
       <div className="in">
         <Link href="/" className="mk">True<b>storey</b></Link>
+
+        {/* One step UP, beside the wordmark, inside the sticky nav — so the
+            way out is wherever the reader is rather than 8,500px above them.
+            Renders nothing on the homepage. See BackLink.jsx for why this is
+            not router.back(). */}
+        <BackLink />
 
         {/* Desktop: three headings, each printing what is inside it. */}
         <ul className="navrow">
