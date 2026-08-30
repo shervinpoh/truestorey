@@ -8,7 +8,7 @@
     "build": "npm run data && next build",
     "start": "next start",
     "ingest:hdb": "node scripts/ingest-hdb.mjs",
-    "ingest:ura": "node --env-file=.env.local scripts/ingest-ura.mjs",
+    "ingest:ura": "node --env-file-if-exists=.env.local scripts/ingest-ura.mjs",
     "index": "node scripts/build-index.mjs",
     "data": "npm run ingest:hdb && npm run ingest:index && npm run ingest:mop && npm run index && npm run build:storey && npm run build:guides",
     "data:all": "npm run ingest:hdb && npm run ingest:ura && npm run ingest:index && npm run ingest:sora && npm run ingest:mop && npm run index && npm run build:storey",
@@ -34,14 +34,14 @@
     "build:map": "node scripts/build-map.mjs",
     "build:storey": "node scripts/build-storey.mjs",
     "build:guides": "node scripts/build-guides.mjs",
-    "ingest:rental": "node --env-file=.env.local scripts/ingest-rental.mjs",
+    "ingest:rental": "node --env-file-if-exists=.env.local scripts/ingest-rental.mjs",
     "build:yield": "node scripts/build-yield.mjs",
     "ingest:boundaries": "node scripts/ingest-boundaries.mjs",
     "preflight": "node scripts/preflight.mjs",
     "ingest:zoning": "node scripts/ingest-zoning.mjs",
     "ingest:gls": "node scripts/ingest-gls.mjs",
-    "ingest:planning": "node --env-file=.env.local scripts/ingest-planning.mjs",
-    "digest": "node --env-file=.env.local scripts/send-digest.mjs"
+    "ingest:planning": "node --env-file-if-exists=.env.local scripts/ingest-planning.mjs",
+    "digest": "node --env-file-if-exists=.env.local scripts/send-digest.mjs"
   },
   "dependencies": {
     "next": "^15.0.0",

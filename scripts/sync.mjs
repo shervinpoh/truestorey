@@ -35,11 +35,31 @@ const forceAll = argv.includes('--all');
 const JOBS = [
   { key: 'sora', file: 'sora.json', every: 1, cmd: 'npm run ingest:sora',
     why: 'MAS publishes SORA every business day' },
-  { key: 'transactions', file: 'index.json', every: 7, cmd: 'npm run ingest:hdb && npm run ingest:ura && npm run index',
+  /*
+   * A REFRESH THAT LEAVES A DERIVED FILE BEHIND IS A REFRESH THAT MAKES THE
+   * SITE DISAGREE WITH ITSELF.
+   *
+   * This ran ingest → index and stopped, while map.json and storey.json are
+   * both built FROM index.json and were rebuilt by nothing on this schedule:
+   * map.json only by the `boundaries` job, every 365 days, and storey.json by
+   * no job at all. build-map.mjs says in its own header that the psf beside a
+   * label is "read straight out of index.json, so the map and the tables can
+   * never disagree" — true of one build, false across two schedules.
+   *
+   * test/map.test.js caught it at one dollar: BISHAN read $731 on the map and
+   * $732 on /hdb. That gap only ever grows, and a map that quietly drifts from
+   * the tables beside it is the exact failure this site exists not to commit.
+   */
+  { key: 'transactions', file: 'index.json', every: 7,
+    cmd: 'npm run ingest:hdb && npm run ingest:ura && npm run index'
+       + ' && npm run build:storey && npm run build:map',
     why: 'HDB and URA file new transactions continuously, with a lag of weeks' },
   { key: 'price-index', file: 'hdb-index.json', every: 80, cmd: 'npm run ingest:index',
     why: 'the resale price index is quarterly' },
-  { key: 'mop', file: 'mop.json', every: 80, cmd: 'npm run ingest:mop',
+  // build:map reads mop.json for HDB's published storey counts — the heights
+  // the 3D blocks are extruded from — so refreshing the register without
+  // rebuilding the map leaves the towers standing at last quarter's heights.
+  { key: 'mop', file: 'mop.json', every: 80, cmd: 'npm run ingest:mop && npm run build:map',
     why: 'HDB Property Information changes a few times a year' },
   { key: 'amenities', file: 'amenities.json', every: 180, cmd: 'npm run ingest:amenities && npm run build:nearby',
     why: 'stations, schools and hawker centres barely move' },
