@@ -1,6 +1,6 @@
 import Masthead from '../../components/Masthead.jsx';
 import LandView from '../../components/LandView.jsx';
-import { glsAwards, hdbSites } from '../../lib/data/query.js';
+import { glsAwards, hdbSitesLinked } from '../../lib/data/query.js';
 
 export const metadata = {
   title: 'What developers paid for the land — every awarded GLS site since 1993 | Truestorey',
@@ -10,7 +10,7 @@ export const metadata = {
 
 export default function Page() {
   const ura = glsAwards();
-  const hdb = hdbSites();
+  const hdb = hdbSitesLinked();
   const d = merge(ura, hdb);
   return (
     <main className="shell wide">
@@ -63,6 +63,10 @@ function merge(ura, hdb) {
     hdb: { source: hdb.source, sourcePage: hdb.sourcePage, note: hdb.note,
            transcribed: hdb.transcribed, sites: hdb.counts.sites, withProject: hdb.counts.withProject,
            withBidDetail: hdb.counts.withBidDetail,
+           // How many of those names resolved to a record here, which is how
+           // many rows are actually clickable. Naming a project and being able
+           // to link to it are different claims — see lib/land.js.
+           linked: new Set(hdb.sites.filter(s => s.record).map(s => s.record.href)).size,
            bids: hdb.sites.reduce((a, s) => a + (s.bidDetail?.length || 0), 0) },
   };
 }

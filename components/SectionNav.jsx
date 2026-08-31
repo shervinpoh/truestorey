@@ -28,6 +28,7 @@ const ITEMS = [
   { id: 'transactions', label: 'Transactions' },
   { id: 'floor', label: 'Floor premium' },
   { id: 'nearby', label: 'Nearby' },
+  { id: 'land', label: 'The land' },
   { id: 'proceeds', label: 'Sale proceeds' },
 ];
 

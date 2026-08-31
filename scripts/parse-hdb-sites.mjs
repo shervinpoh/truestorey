@@ -67,6 +67,47 @@ const num = s => {
  * table already published — three of 182 disagreed. Without that cross-check
  * it would have shipped, because every one of those rows looked fine.
  */
+/**
+ * A winner's name that wrapped into the next column, put back.
+ *
+ * The winner and the project sit side by side in these tables, and when a
+ * consortium name is too long for its cell the continuation lands in the
+ * project. One row does it: HDB's Ang Mo Kio S2a came out with the winner
+ * "NTUC Choice Homes Co- operative Ltd &" — note the dangling ampersand — and
+ * the project "Grandeur 8 Chip Eng Leong Enterprise Pte Ltd".
+ *
+ * Neither field looks wrong on its own, which is why this survived the length
+ * and plausibility checks: 43 characters is a perfectly ordinary project name.
+ * What catches it is that the SAME PDF prints the winner again, in full, at
+ * the top of the bid appendix. Two independent tables that must agree is the
+ * only kind of check that finds a defect this quiet.
+ *
+ * So: if the tender-table winner is a strict word-prefix of the appendix's
+ * rank-1 tenderer, and the project ENDS with exactly the words that went
+ * missing, the wrap happened. Take the appendix's name and cut the remainder
+ * off the project. Every other condition leaves the row untouched — thirty
+ * other rows differ between the two tables only as "Pte Ltd" against
+ * "Pte. Ltd." or "&" against "and", and none of them is a defect.
+ */
+function repairWrappedWinner(s) {
+  const rank1 = (s.bidDetail || []).find(b => b.rank === 1);
+  if (!rank1 || !s.project) return;
+  const key = t => String(t).toUpperCase().replace(/[^A-Z0-9]+/g, ' ').trim();
+  const w = key(s.winner), full = key(rank1.tenderer);
+  if (!w || w === full || !full.startsWith(w + ' ')) return;
+
+  const missing = full.slice(w.length + 1);
+  const words = s.project.trim().split(/\s+/);
+  // Smallest suffix of the project whose words ARE the missing ones. Compared
+  // on the normalised form so punctuation cannot decide it.
+  for (let i = words.length - 1; i > 0; i--) {
+    if (key(words.slice(i).join(' ')) !== missing) continue;
+    s.winner = rank1.tenderer;
+    s.project = words.slice(0, i).join(' ') || null;
+    return;
+  }
+}
+
 function matchBids(map, site) {
   if (!map.size) return null;
   for (const key of [...map.keys()].sort((a, b) => b.length - a.length)) {
@@ -275,6 +316,8 @@ export async function parseHdbSites() {
     }
     console.log(`  ${f} — ${n} sites (${schema.kind})`);
   }
+
+  for (const s of sites) repairWrappedWinner(s);
 
   const withBids = sites.filter(s => s.bidDetail?.length).length;
   sites.sort((a, b) => (a.award < b.award ? 1 : -1));

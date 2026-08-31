@@ -1369,3 +1369,90 @@ sup.cite a:hover{text-decoration:underline}
 .landtable tr.openable:hover{background:var(--sunk)}
 /* Below the table's own width the wrapper scrolls sideways rather than the
    page — .tablewrap already does that, and the columns keep their shape. */
+
+/* ── The land under a project ───────────────────────────────────────────────
+   A tender is four moments and they happened in an order, so the section is
+   an ordered list drawn as one — a rail down the left with a marker at each
+   step. The markers are --acc because they are structure: this is a closed
+   historical record, not something live or selected, and --acc-lit is
+   reserved for the latter. The award marker is filled rather than hollow
+   because it is the step the rest of the page descends from.
+
+   The rail is drawn on the OL and not on each LI so it cannot break between
+   items, and it stops short of the last marker rather than running past it. */
+.trail{list-style:none;margin:18px 0 22px;padding:0 0 0 26px;position:relative}
+.trail::before{content:"";position:absolute;left:5px;top:7px;bottom:14px;
+  width:1px;background:var(--line)}
+.trail li{position:relative;margin:0 0 16px;line-height:1.35}
+.trail li:last-child{margin-bottom:0}
+.trail li::before{content:"";position:absolute;left:-26px;top:5px;width:11px;height:11px;
+  border-radius:50%;background:var(--paper);border:1px solid var(--acc);box-sizing:border-box}
+.trail li.twin::before{background:var(--acc)}
+.tlab{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--mute)}
+.trail b{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.trail li.twin b{font-size:24px}
+.tnote{display:block;font-size:13px;color:var(--ink2);margin-top:2px;max-width:62ch}
+
+/* The parcel's own attributes. Two columns on anything wider than a phone;
+   the term is small caps and the value is mono, which is the pairing used for
+   every other identifier on the site. */
+.parcel{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:1px;background:var(--line2);border:1px solid var(--line);border-radius:var(--r2);
+  overflow:hidden;margin:0 0 18px}
+.parcel>div{background:var(--card);padding:10px 13px}
+.parcel dt{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.parcel dd{margin:3px 0 0;font-size:14px;color:var(--ink)}
+
+/* Every bid, folded away. <details> and not a button: it costs no JavaScript,
+   it is open by default when printed, and a reader with no JS still gets the
+   whole appendix. */
+.bidwrap{border:1px solid var(--line);border-radius:var(--r2);
+  background:var(--card);margin:0 0 18px}
+.bidwrap>summary{cursor:pointer;padding:11px 14px;font-size:14px;font-weight:600;
+  color:var(--acc);border-radius:var(--r2)}
+.bidwrap>summary:focus-visible{outline:2px solid var(--acc);outline-offset:-2px}
+.bidwrap[open]>summary{border-bottom:1px solid var(--line2)}
+.bidwrap .tablewrap{margin:0;padding:0 14px 12px}
+.bidtable{min-width:520px;width:100%}
+.bidtable .r{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+/* The winner is bolder, not coloured. Green and red on this site mean a price
+   that moved and a school inside the MOE band, and a winning tender is
+   neither of those things. */
+.bidtable tr.won td{font-weight:600;background:var(--sunk)}
+
+/* The one paragraph on the page that exists to stop a subtraction. It gets a
+   rule and a tint so it does not read as the small print it is sitting in. */
+.gapnote{border-left:2px solid var(--edge);padding:2px 0 2px 12px;
+  max-width:70ch;margin:0 0 14px}
+/* Forced open on paper. The UA hides a closed <details>'s children, so the
+   override has to be !important to beat it — without this the printed page
+   says "Every bid — all 8" and then shows none of them. */
+@media print{
+  .bidwrap>summary{display:none}
+  .bidwrap>*{display:block!important}
+  .bidwrap .tablewrap{padding:0;overflow:visible}
+  .bidtable{min-width:0}
+}
+
+/* ── The cost ledger ────────────────────────────────────────────────────────
+   A running account rather than a comparison, so it is one column of figures
+   under headed groups — not a grid, which would invite reading across rows
+   that have nothing to do with each other. The group heads are TH with
+   scope=colgroup so a screen reader announces which part of the account each
+   figure belongs to. */
+.ledgertable{width:100%;min-width:420px;border-collapse:collapse;font-size:14px}
+.ledgertable td{padding:7px 0;border-bottom:1px solid var(--line2);color:var(--ink2)}
+.ledgertable .r{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;
+  color:var(--ink);width:1%;padding-left:18px}
+.ledgertable tr.grp th{text-align:left;padding:18px 0 6px;font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--mute);font-weight:600;border-bottom:1px solid var(--line)}
+.ledgertable tr.grp:first-child th{padding-top:2px}
+/* A subtotal is the group's own answer, so it is the only bold row in it. */
+.ledgertable tr.sub td{font-weight:600;color:var(--ink);border-bottom:1px solid var(--line)}
+
+/* Bulleted prose inside a .note. The note is already indented by its rule, so
+   the list sits flush and hangs its markers rather than indenting twice. */
+.bul{margin:8px 0 0;padding-left:17px}
+.bul li{margin:0 0 7px;line-height:1.55}
+.bul li:last-child{margin-bottom:0}

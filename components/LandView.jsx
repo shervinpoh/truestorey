@@ -190,7 +190,13 @@ export default function LandView({ data }) {
                   )}
                 </td>
                 {/* The column URA does not have: what the site became. */}
-                <td className="who">{s.project || <span style={{ color: 'var(--mute)' }}>{s.winner || '—'}</span>}</td>
+                {/* A link only where the project resolved to a record we
+                    actually hold — see lib/land.js, which will not guess.
+                    Unlinked names still show, because "HDB says this became X"
+                    is worth reading even when X is not on this site. */}
+                <td className="who">{s.record
+                  ? <Link href={s.record.href}>{s.project}</Link>
+                  : s.project || <span style={{ color: 'var(--mute)' }}>{s.winner || '—'}</span>}</td>
               </tr>
             ))}
             {/* Rendered as its own row so the table keeps its column widths. */}
@@ -251,7 +257,10 @@ export default function LandView({ data }) {
           same programme. URA&rsquo;s sheet carries a rate per square metre; HDB&rsquo;s does not,
           so those rows show a dash rather than a figure this site worked out for itself. The
           charts above are drawn from the rows that have one. What HDB carries and URA does not is
-          the project each site became — {data.hdb.withProject} of them.
+          the project each site became — {data.hdb.withProject} of them, and{' '}
+          {data.hdb.linked} of those resolve to a development this site holds transactions for.
+          Those are links. The rest are shown as HDB printed them: a name transcribed from a PDF
+          that could not be matched exactly is left unmatched rather than guessed at.
         </div>
       )}
 
@@ -271,7 +280,8 @@ export default function LandView({ data }) {
         {data.hdb && <>
           <br /><br />
           {data.hdb.source} · {data.hdb.sites} sites, {data.hdb.withProject} naming the project
-          they became · saved and parsed {data.hdb.transcribed}<br />
+          they became, {data.hdb.linked} linked to a record here · saved and parsed{' '}
+          {data.hdb.transcribed}<br />
           <a href={data.hdb.sourcePage} target="_blank" rel="noopener noreferrer">{data.hdb.sourcePage}</a><br />
           {data.hdb.note}
         </>}

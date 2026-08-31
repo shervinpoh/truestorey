@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { recordAt, getIndex, allUrls, nearby, nearbyManifest, storeyFor } from '../../../lib/data/query.js';
+import { recordAt, getIndex, allUrls, nearby, nearbyManifest, storeyFor, landForRecord } from '../../../lib/data/query.js';
 import { ogForRecord } from '../../../lib/og.js';
 import { titleCase } from '../../../lib/name.js';
 import RecordPage from '../../../components/RecordPage.jsx';
@@ -32,7 +32,7 @@ export default async function Page({ params }) {
   const rec = recordAt('condo', slug);
   if (!rec) notFound();
   return (
-    <RecordPage rec={rec} storey={storeyFor(rec)} near={nearby(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []} posts={insightsForBlock(rec.href)}
+    <RecordPage rec={rec} land={landForRecord(rec.href)} storey={storeyFor(rec)} near={nearby(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []} posts={insightsForBlock(rec.href)}
       crumbs={[{ href: '/', label: 'Home' }, { href: '/condo', label: 'condo' === 'condo' ? 'Condos' : 'Landed' }]} />
   );
 }

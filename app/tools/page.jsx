@@ -27,6 +27,8 @@ export default function Page() {
               missing from it is a tool that does not exist for them. */}
           <li><Link href="/progressive"><span className="n">Buying off the plan</span>
             <span className="s">The nine stages a developer may bill you for, quoted from the Housing Developers Rules, and what your instalment does at each one</span></Link></li>
+          <li><Link href="/cost"><span className="n">What owning it actually costs</span>
+            <span className="s">Stamp duty, interest, commission and the CPF interest running against your home the whole time — what a sale must clear to return your own money</span></Link></li>
         </ul>
       </section>
 

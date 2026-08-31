@@ -8,6 +8,7 @@ import Locator from './Locator.jsx';
 import Search from './Search.jsx';
 import Masthead from './Masthead.jsx';
 import Amenities from './Amenities.jsx';
+import LandTrail from './LandTrail.jsx';
 import Storey from './Storey.jsx';
 import SectionNav from './SectionNav.jsx';
 import { titleCase } from '../lib/name.js';
@@ -47,7 +48,7 @@ import { EVENTS } from '../lib/analytics.js';
  * The proceeds waterfall re-anchors when the flat-type filter moves, so the
  * slider is never centred on a median that is no longer on screen.
  */
-export default function RecordPage({ rec, attribution, crumbs, posts = [], near = null, nearManifest = null, storey = null, canWatch = false, locator = null }) {
+export default function RecordPage({ rec, attribution, crumbs, posts = [], near = null, nearManifest = null, storey = null, canWatch = false, locator = null, land = null }) {
   const [median, setMedian] = useState(rec.medianPrice);
 
   useEffect(() => { track(EVENTS.RECORD, { href: rec.href, kind: rec.kind }); }, [rec.href]);
@@ -88,6 +89,11 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
       {hasNear
         ? <div id="nearby"><Amenities near={near} manifest={nearManifest} /></div>
         : <Amenities near={near} manifest={nearManifest} />}
+
+      {/* Where the ground came from, after what is on it and around it.
+          Only ever present for a development HDB tendered the land for and
+          then named — see lib/land.js. Everything else renders nothing. */}
+      {land && <LandTrail land={land} label={titleCase(rec.label)} rec={rec} />}
 
       {/* HDB only: the digest is built on HDB's monthly resale register, and
           there is no equivalent per-project feed for private transactions.
