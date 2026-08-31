@@ -129,29 +129,43 @@ export default function LandView({ data }) {
       <div className="tablewrap">
         <table className="anst">
           <thead><tr>
-            <th>Awarded</th><th>Site</th><th>Planning area</th>
+            <th>Awarded</th><th>Site</th><th>Sold by</th>
             <th style={{ textAlign: 'right' }}>Price</th>
             <th style={{ textAlign: 'right' }}>psm</th>
             <th style={{ textAlign: 'right' }}>Bids</th>
-            <th>Won by</th>
+            <th>Became</th>
           </tr></thead>
           <tbody>
             {latest.map(s => (
               <tr key={`${s.award}-${s.site}`}>
                 <td className="mono">{s.award}</td>
                 <td>{s.site}</td>
-                <td>{s.planningArea || '—'}</td>
+                <td className="mono">{s.vendor}</td>
                 <td className="mono" style={{ textAlign: 'right' }}>{money(s.price)}</td>
+                {/* HDB publishes no rate column. An em dash, not a computed
+                    figure — deriving one would invent a basis URA's own column
+                    is already ambiguous about. */}
                 <td className="mono" style={{ textAlign: 'right' }}>{s.psmGfaOrGpr ? money(s.psmGfaOrGpr) : '—'}</td>
                 {/* A single bid is the most informative number on this row and
                     it is easy to skim past. */}
                 <td className="mono" style={{ textAlign: 'right' }}>{s.bids ?? '—'}</td>
-                <td>{s.winner || '—'}</td>
+                {/* The column URA does not have: what the site became. */}
+                <td>{s.project || <span style={{ color: 'var(--mute)' }}>{s.winner || '—'}</span>}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {data.hdb && (
+        <div className="note" style={{ marginTop: 20 }}>
+          <b>Two vendors, and only one publishes a rate.</b> URA and HDB both sell land under the
+          same programme. URA&rsquo;s sheet carries a rate per square metre; HDB&rsquo;s does not,
+          so those rows show a dash rather than a figure this site worked out for itself. The
+          charts above are drawn from the rows that have one. What HDB carries and URA does not is
+          the project each site became — {data.hdb.withProject} of them.
+        </div>
+      )}
 
       <div className="note" style={{ marginTop: 20 }}>
         <b>What this is, and what it is not.</b> A developer cannot sell below what the ground cost,
@@ -166,6 +180,13 @@ export default function LandView({ data }) {
         {data.counts.fromYear}–{data.counts.toYear} · accessed {data.accessedAt.slice(0, 10)}<br />
         <a href={data.sourcePage} target="_blank" rel="noopener noreferrer">{data.sourcePage}</a><br />
         {data.rateNote}
+        {data.hdb && <>
+          <br /><br />
+          {data.hdb.source} · {data.hdb.sites} sites, {data.hdb.withProject} naming the project
+          they became · saved and parsed {data.hdb.transcribed}<br />
+          <a href={data.hdb.sourcePage} target="_blank" rel="noopener noreferrer">{data.hdb.sourcePage}</a><br />
+          {data.hdb.note}
+        </>}
       </p>
 
       <div className="sh" style={{ marginTop: 26 }}><span>The rest of it</span></div>

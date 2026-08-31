@@ -1,0 +1,4745 @@
+Date 
+Tender 
+Launch 
+Date 
+Tender 
+Closed 
+Date 
+Tender 
+Awarded 
+Land Parcel Street Name 
+Land 
+Area (sq 
+m) 
+Propos
+ed Devt 
+Type 
+Lease 
+Term 
+Permissi
+ble GPR 
+[approx 
+GPR] 
+Permissible 
+Gross Floor 
+Area (sq m) 
+Successful 
+Tenderer's 
+Name 
+Tender Price 
+** No. 
+of 
+Bidders 
+Project Name 
+29/4/2015 23/6/2015 30/6/2015 Queenstown 
+S9b Dundee Road 10,516.1 *CO 99 yrs 4.9 51,528.89 HY Realty Pte 
+Ltd $483,178,000.00 9 Queens Peak 
+29/4/2015 18/6/2015 23/6/2015 Toa Payoh 
+S4 
+Lorong 6 Toa 
+Payoh / Lorong 4 
+Toa Payoh 
+12,154.6 *CO 99 yrs 3.5 42,541.10 
+Evia Real 
+Estate (7) Pte 
+Ltd, Maxdin Pte 
+Ltd and 
+Gamuda Berhad 
+$345,860,000.00 14 Gem Residences 
+30/12/2013 29/4/2014 30/4/2014 Geylang S6 Sims Drive 23,900.1 *CO 99 yrs 3.0 71,700.30 
+First Changi 
+Development 
+Pte Ltd 
+$530,891,000.00 4 Sims Urban Oasis 
+15/4/2013 13/6/2013 14/6/2013 Sengkang 
+S12 Fernvale Close 14,930.5 *CO 99 yrs 3.0 44,791.50 
+FCL Topaz Pte. 
+Ltd., Far East 
+Orchard Limited 
+and Sekisui 
+House, Ltd. 
+$256,980,000.00 9 
+Rivertrees 
+Residences 
+28/2/2013 11/4/2013 12/4/2013 Sengkang 
+S11 
+Sengkang West 
+Way 16,603.9 *CO 99 yrs 3.0 49,811.70 
+Secure 
+Development 
+Pte. Ltd. 
+$262,100,000.00 8 
+Riverbank 
+@Fernvale 
+18/12/2012 5/2/2013 7/2/2013 Queenstown 
+S9a 
+Commonwealth 
+Avenue 12,086.8 *CO 99 yrs 4.9 59,225.32 
+Intrepid 
+Investments Pte 
+Ltd, Verwood 
+Holdings Pte. 
+Ltd. and Hong 
+Realty (Private) 
+Limited    
+$562,818,171.00 3 
+Commonwealth 
+Towers 
+15/10/2012 29/11/2012 3/12/2012 Bishan S11a Bishan Street 14 11,227.8 *CO 99 yrs 4.9 55,016.22 
+Allamanda 
+Residential 
+Development 
+Pte. Ltd. 
+$505,100,000.00 9 Sky Vue 
+20/6/2012 7/8/2012 10/8/2012 Bishan S8 Bright Hill Drive 13,437.1 *CO 99 yrs 2.8 37,623.88 UVD Pte. Ltd. $291,500,000.00 6 Thomson Three 
+16/4/2012 31/5/2012 6/6/2012 Sengkang S5 
+Sengkang 
+Square/ 
+Compassvale 
+Drive 
+22,497.6 *CO 99 yrs 3 67,492.80 
+EL 
+Development 
+Pte Ltd 
+$383,333,000.00 5 La Fiesta 
+15/2/2012 11/4/2012 13/4/2012 Pasir Ris S4a Elias Road/ Pasir 
+Ris Drive 3 23,322.0 LP / CO 
+/ FT 99 yrs 1.4 32,650.80 
+Elitist 
+Development 
+Pte Ltd 
+$165,888,333.00 9 Stratum 
+29/11/2011 12/1/2012 16/1/2012 Clementi S16 Jalan Lempeng 24,417.6 CO 99 yrs 2.8 68,369.28 
+Multi Wealth 
+(Singapore) Pte 
+Ltd 
+$408,000,800.00 8 The Trilinq 
+27/10/2011 15/12/2011 20/12/2011 Punggol S3 Punggol Central/ 
+Punggol Place 18,019.4 CO 99 yrs 3 54,058.20 
+Wee Hur 
+Development 
+Pte Ltd 
+$206,200,000.00 13 Parc Centros 
+15/9/2011 15/11/2011 21/11/2011 Yishun S12 Yishun Avenue 1/ 
+Miltonia Close 16,900.0 CO 99 yrs 2.1 35,490.00 
+T G 
+Development 
+Pte Ltd and 
+Master Contract 
+Services Pte Ltd  
+$138,900,000.00 8 Skies Miltonia 
+15/9/2011 3/11/2011 8/11/2011 Punggol S2 Punggol Central/ 
+Edgedale Plains 20,256.1 CO 99 yrs 3 60,768.30 
+Qingjian Realty 
+(South Pacific) 
+Group Pte Ltd 
+$215,870,000.00 5 River Isles 
+28/7/2011 7/9/2011 9/9/2011 Hougang S20 
+Upper Serangoon 
+Crescent / Upper 
+Serangoon Road 
+24,620.5 CO 99 yrs 3.5 86,171.75 
+Allgreen 
+Properties 
+Limited 
+$270,280,000.00 3 Riversails 
+29/6/2011 1/9/2011 7/9/2011 Punggol S6 Punggol Field 
+Walk  14,344.0 CO 99 yrs 3.4 48,769.60 
+Capital 
+Development 
+Pte Ltd / ZACD 
+Investments Pte 
+Ltd 
+$169,559,000.00 8 FLO Residence 
+30/3/2011 2/6/2011 14/6/2011 Sengkang S9 
+Buangkok Drive / 
+Sengkang East 
+Drive 
+19,549.2 CO 99 yrs 3 58,647.60 
+Qingdao 
+Construction 
+(Singapore) Pte 
+Ltd 
+$247,000,000.00 4 
+Riversound 
+Residence 
+23/2/2011 7/4/2011 11/4/2011 Kallang 
+Whampoa S9 
+Bendemeer 
+Road/ Whampoa 
+East 
+18,618.2 CO 99 yrs 3.5 65,163.70 
+United 
+Engineers 
+Developments 
+Pte Ltd 
+$543,000,888.00 8 Eight Riversuites 
+21/1/2011 15/3/2011 18/3/2011 Sengkang S6 
+Sengkang 
+Square/ 
+Compassvale 
+Road 
+17,700.0 CO 99 yrs 3 53,100.00 Keppel Land 
+Realty Pte Ltd $286,790,000.00 9 The Luxurie 
+21/1/2011 24/2/2011 28/2/2011 Bishan S11 Bishan Street 14 11,997.1 CO 99 yrs 4.9 58,785.79 
+Bishan 
+Residential 
+Development 
+Pte. Ltd. 
+$550,100,000.00 19 Sky Habitat 
+22/9/2010 9/11/2010 12/11/2010 Hougang S19 Upper Serangoon 
+View 13,000.3 CO 99 yrs 3.5 45,501.05 
+FCL Topaz Pte. 
+Ltd., Far East 
+Civil 
+Engineering 
+(Pte.) Limited 
+and Sekisui 
+House Ltd 
+$156,800,000.00 4 
+Boathouse 
+Residences 
+22/9/2010 4/11/2010 10/11/2010 Woodlands 
+S3a 
+Woodgrove 
+Avenue 20,956.3 LP / CO 
+/ FT 99 yrs 1.4 29,338.82 Tampines Court 
+Pte. Ltd. $105,120,000.00 6 Woodhaven 
+5/8/2010 30/9/2010 6/10/2010 Pasir Ris 
+S10a 
+ 
+Pasir Ris Drive 3/ 
+Pasir Ris Drive 4  
+20,000.1 CO 99 yrs 2.1 42,000.21 
+FCL Topaz Pte. 
+Ltd. And F.E. 
+Lakeside Pte. 
+Ltd. 
+$151,380,000.00 4 Seastrand 
+5/8/2010 17/9/2010 21/9/2010 Hougang S18 Hougang Avenue 
+7 15,630.4 CO 99 yrs 2.8 43,765.12 Sim Lian Land 
+Pte Ltd $160,000,000.00 6 Parc Vera 
+2/7/2010 24/8/2010 2/9/2010 Yishun S5b Miltonia Close 27,000.0 LP / CO 
+/ FT 99 yrs 1.4 37,800.00 
+Hoi Hup Realty 
+Pte Ltd and 
+Sunway 
+Developments 
+Pte Ltd 
+$165,000,000.00 7 The Miltonia 
+5/5/2010 18/6/2010 23/6/2010 Yishun S4c 
+Yishun Ave 2 / 
+Ave 7 / Canberra 
+Drive 
+26,539.6 CO 99 yrs 2.5 66,349.00 
+Nam Hee 
+Contractor Pte 
+Ltd. and FCL 
+Topaz Pte. Ltd. 
+$229,400,000.00 2 Eight Courtyards 
+14/4/2010 8/6/2010 11/6/2010 Sembawang 
+S1a 
+Sembawang 
+Road / Canberra 
+Drive 
+22,567.8 LP / CO 
+/ FT 99 yrs 1.4 31,594.92 
+MCC Land 
+(Singapore) Pte 
+Ltd 
+$131,700,000.00 7 
+Canberra 
+Residences 
+7/4/2010 6/5/2010 10/5/2010 Hougang S13 Tampines Road 2,662.2 LP 99 yrs 1.4 3,727.08 (max) 
+Fragrance 
+Properties Pte 
+Ltd 
+$16,250,000.00 16 Kovan Grandeur 
+8/1/2010 4/2/2010 8/2/2010 Sengkang S7 
+Sengkang West 
+Avenue / 
+Fernvale Link 
+16,998.8 CO 99 yrs 3.0 50,996.4 (max) 
+Sunmaster 
+Holdings Pte. 
+Ltd. 
+$200,500,000.00 10 H2O Residences 
+9/11/2009 8/12/2009 10/12/2009 Jurong West 
+S7 
+Westwood 
+Avenue 14,098.9 LP 99 yrs N.A. N.A Chappelis Pte 
+Ltd $38,500,000.00 32 The Woods 
+23/7/2009 19/8/2009 25/8/2009 Bukit Panjang 
+S10a Chestnut Avenue  22,700.4 CO 99 yrs 2.1 47,670.84 
+(max) 
+Sunny Vista 
+Developments 
+Pte. Ltd. And 
+Hong Realty 
+(Private) Limited  
+$143,680,000.00 13 Tree House 
+20/2/2008 15/4/2008 17/4/2008 Toa Payoh 
+S3 
+Lorong 2/ Lorong 
+3 Toa Payoh 13,955.1 CO 99 yrs 4.2 58,611.42 
+(max) 
+ChoiceHomes 
+Investments 
+Pte. Ltd. 
+$290,189,000.00 4 Trevista 
+30/1/2008 25/3/2008 28/3/2008 Yishun S2 
+Yishun Avenue 1 
+/ Yishun Avenue 
+2 
+26,949.1 CO 99 yrs 2.1 56,593.11 
+(max) 
+MCL Land 
+(Warren) Pte 
+Ltd 
+$213,500,000.00 5 The Estuary 
+25/10/2007 18/12/2007 19/12/2007 Pasir Ris S11 Elias Road 14,126.3 CO 99 yrs 3.0 42378.9 (max) CES-Land Pte 
+Ltd $104,005,848.00 3 Oasis @Elias 
+15/8/2007 11/9/2007 13/9/2007 Ang Mok Kio 
+S6 
+Ang Mo Kio 
+Avenue 8 6,397.2 CO 99 yrs 4.9  31,346.28 
+(max)  
+Eunos 
+LinkTechnology 
+Park Ltd 
+$202,880,000.00 14 Centro Residences 
+9/5/2007 12/6/2007 14/6/2007 Geylang S5 Dakota Crescent 11,601.4 CO 99 yrs N.A. 40,605 (max) 
+Ho Bee 
+Investment Ltd/ 
+ChoiceHomes 
+Investments Pte 
+Ltd 
+$228,888,000.00 15 Dakota Residences  
+9/5/2007 5/6/2007 12/6/2007 Bishan S13 
+ 
+ 
+Bishan Street 22/ 
+Bishan Street 25  
+21,915.6 CO 99 yrs [3.5] 76,704.6  
+(max) 
+Sim Lian Land 
+Pte Ltd $310,000,000.00 7 Clover by the Park 
+20/3/2002 16/4/2002 18/4/2002 Ang Mo Kio 
+S2a 
+Ang Mo Kio 
+Avenue 8/ 
+Avenue 5  
+20,000.0 CO 99 yrs 3.5 NA 
+NTUC Choice 
+Homes Co-
+operative Ltd & 
+$183,988,888.00 8 
+Grandeur 8 
+Chip Eng Leong 
+Enterprise Pte 
+Ltd 
+18/4/2001 28/6/2001 5/7/2001 Bukit Batok 
+S8 
+Bukit Batok 
+Central / Bukit 
+Batok Central 
+Link 
+8,705.5 CO 99 yrs 3.5 NA Sim Lian Land 
+Pte Ltd $78,399,000.00 8 
+The Jade 
+18/4/2001 28/6/2001 5/7/2001 Woodlands 
+S6b 
+Rosewood Drive / 
+Woodlands 
+Avenue 2 
+25,664.5 CO 99 yrs 2.1 NA 
+Bishan 
+Properties Pte 
+Ltd 
+$88,938,000.00 2 
+Casablanca 
+17/1/2001 22/3/2001 24/3/2001 Choa Chu 
+Kang S7 
+Choa Chu Kang 
+Loop 29,093.1 CO 99 yrs 2.8 NA Cuxhaven Pte 
+Ltd $158,708,000.00 5 
+The Warren 
+4/10/2000 30/11/2000 20/12/2000 Bedok S15 
+Bedok Reservoir 
+Rd / Bedok North 
+Ave 3 
+10,536.6 CO 99 yrs 2.5 NA 
+Allgreen 
+Properties 
+Limited / 
+Overdale Pte 
+Ltd 
+$63,830,000.00 6 
+Baywater 
+4/10/2000 30/11/2000 20/12/2000 Yishun S5a Yishun Avenue 1 34,000.0 LP / CO 99 yrs 1.4 (for 
+CO only) NA 
+Allgreen 
+Properties 
+Limited / 
+Overdale Pte 
+Ltd 
+$97,980,000.00 4 
+The Shaughnessy 
+19/7/2000 14/9/2000 5/10/2000 Hougang S3a Upper Serangoon 
+View 14,000.0 CO 99 yrs 3.0 NA 
+MCL Land Ltd & 
+Ho Bee 
+Developments 
+Pte Ltd 
+$98,538,000.00 6 
+Rio Vista 
+19/7/2000 14/9/2000 5/10/2000 Hougang S3b Hougang Avenue 
+7 16,816.0 CO 99 yrs 3.0 NA 
+MCL Land Ltd & 
+Ho Bee 
+Developments 
+Pte Ltd 
+$121,380,000.00 4 
+Rio Vista 
+25/2/2000 13/4/2000 17/5/2000 Bedok S10 
+Jalan 
+Kembangan / Sim 
+Avenue East 
+7,316.8 CO 99 yrs 3.0 NA Bonvests 
+Holdings Ltd $75,346,938.00 12 
+The Trumps 
+25/2/2000 13/4/2000 17/5/2000 Bukit Batok 
+S7 
+Bukit Batok 
+Street 31 18,918.1 CO 99 yrs 3.0 NA Janiton Pte Ltd $172,690,000.00 8 
+The Madeira 
+25/2/2000 13/4/2000 17/5/2000 Clementi 
+S15a 
+West Coast 
+Cresent 24,905.2 CO 99 yrs 2.8 NA 
+Marina Green 
+Ltd & Success 
+Development 
+Pte Ltd 
+$195,390,000.00 5 
+Blu Horizon 
+19/9/1996 6/11/1997 18/11/1997 Queenstown 
+S2 
+Commonwealth 
+Avenue 21,904.5 CO 99 yrs 4.0 NA 
+Allgreen 
+Properties 
+Ltd/Hoe Seng 
+Co (Pte) Ltd 
+$223,000,000.00 5 
+Queens 
+19/9/1996 6/11/1997 18/11/1997 Yishun S4a Yishun Avenue 2 22,383.0 CO 99 yrs 2.1 NA Centrepoint 
+Properties Ltd $78,423,000.00 4 
+Yishun Sapphire 
+19/9/1996 6/11/1997 18/11/1997 Yishun S4b Yishun Avenue 2 21,038.5 CO 99 yrs 2.5 NA Centrepoint 
+Properties Ltd $87,759,000.00 4 
+Yishun Emerald 
+30/5/1996 24/7/1997 8/9/1997 Bishan S12 Sin Ming Avenue 6,799.9 CO 99 yrs 2.8 NA First Capital 
+Corporation Ltd $62,385,000.00 3 
+Bishan Point 
+30/5/1996 24/7/1997 8/9/1997 Serangoon 
+S11 
+Serangoon 
+Avenue 3 6,545.3 CO/LP 99 yrs 1.4 NA MCL Land Ltd $21,507,856.00 8 
+The Sunnydale 
+30/5/1996 24/7/1997 8/9/1997 Tampines 
+S6a Simei Street 4 14,000.0 CO 99 yrs 2.3 NA Eyton Pte Ltd $121,700,000.00 8 
+Modena 
+30/5/1996 24/7/1997 8/9/1997 Tampines 
+S6b Simei Street 4 14,000.0 CO 99 yrs 2.3 NA 
+NTUC Choice 
+Homes Co-
+operative Ltd 
+$116,116,000.00 6 
+Tropical Spring 
+29/11/1996 16/1/1997 17/2/1997 Bukit Merah 
+S6 Alexandra Road 17,512.7 CO 99 yrs 2.8 NA 
+Golden 
+Development 
+Pte Ltd 
+$248,680,000.00 11 
+Tanglin View 
+29/11/1996 16/1/1997 17/2/1997 Choa Chu 
+Kang S3 
+Choa Chu Kang 
+Street 64 22,848.4 CO 99 yrs 3.0 NA 
+Orchard Parade 
+Land Pte 
+Ltd/Yeo Hiap 
+Seng Ltd 
+$189,077,000.00 5 
+Regent Grove 
+29/11/1996 16/1/1997 17/2/1997 Clementi S8 West Coast Road 12,460.8 LP 99 yrs NA NA 
+Chuan Hup 
+Realty Pte Ltd & 
+Heng Holdings 
+S.E.A. (Pte) Ltd 
+$16,050,000.00 9 
+The Clementvale 
+29/11/1996 16/1/1997 17/2/1997 Woodlands 
+S3d 
+Woodlands 
+Avenue 1 26,992.5 LP/CO 99 yrs 1.4 NA 
+Straits 
+Construction Co 
+Pte Ltd, Hoi Hup 
+Realty Pte Ltd, 
+Wong Swee 
+Chun, Ng Keng 
+Teong, Ong 
+Cher Keong & 
+Others 
+$61,300,000.00 7 
+Woodgrove 
+Condominium 
+27/9/1996 21/11/1996 23/12/1996 Bishan S3 Sin Ming Walk 34,949.2 CO 99 yrs 2.5 NA First Capital 
+Corporation Ltd $275,559,000.00 7 
+The Gardens at 
+Bishan 
+27/9/1996 21/11/1996 23/12/1996 Choa Chu 
+Kang S5 
+Choa Chu Kang 
+North 5 
+125,913.
+4 LP 99 yrs NA NA SSL Properties 
+Pte Ltd $140,154,000.00 4 
+Villa Verde 
+31/5/1996 25/7/1996 6/9/1996 Hougang S5a Hougang Avenue 
+2 11,567.8 LP 99 yrs NA NA Yeo Hiap Seng 
+Ltd $18,889,000.00 2 
+Henley Gardens 
+31/5/1996 25/7/1996 6/9/1996 Hougang S5b Poh Huat Road 
+West 10,344.2 LP 99 yrs NA NA Yeo Hiap Seng 
+Ltd $18,098,000.00 5 
+Princeton Vale 
+31/5/1996 25/7/1996 6/9/1996 Jurong East 
+S1 
+Jurong East 
+Avenue 1 18,905.0 CO 99 yrs 2.8 NA SSL Properties 
+Pte Ltd $131,215,000.00 9 
+The Mayfair 
+31/5/1996 25/7/1996 6/9/1996 Serangoon 
+S5 Lorong Chuan 8,905.5 LP 99 yrs NA NA Yeo Hiap Seng 
+Ltd $19,188,000.00 7 
+Chuan Villas 
+31/5/1996 25/7/1996 6/9/1996 Tampines S3 Tampines 
+Avenue 1 34,893.6 CO 99 yrs 2.1 NA 
+City 
+Developments 
+Ltd/Hong Leong 
+Holdings Ltd 
+$194,663,000.00 10 
+The Tropica 
+31/5/1996 25/7/1996 6/9/1996 Woodlands 
+S5 
+Woodgrove 
+Avenue 22,171.8 LP 99 yrs NA NA Questvest (S) 
+Pte Ltd $40,300,000.00 3 
+Century Woods 
+26/1/1996 28/3/1996 13/5/1996 Choa Chu 
+Kang S2 
+Choa Chu Kang 
+Way 30,671.4 AP 99 yrs 2.8 NA SSL Properties 
+Pte Ltd $211,694,002.80 6 
+Palm Gardens 
+26/1/1996 28/3/1996 13/5/1996 Jurong West 
+S3a Corporation Road 21,218.9 LP 99 yrs NA NA 
+The Dynasty 
+Corporation (S) 
+Pte Ltd/SEADC 
+Investment Pte 
+Ltd/Refine 
+Technology Pte 
+Ltd/GEMT 
+Trading Pte Ltd 
+$43,000,000.00 5 
+Lakeside Grove 
+26/1/1996 28/3/1996 13/5/1996 Queenstown 
+S4 Dover Rise 36,500.7 CO 99 yrs 2.1 NA 
+Success 
+Development 
+Pte Ltd 
+$271,299,000.00 6 
+Herigate View 
+26/1/1996 28/3/1996 13/5/1996 Woodlands 
+S2a Pinewood Grove 5,745.1 BH 99 yrs NA NA 
+Davis 
+Development 
+Pte Ltd 
+$13,330,212.70 5 
+Landed Housing 
+26/1/1996 28/3/1996 13/5/1996 Woodlands 
+S2b 
+Woodgrove 
+Avenue 2,813.8 BH 99 yrs NA NA Jen Emerald 
+Nexus Pte Ltd $6,963,593.00 12 
+NA 
+24/11/1995 25/1/1996 29/3/1996 Pasir Ris S4b Pasir Ris Drive 3 56,997.6 TH 99 yrs NA NA 
+Ho Bee 
+Developments 
+Pte Ltd 
+$105,118,000.00 5 
+The Riverina 
+29/9/1995 30/11/1995 26/1/1996 Bukit Batok 
+S1 
+Bukit Batok 
+Street 52 31,024.8 AP 99 yrs 3.0 NA 
+Hong Leong 
+Holdings 
+Ltd/City 
+Developments 
+Ltd 
+$233,000,000.00 5 
+Guilin View 
+29/9/1995 30/11/1995 26/1/1996 Bukit Timah 
+S1 Toh Yi Drive 16,664.0 CO 99 yrs 1.4 NA Orchard 
+Terminal Pte Ltd $81,868,000.00 10 
+High Oak 
+29/9/1995 30/11/1995 26/1/1996 Hougang S2 Hougang Street 
+92 24,045.3 AP 99 yrs 2.8 NA Orchard 
+Terminal Pte Ltd $146,398,000.00 4 
+Regentville 
+29/9/1995 30/11/1995 26/1/1996 Jurong West 
+S3b Corporation Drive 21,311.3 LP 99 yrs NA NA 
+The Dynasty 
+Corporation(s) 
+Pte Ltd 
+$45,900,000.00 3 
+Lakeside Grove 
+29/9/1995 30/11/1995 26/1/1996 Tampines S4 Simei Street 3 37,152.1 CO 99 yrs 2.0 NA Orchard 
+Terminal Pte Ltd $215,349,000.00 6 
+Eastpoint Green 
+16/12/1994 16/2/1995 6/7/1995 Hougang S9 Hougang Avenue 
+7 17,012.1 AP 99 yrs 2.8 NA Allgreen 
+Properties Ltd $63,000,000.00 3 
+Evergreen Park 
+26/8/1994 27/10/1994 9/12/1994 Choa Chu 
+Kang S4 
+Choa Chu Kang 
+Dr/Choa Chu 
+Kang Loop 
+37,265.0 AP 99 yrs 2.5 NA Pidemco Land 
+Ltd $261,300,000.00 8 
+Northvale 
+26/8/1994 27/10/1994 9/12/1994 
+Kallang/                        
+Whampoa 
+S7a 
+Kent Rd/Oxford 
+Rd/Dorset Rd 3,142.7 AP 99 yrs 3 NA 
+Far East 
+Organisation 
+Centre Pte Ltd 
+$25,989,000.00 8 
+Kentish Lodge 
+26/8/1994 27/10/1994 9/12/1994 
+Kallang/                        
+Whampoa 
+S7b 
+Kent Rd/Oxford 
+Rd/Dorset Rd 3,512.1 AP 99 yrs 2.8 NA 
+Far East 
+Organisation 
+Centre Pte Ltd 
+$27,180,000.00 6 
+Kentish Court 
+26/8/1994 27/10/1994 9/12/1994 
+ 
+ 
+Kallang/                        
+Whampoa 
+S7c  
+Kent Rd/Oxford 
+Rd/Dorset Rd 5,494.6 AP 99 yrs 2.8 NA 
+Far East 
+Organisation 
+Centre Pte Ltd 
+$42,489,000.00 4 
+Kentish Green 
+26/8/1994 27/10/1994 9/12/1994 Toa Payoh 
+S2 Lor 1 Toa Payoh 13,025.6 AP 99 yrs 2.8 NA 
+Wingem 
+Investment Pte 
+Ltd/Winprime 
+Investment Pte 
+Ltd 
+$132,500,000.00 9 
+Oleander Towers 
+26/8/1994 27/10/1994 9/12/1994 Ang Mo Kio 
+S3 Yio Chu Kang Rd 24,071.1 CO 99 yrs 2.8 NA 
+Orchard Parade 
+Land Pte 
+Ltd/Pidemco 
+Land Ltd 
+$131,132,000.00 2 
+Seasons Park 
+26/8/1994 27/10/1994 9/12/1994 Clementi S3 West Coast Rd 18,596.3 CO 99 yrs 2.8 NA Orchard Parade 
+Land Pte Ltd $96,680,000.00 4 
+Westcove Resort 
+Condominium 
+26/8/1994 27/10/1994 9/12/1994 Jurong West 
+S5 
+Boon Lay 
+Way/Corporation 
+Rd 
+31,747.8 CO 99 yrs 2.8 NA 
+Far East 
+Organisation 
+Centre Pte 
+Ltd/Pidemco 
+Land Ltd 
+$203,332,000.00 4 
+Parc Vista 
+26/8/1994 27/10/1994 9/12/1994 Serangoon 
+S2 
+Lorong 
+Chuan/Serangoo
+n Ave 3 
+24,309.9 CO 99 yrs 2.8 NA Malayan Credit 
+Ltd $200,571,588.00 5 
+Springbloom 
+26/8/1994 27/10/1994 9/12/1994 Bedok S3b Jalan Eunos 3,344.5 LP 99 yrs NA NA 
+Habitat 
+Properties Pte 
+Ltd 
+$12,000,000.00 6 
+Reservoir Villas 
+26/8/1994 27/10/1994 9/12/1994 Bedok S3c Jalan Eunos 2,251.1 LP 99 yrs NA NA 
+LKN 
+Development 
+Pte Ltd 
+$8,450,000.00 6 
+Landed Properties 
+(No project name) 
+26/8/1994 27/10/1994 9/12/1994 Bt Batok S2 Bt Batok East 
+Ave 3 50,000.0 LP 99 yrs NA NA Pidemco Land 
+Ltd $176,800,000.00 6 
+Burgundy Hill 
+26/8/1994 27/10/1994 9/12/1994 Clementi S7 West Coast Rd 910.1 LP 99 yrs 2.8 NA Spring Quay 
+Holdings Pte Ltd $4,180,000.00 8 
+Fulin Park 
+25/2/1994 28/4/1994 12/9/1994 Jurong West 
+S2a 
+Jurong West Ave 
+5 45,099.8 LP 99 yrs NA NA 
+United 
+Overseas Land 
+Ltd 
+$101,928,000.00 6 
+Westwood Park 
+25/2/1994 28/4/1994 12/9/1994 Jurong West 
+S2b 
+Jurong West Ave 
+5 90,236.8 LP 99 yrs NA NA First Capital 
+Corporation Ltd $204,944,000.00 3 
+Westville 
+25/2/1994 28/4/1994 19/8/1994 Geylang S1 
+Sims 
+Ave/Geylang 
+East Ave 2 
+28,154.0 CO 99 yrs 2.5 NA DBS Realty 
+(Pte) Ltd $184,800,000.00 7 
+Sinsville 
+25/2/1994 28/4/1994 19/8/1994 Bt Panjang 
+S1 Petir Rd 25,000.0 AP 99 yrs 3 NA First Capital 
+Corporation Ltd $157,153,000.00 6 
+Maysprings 
+13/8/1993 14/10/1993 21/1/1994 Bt Merah S4 Tanglin 
+Rd/Alexandra Rd 10,542.1 CO 99 yrs 2.1 NA First Capital 
+Corporation Ltd $57,872,250.00 13 
+Tanglin Regency 
+13/8/1993 14/10/1993 21/1/1994 Bt Panjang 
+S2 Petir Rd 58,838.3 BH / LP 99 yrs   NA Malayan Credit 
+Ltd $106,399,440.00 4 
+Mera Gardens 
+13/8/1993 14/10/1993 21/1/1994 Bt Batok S3 Bt Batok East 
+Ave 3 25,000.0 AP 99 yrs 2.5 NA Glory Realty Co 
+Pte Ltd $105,169,000.00 3 
+Parkview 
+13/8/1993 14/10/1993 21/1/1994 Hougang S1a 
+Yio Chu Kang 
+Rd/Hougang Ave 
+2 
+22,183.7 LP 99 yrs NA NA Glory Realty Co 
+Pte Ltd $60,228,000.00 9 
+Parkvillas 
+13/8/1993 14/10/1993 21/1/1994 Hougang S1b 
+Yio Chu Kang 
+Rd/Hougang Ave 
+2 
+24,173.8 LP 99 yrs NA NA Glory Realty Co 
+Pte Ltd $56,539,000.00 5 
+Parkvillas 
+12/3/1993 13/5/1993 1/9/1993 Ang Mo Kio 
+S1 
+Ang Mo Kio Ave 
+6 39,575.7 CO 99 yrs 2 NA 
+Allgreen 
+Properties Ltd, 
+Hoe Seng Co 
+Pte Ltd, 
+Asiawide 
+Investment Pte 
+Ltd 
+$119,000,000.00 7 
+Castle Green 
+12/3/1993 13/5/1993 1/9/1993 Queenstown 
+S1 Dover Rd 39,401.7 CO 99 yrs 2 NA 
+Kanopy 
+Investments Pte 
+Ltd 
+$135,758,000.00 7 
+Dover Parkview 
+12/3/1993 13/5/1993 1/9/1993 Clementi S2 Clementi Ave 6 14,933.3 CO 99 yrs 2 NA 
+Ho Lee 
+Investments Pte 
+Ltd 
+$54,267,500.00 12 
+Regetn Park 
+28/8/1992 23/10/1992 2/2/1993 Serangoon 
+S3f Serangoon Ave 1 10,829.0 LP 99 yrs 0.8 NA RDC Land Pte 
+Ltd $13,980,239.00 9 
+Ardisia Gardens 
+28/8/1992 23/10/1992 2/2/1993 Serangoon 
+S3e Serangoon Ave 1 3,000.0 LP 99 yrs 0.8 NA RDC Land Pte 
+Ltd $3,873,000.00 11 
+Babriel Villas 
+28/8/1992 23/10/1992 2/2/1993 Seranggon 
+S3d Serangoon Ave 1 2,532.4 LP 99 yrs 0.8 NA Seah Holdings 
+Pte Ltd $3,473,900.00 20 
+Home at Jalan rindu 
+28/8/1992 23/10/1992 2/2/1993 Serangoon 
+S3c Serangoon Ave 1 2,106.1 LP 99 yrs 0.8 NA RDC Land Pte 
+Ltd $2,765,309.30 14 
+Rindu Terrace 
+28/8/1992 23/10/1992 2/2/1993 Sernagoon 
+S3b Serangoon Ave 1 6,032.8 LP 99 yrs 0.8 NA 
+Sing-Indo 
+Enterprise Pte 
+Ltd 
+$5,520,012.00 4 
+Classical Terrace 
+28/8/1992 23/10/1992 2/2/1993 Serangoon 
+S3a Serangoon Ave 1 16,417.0 LP 99 yrs 0.8 NA 
+Park Court Pte 
+Ltd/Allgreen 
+Properties 
+Ltd/Hoe Seng 
+Co Pte Ltd JV 
+$15,100,000.00 10 
+Bartley Villas 
+28/8/1992 23/10/1992 2/2/1993 Bedok S2 Lorong Mydin 19,490.5 CO 99 yrs 2.12 NA 
+Golden 
+Development 
+Pte Ltd 
+$42,300,000.00 8 
+Astoria Park 
+28/8/1992 23/10/1992 2/2/1993 Pasir Ris S1 Loyang Ave 104,783.
+7 LP 99 yrs 1.2 NA First Capital 
+Corporation Ltd $73,400,000.00 5 
+Loyang Villas 
+31/1/1992 27/3/1992 6/6/1992 Tampines S1 Simei Rd 75,646.7 AP 99 yrs 2 NA First Capital 
+Corporation Ltd $98,000,000.00 4 
+Melville Park 
+29/11/1991 24/1/1992 25/3/1992 Bt Merah S3 Tiong Bahru 
+Rd/Jln Membina 24,912.5 CO 99 yrs 2.5 NA 
+Wennin 
+Investment Pte 
+Ltd/Winmost 
+Investment Pte 
+Ltd/Winnest 
+Investment Pte 
+Ltd/Winns 
+Investment Pte 
+Ltd  
+$64,300,000.00 8 
+Central Green 
+27/2/1991 24/4/1991 14/6/1991 Bt Merah S2 Ganges 
+Ave/Indus Rd 16,465.9 CO 99 yrs 2 NA 
+Far East 
+Organisation 
+Centre Pte Ltd 
+$36,780,000.00 10 
+Emerald Park 
+27/2/1991 24/4/1991 14/6/1991 Yishun S1 Yishun Ave 1/St 
+81 38,228.3 CO 99 yrs 2 NA 
+Far East 
+Organisation 
+Centre Pte Ltd 
+$85,890,000.00 10 
+Orchid Park 
+13/7/1990 7/9/1990 7/12/1990 Serangoon 
+S1 Serangoon Ave 3 36,000.0 CO 99 yrs 2.1 NA First Capital 
+Corporation Ltd $32,940,000.00 5 
+Chiltern Park 
+13/7/1990 7/9/1990 7/12/1990 Bishan S1 Sin Ming Walk 25,064.0 CO 99 yrs 2 NA Hong Leong 
+Holdings Ltd $18,000,000.00 3 
+Bishan Park 
+13/7/1990 7/9/1990 7/12/1990 Clementi S1 Clementi West 
+Coast Link/Rd 22,000.0 CO 99 yrs 1.8 NA Ming Court 
+Hotel Ltd $21,600,000.00 2 
+West Bay Resort 
+Condominium 
+23/11/1989 19/1/1990 9/4/1990 Bt Merah S1 Telok Blangah Dr 13,042.3 CO 99 yrs 2 NA First Capital 
+Corporation Ltd $25,270,000.00 7 
+Harbour View 
+Towers 
+23/11/1989 19/1/1990 9/4/1990 Bedok S1 Tanah Merah 
+Kechil Rd 22,654.6 CO 99 yrs 2 NA First Capital 
+Corporation Ltd $29,260,000.00 4 
+The Tanamera 
+              
+              
+  LEGEND            
+  
+*CO 
+Condominium
+; or Flats; or 
+With prior 
+written 
+approval, a 
+combination 
+of Flats and 
+Strata 
+Landed 
+Houses 
+(Serviced 
+Apartments 
+are not 
+allowed)           
+  CO Condominium 
+or Flats           
+  AP Apartment           
+  LP Landed           
+  
+LP / CO / 
+FT 
+Strata 
+Landed or 
+Condominium
+/ Flats           
+  BH Bungalow 
+Housing           
+  TH Terrace 
+Housing           
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bedok S1 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+S/N Tenderer Tender Bid           
+($) 
+1 First Capital Corporation Ltd 29,260,000.00 
+2 Goldvein Pte Ltd 19,000,000.00 
+3 Ladyhill (Pte) Ltd 16,800,000.00 
+4 Allgreen Properties Ltd 13,880,000.00 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bukit Merah S1 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 First Capital Corporation Ltd 25,270,000.00 
+2 Oaks Development Pte Ltd 20,355,680.00 
+3 Ming Court Hotel Ltd 19,500,000.00 
+4 GCM Pte Ltd 18,945,900.00 
+5 Goldvein Pte Ltd 17,000,000.00 
+6 Clunyhill (Pte) Ltd 12,380,000.00 
+7 Allgreen Properties Ltd 8,880,000.00 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Clementi S1 
+ 
+S/N Tenderer Tender Bid                                         
+($) 
+1 Ming Court Ltd 21,600,000.00 
+2 First Capital Corporation Ltd 10,660,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bishan S1 
+ 
+S/N Tenderer Tender Bid                 
+($) 
+1 Hong Leong Holdings Ltd 18,000,000.00 
+2 First Capital Corporation Ltd 17,540,000.00 
+3 Ming Court Hotel Ltd 15,500,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Serangoon S1 
+ 
+S/N Tenderer Tender Bid          
+ ($) 
+1 First Capital Corporation Ltd 32,940,000.00 
+2 Primular Investments Pte Ltd 24,408,000.00 
+3 City Development Ltd 23,250,000.00 
+4 Ming Court Hotel Ltd 20,180,000.00 
+5 Joinwell Investments Inc 19,000,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Yishun S1 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Far East Organisation Centre Pte Ltd 85,890,000.00 
+2 Tuan Huat Development Pte Ltd and Liang 
+Court Holdings Pte Ltd 
+45,890,000.00 
+3 Park Court Pte Ltd 35,000,000.00 
+4 Primular Investments Pte Ltd 32,800,000.00 
+5 Panasia Property Pte Ltd 32,000,000.00 
+6 Goldhill Orchard Land Pte Ltd 28,392,770.00 
+7 Wing Tai Holdings Ltd 27,988,000.00 
+8 DBS Land Ltd 19,751,470.00 
+9 First Capital Corporation Ltd 18,519,700.00 
+10 City Development Ltd 17,100,000.00 
+ 
+ 
+ 
+ 
+Land Parcel : Bt Merah S2 
+ 
+S/N   Tenderer Tender Bid              
+($) 
+1   Far East Organisation Centre Pte Ltd 36,780,000.00 
+2   Sing Development (Pte) Ltd and Sing Holdings 
+Ltd 
+24,962,304.40 
+3   Norgay Investments Pte Ltd 22,800,000.00 
+4   Lam San Development Pte Ltd 19,850,795.00 
+5   Kengfu Development Pte Ltd 17,680,000.00 
+6   Teo Teck Huat (S) Pte Ltd and Ong & Lim 
+Enterprise Pte Ltd 
+16,000,000.00 
+7   United Overseas Land Ltd 15,597,028.00 
+8   Hong Leong Holdings Ltd 15,000,000.00 
+9   Sing-Indo Enterprises Pte Ltd 12,481,152.20 
+10   Alwyn Development Pte Ltd 7,210,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bt Merah S3 
+ 
+S/N Tenderer Tender Bid           
+($) 
+1 Wennin Investment Pte Ltd/Winmost Investment 
+Pte Ltd/Winnest Investment Pte Ltd/Winns 
+Investment Pte Ltd 
+64,300,000.00 
+2 Allgreen Properties Pte Ltd 57,700,000.00 
+3 Bullion Holdings Pte Ltd 50,400,000.00 
+4 RMA Land Development Pte Ltd 49,110,000.00 
+5 United Overseas Land Ltd 47,000,000.00 
+6 DBS Realty Pte Ltd 42,800,000.00 
+7 First Capital Corporation Ltd 41,966,850.00 
+8 Bonvest Holding Ltd 31,000,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Tampines S1 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+S/N Tenderer Tender Bid                
+($) 
+1 First Capital Corporation Ltd 98,000.00 
+2 Hong Leong Holdings Ltd 62,500.00 
+3 Primular Investments Pte Ltd 39,800.00 
+4 Toa Corporation No offer 
+ 
+ 
+ 
+ 
+ 
+ 
+                 Land Parcel : Pasir Ris S1 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 First Capital Corporation Ltd 73,400,000.00 
+2 Overseas Union Land Pte Ltd/Liang Court 
+Holdings Ltd/Tuan Huat Development Pte Ltd 
+69,910,000.00 
+3 City Development Ltd 68,200,000.00 
+4 Li Hills Investment Pte Ltd/Pissaro Internation Pte 
+Ltd/Hickson Pte Ltd 
+41,806,600.00 
+5 Golden Development Pte Ltd 39,000,000.00 
+   
+ 
+  Click here to return to List of Residential Sites  
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bedok S2 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Golden Development Pte Ltd 42,300,000.00 
+2 GCM Pte Ltd 38,310,000.00 
+3 DBS Realty (Pte) Ltd 35,880,000.00 
+4 Sim Lian Construction Co Pte Ltd 35,450,880.64 
+5 Amash Development Pte Ltd/Hermitage Property 
+Development Pte Ltd JV 
+35,280,000.00 
+6 Union Investment Holding Pte Ltd 33,888,000.00 
+7 Oaks Development Pte Ltd 27,200,000.00 
+8 Chelshire Investment Pte Ltd/Welwyn Investment 
+Pte Ltd 
+24,100,000.00 
+   
+ Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+Land Parcel : Serangoon S3a 
+ 
+S/N Tenderer Tender Bid                  
+($) 
+1 Park Court Pte Ltd/Allgreen Properties Ltd/Hoe 
+Seng Co Pte Ltd JV 
+15,100,000.00 
+2 Sing-Indo Enterprises Pte Ltd 14,167,871.00 
+3 Tong Eng Brothers Pte Ltd 12,608,000.00 
+4 First Capital Corporation Ltd 12,400,000.00 
+5 Union Investment Holding Private Ltd 11,888,000.00 
+6 DBS Realty (Pte) Ltd 11,680,000.00 
+7 Sim Lian Construction Co Pte Ltd 10,288,205.56 
+8 Lido Development (Pte) Ltd 8,460,000.00 
+9 Duit Property Development Pte Ltd 5,300,720.00 
+10 Golden Development Pte Ltd 3,967,216.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Serangoon S3b 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Sing-Indo Enterprises Pte Ltd 5,520,012.00 
+2 Golden Development Pte Ltd 1,983,606.00 
+3 Swee Hin Enterprise Gunny Bag (Pte) Ltd 1,680,000.00 
+4 Island Tamara Holdings Pte Ltd/Wynyark 
+Investment Pte Ltd/Karimum Shipping Pte Ltd JV 
+1,480,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Serangoon S3c 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 RDC Land Pte Ltd 2,765,309.30 
+2 Hoi Hup Realty Pte Ltd 2,222,000.00 
+3 Ho Bee Investment Pte Ltd 2,106,000.00 
+4 Hua Kok Realty (Pte) Ltd 2,084,720.00 
+5 Hougang Town Central Development Pte Ltd 2,028,000.00 
+6 Mr Goh Peng Tong & Mr Lim Boon Leng, John 1,889,800.00 
+7 Yuet Fong Realty Pte Ltd 1,800,000.00 
+8 United Consultants Pte Ltd 1,748,063.00 
+9 Creative Investments Pte Ltd 1,700,000.00 
+10 Goodhouse Development Pte Ltd 1,500,000.00 
+11 Golden Development Pte Ltd 1,442,622.00 
+12 Mr Ho Ming Heng / Mdm Lim Siew Heng, Priscilla & 
+Mdm Yeo Kim Neo 
+1,133,081.80 
+13 Island Tamara Holding Pte Ltd/Wnyark Investment 
+Pte Ltd/Karimun Shipping Pte Ltd 
+880,008.00 
+14 Swee Hin Enterprise Gunny Bag (Pte) Ltd 880,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Serangoon S3d 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Seah Holdings Pte Ltd 3,473,900.00 
+2 RDC Land Pte Ltd 3,269,328.40 
+3 Loyang Development Pte Ltd 2,848,950.00 
+4 Chua Kim Huo Investments Pte Ltd 2,753,134.00 
+5 Lido Development (Pte) Ltd 2,660,000.00 
+6 Hua Kok Realty (Pte) Ltd 2,560,930.00 
+7 Liang Huat Holdings Pte Ltd 2,550,000.00 
+8 United Consultants Pte Ltd 2,279,160.00 
+9 Sing-Indo Enterprises Pte Ltd 2,208,252.00 
+10 Goodhouse Development Pte Ltd 2,200,000.00 
+11a Creative Investments Pte Ltd 2,100,000.00 
+11b Yuet Fong Realty Pte Ltd 2,100,000.00 
+12 Eng Lim Construction Co Pte Ltd 2,089,230.00 
+13 Asia Garden Development Pte Ltd 2,044,425.00 
+14 Mr Ho Ming Heng/Mdm Lim Siew Heng, Priscilla & Mdm Yeo 
+Kim Neo 
+1,906,897.00 
+15 Kwong Seng Loong Co (Pte) Ltd 1,810,666.00 
+16 K K Development Pte Ltd 1,800,000.00 
+17 Koon Seng Construction Pte Ltd 1,710,000.00 
+18 Swee Hin Enterprise Gunny Bag (Pte) Ltd 1,380,000.00 
+19 Island Tamara Holdings Pte Ltd/Wynyark Investment Pte 
+Ltd/Karimun Shippiong Pte Ltd 
+880,135.00 
+20 Golden Development Pte Ltd 450,819.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Serangoon S3e 
+ 
+S/N Tenderer 
+Tender Bid          
+($) 
+1 RDC Land Pte Ltd 3,873,000.00 
+2 Seah Holdings Pte Ltd 3,526,100.00 
+3 Hoi Hup Realty Pte Ltd 3,180,000.00 
+4 United Consultants Pte Ltd 2,880,000.00 
+5 Tayew Development Pte Ltd 2,750,000.00 
+6 Ho Bee Investment Pte Ltd 2,426,000.00 
+7 Creative Investments Pte Ltd 2,200,000.00 
+8 Lido Development Pte Ltd 2,000,000.00 
+9 K K Development Pte Ltd 1,950,000.00 
+10 
+Island Tamara Holdings Pte Ltd/Wynyark 
+Investment Pte Ltd/Karimun Shipping Pte Ltd 
+980,000.00 
+11 Golden Development Pte Ltd 540,983.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Serangoon S3f 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 RDC Land Pte Ltd 13,980,239.00 
+2 Creative Investments Pte Ltd 10,100,000.00 
+3 Lido Development Pte Ltd 8,970,000.00 
+4 DBS Realty Pte Ltd 7,800,000.00 
+5 Union Investment Holding Pte Ltd 7,477,470.00 
+6 Chip Tiong Investment Pte Ltd 7,149,522.38 
+7 Island Tamara Holdings Pte Ltd/Wynyark 
+Investment Pte Ltd/Karimun Shipping Pte Ltd 
+5,400,000.00 
+8 Melodies Ltd 4,500,000.00 
+9 Golden Development Pte Ltd 2,614,754.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Clementi S2 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 HO Lee Investments (Pte) Ltd 54,267,500.00 
+2 Liang Court Holdings Ltd, Ban Guan Enterprise 
+Pte Ltd 
+48,950,000.00 
+3 Allgreen Properties,Hoe Seng Co Pte Ltd, 
+Asiawide Investment Pte Ltd 
+48,800,000.00 
+4 Frist Capital Corporation Ltd 45,511,134.00 
+5 Waterville Investment Pte Ltd 43,008,009.00 
+6 United Overseas Land Group, Velverton 
+Investment Pte Ltd,RMA Land Development Pte 
+Ltd and Peak Properties Pte Ltd 
+43,000,000.00 
+7 EURO - Asia Land (Pte) Ltd 40,668,000.00 
+8 Winwill Investment Pte Ltd, Winmax 38,960,000.00 
+9 Jihe Development Pte Ltd, Mode Circl Pte Ltd and 
+Hoi Hup Realty Pte Ltd - Joint Venture 
+36,830,000.00 
+10 Trade & Industrial Development Pte Ltd 36,640,002.00 
+11 International Real Estate Corporation (Pte) Ltd 34,300,000.00 
+12 Sing - Indo Development Pte Ltd 34,064,777.60 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Queenstown S1 
+ 
+S/N Tenderer Tender Bid               
+($) 
+1 Kanopy Investments Pte Ltd 135,758,000.00 
+2 Allgreen Properties Ltd,Hoe Seng Co Pte 
+Ltd,Asizwide Investment Pte Ltd 
+133,000,000.00 
+3 United Overseas Land Group,UIC Land Pte 
+Ltds,shenton Holdings Pte Ltd and Peak 
+Properties Pte Ltd 
+115,000,000.00 
+4 DBS Realty (Pte) Ltd 112,880,000.00 
+5 Hong Leong Holdings Ltd 111,000,000.00 
+6 Winbill Investment Pte Ltd, Winwill 
+Investment Pte Ltd 
+109,339,000.00 
+7 First Capital Corporation Ltd 102,637,040.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Ang Mo Kio S1 
+ 
+S/N Tenderer Tender Bid             
+($) 
+1 Allgreen Properties Ltd, Hoe Seng Co Pte Ltd, 
+Asiawide Investment Pte Ltd 
+119,000,000.00 
+2 Ho Lee Investment (Pte) Ltd 112,998,000.00 
+3 DBS Realty (Pte) Ltd 103,800,000.00 
+4 City Development Ltd 102,200,000.00 
+5 United Overseas Land Group, UIC 
+Investments (Properties) Pte Ltd, Interpex 
+Service Pte Ltd and Peak Properties Pte Ltd 
+77,000,000.00 
+6 First Capital Corporation Ltd 75,826,754.00 
+7 Winmax Investment Pte Ltd, Winbill 
+Investment Pte Ltd 
+75,510,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Hougang S1b 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Glory Realty Co Pte Ltd 56,539,000.00 
+2 First Capital Corporation Ltd 52,041,400.00 
+3 DBS Realty (Pte) Ltd 47,830,000.00 
+4 Allgreen Properties Ltd & Hoe Seng Co (Pte) 
+Ltd 
+36,780,000.00 
+5 Winzest Investment Pte Ltd/Winmax 
+Investment Pte Ltd  
+32,100,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Hougang S1a 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Glory Realty Co Pte Ltd 60,228,000.00 
+2 Malayan Credit Ltd 56,114,005.00 
+3 First Capital Corporation Ltd 54,920,550.00 
+4 City Development Ltd 45,000,000.00 
+5 DBS Realty (Pte) Ltd 43,880,000.00 
+6 Allgreen Propoerties Ltd & Hoe Seng Co (Pte) 
+Ltd 
+40,180,000.00 
+7 Jihe Development Pte Ltd, Straits Construction 
+Co Pte Ltd & Yi-Kai Development Pte Ltd 
+38,692,500.00 
+8 Winzest Investment Pte Ltd/Winmax 
+Investment Pte Ltd 
+34,300,000.00 
+9 Sing Development (Pte) Ltd and F.H. Lee 
+Holdings (Pte) Ltd 
+33,600,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bukit Batok S3 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Glory Realty Co Pte Ltd 105,169,000.00 
+2 Allgreen Properties Ltd/Hoe Seng Co (Pte) Ltd 98,200,000.00 
+3 Winshine Investment Pte Ltd/Winmax Investment 
+Pte Ltd 
+78,999,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bt Panjang S2 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Malayan Credit Ltd 106,399,440.00 
+2 Orchard Parade Land Pte Ltd 105,190,000.00 
+3 Winshine Investment Pte Ltd/Winbill 
+Investment Pte Ltd 
+90,190,000.00 
+4 Allgreen Properties Ltd/Hoe Seng Co Pte Ltd 73,180,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bukit Merah S4 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 First Capital Corporation Ltd 57,872,250.00 
+2 Glory Realty Co Pte Ltd 54,399,000.00 
+3 Keck Seng Hotel Pte Ltd & Keck Seng 
+Investments (HK) Ltd & Newford Pte Ltd 52,000,000.00 
+4 Hong Leong Holdings Ltd 50,500,000.00 
+5 Sing-Indo Development Pte Ltd 50,296,359.10 
+6 City Development Ltd 50,200,000.00 
+7 DBS Realty (Pte) Ltd 49,800,000.00 
+8 Winshine Investment Pte Ltd,Winzest 
+Investment Pte Ltd 49,510,000.00 
+9 Marco Polo Development Ltd 48,000,000.00 
+10 United Overseas Land Ltd & Shenton Holdings 
+Pte Ltd 41,300,000.00 
+11 CDC-Construction & Development Pte Ltd 40,108,000.00 
+12 Sing Development (Pte) Ltd & FH Lee Holdings 
+(Pte) Ltd 40,030,000.00 
+13 
+Jihe Development Pte Ltd, Straits Construction 
+Co Pte Ltd, Mode Circle Co Pte Ltd & Great 
+Wealth Holdings Pte Ltd-Joint Venture 
+35,685,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bt Panjang S1 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 First Capital Corporation Ltd 157,153,000.00 
+2 CPL Complex Pte Ltd 142,455,409.00 
+3 Far East Organization Centre Pte Ltd 139,429,000.00 
+4 City Developments Ltd 138,000,000.00 
+5 Wing Tai Land Pte Ltd/Wingem Investment 
+Pte Ltd 
+100,190,000.00 
+6 LKN Development Pte Ltd 80,800,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Geylang S1 
+ 
+S/N Tenderer Tender Bid              
+($) 
+1 DBS Realty (Pte) Ltd 184,800,000.00 
+2 First Capital Corporation Ltd 179,404,000.00 
+3 Wing Tai Land Pte Ltd/Windeal Investment Pte 
+Ltd 
+172,110,000.00 
+4 Tuan sing Holdings Ltd/Habitat Properties Pte 
+Ltd 
+162,280,000.00 
+5 Far East Organization Centre Pte Ltd 161,999,000.00 
+6 C.G.H Land Pte Ltd 135,380,000.00 
+7 Hong Leong Holdings Ltd 128,000,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Jurong West S2b 
+ 
+S/N Tenderer Tender Bid                
+($) 
+1 First Capital Corporation Ltd 204,944,000.00 
+2 Tuan Sing Holdings Ltd/Habitat Properties Pte 
+Ltd 
+155,168,000.00 
+3 Beauty World Properties Pte Ltd 64,182,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Jurong West S2a 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 United Overseas Land Ltd 101,928,000.00 
+2 First Capital Corporation Ltd 100,003,000.00 
+3 Tuan Sing Holdings Ltd 80,180,000.00 
+4 LKN Development Pte Ltd 78,165,000.00 
+5 Hong Leong Holdings Ltd 55,000,000.00 
+6 Orchard Parade Land Pte Ltd 44,600,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Clementi S7 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Spring Quay Holdings Pte Ltd 4,180,000.00 
+2 Guok Chin Huat, Samuel/Sio Tat Long 3,540,000.00 
+3 Builtech Corporation Pte Ltd 2,968,800.00 
+4 Saujana Development Pte Ltd 2,555,000.00 
+5 Crescent Developments Pte Ltd 2,547,019.00 
+6 Dr Seow Onn Choong 1,979,467.50 
+7 Chye Joo Construction Pte Ltd 1,958,200.00 
+8 Lim Chee Keong 38,008.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bukit Batok S2 
+ 
+S/N Tenderer Tender Bid                   
+($) 
+1 Pidemco Land Ltd 176,800,000.00 
+2 Tuan Sing Holdings Ltd/ Habitat Properties Pte 
+Ltd 
+143,910,000.00 
+3 Allgreen Properties Ltd/Hoe Seng Co (Pte) Ltd 130,800,000.00 
+4 United Overseas Land Ltd 123,800,000.00 
+5 DBS Realty (Pte) Ltd & Far East Organization 
+Centre Pte Ltd 
+111,999,999.00 
+6 Wingem Investment Pte Ltd/Winglade 
+Investment Pte Ltd 
+105,410,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bedok S3c 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 LKN Development Pte Ltd 8,450,000.00 
+2 Habitat Properties Pte Ltd 8,000,000.00 
+3 RDC Land Pte Ltd 6,483,168.00 
+4 Saujana Development Pte Ltd 6,389,000.00 
+5 Tacwealth Investments Pte Ltd 5,807,838.00 
+6 Seah Holdings Pte Ltd 5,680,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bedok S3b 
+ 
+S/N Tenderer Tender Bid             
+($) 
+1 Habitat Properties Pte Ltd 12,000,000.00 
+2 LKN Development Pte Ltd 11,700,000.00 
+3 RDC Land Pte Ltd 10,000,055.00 
+4 Seah Holding Pte Ltd 9,980,000.00 
+5 Tacwealth Investments Pte Ltd 9,732,495.00 
+6 Liang Huat Holding Pte Ltd 8,361,250.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Serangoon S2 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Malayan Credit Ltd 200,571,588.00 
+2 Pidemco Land Ltd 170,380,000.00 
+3 Far East Organization Centre Pte Ltd 146,180,000.00 
+4 First Capital Corporation Ltd 128,006,000.00 
+5 Chelville Investment Pte Ltd/Chelshire Investment 
+Pte Ltd 
+123,400,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Jurong West S5 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Far East Organization Centre Pte Ltd/Pidemco 
+Land Ltd 
+203,332,000.00 
+2 Allgreen Properties Ltd/Hoe Seng Co (Pte) Ltd 188,000,000.00 
+3 First Capital Corporation Ltd 165,438,000.00 
+4 Winspeed Investment Pte Ltd/Wingrace 
+Investment Pte Ltd 
+149,100,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Clementi S3 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Orchard Parade Land Pte Ltd 96,680,000.00 
+2 City Development Ltd 90,200,000.00 
+3 Allgreen Properties Ltd/Hoe Seng Co (Pte) Ltd 80,300,000.00 
+4 Chelville Investment Pte Ltd/Winfaith Investment 
+Pte Ltd 
+65,500,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Ang Mo Kio S3 
+ 
+S/N Tenderer Tender Bid                
+($) 
+1 Orchard Parade Land Pte Ltd/Pidemco Land Ltd 131,132,000.00 
+2 Windew Investment Pte Ltd/Richdeal Investment Pte 
+Ltd 
+106,500,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Toa Payoh S2 
+ 
+S/N Tenderer Tender Bid               
+($) 
+1 Wingem Investment Pte Ltd/Winprime Investment 
+Pte Ltd 
+132,500,000.00  
+2 SSL Properties Pte Ltd 131,100,000.00  
+3 City Development Ltd 125,300,000.00  
+4 Far East Organization Centre Pte Ltd 122,190,000.00  
+5 DBS Realty (Pte) Ltd 116,999,999.00  
+6 Park Court Pte Ltd & Hong Leong Holdings Ltd 113,998,880.00  
+7 Goldvein Pte Ltd 106,328,168.00  
+8 Allgreen Properties Ltd/Hoe Seng Co Pte Ltd 100,800,000.00  
+9 First Capital Corporation Ltd 85,255,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Kallang/ Whampoa S7c 
+ 
+S/N Tenderer Tender Bid              
+($) 
+1 Far East Organization Centre Pte Ltd 42,489,000.00 
+2 RDC Land Pte Ltd 34,610,485.00 
+3 Lido Developments Pte Ltd 29,800,000.00 
+4 Park Court Pte Ltd 17,800,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Kallang/Whampoa S7b 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Far East Organization Centre Pte Ltd 27,180,000.00 
+2 Lido Development Pte Ltd 20,700,000.00 
+3 RDC Land Pte Ltd 20,004,921.60 
+4 Liang Huat Aluminium Ltd 19,843,365.00 
+5 LKN Development Pte Ltd 13,800,000.00 
+6 Park Court Pte Ltd 11,800,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Kallang/Whampoa S7a 
+ 
+S/N Tenderer Tender Bid                  
+($) 
+1 Far East Organization Centre Pte Ltd 25,989,000.00 
+2 Lido Development Pte Ltd 22,800,000.00 
+3 RDC Land Pte Ltd 19,179,898.10 
+4 Liang Huat Aluminium Ltd 18,856,200.00 
+5 Cosmopolitan Development Pte Ltd 18,825,445.00 
+6 Graystone Development Pte Ltd/United 
+Consultants Pte Ltd 
+13,702,172.00 
+7 Goodland Pte Ltd 12,800,000.00 
+8 Tacwealth Investments Pte Ltd 10,370,910.00 
+  Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Choa Chu Kang S4 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Pidemco Land Ltd 261,300,000.00 
+2 DBS Realty (Pte) Ltd & Far East Organization 
+Centre Pte Ltd 
+232,888,889.00 
+3 Hong Leong Holdings Ltd/Park Court Pte Ltd 218,000,000.00 
+4 City Development Ltd 203,000,000.00 
+5 Winswift Investment Pte Ltd/Grandwin Investment 
+Pte Ltd 
+196,310,000.00 
+6 Singapore United Estates Pte Ltd 190,600,000.00 
+7 First Capital Corporation Ltd 179,700,000.00 
+8 Allgreen Properties Ltd/Hoe Seng Co (Pte) Ltd 142,800,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Hougang S9 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Allgreen Properties Ltd 63,000,000.00 
+2 NTUC Income Insurance Co-operative Ltd 62,300,000.00 
+3 Goodland Pte Ltd 57,280,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Tampines S4 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Orchard Terminal Pte Ltd 215,349,000.00 
+2 Nasidon Investments Pte Ltd 188,200,000.00 
+3 Allgreen Properties Ltd / Hoe Seng Co (Pte) Ltd / 
+Ho Bee Developments Pte Ltd 
+180,800,000.00 
+4 First Capital Corporation Ltd 179,955,670.00 
+5 Winfar Investment Pte Ltd 145,218,000.00 
+6 SSL Properties Pte Ltd 137,700,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Jurong West S3b 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 The Dynasty Corporation (S) Pte Ltd 45,900,000.00 
+2 Malayan Credit Ltd 36,700,000.00 
+3 Dawnatron Pte Ltd 33,100,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Hougang S2 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Orchard Terminal Pte Ltd 146,398,000.00 
+2 Allgreen Properties Ltd / Hoe Seng Co (Pte) Ltd 123,800,000.00 
+3 Ho Bee Developments Pte Ltd 101,899,000.00 
+4 First Capital Corporation Ltd 85,411,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bukit Timah S1 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Orchard Terminal Pte Ltd 81,868,000.00 
+2 Sing Development (Pte) Ltd 70,300,000.00 
+3 City Developments Ltd 66,800,000.00 
+4 Guthrie GTS Ltd / Lee Kim Tah Holdings Ltd 65,111,018.00 
+5 Winwave Investment Pte Ltd 51,111,000.00 
+6 Dawnatron Pte Ltd 50,600,000.00 
+7 Allgreen Properties Ltd / Hoe Seng Co (Pte) 
+Ltd 
+48,300,000.00 
+8 SSL Properties Pte Ltd 45,201,900.00 
+9 First Capital Corporation Ltd 45,201,200.00 
+10 Came Enterprises Pte Ltd 41,000,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bukit Batok S1 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Hong Leong Holdings Ltd / City Developments 
+Ltd 
+233,000,000.00 
+2 Orchard Terminal Pte Ltd 228,403,000.00 
+3 First Capital Corporation Ltd 204,500,000.00 
+4 Allgreen Properties Ltd / Hoe Seng Co (Pte) 
+Ltd / Ho Bee Developments Pte Ltd 
+200,800,000.00 
+5 Winavic Investment Pte Ltd 193,118,900.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                Land Parcel : Pasir Ris S4b   
+S/N Tenderer Tender Bid          
+($) 
+1 Ho Bee Developments Pte Ltd 105,118,000.00 
+2 Dawnatron Pte Ltd 98,200,000.00 
+3 SSL Properties Pte Ltd 72,328,000.00 
+4 Allgreen Properties Ltd / Hoe Seng Company 
+Pte Ltd / Pacific Carriers Ltd 
+59,850,000.00 
+5 Hong Leong Holdings Ltd 44,888,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Woodlands S2b 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Jen Emerald Nexus Pte Ltd 6,963,593.00 
+2 Ng Cheow Chye / Sio Tat Long / Chen Yang Chin / 
+Lim Cheng Chua / Guok Chin Huat (Samuel) 
+6,300,004.00 
+3 Lau Eng Tiong / Tan Bock Huat / Tan Chian Chai / 
+Ong See Kit / Yeo Aik Seng 
+5,689,503.60 
+4 Yee Hong Pte Ltd 5,028,119.91 
+5 Ng Tian Chiong 5,011,000.00 
+6 Jun Yuan Development Pte Ltd 4,844,238.00 
+7 Ng Huat Engineering Pte Ltd 4,544,287.00 
+8 Kay Huat Investments Pte Ltd 4,179,718.00 
+9 Hai Leck Development Pte Ltd 4,150,355.00 
+10 Mayfair Construction Pte Ltd 3,936,506.20 
+11 Best Capital Development Pte Ltd 2,813,800.00 
+12 Haw Peng Chai / William Seet Teck Seng / Choo 
+Hoh Kin / Lee Fook Choy 
+2,813,771.86 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Woodlands S2a 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Davis Development Pte Ltd 13,330,212.70 
+2 Ng Huat Engineering Pte Ltd 9,278,336.50 
+3 Central Granite Pte Ltd / Hoong Bee Teck / 
+Goh Peng Tong / Michael Sng Boh Kwang / 
+Lee Kok Weng 
+7,928,238.00 
+4 Chuan Bee Realty Pte Ltd 7,727,159.50 
+5 Toh Chiew Kwee 6,807,943.50 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Queenstown S4 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Success Development Pte Ltd 271,299,000.00 
+2 Richdeal Investment Pte Ltd 251,199,000.00 
+3 United Overseas Land Ltd / Kheng Leong Co 
+Pte Ltd / Haw Par Brothers International Limited 
+228,800,000.00 
+4 Hong Leong Holdings Limited 223,988,000.00 
+5 Allgreen Properties Ltd / Hoe Seng Company 
+Pte Ltd 
+218,898,000.00 
+6 First Capital Corporation Ltd / Guobena Sdn 
+Bhd 
+148,513,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Jurong West S3a 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 The Dynasty Corporation (S) Pte Ltd / SEADC 
+Investment Pte Ltd / Refine Technology Pte Ltd / 
+GEMT Trading Pte Ltd 
+43,000,000.00 
+2 Pan Malayan Holdings Ltd 36,200,000.00 
+3 Jurong Point Resources Pte Ltd 35,300,888.00 
+4 May Flower Properties Pte Ltd 32,001,000.00 
+5 SSL Properties Pte Ltd 29,006,236.30 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Choa Chu Kang S2 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 SSL Properties Pte Ltd 211,694,002.80 
+2 City Developments Limited 208,000,000.00 
+3 Success Development Pte Ltd / Vasilon Pte 
+Ltd 
+203,701,000.00 
+4 Richdeal Investment Pte Ltd 173,081,000.00 
+5 Allgreen Properties Ltd / Hoe Seng Company 
+Pte Ltd 
+168,898,000.00 
+6 First Capital Corporation Ltd / Guobena Sdn 
+Bhd 
+138,670,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Woodlands S5 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Questvest (S) Pte Ltd 40,300,000.00 
+2 SSL Properties Pte Ltd 30,151,000.00 
+3 Azurite Land Pte Ltd 28,161,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Tampines S3 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 City Developments Ltd / Hong Leong Holdings 
+Ltd 
+194,663,000.00 
+2 RichDeal Investment Pte Ltd 168,311,000.00 
+3 Allgreen Properties Ltd / Hoe Seng Company 
+(Pte) Ltd 
+155,398,000.00 
+4 Erishi Holdings Pte Ltd 154,590,000.00 
+5 Azurite Land Pte Ltd 151,100,000.00 
+6 First Capital Corporation Ltd 147,200,000.00 
+7 NTUC Choice Homes Co-Operative Ltd 139,227,060.00 
+8 OUB Centre Ltd 136,509,149.00 
+9 Sin Soon Lee Realty Co Pte Ltd 131,388,888.00 
+10 Alkaff Complex Pte Ltd 93,880,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Serangoon S5 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Yeo Hiap Seng Ltd 19,188,000.00 
+2 SSL Properties Pte Ltd 15,075,200.00 
+3 Allgreen Properties Ltd / Hoe Seng Company (Pte) 
+Ltd 
+12,398,000.00 
+4 Sim Lian Holdings Ltd 11,080,000.00 
+5 First Capital Corporation Ltd 10,200,000.00 
+6 Chuan Bee Realty Pte Ltd 8,193,060.00 
+7 Swee Hin Enterprise Gunny Bag (Pte) Ltd 6,472,490.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Jurong East S1 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 SSL Properties Pte Ltd 131,215,000.00 
+2 Allgreen Properties Ltd / Hoe Seng Company 
+(Pte) Ltd 
+125,980,000.00 
+3 City Developments Ltd / Hong Leong Holdings 
+Ltd 
+111,222,000.00 
+4 First Capital Corporation Ltd 109,600,000.00 
+5 RichDeal Investment Pte Ltd 96,999,000.00 
+6 Erishi Holdings Pte Ltd 91,780,000.00 
+7 Azurite Land Pte Ltd 91,100,000.00 
+8 Nasidon Investments Pte Ltd 71,880,000.00 
+9 Tara Development Pte Ltd 16,328,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Hougang S5b 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Yeo Hiap Seng Ltd 18,098,000.00 
+2 SSL Properties Pte Ltd 16,503,600.00 
+3 Guthrie GTS Ltd 12,888,000.00 
+4 Tacwealth Investments Pte Ltd 10,013,185.60 
+5 Swee Hin Enterprise Gunny Bag (Pte) Ltd 8,629,980.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Hougang S5a 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Yeo Hiap Seng Ltd 18,889,000.00 
+2 SSL Properties Pte Ltd 12,408,960.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Choa Chu Kang S5 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 SSL Properties Pte Ltd 140,154,000.00 
+2 Kansas Holdings Ltd / Keck Seng (S) Pte Ltd 92,000,000.00 
+3 Hong Leong Holdings Ltd 88,988,000.00 
+4 First Capital Corporation Ltd/Malayan Credit 
+Ltd 
+82,675,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bishan S3 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 First Capital Corporation Ltd 275,559,000.00 
+2 Wincrest Investment Pte Ltd / Pidemco Land 
+Ltd 
+243,189,000.00 
+3 Golden Development Pte Ltd / Orchard Parade 
+Land Pte Ltd 
+218,258,000.00 
+4 Malayan Credit Ltd 180,572,648.00 
+5 Allgreen Properties Ltd / Hoe Seng Co (Pte) 
+Ltd 
+173,890,000.00 
+6 City Developments Ltd 170,800,000.00 
+7 United Overseas Land Ltd and Others 152,000,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Woodlands S3d 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Straits Construction Co Pte Ltd / Hoi Hup Realty Pte 
+Ltd / Wong Swee Chun / Ng Keng Teong / Ong 
+Cher Keong & Others 
+61,300,000.00 
+2 Amazonite Land Pte Ltd 61,000,000.00 
+3 Actbilt Pte Limited 60,280,000.00 
+4 Winavic Investment Pte Ltd 60,180,000.00 
+5 Teng Fuh Holdings Pte Ltd 44,686,170.00 
+6 Yong Da Properties Pte Ltd 41,001,000.00 
+7 Goodland Private Limited / Keck Seng Investments 
+(Hong Kong) Limited 
+32,800,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Clementi S8 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Chuan Hup Realty Pte Ltd & Heng Holdings 
+S.E.A (Pte) Ltd 
+16,050,000.00 
+2 LKN Development Pte Ltd 14,210,000.00 
+3 Peak Properties Pte Ltd 14,100,000.00 
+4 Econ International Limited & Amara Holdings 
+Pte Ltd 
+13,800,000.00 
+5 Asia Industrial Development (Pte) Ltd 10,789,308.00 
+6 Tacwealth Investments Pte Ltd 10,018,000.00 
+7 Chuan Bee Realty Pte Ltd 9,600,008.00 
+8 Eltech Electronics Limited 9,117,304.00 
+9 Goodland Private Limited 8,800,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Choa Chu Kang S3 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Orchard Parade Land Pte Ltd / Yeo Hiap Seng 
+Limited 
+189,077,000.00 
+2 Malayan Credit Limited 159,376,800.00 
+3 Wincrest Investment Pte Ltd 145,400,000.00 
+4 Alkaff Complex Pte Ltd 139,200,000.00 
+5 Amazonite Land Pte Ltd 129,000,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bukit Merah S6 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Golden Development Private Limited 248,680,000.00 
+2 United Overseas Land Ltd / S. L. Properties Ltd / 
+Haw Par Brothers International Ltd 
+211,000,000.00 
+3 Winbell Investment Pte Ltd 198,510,000.00 
+4 HPL Properties Pte Ltd / Hyundai Engineering and 
+Construction Co Ltd 
+185,050,000.00 
+5 Amazonite Land Pte Ltd 184,739,000.00 
+6 Malayan Credit Limited 180,028,600.00 
+7 DBS Realty (Private) Limited 176,228,209.00 
+8 Sing Development (Private) Ltd / Sing Realty 
+(Singapore) Pte Ltd 
+165,006,000.00 
+9 First Capital Corporation Ltd 160,983,300.00 
+10 Allgreen Properties Ltd / Hoe Seng Co (Pte) Ltd 156,880,000.00 
+11 Chng Gim Huat 120,000,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Tampines S6b 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 NTUC Choice Homes Co-Operative Limited 116,116,000.00 
+2 Orchard Terminal Private Ltd 104,680,000.00 
+3 Allgreen Properties Ltd / Hoe Seng Co (Pte) Ltd 93,480,000.00 
+4 City Developments Limited 80,000,000.00 
+5 Wincrest Investment Pte Ltd 77,000,000.00 
+6 DBS Realty Pte Ltd and HKR Asia Pacific Pte 
+Ltd 
+76,419,490.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Tampines S6a 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Eyton Pte Ltd 121,700,000.00 
+2 NTUC Choice Homes Co-Operative Limited 116,116,000.00 
+3 Orchard Terminal Private Ltd 106,758,000.00 
+4 SL Properties Limited 98,800,000.00 
+5 Allgreen Properties Ltd / Hoe Seng Co (Pte) Ltd 91,980,000.00 
+6 City Developments Limited 80,000,000.00 
+7 Wincrest Investment Pte Ltd 77,000,000.00 
+8 DBS Realty Private Limited and HKR Asia 
+Pacific Pte Ltd 
+76,419,490.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Serangoon S11 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 MCL Land Limited 21,507,856.00 
+2 Econ International Limited & Kienta Engineering 
+Construction Pte Ltd 
+21,200,000.00 
+3 Tacwealth Investments Pte Ltd 21,001,800.00 
+4 DBS Realty Pte Ltd 20,731,118.00 
+5 Allgreen Properties Ltd / Hoe Seng Co (Pte) Ltd 20,310,000.00 
+6 Seah Holdings Pte Ltd 18,008,000.00 
+7 Winstar Investment Pte Ltd 17,100,000.00 
+8 Came Development Pte Ltd 14,893,893.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bishan S12 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 First Capital Corporation Ltd 62,385,000.00 
+2 DBS Realty Pte Ltd & HKR Asia Pacific Pte 
+Ltd 
+47,318,090.00 
+3 MCL Land Limited 38,120,238.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Yishun S4b 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Centrepoint Properties Ltd 87,759,000.00 
+2 Allgreen Properties Ltd / Hoe Seng Co (Pte) 
+Ltd 
+81,000,000.00 
+3 Erishi Holdings Private Limited 68,508,000.00 
+4 DBS Realty (Private) Limited 50,280,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Yishun S4a 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Centrepoint Properties Ltd 78,423,000.00 
+2 Allgreen Properties Ltd / Hoe Seng Co (Pte) 
+Ltd 
+73,000,000.00 
+3 Erishi Holdings Private Limited 61,228,000.00 
+4 DBS Realty (Private) Limited 41,880,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Queenstown S2 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Allgreen Properties Ltd / Hoe Seng Co (Pte) 
+Ltd 
+223,000,000.00 
+2 Erishi Holdings Private Limited 217,880,000.00 
+3 Chancery Properties Private Limited 200,088,000.00 
+4 Centrepoint Properties Ltd & Lum Chang 
+Holdings Ltd 
+198,060,000.00 
+5 DBS Realty (Private) Limited 188,800,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Clementi S15a 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Marina Green Ltd & Success Development Pte 
+Ltd 
+195,390,000.00 
+2 MCL Land Ltd 182,500,000.00 
+3 Ho Bee Developments Pte Ltd 173,018,000.00 
+4 Allgreen Properties Ltd & Hoe Seng Company 
+(Pte) Ltd 
+163,888,000.00 
+5 Centrepoint Properties Ltd 161,380,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bukit Batok S7 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Janiton Pte Ltd 172,690,000.00 
+2 Winlite Investment Pte Ltd 161,969,000.00 
+3 Marina Green Ltd & Success Development Pte 
+Ltd 
+157,600,000.00 
+4 Centrepoint Properties Ltd 153,900,000.00 
+5 Allgreen Properties Ltd & Hoe Seng Company 
+(Pte) Ltd 
+133,888,000.00 
+6 Keppel Land Properties Pte Ltd 118,208,000.00 
+7 Hong Leong Holdings Ltd 118,118,000.00 
+8 Parvillion Pte Ltd, United Overseas Land Ltd, 
+Haw Par Realty Pte Ltd & Feature Dev Pte Ltd  
+Late 
+submission 
+received at     
+12.01 pm 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bedok S10 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Bonvests Holdings Ltd 75,346,938.00 
+2 Wingrand Investment Pte Ltd 74,688,000.00 
+3 Ho Bee Developments Pte Ltd 71,119,000.00 
+4 NTUC Choice Homes Co-Operative Ltd & Chip 
+Eng Leong Enterprise Pte Ltd 
+70,000,888.00 
+5 UIC Development Pte Ltd 69,700,830.00 
+6 Marina Green Ltd & Success Development Pte 
+Ltd 
+68,880,000.00 
+7 Centrepoint Properties Ltd 68,500,000.00 
+8 Allgreen Properties Ltd & Hoe Seng Company 
+(Pte) Ltd 
+68,188,000.00 
+9 Sino Holdings (S) Pte Ltd 66,380,000.00 
+10 Rivaldo Investments Pte Ltd 66,160,000.00 
+11 Keppel Land Properties Pte Ltd 60,408,000.00 
+12 Koh Brothers Development Pte Ltd 53,300,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Hougang S3b 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 MCL Land Ltd & Ho Bee Developments Pte Ltd 121,380,000.00 
+2 Bishan Properties Pte Ltd 110,800,000.00 
+3 Allgreen Properties Ltd / Hoe Seng Co (Pte) 
+Ltd / Astipal Pte Ltd 
+105,080,000.00 
+4 Rivaldo Investments Pte Ltd 91,770,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Hougang S3a 
+ 
+S/N Tenderer Tender Bid           
+($) 
+1 MCL Land Ltd & Ho Bee Developments Pte 
+Ltd 
+98,538,000.00 
+2 Bishan Properties Pte Ltd 96,034,000.00 
+3 Allgreen Properties Ltd / Hoe Seng Co (Pte) 
+Ltd / Astipal Pte Ltd 
+93,080,000.00 
+4 Sino Holdings (S) Pte Ltd 87,220,880.00 
+5 Rivaldo Investments Pte Ltd 81,827,000.00 
+6 Union Investment Holding Pte Ltd 77,000,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Yishun S5a 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Allgreen Properties Ltd & Overdale Pte Ltd 97,980,000.00 
+2 Centrepoint Properties Ltd 79,000,000.00 
+3 MCL Land Limited & Winpeace Investment Pte 
+Ltd 
+78,392,000.00 
+4 City Developments Limited 72,000,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bedok S15 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Allgreen Properties Ltd & Overdale Pte Ltd 63,830,000.00 
+2 Wingrand Investment Pte Ltd 61,220,000.00 
+3 Sino Holdings (Singapore) Pte Ltd 59,818,000.00 
+4 Centrepoint Properties Ltd 55,200,000.00 
+5 Ho Bee Developments Pte Ltd 51,180,000.00 
+6 Torbernite Pte Ltd 48,939,779.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Choa Chu Kang S7 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Cuxhaven Pte Ltd 158,708,000.00 
+2 Bishan Properties Pte Ltd 155,315,000.00 
+3 Centrepoint Properties Ltd 140,900,000.00 
+4 Winlite Investment Pte Ltd 137,132,800.00 
+5 Union Investment Holding Pte Ltd 123,635,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Woodlands S6b 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Bishan Properties Pte Ltd 88,938,000.00 
+2 Centrepoint Properties Ltd 85,838,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bukit Batok S8 
+ 
+S/N Tenderer Tender Bid          
+($) 
+1 Sim Lian Land Pte Ltd 78,399,000.00 
+2 Bishan Properties Pte Ltd 66,678,000.00 
+3 Deyrolle Pte Ltd 63,688,000.00 
+4 Hoi Hup Realty Pte Ltd / Hoi Hup JV 
+Development Pte Ltd 
+61,300,000.00 
+5 Centrepoint Properties Ltd 58,388,800.00 
+6 Tiong Aik Investments Pte Ltd / King Wan 
+Corporation Ltd 
+57,538,000.00 
+7 NTUC Choice Homes Co-operative Ltd / Chip 
+Eng Leong Enterprise Pte Ltd 
+54,118,889.00 
+8 Allgreen Properties Ltd 50,380,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Ang Mo Kio S2a 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 NTUC Choice Homes Co-operative Ltd & Chip 
+Eng Leong Enterprise Pte Ltd 
+183,988,888.00 
+2 City Developments Ltd  172,200,000.00 
+3 Sim Lian Land Pte Ltd 172,000,000.00 
+4 Deyrolle Pte Ltd 169,000,000.00 
+5 Tanglin View Pte Ltd 166,666,000.00 
+6 Centrepoint Properties Ltd 158,100,000.00 
+7 CRL Realty Pte Ltd 153,211,888.00 
+8 United Overseas Land Ltd, Russville Pte Ltd & 
+Bali Investment Pte Ltd 
+135,628,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bishan S13 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 Sim Lian Land Pte Ltd  310,000,000.00  
+2 CRL Realty Pte Ltd and Wachovia Development 
+Corporation  
+306,300,000.00 
+3 GuocoLand (Singapore) Pte Ltd  300,200,000.00  
+4 Kingston Development Pte Ltd and ASPF II 
+Alpha GMBH  
+291,870,000.00  
+5 Allgreen Properties Limited and Hoe Seng 
+Company (Pte) Ltd  
+279,880,000.00  
+6 Choicehomes Investments Pte Ltd  264,288,889.00  
+7 Multi Wealth (Singapore) Pte Ltd  256,055,555.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Geylang S5 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 Ho Bee Investment Ltd/ ChoiceHomes 
+Investments Pte Ltd 
+228,888,000.00 
+2 Multi Wealth (Singapore) Pte Ltd 222,088,000.00 
+3 GuocoLand (Singapore) Pte Ltd 207,600,000.00 
+4 CRL Realty Pte Ltd / Wachovia Development 
+Corporation 
+203,680,000.00 
+5 Frasers Centrepoint Limited 197,000,000.00 
+6 Allgreen Properties Limited / Hoe Seng Company 
+(Pte) Ltd 
+187,800,000.00 
+7 Dakota Pte Ltd 187,188,189.00 
+8 City Venture Properties Pte Ltd 186,800,000.00 
+9 Sim Lian Land Pte Ltd 183,000,000.00 
+10 Mansfield Developments Pte Ltd 176,160,000.00 
+11 Winsmart Investment Pte Ltd/ Greatearth 
+Developments Pte Ltd 
+176,000,000.00 
+12 Haig Development Pte Ltd 175,098,000.00 
+13 Peak Star Pte Ltd 159,000,000.00 
+14 Soilbuild Group Holdings Ltd 157,890,000.00 
+15 SuperBowl Management Pte Ltd/ Wah Hoe 
+Development Pte Ltd 
+142,000,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Ang Mo Kio S6 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 Eunos Link Technology Park Ltd 202,880,000.00  
+2 AMK Development Pte Ltd 181,528,000.00  
+3 Frasers Centrepoint Limited 167,018,000.00  
+4 Duke Development Pte Ltd 162,890,000.00  
+5 Hong Leong Holdings Limited / TID Pte. Ltd. 161,000,000.00  
+6 EL Development Private Limited 148,800,000.00  
+7 Boon Keng Development Pte Ltd 144,800,000.00  
+8 Bravo Building Construction Pte Ltd 142,599,999.00  
+9 ChoiceHomes Investments Pte Ltd 142,189,000.00  
+10 GLL Ventures Pte. Ltd. 142,000,000.00  
+11 Allgreen Properties Limited 139,890,000.00  
+12 
+CRL Realty Pte Ltd / Wachovia Development 
+Corporation 
+138,000,000.00  
+13 Sim Lian Land Pte Ltd 128,000,000.00  
+14 
+Winsmart Investment Pte. Ltd. / Greatearth 
+Developments Pte Ltd 
+120,120,120.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Pasir Ris S11 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 CES-Land Pte Ltd 104,005,848.00  
+2 Perfect Eagle Pte. Ltd. 100,360,000.00  
+3 Sim Lian Land Pte Ltd 93,000,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Yishun S2 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 MCL Land (Warren) Pte Ltd 213,500,000.00  
+2 Peak Green Pte. Ltd. 127,000,000.00  
+3 Frasers Centrepoint Limit 109,660,000.00  
+4 Sim Lian Land Pte Ltd 92,595,000.00  
+5 Billion Rise Limited 57,740,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Toa Payoh S3 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 ChoiceHomes Investments Pte. Ltd 290,189,000.00  
+2 First Capital Holdings Pte Ltd 263,000,000.00  
+3 Frasers Centrepoint Limit 201,180,000.00  
+4 Hoi Hup Realty Pte Ltd and Sunway 
+Developments Pte Ltd 196,220,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bukit Panjang S10a 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 Sunny Vista Developments Pte. Ltd. And 
+Hong Realty (Private) Limited 
+143,680,000.00  
+2 Far East Square Pte. Ltd. 129,100,000 00 
+3 Sim Lian Land Pte Ltd 113,000,000.00  
+4 First Changi Development Pte Ltd 93,380,000.00  
+5 Centurion Re Pte Ltd 91,889,000.00  
+6 UIC Commodities Pte Ltd And Chappelis Pte 
+Ltd 
+90,008,888.00  
+7 Ho Bee Developments Pte Ltd 87,819,000.00  
+8 Teambuild Properties Pte Ltd 87,118,000.00  
+9 Allgreen Properties Limited 86,990,000.00  
+10 Hoi Hup Realty Pte Ltd And Sunway 
+Developments Pte Ltd 
+86,600,000.00  
+11 Boon Keng Development Pte Ltd 81,180,000.00  
+12 JBE Development Pte Ltd 78,513,000.00  
+13 Frasers Centrepoint Limited 77,000,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Jurong West S7 
+S/N Tenderer Tender Bid  
+($) 
+1 Chappelis Pte Ltd 38,500,000.00 
+2 Hoi Hup Realty Pte Ltd And Sunway Developments Pte Ltd 38,009,000.00 
+3 Act - Nobel Homes Pte Ltd 35,121,000.00 
+4 CEL Development Pte Ltd 32,345,688.00 
+5 Alliance Development Pte Ltd 31,200,000.00 
+6 Top Global Ltd 31,111,000.00 
+7 Aurum Land (Pte) Ltd 31,000,000.00 
+8 EL Development Pte Ltd 30,800,000.00 
+9 Bishopsgate Developments Pte Ltd 30,388,888.00 
+10 Wah Khiaw Developments Pte Ltd 30,030,000.00 
+11 Soilbuild Group Holdings Ltd 29,390,000.00 
+12 JBE Development Pte Ltd 29,310,000.00 
+13 S P Setia International (S) Pte Ltd 28,002,255.00 
+14 Tuas Hi-Tech Park Pte Ltd 27,500,000.00 
+15 Goodland Sunny Pte Ltd 27,300,000.00 
+16 TGFB Pte Ltd 26,380,000.00 
+17 Sing Holdings Limited 25,900,000.00 
+18 Whye Wah Development & Construction Pte Ltd 25,611,000.00 
+19 CH Development Pte Ltd 23,890,000.00 
+20 Fragrance Homes Pte Ltd 23,116,000.00 
+21 TID Pte. Ltd. 23,000,000.00 
+22 Amerald Land Pte Ltd 22,888,000.00 
+23 HLH Development Pte Ltd 22,800,000.00 
+24 Feature Development Pte Ltd 21,500,000.00 
+25 Wee Hur Development Pte Ltd 21,300,000.00 
+26 Frasers Centrepoint Limited 18,980,000.00 
+27 Prelim Corporation Pte Ltd 18,800,000.00 
+28 Sim Lian Land Pte Ltd 18,100,000.00 
+29 Westwood Development 18,000,008.00 
+30 Gazelle Estates (Pte) Ltd 18,000,000.00 
+31 Phoenix West Development Pte. Ltd. 17,777,777.60 
+32 Boon Keng Development Pte Ltd 16,800,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Sengkang S7 
+ 
+S/N Tenderer Tender Bid 
+ ($) 
+1 Sunmaster Holdings Pte. Ltd. 200,500,000.00  
+2 Tuas Hi-Tech Park Pte Ltd 177,000,000.00  
+3 Frasers Centrepoint Limited 176,908,000.00  
+4 CEL Development Pte Ltd 168,519,975.00  
+5 Allgreen Properties Limited 165,890,000.00  
+6 First Changi Development Pte Ltd 163,800,000.00  
+7 Hoi Hup Realty Pte Ltd And Sunway 
+Developments Pte Ltd 
+156,800,000.00  
+8 Peak Green Pte Ltd 125,000,000.00  
+9 Sim Lian Land Pte Ltd 116,380,000.00  
+10 Lippo Estates (S) Pte Ltd 115,600,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Hougang S13 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 Fragrance Properties Pte Ltd 16,250,000.00  
+2 Whye Wah Group Pte Ltd 15,500,000.00  
+3 OPH Marymount Limited 14,999,000.00  
+4 Ningbo Construction Group (S) Pte Ltd 13,999,998.00  
+5 Sea + Park Development Pte Ltd 13,900,000.00  
+6 Right Construction Pte Ltd 12,330,000.00  
+7 JBE Holdings Pte Ltd 12,300,000.00  
+8 Goodland Sunny Pte Ltd 11,000,888.00  
+9 Cadence Properties Pte. Ltd. 10,918,000.00  
+10 Techkon Investment Pte Ltd 10,080,000.00  
+11 Vigcon Construction Pte Ltd 9,868,000.00  
+12 Liverland Investments Pte Ltd 9,280,000.00  
+13 Invest-Ho Properties Pte Ltd 9,100,000.00  
+14 KDC Development Pte Ltd 8,850,000.00  
+15 Wee Hur Development Pte Ltd 8,320,000.00  
+16 Kim Hoe Corporation Pte Ltd 7,500,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Sembawang S1a 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 MCC Land (Singapore) Pte Ltd 131,700,000.00  
+2 M/s S P Setia International (S) Pte Ltd 122,550,000.00  
+3 Nam Hee Contractor Pte Ltd. and OPH 
+Marymount Limited 
+111,000,000.00  
+4 Hoi Hup Realty Pte Ltd and Sunway 
+Developments Pte Ltd 
+109,168,500.00  
+5 Prelim Corporation Pte Ltd 105,500,000.00  
+6 Superport Pte. Ltd. 95,200,000.00  
+7 Frasers Centrepoint Limited 85,020,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Yishun S4c 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 Nam Hee Contractor Pte Ltd. and FCL Topaz 
+Pte. Ltd. 
+229,400,000.00  
+2 Perfect Eagle Pte. Ltd. 196,000,000.00 
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Yishun S5b 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 Hoi Hup Realty Pte Ltd and Sunway 
+Developments Pte Ltd 
+165,000,000.00  
+2 Master Contract Services Pte Ltd 126,000,000.00 
+3 FCL Topaz Pte. Ltd. and OPH Marymount 
+Limited 
+125,318,000.00  
+4 Superport Pte. Ltd. 116,000,000.00  
+5 Allgreen Properties Limited 108,880,000.00  
+6 Ho Lee Group Pte Ltd 103,000,000.00  
+7 Intrepid Investments Pte. Ltd. 97,877,221.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Hougang S18 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 Sim Lian Land Pte Ltd 160,000,000.00  
+2 Hoi Hup Realty Pte Ltd, Sunway Developments 
+Pte Ltd and SC Wong Holdings Pte Ltd 
+156,080,000.00  
+3 F.E. Lakeside Pte. Ltd. And FCL Topaz Pte. Ltd. 146,800,000.00  
+4 First Changi Development Pte Ltd 145,800,000.00  
+5 Intrepid Investments Pte. Ltd. 132,106,106.00  
+6 Meadows Investment Pte Ltd 106,000,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Pasir Ris S10a 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 FCL Topaz Pte. Ltd. And F.E. Lakeside Pte. Ltd.   151,380,000.00  
+2 Hoi Hup Realty Pte Ltd, Sunway Developments 
+Pte Ltd and SC Wong Holdings Pte Ltd 
+140,690,000.00  
+3 Allgreen Properties Limited 131,890,000.00  
+4 Meadows Investment Pte Ltd 106,000,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Woodlands S3a 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 Tampines Court Pte. Ltd 105,120,000.00  
+2 EL Development Pte Ltd 100,899,000.00  
+3 TID Residential Pte. Ltd 95,400,000.00  
+4 Bishopsgate Development Pte Ltd 86,280,000.00  
+5 Sim Lian Land Pte Ltd 86,000,000.00  
+6 Ecco Development Pte Ltd 73,000,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Hougang S19 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 FCL Topaz Pte. Ltd, Far East Civil Engineering 
+(Pte.) Limited & Sekisui House, Ltd. 
+156,800,000.00  
+2 Centurion Re Pte Ltd 152,888,889.00  
+3 Ladyhill (Private) Limited 147,800,000.00  
+4 Grand Isle Holdings Pte. Ltd. 136,390,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bishan S11 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 Bishan Residential Development Pte. Ltd. 550,100,000.00  
+2 Keppel Land Realty Pte Ltd 432,330,000.00  
+3 MCC Land (Singapore) Pte Ltd 427,800,000.00  
+4 Sunmaster Holdings Pte. Ltd. 418,000,000.00  
+5 Qingdao Construction (Singapore) Pte Ltd 400,670,000.00  
+6 Siong Feng Development Pte Ltd 399,288,888.00  
+7 BRDB (S) Pte. Ltd. And Novelty Corp Pte Ltd 380,000,000.00  
+8 Intrepid Investments Pte Ltd and TID Residential 
+Pte. Ltd 
+367,003,000.00  
+9 MCL Land Limited and City Top Investments 
+Limited 
+363,840,000.00  
+10 Allgreen Properties Limited 333,890,000.00  
+11 FCL Topaz Pte. Ltd., Far East Civil Engineering 
+(Pte.) Limited and Sekisui House, Ltd 
+321,777,000.00  
+12 Tong Eng Brothers Pte Ltd, Clarus Corporation 
+Pte Ltd and Lum Chang Building Contractors Pte 
+Ltd 
+320,000,000.00  
+13 Winbelle Investment Pte. Ltd. And Maxdin Pte Ltd 303,729,600.00  
+14 Evia Real Estate (I) Pte Ltd 284,746,608.00  
+15 Sim Lian Land Pte Ltd 268,000,000.00  
+16 First Changi Development Pte Ltd 260,800,000.00  
+17 Plan Achieve Limited 256,478,888.00  
+18 Teneriffe Development Pte Ltd 240,452,600.00  
+19 Leng Hoe Development Pte. Ltd. 213,000,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Sengkang S6 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 Keppel Land Realty Pte Ltd 286,790,000.00  
+2 Sunmaster Holdings Pte. Ltd., Garden Estates 
+(Pte) Limited and TID Residential Pte. Ltd.  
+274,350,000.00  
+3 Qingdao Construction (Singapore) Pte Ltd 271,700,000.00  
+4 F.E. Lakeside Pte. Ltd. And FCL Topaz Pte. Ltd. 255,000,000.00  
+5 MCL Land Limited 240,000,000.00  
+6 Allgreen Properties Limited 233,888,000.00  
+7 Sim Lian Land Pte Ltd 230,000,000.00  
+8 First Changi Development Pte Ltd 228,800,000.00  
+9 Leng Hoe Development Pte. Ltd. 192,500,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Kallang Whampoa S9 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 United Engineers Developments Pte Ltd 543,000,888.00  
+2 Sherwood Development Pte Ltd 482,230,000.00  
+3 Sunmaster Holdings Pte. Ltd. and Intrepid 
+Investments Pte. Ltd. 
+475,200,000.00  
+4 F.E. Lakeside Pte. Ltd. and FCL Topaz Pte. 
+Ltd. 
+469,000,000.00  
+5 Best Desire Investments Limited 401,100,000.00  
+6 Hoi Hup Realty Pte Ltd, Sunway Developments 
+Pte Ltd and Investment Focus Pte Ltd 
+387,200,000.00  
+7 Qingdao Construction (Singapore) Pte Ltd 380,888,777.00  
+8 Allgreen Properties Limited 363,880,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Sengkang S9 
+S/N Tenderer Tender Bid  
+($) 
+1 Qingdao Construction (Singapore) Pte Ltd 247,000,000.00  
+2 Opal Star Pte. Ltd. & Lum Chang Building 
+Contractors Pte. Ltd. 
+239,800,000.00  
+3 Centurion Re Pte Ltd 196,888,988.00  
+4 Best Desire Investments Limited 145,196,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Punggol S6 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 Capital Development Pte Ltd / ZACD 
+Investments Pte Ltd 
+169,559,000.00  
+2 FCL Topaz Pte. Ltd., Far East Civil Engineering 
+(Pte.) Limited & Sekisui House, Ltd.    
+163,000,000.00  
+3 Leng Hoe Development Pte. Ltd.  161,800,000.00  
+4 Allgreen Properties Limited   160,080,000.00  
+5 EL Development Pte Ltd   142,000,000.00  
+6 Heeton Capital Pte. Ltd.    140,800,000.00  
+7 Wee Hur Development Pte Ltd  126,000,000.00  
+8 Intrepid Investments Pte. Ltd. 120,738,880.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Hougang S20 
+S/N Tenderer Tender Bid  
+($) 
+1 Allgreen Properties Limited  270,280,000.00  
+2 FCL Topaz Pte. Ltd., Far East Civil Engineering 
+(Pte.) Limited & Sekisui House, Ltd. 
+252,800,000.00  
+3 CEL Development Pte Ltd 242,000,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Punggol S2 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 Qingjian Realty (South Pacific) Group Pte Ltd 215,870,000.00  
+2 Soilbuild Group Holdings Pte Ltd 203,888,000.00  
+3 Sunmaster Holdings Pte. Ltd. 203,200,000.00  
+4 CEL Development Pte Ltd 201,465,880.00  
+5 
+Opal Star Pte Ltd & Lum Chang Building 
+Contractors Pte Ltd 189,890,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Yishun S12 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 T G Development Pte Ltd and Master Contract 
+Services Pte Ltd  
+138,900,000.00  
+2 S L (Serangoon) Pte. Ltd. 131,028,000.00  
+3 Intrepid Investments Pte. Ltd. 129,888,797.00  
+4 Frasers Centrepoint Limited  129,880,000.00  
+5 Peak Shines Pte Ltd 126,500,000.00  
+6 EL Development Pte Ltd  125,000,000.00  
+7 Hoi Hup Realty Pte Ltd, Sunway Developments 
+Pte Ltd and Hoi Hup J.V. Development Pte Ltd   
+124,300,000.00  
+8 Hangzhou Headway Real Estate Co., Ltd. and 
+Hua Yuan Organisation Pte Ltd      
+119,246,400.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Punggol S3 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 Wee Hur Development Pte Ltd 206,200,000.00  
+2 Opal Star Pte Ltd and Lum Chang Building 
+Contractors Pte Ltd 
+200,880,000.00  
+3 Sam Development Pte Ltd / Seletar View Pte 
+Ltd 
+198,422,000.00  
+4 EL Development Pte Ltd 188,100,000.00  
+5 Oxley Vibrant Pte. Ltd. 186,888,888.00  
+6 Russville Pte Ltd and Low Keng Huat 
+(Singapore) Limited 
+183,400,000.00  
+7 MCL Land Limited 180,000,000.00  
+8 Win Brothers Pte Ltd 179,180,181.00  
+9 Soilbuild Group Holdings Ltd 174,899,000.00  
+10 Hoi Hup Realty Pte Ltd, Sunway 
+Developments Pte Ltd and Hoi Hup JV 
+Development Pte Ltd 
+163,000,000.00  
+11 Mezzo Development Pte Ltd 161,000,000.00  
+12 Ho Lee Group Pte Ltd 154,198,000.00  
+13 Intrepid Investments Pte. Ltd. 139,520,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Clementi S16 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 Multi Wealth (Singapore) Pte Ltd 408,000,800.00  
+2 UOL Venture Investments Pte. Ltd., S.L. 
+Development Pte. Limited, Russville Pte Ltd 
+360,970,000.00  
+3 FCL Topaz Pte. Ltd., F.E. Lakeside Pte. Ltd., 
+Sekisui House Singapore Pte. Ltd. 
+333,777,000.00  
+4 MCL Land Limited 320,000,000.00  
+5 First Changi Development Pte Ltd 319,660,000.00  
+6 Ho Lee Group Pte Ltd & Hwa Seng 
+Investment Pte Ltd & Chye Joo Construction 
+Pte Ltd 
+302,100,000.00  
+7 Mezzo Development Pte Ltd 268,000,000.00  
+8 Soilbuild Group Holdings Ltd 260,100,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Pasir Ris S4a 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 Elitist Development Pte Ltd  165,888,333.00  
+2 OUE Reef Development Pte. Ltd.   139,000,000.00  
+3 Singland Development Pte. Ltd.   133,648,000.00  
+4 Strategic Developments Pte Ltd  126,800,000.00  
+5 Frasers Centrepoint Limited  123,400,000.00  
+6 EL Development   123,100,000.00  
+7 First Changi Development Pte Ltd 112,200,000.00  
+8 Capital Development Pte Ltd / Qinghe Pte Ltd        112,000,000.00  
+9 Santarli Corporation Pte Ltd    108,980,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Sengkang S5 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 EL Development Pte Ltd  383,333,000.00  
+2 White Haven Properties Pte. Ltd.    348,000,000.00  
+3 OUE Reef Development Pte. Ltd.  340,105,000.00  
+4 Opal Star Pte. Ltd. & Binjai Holdings Pte. Ltd.   328,008,000.00  
+5 Singland Development Pte. Ltd. & UOL 
+Venture Investments Pte. Ltd.    
+301,800,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bishan S8 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 UVD Pte. Ltd. 291,500,000.00  
+2 FCL Topaz Pte. Ltd., Far East Orchard 
+Limited and Seikisui House, Ltd. 
+246,800,000.00  
+3 Qingjiang Realty (South Pacific) Group Pte 
+Ltd 
+245,870,000.00  
+4 Verspring Properties Pte. Ltd. 243,000,000.00  
+5 Hoi Hup Realty Pte Ltd, Sunway 
+Developments Pte Ltd and Hoi Hup J.V. 
+Development Pte Ltd 
+230,870,000.00  
+6 Wee Hur Development Pte Ltd 206,200,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Bishan S11a 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 Allamanda Residential Development Pte. Ltd.  505,100,000.00  
+2 Singland Homes Pte. Ltd, UOL Venture 
+Investments Pte. Ltd, ORIX Investment and 
+Management Pte Ltd  
+490,100,000.00  
+3A FCL Topaz Pte. Ltd., Far East Orchard 
+Limited and China Construction (South 
+Pacific) Development Co. Pte. Ltd. 
+462,000,000.00  
+3B Pinehill Investments Pte. Ltd.      462,000,000.00  
+5 Acresvale Investment Pte Ltd      456,390,000.00  
+6 MCL Land Limited             450,000,000.00  
+7 Intrepid Investments Pte Ltd, Verwood 
+Holdings Pte. Ltd. and TID Residential Pte. 
+Ltd.  
+444,148,000.00  
+8 Best Desire Investments Limited   401,100,000.00  
+9 Mezzo Development Pte Ltd     368,000,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Queenstown S9a 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 Intrepid Investments Pte Ltd, Verwood 
+Holdings Pte. Ltd. and Hong Realty (Private) 
+Limited    
+562,818,171.00  
+2 Acresvale Investment Pte Ltd    549,290,000.00  
+3 FCL Topaz Pte. Ltd., Far East Orchard Limited, 
+Sekisui House, Ltd. and China Construction 
+(South Pacific) Development Co. Pte Ltd                                
+541,880,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Sengkang S11 
+ 
+S/N Tenderer Tender Bid 
+ ($) 
+1 Secure Development Pte. Ltd.  262,100,000.00  
+2 Bayfront Land Pte Ltd  253,550,000.00  
+3 FCL Topaz Pte. Ltd., Far East Orchard Limited 
+and Sekisui House, Ltd.  
+230,380,800.00  
+4 Qingjian Realty (South Pacific) Group Pte. Ltd.  211,000,000.00  
+5 Kingsford Development Pte Ltd   204,818,188.00  
+6 EL Development Pte Ltd   196,100,000.00  
+7 Bellevue Properties Pte. Ltd.  187,820,000.00  
+8 Athens Residential Development Pte. Ltd.  110,990,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Sengkang S12 
+ 
+S/N Tenderer Tender Bid 
+ ($) 
+1 FCL Topaz Pte. Ltd., Far East Orchard Limited 
+and Sekisui House, Ltd.  
+256,980,000.00  
+2 MCC Land (Singapore) Pte Ltd   250,000,000.00  
+3 UOL Development (Sengkang) Pte. Ltd.  240,200,000.00  
+4 Kingsford Development Pte Ltd   236,728,629.00  
+5 Bellevue Properties Pte. Ltd.    229,000,000.00  
+6 CEL EC Development Pte Ltd  228,999,000.00  
+7 World Class Land Pte Ltd     227,588,000.00  
+8 Leng Hoe Development Pte. Ltd.   218,880,000.00  
+9 EL Development Pte Ltd  200,100,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Geylang S6 
+ 
+S/N Tenderer Tender Bid 
+ ($) 
+1 First Changi Development Pte Ltd 530,891,000.00  
+2 Verwood Holdings Pte. Ltd., Intrepid 
+Investments Pte. Ltd. and TID Residential Pte. 
+Ltd. 
+502,000,000.00  
+3 Far East Civil Engineering (Pte.) Limited, FCL 
+Topaz Pte. Ltd. and Sekisui House, Ltd.  
+447,777,000.00  
+4 Sim Lian Land Pte Ltd    356,000,000.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Toa Payoh S4 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 Evia Real Estate (7) Pte Ltd, Maxdin Pte Ltd 
+and Gamuda Berhad  
+345,860,000.00  
+2 Sing Holdings Limited 342,100,000.00  
+3 UOL Venture Investments Pte. Ltd. and 
+Singland Homes Pte. Ltd. 
+339,000,000.00  
+4 FCL Tampines Court Pte. Ltd., Sekisui House, 
+Ltd. and KH Capital Pte. Ltd.    
+338,888,000.00  
+5 EL Development Pte Ltd  332,100,000.00  
+6 HY Realty Pte Ltd   325,880,000.00  
+7 Allgreen Properties Limited  321,980,000.00  
+8 Verwood Holdings Pte. Ltd., Intrepid 
+Investments Pte. Ltd. and TID Residential Pte. 
+Ltd.  
+321,000,000.00  
+9 KBD Ventures Pte. Ltd.  307,900,500.00  
+10 Hoi Hup Realty Pte Ltd, Sunway 
+Developments Pte Ltd and Oriental Worldwide 
+Investments Inc 
+276,500,000.00  
+11 MCL Land (Regency) Pte. Ltd.  276,300,000.00  
+12 Fica Nominees Pte Ltd 240,200,000.00  
+13 Sim Lian Land Pte Ltd 230,001,000.00  
+14 Best Desire Investments Limited  183,164,888.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel : Queenstown S9b 
+ 
+S/N Tenderer Tender Bid  
+($) 
+1 HY Realty Pte Ltd  483,178,000.00  
+2 Allgreen Properties Limited  445,910,000.00  
+3 Intrepid Investments Pte Ltd, Verwood 
+Holdings Pte. Ltd. and Hong Realty (Private) 
+Limited 
+432,774,525.00  
+4 FCL Tampines Court Pte. Ltd. and KH Capital 
+Pte. Ltd.    
+421,500,000.00  
+5 UOL Venture Investments Pte. Ltd., Singland 
+Homes Pte. Ltd., Peak Opal Pte. Ltd. and 
+Orchard Square Pte. Ltd. 
+417,280,000.00  
+6 Excelsior Investments Pte Ltd    402,080,000.00  
+7 Sing Holdings Limited   389,000,000.00  
+8 MCL Land (Regency) Pte. Ltd.   387,000,000.00  
+9 Japura Development Pte Ltd 281,000,888.00  
+ 
+Click here to return to List of Residential Sites 
+ 
+ 
+ 
+ 
+ 
+ 

@@ -1,6 +1,6 @@
 import Masthead from '../../components/Masthead.jsx';
 import LandView from '../../components/LandView.jsx';
-import { glsAwards } from '../../lib/data/query.js';
+import { glsAwards, hdbSites } from '../../lib/data/query.js';
 
 export const metadata = {
   title: 'What developers paid for the land — every awarded GLS site since 1993 | Truestorey',
@@ -9,7 +9,9 @@ export const metadata = {
 };
 
 export default function Page() {
-  const d = glsAwards();
+  const ura = glsAwards();
+  const hdb = hdbSites();
+  const d = merge(ura, hdb);
   return (
     <main className="shell wide">
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
@@ -26,4 +28,39 @@ export default function Page() {
       </section>
     </main>
   );
+}
+
+/**
+ * URA's sheet and HDB's PDFs, as one series.
+ *
+ * They are the same programme sold by two agencies, so a reader asking "what
+ * did land cost" wants both. The vendor is kept on every row because the two
+ * sources do not carry the same columns — only HDB names the project a site
+ * became, and only URA's rate column exists at all.
+ */
+function merge(ura, hdb) {
+  if (!ura) return null;
+  if (!hdb?.sites?.length) return { ...ura, sites: ura.sites.map(s => ({ ...s, vendor: 'URA' })) };
+  const sites = [
+    ...ura.sites.map(s => ({ ...s, vendor: 'URA' })),
+    ...hdb.sites.map(s => ({
+      ...s,
+      use: s.kind,
+      planningArea: null,
+      // HDB does not publish a rate column. Leaving it null is the honest
+      // answer; deriving price/GFA here would invent a basis URA's own column
+      // is ambiguous about, and the two would then be silently compared.
+      psmGfaOrGpr: null,
+    })),
+  ].sort((a, b) => (a.award < b.award ? 1 : -1));
+  return {
+    ...ura, sites,
+    counts: {
+      awarded: sites.length,
+      fromYear: sites.at(-1).award.slice(0, 4),
+      toYear: sites[0].award.slice(0, 4),
+    },
+    hdb: { source: hdb.source, sourcePage: hdb.sourcePage, note: hdb.note,
+           transcribed: hdb.transcribed, sites: hdb.counts.sites, withProject: hdb.counts.withProject },
+  };
 }

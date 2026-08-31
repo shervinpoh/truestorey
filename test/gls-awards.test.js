@@ -62,3 +62,52 @@ test('the raw download is kept out of the bundle as well as out of git', () => {
   assert.match(ignore, /gls-awards-raw\.xlsx/, 'raw workbook is not gitignored');
   assert.match(cfg, /gls-awards-raw\.xlsx/, 'raw workbook is not in outputFileTracingExcludes');
 });
+
+/* ── HDB's half ─────────────────────────────────────────────────────────── */
+const hUrl = new URL('../data/sources/hdb-sites-sold.json', import.meta.url);
+const hHas = { skip: existsSync(hUrl) ? false : 'hdb-sites-sold.json not parsed here' };
+const h = existsSync(hUrl) ? JSON.parse(readFileSync(hUrl, 'utf8')) : null;
+
+/* The column URA does not have, and the reason this source is worth the manual
+ * step: it says what each site BECAME. */
+test('every HDB site names the project it became', hHas, () => {
+  assert.ok(h.sites.length > 100, `only ${h.sites.length} sites`);
+  assert.equal(h.counts.withProject, h.sites.length,
+    'a site without a project name has appeared — check the parse');
+  for (const s of h.sites) {
+    assert.match(s.award, /^\d{4}-\d{2}-\d{2}$/);
+    assert.ok(s.price > 0);
+    assert.equal(s.vendor, 'HDB');
+  }
+});
+
+/*
+ * "N.A." is not zero, and "(max)" is a ceiling not a value. Both were rows the
+ * first parser dropped, and both are the kind of thing that becomes a wrong
+ * figure rather than a missing one if handled carelessly.
+ */
+test('a field HDB does not publish is null, never zero', hHas, () => {
+  for (const s of h.sites) {
+    for (const k of ['gpr', 'gfaSqm', 'areaSqm']) {
+      assert.ok(s[k] === null || s[k] > 0, `${s.site} has ${k} = ${s[k]}`);
+    }
+  }
+  assert.ok(h.sites.some(s => s.gpr === null), 'nothing is null — the N.A. handling has gone');
+  assert.match(h.note, /null rather than zero|null and never zero/);
+  assert.match(h.note, /ceiling/);
+});
+
+/* HDB publishes no rate column. The page must show a dash rather than a figure
+ * this site worked out, because URA's own rate column is ambiguous about its
+ * basis and a derived one would be silently compared against it. */
+test('no rate is invented for a vendor that does not publish one', hHas, () => {
+  for (const s of h.sites) assert.ok(!('psmGfaOrGpr' in s) || s.psmGfaOrGpr == null);
+  const view = readFileSync(new URL('../components/LandView.jsx', import.meta.url), 'utf8');
+  assert.doesNotMatch(view, /price\s*\/\s*(s\.)?gfaSqm/, 'a rate is being derived in the view');
+});
+
+test('the manual step is explained rather than hidden', hHas, () => {
+  assert.match(h.sourcePage, /^https:\/\/www\.hdb\.gov\.sg\//);
+  assert.match(h.note, /no stable download URL/);
+  assert.match(h.transcribed, /^\d{4}-\d{2}-\d{2}$/);
+});
