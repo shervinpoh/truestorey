@@ -54,6 +54,10 @@ const nextConfig = {
       // forgetting this list has now happened twice; if you add an ingest that
       // saves its raw download, it belongs here in the same commit.
       './data/.planning-raw.json',
+      // The URA past-sites workbook. Gitignored AND excluded here, in the same
+      // commit, because the tracer reads the disk and not the index — which is
+      // the mistake this list has already recorded twice.
+      './data/.gls-awards-raw.xlsx',
       './data/.onemap-pace.json',
       './data/.brief-state.json',
       './data/brief-latest.md',

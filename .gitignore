@@ -39,3 +39,7 @@ data/.planning-raw.json
 # `npm run photos` strips the EXIF, resizes, and writes the publishable
 # derivatives to public/photos/. Only those are versioned.
 photos-in/
+
+# Raw ingest download. Must ALSO be in outputFileTracingExcludes — the tracer
+# reads the disk, not the index.
+data/.gls-awards-raw.xlsx

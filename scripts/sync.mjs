@@ -67,6 +67,11 @@ const JOBS = [
     why: 'URA files rental contracts quarterly, but in rolling batches' },
   { key: 'boundaries', file: 'boundaries.json', every: 365, cmd: 'npm run ingest:boundaries && npm run build:map',
     why: 'the Master Plan is redrawn about every five years — this is a formality, not a refresh' },
+  // URA awards a handful of sites a month and the sheet is republished as they
+  // close. Fortnightly is faster than the source moves and slow enough not to
+  // hammer a static file host.
+  { key: 'gls-awards', file: 'gls-awards.json', every: 14, cmd: 'npm run ingest:gls-awards',
+    why: 'URA republishes the past-sites sheet as each tender is awarded' },
   { key: 'planning', file: 'planning.json', every: 30, cmd: 'npm run ingest:planning',
     why: 'URA decides applications continuously and the current year grows all year' },
   { key: 'zoning', file: 'zoning.json', every: 365, cmd: 'npm run ingest:zoning',

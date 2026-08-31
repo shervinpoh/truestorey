@@ -41,7 +41,8 @@
     "ingest:zoning": "node scripts/ingest-zoning.mjs",
     "ingest:gls": "node scripts/ingest-gls.mjs",
     "ingest:planning": "node --env-file-if-exists=.env.local scripts/ingest-planning.mjs",
-    "digest": "node --env-file-if-exists=.env.local scripts/send-digest.mjs"
+    "digest": "node --env-file-if-exists=.env.local scripts/send-digest.mjs",
+    "ingest:gls-awards": "node scripts/ingest-gls-awards.mjs"
   },
   "dependencies": {
     "next": "^15.0.0",
