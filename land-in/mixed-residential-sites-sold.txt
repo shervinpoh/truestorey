@@ -1,0 +1,997 @@
+Date 
+Tender 
+Launch 
+Date 
+Tender 
+Closed 
+Date 
+Tender 
+Awarded 
+Land Parcel Street Name 
+Land 
+Area (sq 
+m) 
+Lease 
+Term 
+(years) 
+Permissible 
+GFA / (GPR) 
+Successful Tenderer's 
+Name Tender Price ** No. of 
+Bidders Project Name 
+ 
+29/5/2025 
+ 
+16/12/2025 
+ 
+14/1/2026 
+ 
+Hougang P3 
+ 
+Hougang 
+Avenue 10/ 
+Hougang 
+Central 
+ 
+ 
+46,899.4 
+ 
+99 
+ 
+118,268 sqm          
+/ (2.5) 
+Horizon Residential Pte. 
+Ltd. and Horizon 
+Commercial Trustee 
+Pte. Ltd. (as trustee of 
+Horizon Commercial 
+Trust) 
+ 
+$1,500,738,338.00 
+ 
+3 
+  
+26/9/2024 11/9/2025 26/9/2025 Yishun P6 Chencharu 
+Close 29,450.30 99 96,008 sqm / 
+(3.26) 
+Evia MCS Pte. Ltd., 
+Gamuda (Singapore) 
+Pte. Ltd. and H108 Pte. 
+Ltd. 
+$1,012,588,989.89 3  
+27/6/2024 19/09/2024 10/10/2024 Tampines P18 Tampines 
+Street 94 23,510.7 99 61,834 sqm / 
+(2.63) 
+Hoi Hup Realty Pte Ltd 
+and Sunway 
+Developments Pte. Ltd. 
+$668,280,000.00 6  
+23/12/2022 27/06/2023 11/7/2023 Tampines P17  Tampines 
+Avenue 11 50,679.7 99 126,700 sqm 
+/ (2.5) 
+Topaz Residential Pte. 
+Ltd. and Topaz 
+Commercial Pte. Ltd. 
+$1,206,390,880.00 3 ParkTown Tampines & ParkTown 
+Residence 
+27/8/2018 14/12/2018 22/3/2019 Pasir Ris P2  
+Pasir Ris 
+Drive 3/ 
+Pasir Ris 
+Drive 8/ 
+Pasir Ris 
+Central 
+38,003.7 99 95,010 sqm / 
+(2.5) 
+Phoenix Residential 
+Pte. Ltd. & Phoenix 
+Commercial Pte. Ltd. 
+$699,999,999.99 3 Pasir Ris Mall & Pasir Ris 8 
+6/3/2017 13/6/2017 21/6/2017 Bidadari P1 
+Upper 
+Serangoon 
+Road 
+25,440.8 99 89,043 sqm / 
+(3.5)  
+Elara 1 Pte. Ltd. And        
+Callisto 1 Pte. Ltd. $1,132,000,000.00 12 Woodleigh Mall & Woodleigh Residences 
+18/11/2014 13/1/2015 26/1/2015 Yishun P5 
+Yishun 
+Avenue 4 9,759.80 99 27,327.44 
+sqm / (2.8) 
+Northern Resi Pte. Ltd. 
+and Northern Retail Pte. 
+Ltd. 
+$185,090,000.00 5 Wisteria Mall & The Wisteria 
+28/6/2013 5/9/2013 9/9/2013 Yishun P3 
+Yishun 
+Avenue 2 / 
+Yishun 
+Central 1 
+41,084.90 99 
+123,254.7 
+sqm                                               
+/ (3.0) 
+North Gem 
+Development Pte. Ltd. 
+& FC North Gem 
+Trustee Pte. Ltd. (as 
+Trustee-Manager of 
+North Gem Trust) 
+$1,428,880,000.00 5 Northpoint City & North Park Residences 
+27/11/2012 24/1/2013 31/1/2013 Yishun P4 
+Yishun Ring 
+Road / 
+Yishun 
+Avenue 9 
+8,858.30 99 
+24,803.24 
+sqm                                               
+/ (2.8) 
+CEL Property Pte Ltd $212,100,000.00 13 
+Junction nine & Junction Nine 
+Residences 
+30/11/2010 15/2/2011 18/2/2011 Punggol P1 
+Punggol 
+Central / 
+Punggol 
+Walk 
+29,999.30 99 
+125,997.06 
+sqm 
+/ (4.2) 
+Emerald Star Pte Ltd 
+and FC Retail Trustee 
+Pte Ltd (as Trustee of 
+Sapphire Star Trust) 
+$1,021,000,000.00 7 Waterway Point & Watertown 
+2/7/2010 1/9/2010 6/9/2010 Bedok P1 
+New Upper 
+Changi Road 
+/ Bedok 
+North Drive 
+24,902.20 99 
+87,157.7 
+sqm  
+/(3.5) 
+Brilliance Residential 
+(1) Pte. Ltd. and 
+Brilliance Trustee Pte. 
+Ltd.  
+$788,888,888.00  9 Bedok Mall & Bedok Residences 
+31/8/2005 27/9/2005 3/10/2005 Choa Chu 
+Kang P2 
+Yew Tee 
+Close / Choa 
+Chu Kang 
+North 6 
+8500 99 27,200 sqm  
+/(3.2) 
+Choice Homes Alpha 
+Pte Ltd $90,288,888.00  9 Yew Tee Point & Yew Tee Residences 
+25/5/2005 21/6/2005 28/6/2005 Jurong West 
+P3 
+Jurong West 
+Central 3 / 
+Jurong West 
+St 64 
+33,523.80 99 117,333.30 
+sqm / (3.5) 
+Prime Point Realty 
+Development Pte Ltd $415, 013,888.00 3 The Centris 
+27/11/1998 4/3/1999 30/3/1999 Sengkang P1 
+Sengkang 
+East Way 27,067.3 99 113,682.66 
+sqm / (4.2) 
+Centrepoint Properties 
+Ltd $172,300,000.00 7 Compass Point & Compass Height 
+30/5/1997 24/7/1997 8/9/1997 Sengkang 
+N1NC 
+Rivervale 
+Drive 22,553.3 99 67,659.9 
+sqm / (3.0) 
+NTUC Choice Homes 
+Co-operative Ltd $203,198,000.00 7 Rivervale Mall & Rivervale Crest 
+24/11/1995 25/1/1996 29/3/1996 Sembawang 
+P1 
+Canberra 
+Road 8,600.0 99 30,100 sqm / 
+(3.5) 
+Heeton Development 
+Pte Ltd / Koh Brothers 
+Development Pte Ltd 
+$102,900,000.00 4 Sun Plaza 
+24/11/1995 25/1/1996 29/3/1996 Woodlands 
+N4NC 
+Woodlands 
+Avenue 1 10,000.0 99 12,000 sqm / 
+(1.2) 
+Heeton Development 
+Pte Ltd / King Wan 
+Construction Pte Ltd 
+$28,300,000.00 3 The Woodgrove 
+28/7/1995 28/9/1995 30/11/1995 Hougang 
+N9NC 
+Hougang 
+Avenue 9 15,500.0 99 18,600 sqm / 
+(1.2) 
+Golden Development 
+Pte Ltd $70,180,000.00 7 Central Place 
+25/2/1994 28/4/1994 19/8/1994 Hougang 
+N5NC 
+Hougang St 
+51 / 
+Buangkok 
+Green 
+16,500.00 99 19,900 sqm Hiap Hoe Holdings Pte 
+Ltd $38,800,000.00 4 Hougang Green 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  
+  
+ 
+ 
+ 
+ 
+Land Parcel: Hougang N5NC 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  
+   
+ S/N Tenderer Tender Bid ($) 
+1 Hiap Hoe Holdings Pte ltd 38,800,000.00 
+2 Far East Organization Centre Pte Ltd 34,390,000.00 
+3 United Industrial Corporation 
+Ltd/Shenton Holdings Pte Ltd 
+26,888,000.00 
+4 Wing Tai Land Pte Ltd 18,000,000.00 
+   
+         Click here to return to list of Commercial Sites 
+ 
+ 
+Land Parcel: Hougang N9NC 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Click here to return to list of Commercial Sites 
+ 
+ 
+  
+  
+S/N  Tenderer Tender Bid ($) 
+1 Golden Development Pte Ltd 70,180,000.00 
+2 Ruby Holdings Pte Ltd 61,135,000.00 
+3 Gutherie GTS Ltd, Tang Eng Pte Ltd, Bellora 
+Investments Pte Ltd, First Systems Holding Pte Ltd, 
+Columbia Trading Pte Ltd, Mr Pang Pok / Proposed 
+J. Y. Pte Ltd, Ang Hock Beng Pte Ltd 
+55,000,000.00 
+4 UIC Development Pte Ltd 52,800,000.00 
+5 Heeton Development Pte Ltd 43,100,000.00 
+6 SuperBowl Holdings Ltd 38,308,000.00 
+7 Silverdale Investment Pte Ltd 21,000,000.00 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel: Woodlands N4NC 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Click here to return to list of Commercial Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+S/N Tenderer Tender Bid ($) 
+1 Heeton Development Pte Ltd & King Wan 
+Construction Pte Ltd 
+28,300,000.00 
+2 Hiap Hoe Holdings Pte Ltd 22,656,000.00 
+3 Peak Properties Pte Ltd 21,000,000.00 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel: Sembawang P1 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Click here to return to list of Commercial Sites 
+  
+S/N Tenderer Tender Bid ($) 
+1 Heeton Development Pte Ltd & Koh Brothers 
+Development Pte Ltd 
+102,900,000.00 
+2 Guthrie GTS Ltd & Lee Kim Tah Holdings Ltd 102,000,000.00 
+3 UIC Development Pte Ltd 87,180,000.00 
+4 Allgreen Properties Ltd / Hoe Seng Company 
+(Pte) Ltd / Pacific Carriers Ltd 
+69,300,000.00 
+ 
+ 
+ 
+ 
+Land Parcel: Sengkang N1NC 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Click here to return to list of Commercial Sites 
+ 
+ 
+ 
+ 
+  
+S/N Tenderer Tender Bid ($) 
+1 NTUC Choice Homes Co-Operative Ltd 203,198,000.00 
+2 Centrepoint Properties Ltd 176,000,000.00 
+3 Orchard Terminal Pte Ltd 136,198,000.00 
+4 Hiap Hoe Holdings Pte Ltd 135,000,000.00 
+5 Keppel Land Investment Pte Ltd 130,133,000.00 
+6 MCL Land Ltd 125,998,800.00 
+7 Winwave Investment Pte Ltd 100,100,000.00 
+ 
+ 
+ 
+ 
+ 
+Land Parcel: Sengkang P1 
+S/N Tenderer Tender Bid ($) 
+1 Centrepoint Properties Ltd 172,300,000.00 
+2 Pidemco Realty Pte Ltd / Germiston Pte 
+Ltd / Bryon Pte Ltd /   I. P. Property Fund 
+Asia (Sengkang) Ltd 
+149,999,990.00 
+3 Straits Construction Co Pte Ltd / Jian Yu 
+Development Pte Ltd & Others 
+106,300,000.00 
+4 First Capital Corporation Ltd 102,880,000.00 
+5 City Developments Ltd 100,000,000.00 
+6 MCL Land Ltd / DBS Realty Pte Ltd 88,128,889.00 
+7 Mansfield Realty Pte Ltd / TLB Land Ltd 70,800,000.00 
+ 
+Click here to return to list of Commercial Sites 
+ 
+ 
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Click here to return to list of Commercial Sites 
+ 
+ 
+ 
+ 
+  
+  
+                                    Land Parcel: Jurong West P3 
+   
+S/N Tenderer Tender Bid ($) 
+1 Prime Point Realty Development Pte Ltd 415,013,888.00 
+2 Jubilee Realty Pte Ltd 377,160,000.00 
+3 Centrepoint Properties Ltd 348,000,000.00 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Click here to return to list of Commercial Sites 
+ 
+ 
+ 
+ 
+ 
+  
+  
+Land Parcel: Choa Chu Kang P2 
+   
+S/N Tenderer Tender Bid ($) 
+1 Choice Homes Alpha Pte Ltd 90,288,888.00 
+2 Jubilee Realty Pte Ltd 87,288,000.00 
+3 High Oak Properties Pte Ltd 81,000,000.00  
+4 Rivaldo Investments Pte Ltd 78,200,000.00  
+5 Superbowl Holdings Ltd & Hiap Hoe Ltd 71,300,000.00  
+6 Wincove Investment Pte Ltd 67,470,000.00 
+7 Sim Lian Land Pte Ltd 66,000,000.00 
+8 Centrepoint Properties Ltd 64,400,000.00  
+9 Heeton Holdings Ltd / Koh Brothers 
+Development Pte Ltd Joint Venture 
+63,206,750.00  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Click here to return to list of Commercial Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel: Bedok P1 
+   
+S/N Tenderer Tender Bid ($) 
+1 Brilliance Residential (1) Pte. Ltd. and Brilliance 
+Trustee Pte. Ltd. 
+788,888,888.00 
+2 Moon Holdings Pte. Ltd. and UED Capital Venture 
+Pte. Ltd. 
+650,888,099.00 
+3 Emerald Star Pte Ltd and FC Retail Trustee Pte Ltd 650,028,000.00 
+4 Keppel Land Realty Pte Ltd / Jewel Development Pte. 
+Ltd. 
+640,100,000.00 
+5 Trimost Development Pte. Ltd. and Trifort Investments 
+Pte. Ltd. 
+596,888,000.00 
+6 United Venture Development Pte. Ltd. and United 
+Venture Investments Pte. Ltd. 
+588,000,000.00 
+7 Gold Yield Pte. Ltd. and East Peak Development Pte. 
+Ltd. 
+563,463,288.00 
+8 Choice Homes Zeta Pte Ltd and The R Hub Pte Ltd 542,298,000.00 
+9 Sim Lian Land Pte Ltd & Sim Lian Development Pte 
+Ltd 
+539,000,000.00 
+   
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel: Punggol P1 
+S/N Tenderer Tender Bid ($) 
+1 Emerald Star Pte Ltd and FC Retail Trustee Pte Ltd 
+(as Trustee of Sapphire Star Trust) 
+1,021,000,000.00 
+2 Punggol Retail Development Pte Ltd and Qingdao 
+Construction (Singapore) Pte Ltd 
+849,777,000.00 
+3 Keppel Land Realty Pte Ltd and K-Commercial 
+Management Pte. Ltd. (as Trustee-Manager of K-
+Commercial Trust) 
+786,000,000.00 
+4 Jewel Residential (1) Pte. Ltd. And Jewel Trustee 
+Pte. Ltd. (in its capacity as trustee of Jewel Mall 
+Trust) 
+763,988,888.00 
+5 Earth Holdings Pte. Ltd. And UED Capital Venture 
+Pte. Ltd. 
+692,999,999.00 
+6 Fica Nominees Pte Ltd and First Capital Holdings 
+Pte Ltd 
+680,822,000.00 
+7 Mezzo Development Pte Ltd 250,000,000.00 
+ 
+Click here to return to list of Commercial Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel: Yishun P4 
+   
+S/N Tenderer Tender Bid ($) 
+1 CEL Property Pte Ltd 212,100,000.00 
+2 Boo Han Holdings Pte. Ltd. And Far East Orchard 
+Limited 
+193,777,000.00 
+3 Ho Lee Group / Evia Real Estate (3) Pte Ltd / 
+CNH Investment Pte Ltd 
+182,600,000.00 
+4 Cerapure Pte Ltd 167,124,000.00 
+5 Verwood Holdings Pte. Ltd. And Intrepid 
+Investments Pte Ltd 
+163,000,000.00 
+6 Guthrie (Nov) Pte Ltd and Santarli Venture Pte Ltd   161,800,000.00 
+7 Sim Lian (Focus) Pte Ltd & Sim Lian (Brilliant) Pte 
+Ltd   
+161,000,000.00 
+8 Master Contract Services Pte Ltd and Keong 
+Hong Construction Pte Ltd and Asia Development 
+Pte Ltd   
+155,520,000.00 
+9 Mezzo Development Pte Ltd    151,800,000.00 
+10 FCL Place Pte. Ltd.     133,080,000.00 
+11 Changi Properties Pte. Ltd.   124,500,000.00 
+12 RP North Pte. Ltd.   121,800,000.00 
+13 Creative Investments Pte Ltd     55,538,888.00 
+  
+Click here to return to list of Commercial Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel: Yishun P3 
+   
+S/N Tenderer Tender Bid ($) 
+1 North Gem Development Pte. Ltd. & FC North 
+Gem Trustee Pte. Ltd. (as Trustee-Manager of 
+North Gem Trust) 
+1,428,880,000.00 
+2 Far East Civil Engineering (Pte.) Limited, Far 
+East Orchard Limited & Sekisui House, Ltd.    
+969,333,333.00 
+3 Zenlead Investments Pte. Ltd. & Zenmost 
+Developments Pte. Ltd. 
+930,000,000.00 
+4 Sim Lian (Focus) Pte Ltd & Sim Lian (Brilliant) 
+Pte Ltd   
+875,000,000.00 
+5 Yorkshire Investments (1) Pte. Ltd. and 
+Yorkshire Trustee Pte. Ltd. (in its capacity as 
+trustee of Yorkshire Mall Trust)  
+704,500,000.00 
+ 
+Click here to return to list of Commercial Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+   
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel: Yishun P5 
+   
+S/N Tenderer Tender Bid ($) 
+1 Northern Resi Pte. Ltd. and Northern Retail 
+Pte. Ltd. 
+185,090,000.00 
+2 KBD Ventures Pte. Ltd. and Changi 
+Properties Pte. Ltd. 
+181,600,000.00 
+3 Sim Lian (Focus) Pte Ltd 168,000,000.00 
+4 Wee Hur Development Pte. Ltd. 160,000,000.00 
+5 KSH Land Development Pte. Ltd. 94,523,448.00 
+ 
+Click here to return to list of Commercial Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+  
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Click here to return to list of Commercial Sites 
+ 
+ 
+  
+  
+Land Parcel: Bidadari P1 
+   
+S/N Tenderer Tender Bid ($) 
+1 Elara 1 Pte. Ltd. And Callisto 1 Pte. Ltd.   1,132,000,000.00 
+2 Far East Civil Engineering (Pte.) Limited and Sekisui 
+House, Ltd. 
+1,117,777,777.00 
+3 First Meyer Development Pte. Ltd. and GLL A Pte. 
+Ltd.   
+1,060,000,000.00 
+4 Kingsford Huray Development Pte Ltd 1,035,000,000.00 
+5 Blossom Commercial Development Pte. Ltd. and 
+Blossom Residential Development Pte. Ltd. 
+958,089,288.00 
+6 Sim Lian (Focus) Pte Ltd & Sim Lian (Treasure) Pte 
+Ltd 
+939,999,999.00 
+7 PQJ Retail Management Pte. Ltd. (as trustee - 
+manager of PQJ Retail Trust) and PQJ Residential 
+Development Pte. Ltd.     
+919,998,000.00 
+8 Nanshan Group Singapore Co. Pte. Ltd.   906,800,006.00 
+9 Zenmost Developments Pte. Ltd. And Zenlead 
+Investments Pte. Ltd.     
+905,807,755.00 
+10 CEL Unique Development Pte. Ltd.    863,810,000.00 
+11 FCL Residences Pte. Ltd. and KH Capital Pte. Ltd.     834,000,000.00 
+12 Soilbuild Group Holdings Ltd      774,488,000.00 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel: Pasir Ris P2 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+The tenderer(s) whose concept proposals were not shortlisted are: 
+ 
+1. Elara 1 Pte Ltd and Callisto 1 Pte Ltd  
+ 
+ 
+Click here to return to list of Commercial Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+S/N Tenderer 
+ 
+Tender Bid ($) 
+ 
+1 Phoenix Residential Pte. Ltd. & Phoenix Commercial 
+Pte. Ltd. 
+699,999,999.99 
+2 Laguna Garden Limited and Far East Commercial 
+Trustee Pte. Ltd.  
+677,777,000.00 
+ 
+ 
+ 
+ 
+ 
+ 
+Land Parcel: Tampines P17 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Click here to return to list of Commercial Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+S/N Tenderer 
+ 
+Tender Bid ($) 
+ 
+1 Topaz Residential Pte. Ltd. and Topaz Commercial 
+Pte. Ltd. 
+1,206,390,880.00 
+2 Pine II Commercial Pte. Ltd. and Pine II Residential 
+Pte. Ltd. 
+1,058,999,999.99 
+3 Sim Lian Land Pte Ltd & Sim Lian Development Pte 
+Ltd 
+909,090,909.00 
+ 
+ 
+ 
+ 
+Land Parcel: Tampines P18 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Click here to return to list of Commercial Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+S/N Tenderer 
+ 
+Tender Bid ($) 
+ 
+1 Hoi Hup Realty Pte Ltd and Sunway Developments 
+Pte. Ltd. 
+668,280,000.00 
+2 Sing Holdings Residential Pte. Ltd.           655,600,999.00 
+3 Sim Lian Land Pte Ltd and Sim Lian Development Pte 
+Ltd                  
+560,000,000.00 
+4 GuocoLand (Singapore) Pte. Ltd., Intrepid 
+Investments Pte. Ltd. and Garden Estates (Pte.) 
+Limited              
+550,435,633.00 
+5 Soilbuild Group Holdings Ltd. and UED Bravo Pte. 
+Ltd.     
+542,888,119.00 
+6 SNC3 Realty Pte. Ltd., Apex Asia Alpha Investment 
+Two Pte. Ltd., BHCC Development (Projects) Pte. 
+Ltd., Heeton Homes Pte. Ltd. and Soon Li Heng Civil 
+Engineering Pte Ltd      
+541,888,000.00 
+ 
+ 
+ 
+ 
+Land Parcel: Yishun P6 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Click here to return to list of Commercial Sites 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+S/N Tenderer 
+ 
+Tender Bid ($) 
+ 
+1 Evia MCS Pte. Ltd., Gamuda (Singapore) Pte. 
+Ltd. and H108 Pte. Ltd. 
+1,012,588,989.89 
+2 Phoenix Property 1 Pte. Ltd. and Phoenix 
+Property 2 Pte. Ltd.    
+845,000,000.00 
+3 Sim Lian Land Pte Ltd & Sim Lian Development 
+Pte Ltd             
+692,400,000.00 
+ 
+ 
+ 
+ 
+ 
+Land Parcel: Hougang P3 
+ 
+ 
+S/N 
+ 
+Tenderer 
+ 
+Tender Bid ($) 
+1 Horizon Residential Pte. Ltd. and Horizon 
+Commercial Trustee Pte. Ltd. (as trustee of 
+Horizon Commercial Trust) 
+1,500,738,338 
+2 Sim Lian Land Pte Ltd & Sim Lian Development 
+Pte Ltd 
+1,470,500,000 
+ 
+3 Phoenix Property 1 Pte. Ltd. and Phoenix Property 
+2 Pte. Ltd. (as trustee-manager of Phoenix Mall 
+Trust) 
+1,400,969,888 
+ 
+ 
+Click here to return to list of Commercial Sites 
+ 

@@ -42,7 +42,9 @@ const iso = d => { const [a, b, c] = d.split('/').map(Number); return `${c}-${St
 const num = s => {
   if (s == null) return null;
   const t = String(s).trim();
-  if (/^\[?N\.?A\.?\]?$/i.test(t)) return null;
+  // HDB writes "N.A.", "NA" and a bare "-" for the same thing. None of them
+  // is zero, and a plot ratio of zero would be a real-looking wrong number.
+  if (/^\[?(N\.?A\.?|-|–|—)\]?$/i.test(t)) return null;
   // "125,913. 4" — the space is the PDF's, not HDB's. Close it before parsing.
   const m = /^\[?([\d,]+(?:\.\s?\d+)?)/.exec(t);
   if (!m) return null;
@@ -51,13 +53,69 @@ const num = s => {
 };
 
 const ROW = /(\d{1,2}\/\d{1,2}\/\d{4})\s+(\d{1,2}\/\d{1,2}\/\d{4})\s+(\d{1,2}\/\d{1,2}\/\d{4})\s+([\s\S]*?)(?=\d{1,2}\/\d{1,2}\/\d{4}\s+\d{1,2}\/\d{1,2}\/\d{4}\s+\d{1,2}\/\d{1,2}\/\d{4}|$)/g;
-const HEAD = new RegExp(
-  '^(.*?)\\s+([\\d,]+\\.\\s?\\d)\\s+' +                  // parcel + street, land area
-  '(\\*?[A-Z]{1,3}(?:\\s*/\\s*\\*?[A-Z]{1,3})*)\\s+' +   // devt code, possibly "LP / CO / FT"
-  '(\\d+\\s*yrs?)\\s+' +                                 // lease
-  '(\\[?[\\d.]+\\]?(?:\\s*\\([^)]*\\))?|N\\.?A\\.?)\\s+' + // GPR, maybe [bracketed] or qualified
-  '(N\\.?A\\.?|[\\d,]+(?:\\.\\s?\\d+)?(?:\\s*\\(max\\))?)\\s+' + // GFA, maybe a ceiling
-  '(.*)$');
+
+/*
+ * THREE SHEETS, THREE SCHEMAS, AND THEY ARE NOT VARIATIONS OF ONE.
+ *
+ * The first version of this file had a single row pattern and was written
+ * against the condominium sheet. Run over the other two it would have matched
+ * about half their rows and mis-read the rest — which is worse than failing,
+ * because a half-populated column looks like data.
+ *
+ *   CONDOMINIUM  … Devt Type · Lease · GPR · GFA
+ *   EC           … Devt Type · Lease · GPR · MAX GFA · MIN GFA   (an extra column)
+ *   MIXED        … Lease · "118,268 sqm / (2.5)"   (no devt type at all, and the
+ *                  floor area and plot ratio share ONE cell)
+ *
+ * So the schema is chosen from the sheet's own header rather than guessed from
+ * the filename, and each has its own pattern. A file whose header matches none
+ * of them is refused rather than parsed by the closest fit.
+ */
+const SCHEMAS = [
+  {
+    id: 'ec',
+    // "Min. Gross Floor Area" appears only on the EC sheet.
+    detect: h => /min\.?\s*gross\s*floor/i.test(h),
+    kind: 'EC',
+    re: new RegExp(
+      '^(.*?)\\s+([\\d,]+(?:\\.\\s?\\d+)?)\\s+' +                   // parcel + street, land area
+      '(\\*?[A-Z]{1,3}(?:\\s*\\/\\s*\\*?[A-Z]{1,3})*)\\s+' +       // devt type
+      '(\\d+)\\s*(?:yrs?)?\\s+' +                                  // lease, bare on this sheet
+      '(N\\.?A\\.?|-|\\[?[\\d.]+\\]?)\\s+' +                       // GPR, sometimes a bare dash
+      '(N\\.?A\\.?|[\\d,]+(?:\\.\\d+)?)\\s+(N\\.?A\\.?|[\\d,]+(?:\\.\\d+)?)\\s+' + // max GFA, min GFA — either may be N.A.
+      '(.*)$'),
+    map: g => ({ devtCode: g[3], lease: `${g[4]} yrs`, gpr: num(g[5]),
+                 gfaSqm: num(g[6]), gfaMinSqm: num(g[7]), winner: g[8].trim() }),
+  },
+  {
+    id: 'mixed',
+    // The combined cell is the giveaway: "Permissible GFA / (GPR)".
+    detect: h => /permissible\s*gfa\s*\/\s*\(gpr\)/i.test(h),
+    kind: 'Mixed',
+    re: new RegExp(
+      '^(.*?)\\s+([\\d,]+(?:\\.\\s?\\d+)?)\\s+' +                   // parcel + street, land area
+      '(\\d+)\\s*(?:yrs?)?\\s+' +                                  // lease
+      '([\\d,]+(?:\\.\\d+)?)\\s*sqm\\s*\\/\\s*\\(([\\d.]+)\\)\\s+' + // "118,268 sqm / (2.5)"
+      '(.*)$'),
+    map: g => ({ devtCode: 'Mixed', lease: `${g[3]} yrs`, gfaSqm: num(g[4]),
+                 gpr: num(g[5]), winner: g[6].trim() }),
+  },
+  {
+    id: 'condo',
+    detect: () => true,                                            // the default shape
+    kind: 'Condominium',
+    re: new RegExp(
+      '^(.*?)\\s+([\\d,]+(?:\\.\\s?\\d)?)\\s+' +
+      '(\\*?[A-Z]{1,3}(?:\\s*\\/\\s*\\*?[A-Z]{1,3})*)\\s+' +
+      '(\\d+\\s*yrs?)\\s+' +
+      '(\\[?[\\d.]+\\]?(?:\\s*\\([^)]*\\))?|N\\.?A\\.?|-)\\s+' +
+      '(N\\.?A\\.?|[\\d,]+(?:\\.\\s?\\d+)?(?:\\s*\\(max\\))?)\\s+' +
+      '(.*)$'),
+    map: g => ({ devtCode: g[3].replace(/\s*\/\s*/g, '/'), lease: g[4].replace(/\s+/g, ' '),
+                 gpr: num(g[5]), gprNote: /\[|\(/.test(g[5]) ? g[5].trim() : null,
+                 gfaSqm: num(g[6]), gfaIsCeiling: /\(max\)/i.test(g[6]), winner: g[7].trim() }),
+  },
+];
 
 export async function parseHdbSites() {
   let files = [];
@@ -71,8 +129,23 @@ export async function parseHdbSites() {
   const sites = [];
   const failures = [];
   for (const f of files) {
-    const text = await fs.readFile(new URL(f, IN), 'utf8');
-    const kind = /ec/i.test(f) ? 'EC' : /mix/i.test(f) ? 'Mixed' : 'Condominium';
+    let text = await fs.readFile(new URL(f, IN), 'utf8');
+    /*
+     * Some sheets append a bid-detail section — every tenderer and every bid
+     * per parcel, under "S/N Tenderer Tender Bid ($)". It is genuinely
+     * interesting and it is NOT the table being parsed here, and the row
+     * pattern was catching fragments of it and reporting them as failures.
+     * A parser that cries wolf gets its warnings ignored, so the appendix is
+     * cut off explicitly rather than left to fail row by row.
+     */
+    const appendix = /S\/N\s+Tenderer\s+Tender\s+Bid/i.exec(text);
+    if (appendix) text = text.slice(0, appendix.index);
+    // The header is whatever precedes the first row. Enough to tell the sheets
+    // apart, and it comes from the file rather than from its name.
+    const firstRow = /\d{1,2}\/\d{1,2}\/\d{4}\s+\d{1,2}\/\d{1,2}\/\d{4}\s+\d{1,2}\/\d{1,2}\/\d{4}/.exec(text);
+    const header = text.slice(0, firstRow ? firstRow.index : 1200).replace(/\s+/g, ' ');
+    const schema = SCHEMAS.find(x => x.detect(header));
+
     let m, n = 0;
     ROW.lastIndex = 0;
     while ((m = ROW.exec(text))) {
@@ -80,30 +153,22 @@ export async function parseHdbSites() {
       const tail = /\$([\d,]+)\.\d{2}\s+(\d+)\s*(.*)$/.exec(body);
       if (!tail) { failures.push([f, body.slice(0, 110)]); continue; }
       const head = body.slice(0, tail.index).trim();
-      const g = HEAD.exec(head);
+      const g = schema.re.exec(head);
       if (!g) { failures.push([f, head.slice(0, 110)]); continue; }
       sites.push({
-        vendor: 'HDB', kind,
+        vendor: 'HDB', kind: schema.kind, sheet: schema.id,
         award: iso(m[3]), launched: iso(m[1]), closed: iso(m[2]),
-        site: g[1].trim(),
-        areaSqm: num(g[2]),
-        devtCode: g[3].replace(/\s*\/\s*/g, '/'),
-        lease: g[4].replace(/\s+/g, ' '),
-        gpr: num(g[5]),
-        /* HDB brackets a plot ratio it considers approximate, and qualifies
-           some with "(for CO only)". Both are recorded rather than flattened,
-           because a reader comparing rates needs to know. */
-        gprNote: /\[|\(/.test(g[5]) ? g[5].trim() : null,
-        gfaSqm: num(g[6]),
-        gfaIsCeiling: /\(max\)/i.test(g[6]),
-        winner: g[7].trim(),
+        site: g[1].trim(), areaSqm: num(g[2]),
+        ...schema.map(g),
         price: Number(tail[1].replace(/,/g, '')),
         bids: Number(tail[2]),
+        // Not every row names one — an EC site can be awarded before the
+        // project is named. Null rather than an empty string.
         project: tail[3].trim() || null,
       });
       n++;
     }
-    console.log(`  ${f} — ${n} sites (${kind})`);
+    console.log(`  ${f} — ${n} sites (${schema.kind})`);
   }
 
   sites.sort((a, b) => (a.award < b.award ? 1 : -1));
@@ -120,7 +185,11 @@ export async function parseHdbSites() {
         + 'A bracketed plot ratio is HDB\'s own approximation and is kept in gprNote. Prices are '
         + 'nominal and are not adjusted for inflation.',
     transcribed: new Date().toISOString().slice(0, 10),
-    counts: { sites: sites.length, withProject: named, withGpr: sites.filter(s => s.gpr).length },
+    counts: {
+      sites: sites.length, withProject: named,
+      withGpr: sites.filter(s => s.gpr).length,
+      byKind: sites.reduce((a, s) => ({ ...a, [s.kind]: (a[s.kind] || 0) + 1 }), {}),
+    },
     sites,
   };
   await fs.writeFile(OUT, JSON.stringify(out, null, 1));

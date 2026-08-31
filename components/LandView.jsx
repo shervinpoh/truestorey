@@ -30,9 +30,19 @@ import { Figure } from './Motion.jsx';
  * dollars are not 2026 dollars and nothing here pretends they are.
  */
 const money = n => (Number.isFinite(n) ? `S$${Math.round(n).toLocaleString('en-SG')}` : '—');
+/*
+ * URA and HDB describe use differently — URA writes "Residential" and
+ * "Residential with Commercial", HDB writes "Condominium", "EC" and "Mixed".
+ * Matched on both vocabularies rather than normalised into one, because
+ * rewriting a vendor's own label is how a category quietly becomes wrong.
+ *
+ * EC has its own tab because it is its own market: a different buyer, an
+ * income ceiling, and the financing distinction /plan now makes.
+ */
 const USES = [
-  ['residential', 'Residential', /^Residential$|^Condominium/i],
-  ['mixed', 'With commercial', /^Residential with Commercial/i],
+  ['residential', 'Residential', /^Residential$|^Condominium$/i],
+  ['ec', 'Executive condo', /^EC$/i],
+  ['mixed', 'With commercial', /^Residential with Commercial|^Mixed$/i],
   ['all', 'Every use', /./],
 ];
 

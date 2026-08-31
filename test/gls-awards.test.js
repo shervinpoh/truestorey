@@ -68,12 +68,23 @@ const hUrl = new URL('../data/sources/hdb-sites-sold.json', import.meta.url);
 const hHas = { skip: existsSync(hUrl) ? false : 'hdb-sites-sold.json not parsed here' };
 const h = existsSync(hUrl) ? JSON.parse(readFileSync(hUrl, 'utf8')) : null;
 
-/* The column URA does not have, and the reason this source is worth the manual
- * step: it says what each site BECAME. */
-test('every HDB site names the project it became', hHas, () => {
-  assert.ok(h.sites.length > 100, `only ${h.sites.length} sites`);
-  assert.equal(h.counts.withProject, h.sites.length,
-    'a site without a project name has appeared — check the parse');
+/*
+ * The column URA does not have, and the reason this source is worth the manual
+ * step: most rows say what the site BECAME.
+ *
+ * NOT every row, and the first version of this test wrongly demanded that. It
+ * was written when the condominium sheet was the only input, where all 120
+ * name a project. The EC sheet does not: a site awarded recently can be named
+ * later, and the newest one — Yishun E13, awarded April 2026 — has no project
+ * yet. Asserting "all" would have made a true row look like a parse failure.
+ */
+test('the project a site became is captured wherever HDB publishes one', hHas, () => {
+  assert.ok(h.sites.length > 200, `only ${h.sites.length} sites`);
+  assert.ok(h.counts.withProject / h.sites.length > 0.9,
+    `only ${h.counts.withProject} of ${h.sites.length} name a project — check the parse`);
+  // An unnamed site is null, never an empty string: one is a fact, the other
+  // is a parse that lost something.
+  for (const s of h.sites) assert.ok(s.project === null || s.project.length > 0);
   for (const s of h.sites) {
     assert.match(s.award, /^\d{4}-\d{2}-\d{2}$/);
     assert.ok(s.price > 0);
@@ -86,6 +97,15 @@ test('every HDB site names the project it became', hHas, () => {
  * first parser dropped, and both are the kind of thing that becomes a wrong
  * figure rather than a missing one if handled carelessly.
  */
+/* Three sheets, three schemas — and the EC one is the only complete market
+ * series of its kind published anywhere. */
+test('all three sheets are represented', hHas, () => {
+  const kinds = h.counts.byKind;
+  for (const k of ['Condominium', 'EC', 'Mixed']) {
+    assert.ok(kinds[k] > 10, `${k} has only ${kinds[k] ?? 0} sites — a sheet failed to parse`);
+  }
+});
+
 test('a field HDB does not publish is null, never zero', hHas, () => {
   for (const s of h.sites) {
     for (const k of ['gpr', 'gfaSqm', 'areaSqm']) {
