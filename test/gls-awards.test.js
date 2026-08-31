@@ -131,3 +131,52 @@ test('the manual step is explained rather than hidden', hHas, () => {
   assert.match(h.note, /no stable download URL/);
   assert.match(h.transcribed, /^\d{4}-\d{2}-\d{2}$/);
 });
+
+/* ── the bid detail ─────────────────────────────────────────────────────────
+ *
+ * HDB appends every tenderer and every losing bid to each sheet, and nobody
+ * surfaces it. The main table says "9 bidders", which tells you a site was
+ * contested; the second bid tells you whether it was contested CLOSELY.
+ */
+test('every bid list is headed by the price the table already published', hHas, () => {
+  const withBids = h.sites.filter(s => s.bidDetail?.length);
+  assert.ok(withBids.length > 150, `only ${withBids.length} sites carry bids`);
+  for (const s of withBids) {
+    assert.equal(s.bidDetail[0].bid, s.price,
+      `${s.site}: the top bid (${s.bidDetail[0].bid}) is not the tender price (${s.price})`);
+  }
+});
+
+/*
+ * This assertion found two real bugs before it was a test.
+ *
+ * ONE — a plain startsWith attached "Bukit Batok E1"'s bids to "Bukit Batok
+ * E11". A site whose own parcel has no bid detail will happily match a shorter
+ * parcel's, producing a complete and plausible list of bids belonging to a
+ * different piece of land.
+ *
+ * TWO — the parser keyed on the leading rank number, and HDB omits the "1" for
+ * Pasir Ris E6. That site appeared to have been won by the second-highest
+ * bidder, at a price contradicting its own table.
+ *
+ * Neither looked wrong on the page. Both were caught only by reconciling
+ * against a figure the source had already published twice.
+ */
+test('bids descend, rank follows the amount, and none is negative', hHas, () => {
+  for (const s of h.sites.filter(x => x.bidDetail?.length)) {
+    let prev = Infinity;
+    s.bidDetail.forEach((b, i) => {
+      assert.equal(b.rank, i + 1, `${s.site}: rank ${b.rank} at position ${i + 1}`);
+      assert.ok(b.bid > 0 && b.bid <= prev, `${s.site}: bids out of order at rank ${b.rank}`);
+      assert.ok(b.tenderer.length > 1, `${s.site}: rank ${b.rank} has no tenderer`);
+      prev = b.bid;
+    });
+  }
+});
+
+test('a site with no published bid list carries null, not an empty one', hHas, () => {
+  for (const s of h.sites) {
+    assert.ok(s.bidDetail === null || s.bidDetail.length > 0,
+      `${s.site} has an empty bid list, which means the parse lost something`);
+  }
+});

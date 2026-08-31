@@ -49,6 +49,7 @@ const USES = [
 export default function LandView({ data }) {
   const [use, setUse] = useState('residential');
   const [area, setArea] = useState('');
+  const [openBids, setOpenBids] = useState(null);
 
   const match = USES.find(u => u[0] === use)[2];
   const sites = useMemo(
@@ -142,12 +143,14 @@ export default function LandView({ data }) {
             <th>Awarded</th><th>Site</th><th>Sold by</th>
             <th style={{ textAlign: 'right' }}>Price</th>
             <th style={{ textAlign: 'right' }}>psm</th>
-            <th style={{ textAlign: 'right' }}>Bids</th>
+            <th style={{ textAlign: 'right' }}>Bids<br /><i style={{ fontStyle: 'normal', fontWeight: 400 }}>ahead of 2nd</i></th>
             <th>Became</th>
           </tr></thead>
           <tbody>
             {latest.map(s => (
-              <tr key={`${s.award}-${s.site}`}>
+              <tr key={`${s.award}-${s.site}`}
+                  onClick={() => s.bidDetail?.length && setOpenBids(openBids === s.site ? null : s.site)}
+                  style={s.bidDetail?.length ? { cursor: 'pointer' } : undefined}>
                 <td className="mono">{s.award}</td>
                 <td>{s.site}</td>
                 <td className="mono">{s.vendor}</td>
@@ -158,14 +161,57 @@ export default function LandView({ data }) {
                 <td className="mono" style={{ textAlign: 'right' }}>{s.psmGfaOrGpr ? money(s.psmGfaOrGpr) : '—'}</td>
                 {/* A single bid is the most informative number on this row and
                     it is easy to skim past. */}
-                <td className="mono" style={{ textAlign: 'right' }}>{s.bids ?? '—'}</td>
+                {/* The count is a fact; the SPREAD is the finding. A site won
+                    by 0.11% with six bidders and one won by 102% with two are
+                    both "contested" until you can see the second bid. */}
+                <td className="mono" style={{ textAlign: 'right' }}>
+                  {s.bids ?? '—'}
+                  {s.bidDetail?.length > 1 && (
+                    <i style={{ display: 'block', fontStyle: 'normal', fontSize: 10, color: 'var(--mute)' }}>
+                      +{((s.bidDetail[0].bid - s.bidDetail[1].bid) / s.bidDetail[1].bid * 100).toFixed(1)}%
+                    </i>
+                  )}
+                </td>
                 {/* The column URA does not have: what the site became. */}
                 <td>{s.project || <span style={{ color: 'var(--mute)' }}>{s.winner || '—'}</span>}</td>
+              </tr>
+            ))}
+            {/* Rendered as its own row so the table keeps its column widths. */}
+            {latest.filter(s => s.site === openBids && s.bidDetail?.length).map(s => (
+              <tr key={`${s.site}-bids`}>
+                <td colSpan={7} style={{ background: 'var(--sunk)' }}>
+                  <span className="filtn" style={{ display: 'block', marginBottom: 6 }}>
+                    Every bid — {s.bidDetail.length} tendered
+                  </span>
+                  <ul className="bidlist">
+                    {s.bidDetail.map(b => (
+                      <li key={b.rank}>
+                        <span className="mono r">{b.rank}</span>
+                        <span className="who">{b.tenderer}</span>
+                        <span className="mono amt">{money(b.bid)}</span>
+                        <span className="mono off">
+                          {b.rank === 1 ? 'won'
+                            : `−${((s.bidDetail[0].bid - b.bid) / s.bidDetail[0].bid * 100).toFixed(1)}%`}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {data.hdb?.withBidDetail > 0 && (
+        <div className="note" style={{ marginTop: 20 }}>
+          <b>Tap an HDB row to see every bid.</b> The count says a site was contested; the second
+          bid says whether it was contested <em>closely</em>. {data.hdb.withBidDetail} sites carry
+          the full tender list — {data.hdb.bids.toLocaleString('en-SG')} individual bids — and the
+          spread runs from a site won by a tenth of a per cent to one won by more than double the
+          next offer. HDB publishes this and nobody surfaces it.
+        </div>
+      )}
 
       {data.hdb && (
         <div className="note" style={{ marginTop: 20 }}>

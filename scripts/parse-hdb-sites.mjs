@@ -52,6 +52,32 @@ const num = s => {
   return Number.isFinite(n) ? n : null;
 };
 
+/**
+ * The parcel is the leading token of the site string — "Queenstown S9b Dundee
+ * Road" is parcel "Queenstown S9b".
+ *
+ * THE BOUNDARY CHECK IS THE WHOLE FUNCTION. A plain startsWith attached
+ * "Bukit Batok E1"'s bids to "Bukit Batok E11", because a site whose own
+ * parcel has no bid detail will happily match a SHORTER parcel's. That is the
+ * worst kind of wrong: a complete, plausible list of bids belonging to a
+ * different piece of land, on a page whose entire claim is that its figures
+ * are checkable.
+ *
+ * It was caught by asserting the top bid equals the tender price the main
+ * table already published — three of 182 disagreed. Without that cross-check
+ * it would have shipped, because every one of those rows looked fine.
+ */
+function matchBids(map, site) {
+  if (!map.size) return null;
+  for (const key of [...map.keys()].sort((a, b) => b.length - a.length)) {
+    if (!site.startsWith(key)) continue;
+    // The parcel must END here: "E1" may not swallow "E11".
+    const next = site.charAt(key.length);
+    if (next === '' || !/[A-Za-z0-9]/.test(next)) return map.get(key);
+  }
+  return null;
+}
+
 const ROW = /(\d{1,2}\/\d{1,2}\/\d{4})\s+(\d{1,2}\/\d{1,2}\/\d{4})\s+(\d{1,2}\/\d{1,2}\/\d{4})\s+([\s\S]*?)(?=\d{1,2}\/\d{1,2}\/\d{4}\s+\d{1,2}\/\d{1,2}\/\d{4}\s+\d{1,2}\/\d{1,2}\/\d{4}|$)/g;
 
 /*
@@ -117,6 +143,58 @@ const SCHEMAS = [
   },
 ];
 
+/**
+ * The bid detail: every tenderer and every losing bid, per parcel.
+ *
+ * HDB appends this to each sheet and nobody surfaces it. The main table says
+ * "9 bidders", which tells you a site was contested; this says the second
+ * highest bid was four per cent behind, which tells you whether it was
+ * contested CLOSELY. Those are different facts and only one of them is
+ * currently published in a form anyone can use.
+ *
+ * It is not appended, it is INTERLEAVED — in the condominium sheet the table
+ * occupies the first quarter of the file and the bid detail the remaining
+ * three. And the label is written "Land Parcel :" there, with a space before
+ * the colon, against "Land Parcel:" elsewhere. One missing space cost 121
+ * blocks in the first attempt, silently: the pattern simply matched nothing
+ * and reported nothing, which is why the count is asserted per file below.
+ */
+function bidDetail(text) {
+  const out = new Map();
+  const BLOCK = /Land Parcel\s*:\s*(.+?)\s+(?:Click here[^S]*?)?S\/N\s+Tenderer\s+Tender\s+Bid\s*\(\$\)\s*([\s\S]*?)(?=Land Parcel\s*:|$)/g;
+  let m;
+  while ((m = BLOCK.exec(text))) {
+    const parcel = m[1].replace(/\s+/g, ' ').trim();
+    const body = m[2].replace(/\s+/g, ' ');
+    const bids = [];
+    /*
+     * THE RANK IS NOT REQUIRED, AND THAT IS NOT TIDINESS.
+     *
+     * The first version keyed on the leading rank number. Pasir Ris E6 then
+     * lost its WINNING bid: HDB's own sheet omits the "1" there, printing
+     * "Tender Bid ($) City Developments Ltd 50,800,000.00 2 Chappelis…", so
+     * the pattern started at rank 2 and the site appeared to have been won by
+     * the second-highest bidder at a price that did not match its own table.
+     *
+     * So an entry is a name and an amount; the rank is stripped if present and
+     * recomputed from the amounts. The rank in the source was only ever a
+     * restatement of the ordering, and depending on it made a missing digit
+     * into a wrong winner.
+     */
+    for (const b of body.matchAll(/([^\d][^$]*?)\s+([\d,]+\.\d{2})(?=\s|$)/g)) {
+      const tenderer = b[1].replace(/^\s*\d{1,2}\s+/, '').replace(/\s+/g, ' ').trim();
+      if (!tenderer) continue;
+      bids.push({ tenderer, bid: Number(b[2].replace(/,/g, '')) });
+    }
+    if (bids.length) {
+      bids.sort((a, b) => b.bid - a.bid);
+      bids.forEach((x, i) => { x.rank = i + 1; });
+      out.set(parcel, bids);
+    }
+  }
+  return out;
+}
+
 export async function parseHdbSites() {
   let files = [];
   try { files = (await fs.readdir(IN)).filter(f => f.endsWith('.txt')); } catch { /* no folder yet */ }
@@ -138,7 +216,8 @@ export async function parseHdbSites() {
      * A parser that cries wolf gets its warnings ignored, so the appendix is
      * cut off explicitly rather than left to fail row by row.
      */
-    const appendix = /S\/N\s+Tenderer\s+Tender\s+Bid/i.exec(text);
+    const bids = bidDetail(text);
+    const appendix = /Land Parcel\s*:\s*.+?S\/N\s+Tenderer\s+Tender\s+Bid/i.exec(text);
     if (appendix) text = text.slice(0, appendix.index);
     // The header is whatever precedes the first row. Enough to tell the sheets
     // apart, and it comes from the file rather than from its name.
@@ -150,7 +229,10 @@ export async function parseHdbSites() {
     ROW.lastIndex = 0;
     while ((m = ROW.exec(text))) {
       const body = m[4].replace(/\s+/g, ' ').trim();
-      const tail = /\$([\d,]+)\.\d{2}\s+(\d+)\s*(.*)$/.exec(body);
+      // The cents are captured, not discarded. Dropping them made a tender
+      // price disagree with the top of its own bid list by 38 cents, which is
+      // meaningless as money and fatal as a reconciliation.
+      const tail = /\$([\d,]+\.\d{2})\s+(\d+)\s*(.*)$/.exec(body);
       if (!tail) { failures.push([f, body.slice(0, 110)]); continue; }
       const head = body.slice(0, tail.index).trim();
       const g = schema.re.exec(head);
@@ -165,12 +247,16 @@ export async function parseHdbSites() {
         // Not every row names one — an EC site can be awarded before the
         // project is named. Null rather than an empty string.
         project: tail[3].trim() || null,
+        /* Matched on the parcel, which is the first token of the site string —
+           "Queenstown S9b Dundee Road" is parcel "Queenstown S9b". */
+        bidDetail: matchBids(bids, g[1].trim()),
       });
       n++;
     }
     console.log(`  ${f} — ${n} sites (${schema.kind})`);
   }
 
+  const withBids = sites.filter(s => s.bidDetail?.length).length;
   sites.sort((a, b) => (a.award < b.award ? 1 : -1));
   if (!sites.length) throw new Error('no sites parsed from any file');
 
@@ -188,12 +274,13 @@ export async function parseHdbSites() {
     counts: {
       sites: sites.length, withProject: named,
       withGpr: sites.filter(s => s.gpr).length,
+      withBidDetail: withBids,
       byKind: sites.reduce((a, s) => ({ ...a, [s.kind]: (a[s.kind] || 0) + 1 }), {}),
     },
     sites,
   };
   await fs.writeFile(OUT, JSON.stringify(out, null, 1));
-  console.log(`Wrote data/sources/hdb-sites-sold.json — ${sites.length} sites · ${named} name the project they became`);
+  console.log(`Wrote data/sources/hdb-sites-sold.json — ${sites.length} sites · ${named} name the project · ${withBids} carry every bid`);
   if (failures.length) {
     // Say what could not be read. A parser that reports only successes is the
     // silent-truncation failure this repo keeps writing tests about.

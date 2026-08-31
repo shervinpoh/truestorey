@@ -61,6 +61,8 @@ function merge(ura, hdb) {
       toYear: sites[0].award.slice(0, 4),
     },
     hdb: { source: hdb.source, sourcePage: hdb.sourcePage, note: hdb.note,
-           transcribed: hdb.transcribed, sites: hdb.counts.sites, withProject: hdb.counts.withProject },
+           transcribed: hdb.transcribed, sites: hdb.counts.sites, withProject: hdb.counts.withProject,
+           withBidDetail: hdb.counts.withBidDetail,
+           bids: hdb.sites.reduce((a, s) => a + (s.bidDetail?.length || 0), 0) },
   };
 }
