@@ -22,6 +22,23 @@ export default function Page() {
         <ul className="idx">
           <li><Link href="/plan"><span className="n">Can I afford it</span>
             <span className="s">TDSR, the LTV ceiling, the downpayment, the cash CPF cannot cover, and both stamp duties — chained, not four separate answers</span></Link></li>
+          {/* Four tools shipped without ever reaching this page. /tools is
+              where somebody looks when they do not know what exists, so a tool
+              missing from it is a tool that does not exist for them. */}
+          <li><Link href="/progressive"><span className="n">Buying off the plan</span>
+            <span className="s">The nine stages a developer may bill you for, quoted from the Housing Developers Rules, and what your instalment does at each one</span></Link></li>
+        </ul>
+      </section>
+
+      <section className="pane">
+        <div className="sh"><span>What it is worth over time</span></div>
+        <ul className="idx">
+          <li><Link href="/lease"><span className="n">What a lease is worth</span>
+            <span className="s">The table the State itself applies to a lease renewal, all ninety-nine years of it, and what one more year of holding costs</span></Link></li>
+          <li><Link href="/land"><span className="n">What the land cost</span>
+            <span className="s">Every Government Land Sales site awarded since 1993 — the winning tender, the rate, how many bid, and every losing bid where HDB published it</span></Link></li>
+          <li><Link href="/compare"><span className="n">Compare</span>
+            <span className="s">Two or three blocks side by side, in a link you can send</span></Link></li>
         </ul>
       </section>
 

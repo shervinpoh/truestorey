@@ -180,3 +180,37 @@ test('a site with no published bid list carries null, not an empty one', hHas, (
       `${s.site} has an empty bid list, which means the parse lost something`);
   }
 });
+
+/*
+ * A PROJECT NAME MUST LOOK LIKE A PROJECT NAME.
+ *
+ * Two rows shipped carrying 39,690 and 57,897 characters in this field. The
+ * last row of a table has no following date-triple to stop at, so it captured
+ * everything after it — one took the whole bid appendix, another the legend
+ * that explains the development codes.
+ *
+ * Every test passed, because they asserted the field EXISTED. "Not empty" is
+ * not the same question as "plausible", and on a parser reading a PDF it is
+ * the weaker one by a wide margin. Caught in review, not here — which is why
+ * this test now exists.
+ */
+test('a project name is a name, not a swallowed page', hHas, () => {
+  for (const s of h.sites) {
+    if (!s.project) continue;
+    assert.ok(s.project.length <= 60,
+      `${s.site}: project name is ${s.project.length} characters — the parse has swallowed something`);
+    assert.doesNotMatch(s.project, /LEGEND|S\/N|Tender Bid|Land Parcel/i,
+      `${s.site}: project name contains table furniture`);
+    assert.doesNotMatch(s.project, /\n/, `${s.site}: project name spans lines`);
+  }
+});
+
+/* The same failure mode applies to any long free-text field the parser fills. */
+test('no field has swallowed the rest of the document', hHas, () => {
+  for (const s of h.sites) {
+    for (const [k, v] of Object.entries(s)) {
+      if (typeof v !== 'string') continue;
+      assert.ok(v.length < 300, `${s.site}: ${k} is ${v.length} characters`);
+    }
+  }
+});

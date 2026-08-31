@@ -50,3 +50,31 @@ for (const ns of ['condo', 'landed']) {
     assert.deepEqual(dupes.slice(0, 5), [], `duplicate slugs in ${ns}`);
   });
 }
+
+/*
+ * EVERY TOOL IN THE NAV MUST BE FINDABLE WITHOUT THE NAV.
+ *
+ * /tools is where somebody looks when they do not know what exists, and the
+ * sitemap is where Google does. Four tools — Compare, Buying off the plan,
+ * What a lease is worth, What the land cost — shipped without reaching either,
+ * on a site whose whole strategy is being findable. A tool nobody can find is
+ * a tool that does not exist.
+ */
+test('every tool in the nav is listed on /tools', async () => {
+  const { NAV } = await import('../lib/nav.js');
+  const { readFileSync } = await import('node:fs');
+  const page = readFileSync(new URL('../app/tools/page.jsx', import.meta.url), 'utf8');
+  const tools = NAV.find(g => /tool/i.test(g.group))?.items || [];
+  assert.ok(tools.length > 5);
+  for (const t of tools) {
+    if (t.href === '/tools') continue;                 // the page itself
+    assert.ok(page.includes(`href="${t.href}"`), `/tools does not link ${t.href}`);
+  }
+});
+
+test('the sitemap is driven by the nav rather than a second list', async () => {
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync(new URL('../app/sitemap.js', import.meta.url), 'utf8');
+  assert.match(src, /from '\.\.\/lib\/nav\.js'/, 'the sitemap does not read the nav');
+  assert.match(src, /navPaths\(\)/, 'the nav paths are not spread into the sitemap');
+});

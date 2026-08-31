@@ -50,6 +50,7 @@ export default function LandView({ data }) {
   const [use, setUse] = useState('residential');
   const [area, setArea] = useState('');
   const [openBids, setOpenBids] = useState(null);
+  const [shown, setShown] = useState(25);
 
   const match = USES.find(u => u[0] === use)[2];
   const sites = useMemo(
@@ -81,7 +82,17 @@ export default function LandView({ data }) {
   }, [sites]);
 
   const withRate = sites.filter(s => Number.isFinite(s.psmGfaOrGpr));
-  const latest = sites.slice(0, 12);
+  /*
+   * IT SAID "296 MATCHING" AND SHOWED TWELVE.
+   *
+   * A heading that counts the whole set above a table that shows a twelfth of
+   * it is not a summary, it is a contradiction — and on a page whose argument
+   * is "every awarded site since 1993" it undercuts the claim in the same
+   * breath as making it. The cap stays, because 657 rows is not a first
+   * screen, but it is now stated and liftable.
+   */
+  const PAGE = 25;
+  const latest = sites.slice(0, shown);
   const median = withRate.length
     ? withRate.map(s => s.psmGfaOrGpr).sort((a, b) => a - b)[Math.floor(withRate.length / 2)]
     : null;
@@ -91,14 +102,16 @@ export default function LandView({ data }) {
       <div className="mapctl" style={{ marginBottom: 4 }}>
         <div className="seg" role="group" aria-label="Use">
           {USES.map(([k, label]) => (
-            <button key={k} type="button" aria-pressed={use === k} onClick={() => { setUse(k); setArea(''); }}>
+            <button key={k} type="button" aria-pressed={use === k}
+              onClick={() => { setUse(k); setArea(''); setShown(PAGE); setOpenBids(null); }}>
               {label}
             </button>
           ))}
         </div>
         <label className="mapjump">
           <span className="filtn">Planning area</span>
-          <select value={area} onChange={e => setArea(e.target.value)} aria-label="Planning area">
+          <select value={area} aria-label="Planning area"
+            onChange={e => { setArea(e.target.value); setShown(PAGE); setOpenBids(null); }}>
             <option value="">Everywhere</option>
             {areas.map(([a, n]) => <option key={a} value={a}>{a} — {n} sites</option>)}
           </select>
@@ -135,7 +148,11 @@ export default function LandView({ data }) {
       )}
 
       <div className="sh" style={{ marginTop: 26 }}>
-        <span>Most recently awarded</span><span>{sites.length.toLocaleString('en-SG')} matching</span>
+        <span>Most recently awarded</span>
+        <span>
+          {Math.min(latest.length, sites.length).toLocaleString('en-SG')} of{' '}
+          {sites.length.toLocaleString('en-SG')}
+        </span>
       </div>
       <div className="tablewrap">
         <table className="anst landtable">
@@ -202,6 +219,21 @@ export default function LandView({ data }) {
           </tbody>
         </table>
       </div>
+
+      {/* The heading counted 296 and the table showed 12. A cap is reasonable —
+          657 rows is not a first screen — but an unstated one on a page whose
+          claim is "every awarded site since 1993" contradicts the claim in the
+          same breath as making it. */}
+      {shown < sites.length && (
+        <div className="withinmore" style={{ marginTop: 12 }}>
+          <button type="button" className="linkish" onClick={() => setShown(n => n + 100)}>
+            Show {Math.min(100, sites.length - shown).toLocaleString('en-SG')} more
+          </button>
+          <button type="button" className="linkish" onClick={() => setShown(sites.length)}>
+            Show all {sites.length.toLocaleString('en-SG')}
+          </button>
+        </div>
+      )}
 
       {data.hdb?.withBidDetail > 0 && (
         <div className="note" style={{ marginTop: 20 }}>

@@ -6,7 +6,7 @@ import { titleCase } from '../lib/name.js';
  * What is around a block or project.
  *
  * Two facts lead, because two facts are what actually move a decision here:
- * the nearest station, and how many primary schools fall inside MOE's 1km
+ * the nearest station, and how many primary schools fall inside a 1km
  * priority band. Everything else — hawker, park, preschool, mall — is real
  * but secondary, so it sits in one compact strip below rather than competing
  * for the top of the page.
@@ -72,7 +72,7 @@ export default function Amenities({ near, manifest }) {
       {/* ---------- the primary school band ---------- */}
       {(p1.length > 0 || p2.length > 0) && (
         <>
-          <span className="lab" style={{ display: 'block', margin: '18px 0 6px' }}>Primary schools · MOE distance bands</span>
+          <span className="lab" style={{ display: 'block', margin: '18px 0 6px' }}>Primary schools · straight-line distance</span>
           {p1.length > 0 && (
             <ul className="amlist">
               {p1.map(s => (
@@ -98,10 +98,16 @@ export default function Amenities({ near, manifest }) {
           )}
 
           <div className="note">
-            <b>A band is priority, not a place.</b> MOE measures home to school in a straight line, so
-            1km here is the same measure it uses — but it measures from the address on your child&apos;s
-            registration, not from the block, and an oversubscribed school still ballots within a band.
-            A school on or near the line can fall either side of it once MOE measures it.
+            <b>A band is priority, not a place — and this is an indication, not MOE&apos;s answer.</b>{' '}
+            MOE measures home to school in a straight line, which is what is measured here. But it
+            measures to the school&apos;s <em>land boundary</em> and this measures to the school&apos;s
+            single registered coordinate, so a large campus reads as further away than MOE would find
+            it. It also measures from the address on your child&apos;s registration, not from the
+            block. A school near the line can fall either side of it once MOE measures it, and an
+            oversubscribed school still ballots within a band. For the official category for a
+            specific address, use{' '}
+            <a href="https://www.onemap.gov.sg/" target="_blank" rel="noopener noreferrer">OneMap&apos;s
+            SchoolQuery</a>.
           </div>
         </>
       )}

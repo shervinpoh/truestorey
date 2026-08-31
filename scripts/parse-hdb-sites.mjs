@@ -217,8 +217,28 @@ export async function parseHdbSites() {
      * cut off explicitly rather than left to fail row by row.
      */
     const bids = bidDetail(text);
-    const appendix = /Land Parcel\s*:\s*.+?S\/N\s+Tenderer\s+Tender\s+Bid/i.exec(text);
-    if (appendix) text = text.slice(0, appendix.index);
+    /*
+     * [\s\S] AND NOT `.` — the dot does not cross a newline in JavaScript, and
+     * the label and the S/N header sit on different lines in two of the three
+     * sheets, sometimes with "Click here to return…" between them. The cut
+     * therefore failed silently on those files, and because the LAST row of a
+     * table has no following date-triple to stop at, it captured everything to
+     * the end of the file: one project name came out 57,897 characters long,
+     * carrying the whole bid appendix inside it.
+     *
+     * It passed every test, because the tests asserted the field EXISTED.
+     */
+    /*
+     * Two things follow the table and both get swallowed by the LAST row,
+     * which has no next date-triple to stop at: the bid appendix, and the
+     * LEGEND that explains the development codes. Cut at whichever comes
+     * first. "The Tanamera" arrived carrying the entire code key.
+     */
+    const ends = [
+      /Land Parcel\s*:[\s\S]{0,120}?S\/N\s+Tenderer\s+Tender\s+Bid/i.exec(text),
+      /\bLEGEND\b/.exec(text),
+    ].filter(Boolean).map(m => m.index);
+    if (ends.length) text = text.slice(0, Math.min(...ends));
     // The header is whatever precedes the first row. Enough to tell the sheets
     // apart, and it comes from the file rather than from its name.
     const firstRow = /\d{1,2}\/\d{1,2}\/\d{4}\s+\d{1,2}\/\d{1,2}\/\d{4}\s+\d{1,2}\/\d{1,2}\/\d{4}/.exec(text);

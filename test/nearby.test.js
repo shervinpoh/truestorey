@@ -98,3 +98,33 @@ test('through-train schools coded MIXED LEVEL (P1-S4) are treated as primary', (
   assert.ok(!isPrimary({ level: 'JUNIOR COLLEGE' }));
   assert.ok(!isPrimary({ level: 'SECONDARY (S1-S5)' }));
 });
+
+/* ── the school band is an approximation ────────────────────────────────────
+ *
+ * lib/geo.js claimed "1km here IS the rule's own measure, not a proxy for it",
+ * and Amenities.jsx labelled the result "MOE distance bands". The straight line
+ * is right; the ENDPOINTS are not. MOE measures to the nearest point of the
+ * school's LAND BOUNDARY and this measures to a single registered coordinate,
+ * so a large campus reads as further than MOE would find it — a couple of
+ * hundred metres, which is the whole width of the decision at a band edge.
+ *
+ * Rule 11 says never imply a school place. Claiming to reproduce MOE's own
+ * measurement is a step towards implying one, so the claim is asserted here.
+ */
+test('nothing claims to reproduce MOE’s own measurement', async () => {
+  const { readFileSync } = await import('node:fs');
+  const geo = readFileSync(new URL('../lib/geo.js', import.meta.url), 'utf8');
+  const ui = readFileSync(new URL('../components/Amenities.jsx', import.meta.url), 'utf8');
+
+  // The correction may describe the old wording; the CLAIM must not return.
+  assert.doesNotMatch(geo, /is the rule's own measure(?!")/,
+    'geo.js is claiming to be MOE’s own measure again');
+  assert.match(geo, /land boundary|LAND BOUNDARY/,
+    'geo.js no longer explains that MOE measures to the school boundary');
+
+  assert.doesNotMatch(ui, /MOE distance bands/,
+    'the UI is labelling straight-line distance as MOE’s bands');
+  assert.match(ui, /land boundary/, 'the UI no longer states the endpoint difference');
+  // MOE's own answer, offered rather than replaced.
+  assert.match(ui, /SchoolQuery/, 'the UI does not point at the official source');
+});
