@@ -138,33 +138,33 @@ export default function LandView({ data }) {
         <span>Most recently awarded</span><span>{sites.length.toLocaleString('en-SG')} matching</span>
       </div>
       <div className="tablewrap">
-        <table className="anst">
+        <table className="anst landtable">
           <thead><tr>
-            <th>Awarded</th><th>Site</th><th>Sold by</th>
-            <th style={{ textAlign: 'right' }}>Price</th>
-            <th style={{ textAlign: 'right' }}>psm</th>
-            <th style={{ textAlign: 'right' }}>Bids<br /><i style={{ fontStyle: 'normal', fontWeight: 400 }}>ahead of 2nd</i></th>
-            <th>Became</th>
+            <th className="when">Awarded</th><th>Site</th><th>Sold by</th>
+            <th className="num">Price</th>
+            <th className="num">psm</th>
+            <th className="bidsh">Bids <i>· ahead of 2nd</i></th>
+            <th className="who">Became</th>
           </tr></thead>
           <tbody>
             {latest.map(s => (
               <tr key={`${s.award}-${s.site}`}
-                  onClick={() => s.bidDetail?.length && setOpenBids(openBids === s.site ? null : s.site)}
-                  style={s.bidDetail?.length ? { cursor: 'pointer' } : undefined}>
-                <td className="mono">{s.award}</td>
+                  className={s.bidDetail?.length ? 'openable' : undefined}
+                  onClick={() => s.bidDetail?.length && setOpenBids(openBids === s.site ? null : s.site)}>
+                <td className="mono when">{s.award}</td>
                 <td>{s.site}</td>
                 <td className="mono">{s.vendor}</td>
-                <td className="mono" style={{ textAlign: 'right' }}>{money(s.price)}</td>
+                <td className="mono num">{money(s.price)}</td>
                 {/* HDB publishes no rate column. An em dash, not a computed
                     figure — deriving one would invent a basis URA's own column
                     is already ambiguous about. */}
-                <td className="mono" style={{ textAlign: 'right' }}>{s.psmGfaOrGpr ? money(s.psmGfaOrGpr) : '—'}</td>
+                <td className="mono num">{s.psmGfaOrGpr ? money(s.psmGfaOrGpr) : '—'}</td>
                 {/* A single bid is the most informative number on this row and
                     it is easy to skim past. */}
                 {/* The count is a fact; the SPREAD is the finding. A site won
                     by 0.11% with six bidders and one won by 102% with two are
                     both "contested" until you can see the second bid. */}
-                <td className="mono" style={{ textAlign: 'right' }}>
+                <td className="mono num">
                   {s.bids ?? '—'}
                   {s.bidDetail?.length > 1 && (
                     <i style={{ display: 'block', fontStyle: 'normal', fontSize: 10, color: 'var(--mute)' }}>
@@ -173,7 +173,7 @@ export default function LandView({ data }) {
                   )}
                 </td>
                 {/* The column URA does not have: what the site became. */}
-                <td>{s.project || <span style={{ color: 'var(--mute)' }}>{s.winner || '—'}</span>}</td>
+                <td className="who">{s.project || <span style={{ color: 'var(--mute)' }}>{s.winner || '—'}</span>}</td>
               </tr>
             ))}
             {/* Rendered as its own row so the table keeps its column widths. */}

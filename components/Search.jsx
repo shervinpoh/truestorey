@@ -111,8 +111,12 @@ export default function Search({ autoFocus = false }) {
           : answered ? 'No matches.' : ''}
       </p>
 
-      {/* Only once a request has actually come back empty for THIS term. */}
-      {answered === q.trim() && !sugg.length && !seeking && !busy && (
+      {/* Only once a request has actually come back empty for THIS term.
+          `answered` must be non-empty as well as equal: clearing the box resets
+          it to '' and q.trim() is also '', so the two matched and the line
+          appeared under an EMPTY search field. Fixing the flash on keystroke
+          introduced a worse one on an empty box. */}
+      {answered && answered === q.trim() && !sugg.length && !seeking && !busy && (
         <p className="hint" style={{marginTop:8}}>Nothing matching that. Try the block number on its own, or the street.</p>
       )}
     </>

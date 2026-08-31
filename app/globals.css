@@ -184,10 +184,14 @@ a{color:var(--ink)}
    for this site over a paid competitor — two of which no nav anywhere led to.
    Three headings that print their contents instead. */
 .navgrp{position:relative}
+/* Tools has grown from six items to eleven, and this had no height limit at
+   all — the panel simply ran past the bottom of the window with nothing to
+   scroll. The mobile panel had been given one; the desktop one never was. */
 .navdrop{position:absolute;top:calc(100% + 11px);right:0;z-index:42;min-width:330px;
- background:var(--paper);border:1px solid var(--ink);padding:4px 0}
+ background:var(--paper);border:1px solid var(--ink);padding:4px 0;
+ max-height:calc(100vh - 96px);overflow-y:auto;overscroll-behavior:contain}
 .navgrp:first-child .navdrop{left:0;right:auto}
-.navdrop a{display:block;padding:10px 15px;text-decoration:none;color:var(--ink);
+.navdrop a{display:block;padding:9px 15px;text-decoration:none;color:var(--ink);
  border-bottom:1px solid var(--line2)}
 .navdrop a:last-child{border-bottom:0}
 .navdrop a b{display:block;font-size:13.5px;font-weight:600;letter-spacing:-.022em;line-height:1.25}
@@ -1346,3 +1350,22 @@ sup.cite a:hover{text-decoration:underline}
   .bidlist li{grid-template-columns:24px 1fr;row-gap:2px}
   .bidlist .amt,.bidlist .off{grid-column:2;text-align:left}
 }
+
+/* ── the land table ─────────────────────────────────────────────────────── */
+/* Seven columns of very different natures: three are figures that must never
+   wrap, one is a date, and two are company names that will wrap forever if
+   allowed to. Left to itself the browser gave the widest column to the longest
+   consortium name and squeezed "Bids / ahead of 2nd" into three stacked lines. */
+.landtable{min-width:860px}
+.landtable th,.landtable td{vertical-align:top}
+.landtable .num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.landtable .when{white-space:nowrap}
+.landtable .who{min-width:220px}
+/* The header for the bid spread. Kept on one line — it was wrapping to
+   "Bids / ahead of / 2nd" and reading as three separate columns. */
+.landtable th.bidsh{white-space:nowrap;text-align:right}
+.landtable th.bidsh i{font-style:normal;font-weight:400;opacity:.75}
+.landtable tr.openable{cursor:pointer}
+.landtable tr.openable:hover{background:var(--sunk)}
+/* Below the table's own width the wrapper scrolls sideways rather than the
+   page — .tablewrap already does that, and the columns keep their shape. */

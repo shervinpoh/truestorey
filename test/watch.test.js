@@ -191,3 +191,16 @@ test('nothing collects an address unless it can actually be used', () => {
   assert.match(src('components/RecordPage.jsx'), /hdb && canWatch &&/);
   assert.match(src('app/hdb/[town]/[block]/page.jsx'), /canWatch=\{mailConfigured\(\)\}/);
 });
+
+/* The empty-state line is gated on a term having been ANSWERED, and the guard
+ * has to check the term is non-empty as well as equal. Clearing the box resets
+ * `answered` to '' while q.trim() is also '' — the two matched, and "Nothing
+ * matching that" appeared under an empty search field on the homepage. */
+test('the search says nothing when there is nothing typed', () => {
+  const s = src('components/Search.jsx');
+  // The guard immediately before the empty-state paragraph.
+  const m = /\{\s*(answered[^\n]*?)\s*&&\s*\(\s*\n\s*<p className="hint"[^>]*>Nothing matching/.exec(s);
+  assert.ok(m, 'could not find the empty-state condition');
+  assert.match(m[1], /^answered\s*&&\s*answered === q\.trim\(\)/,
+    'the condition must require a NON-EMPTY answered term, not just an equal one');
+});
