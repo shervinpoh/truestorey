@@ -1,179 +1,242 @@
 # What to build next
 
-Rewritten 29 Aug 2026, after the site went live. `CLAUDE.md` has the rules and
-the architecture — read that first, it is not optional. This file is only the
-ordered backlog.
+Rewritten 1 Sep 2026, at the handover to Codex. `CLAUDE.md` has the rules and
+the architecture — **read that first, it is not optional.** This file is only
+the ordered backlog.
 
-**State:** live at https://truestorey.vercel.app · 132 tests · three npm
+**State:** live at https://truestorey.vercel.app · **277 tests** · three npm
 dependencies · Blindspot scoring out of 10 with all four checks running · data
-refreshing itself daily.
+refreshing itself daily via `.github/workflows/refresh-data.yml`.
 
 ---
 
-## What changed on 28–29 Aug, so you do not redo it
+## Read this before you touch the design
 
-The previous version of this file opened with "run `npx next build`, it has
-never been done". That is finished, along with most of what followed it. In
-order:
+An earlier version of this file told you to keep "no rounded corners anywhere",
+"the figure larger than the heading", Schibsted + DM Mono, and bright teal
+`#00C2CC`. **Those four rules were retired on purpose on 29 Aug 2026** and
+`CLAUDE.md` now says so. Square shapes on pure white read as a spreadsheet
+rather than as authority.
 
-- **Production build, deploy, custom Vercel team.** Live. `vercel.json` pins the
-  build command to `next build` — the default `npm run build` runs three live
-  data.gov.sg ingests first, so a deploy would fail whenever their API is slow.
-- **Serverless bundle 155MB → 89MB.** `outputFileTracingExcludes` in
-  `next.config.mjs`. Raw ingest downloads must be added there as well as to
-  `.gitignore` — the tracer reads the disk, not the index. That has been
-  forgotten twice.
-- **`/api/track` moved to Supabase.** The local file was silently losing every
-  event on serverless. `scripts/supabase-events.sql` creates the table; RLS is
-  on with no policies, so only the service role can touch it.
-- **`Proceeds.jsx` reconciled with `lib/calc/proceeds.js`.** It had its own copy
-  of the maths, floored at zero, telling a seller in negative equity they walk
-  away with nothing rather than owing S$197k.
-- **Blindspot is out of 10.** `ingest:zoning` and `ingest:planning` written;
-  GLS transcribed by hand. Rubric v2 moved the `view` check from what the
-  Master Plan permits to what URA has actually approved.
-- **Daily data refresh.** `.github/workflows/refresh-data.yml` runs `npm run
-  sync`, commits `data/`, and the commit triggers the deploy.
-- **Keys live.** Perplexity, Anthropic, Gemini, Supabase, OneMap — all verified
-  against production, not just accepted. `npm run preflight` re-checks them.
-
-Git log is the detailed record. Every commit says what broke and how it was
-found.
+The live system is warm ground (`--paper #F6F5F2`), two teals (`--acc #164F52`
+is interface, `--acc-lit #58BCC3` is data that is live or selected and nothing
+else), radius as a decision (`--r1 3px` control, `--r2 8px` panel), Archivo
+semi-condensed headings, Source Sans 3 body, IBM Plex Mono figures. Read rules
+1–5 under "Styling" in `CLAUDE.md`. Do not reinstate the old ones by reflex —
+that instruction is why this warning is at the top of the file.
 
 ---
 
-## 0 · Waiting on something, not blocked
+## 0 · Blocked on Shervin, not on you
+
+Nothing below can be finished by an agent. Ordered by what unblocks the most.
+
+1. **A domain.** Drives three things: a Resend account with a verified sending
+   domain, `NEXT_PUBLIC_SITE_URL` (which today is the Vercel URL and is correct
+   only by luck — it drives `robots.txt` and the sitemap), and the OG cards.
+2. **`RESEND_API_KEY` and `DIGEST_FROM`** in Vercel and `.env.local`. These are
+   the only two environment variables referenced in code and absent from
+   `.env.local`. Until they exist, `lib/watch.js` refuses every subscription
+   and the form does not render — deliberately. See "A consent tick promised
+   something nothing delivered" in `CLAUDE.md`.
+3. **`NEXT_PUBLIC_WA_CHANNEL` in Vercel.** Set locally, not in production.
+4. **DNC check on 219 existing CRM contacts.** `DNC Checked` is never
+   auto-filled — rule 5.
+5. **A decision: does a phone number ever get used?** Consent has been
+   email-only since 24 Aug 2026 and the mobile field was deleted rather than
+   reworded. Reintroducing one is a policy decision, not a UI one.
+6. **19 of 27 GLS sites need unit yields.** URA publishes them in each site's
+   own launch press release. Add `units` plus a `unitsSource` URL to
+   `data/sources/gls-programme.json`, then `npm run ingest:gls`. **Never
+   estimate one from site area and plot ratio.**
+7. **Three GLS sites will not geocode** — Berlayar Drive, Berlayar Close,
+   Marina Gardens Crescent. Confirmed absent from OneMap with and without a
+   token; they are new roads. Only a properly sourced coordinate goes in.
+8. **A URA URL for district locality names**, so the map can label a district
+   consistently instead of mixing "East Coast" with "District 15".
+9. **Make.com HTTP module** posting to `/api/webhook/article` with the Bearer
+   secret from `.env.local`. Payload shape is in `SETUP.md` §4c. The endpoint is
+   verified against production; nothing depends on it.
+10. **Photos into `photos-in/` with a manifest**, then `npm run photos`.
+
+---
+
+## 1 · Waiting on someone else's server
 
 **SORA is missing.** MAS has been under maintenance since 28 Aug;
-`eservices.mas.gov.sg` and `www.mas.gov.sg` both serve a maintenance page.
-`/market` omits the rates block until it returns and the scheduled workflow
-will collect it on the first morning it does. Nothing to do.
+`eservices.mas.gov.sg` and `www.mas.gov.sg` both served a maintenance page when
+last checked. `ingest:sora` exits 0 on purpose in that case, and `sync`
+re-checks file age afterwards so it can no longer report a refresh that did not
+happen. `/market` omits the rates block until it returns. Nothing to do.
 
-**19 of 27 GLS sites have no unit yield.** URA publishes yields in each site's
-own launch press release, not on the schedule page, so a site that has not
-launched has no figure. Add them as launches happen — `units` plus a
-`unitsSource` URL in `data/sources/gls-programme.json`, then `npm run
-ingest:gls`. Never estimate one from site area and plot ratio.
-
-**Three GLS sites will not geocode** — Berlayar Drive, Berlayar Close, Marina
-Gardens Crescent. Confirmed absent from OneMap with and without a token; they
-are new roads. Only a properly sourced coordinate should go in by hand.
-
-**The OneMap token expires every three days.** `forever: false` in the JWT.
-Unauthenticated search still works today, so expiry degrades quietly rather
-than breaking — but the geocoder warns when a token is set and refused. Check
+**The OneMap token expires every three days** (`forever: false` in the JWT).
+Unauthenticated search still works, so expiry degrades quietly. Worth checking
 whether OneMap offers a long-lived token.
 
 ---
 
-## 1 · The TRM gaps still open
+## 2 · What was built 29 Aug – 1 Sep, so you do not redo it
 
-From the teardown, in its order. Four remain, all buildable from data held.
+Git log is the detailed record; every commit says what broke and how it was
+found. In brief:
+
+- **The calculators cross all four property types.** `HDB`, `EC_DEVELOPER`,
+  `EC_RESALE`, `PRIVATE` — MSR applies to the first two, TDSR to all, and the
+  tenure cap differs. An EC sent as HDB was assessed over 25 years instead of
+  30 and understated the loan by ~S$54,000.
+- **`/progressive`** — the nine statutory BUC stages, quoted from the Housing
+  Developers Rules, with stamping deadlines and penalties.
+- **`/lease`** — SLA's leasehold relativity table, all 99 rows, from
+  `data/sources/leasehold-table.json`. No "when to exit" advice; that half of
+  the brief was refused.
+- **`/land`** — 441 URA awarded sites since 1993 plus 216 HDB sites, with every
+  losing bid where HDB published it. **No breakeven ladder** — see the refusal
+  note at the top of `components/LandView.jsx`.
+- **The land → project trail** — `lib/land.js` joins HDB's tender tables to 190
+  records. A condo or EC page now opens the tender that created it.
+- **`/cost`** — `lib/calc/ledger.js`. What a purchase costs before the property
+  does anything, and the price a sale must clear to return the reader's cash.
+- **`/compare`** — gap 7 from the TRM teardown, done.
+- **A back button on every page** — `components/BackLink.jsx`, `lib/nav.js`.
+  It goes UP, not back; the reasoning is in the file.
+- **The neighbourhood tracker is scoped to Singapore in `lib/scope.js`**,
+  before the model is called. A prompt rule alone did not hold.
+- **`lib/watch.js`, `lib/digest.js`, `scripts/send-digest.mjs`** — the block
+  digest the consent tick had been promising since 24 Aug with nothing behind
+  it.
+- **Contrast measured rather than eyeballed** — `test/contrast.test.js` reads
+  the tokens out of `globals.css`. `--edge` exists because every control border
+  was at 1.21:1 against a 3:1 requirement.
+- **The sitemap is driven from `lib/nav.js`.** It was missing every calculator
+  on the site. Adding a tool to the nav now adds it to the sitemap.
+
+---
+
+## 3 · The TRM gaps still open
+
+Three remain, all buildable from data already held.
 
 | | Tool | Notes |
 |---|---|---|
-| 5 | **Price history and realised returns** | Repeat sales of the same unit. `data/private.json` has project, area, floorRange and contractDate — enough to pair them. **See the note on PropNex below before building this.** |
+| 5 | **Price history and realised returns** | Repeat sales of the same unit. `data/private.json` has project, area, floorRange and contractDate — enough to pair them. **Read the PropNex note below first.** |
 | 6 | **Quantum by year** | What buyers actually paid, by region, size and year. A pivot over data already held. |
-| 7 | **Compare** | Two blocks side by side. Every field already renders on a record page — a layout, not a feature. |
-| 8 | **URA Private Residential Property Index** | Only HDB's index is published today, so anyone comparing a flat to a condo has to leave the site. |
+| 8 | **URA Private Residential Property Index** | Only HDB's index is published on the site today, so anyone comparing a flat to a condo has to leave. `data/hdb-index.json` is the shape to follow. |
 
-Refuse regardless, unchanged: Valuation, Project Scorecard, New Projects/BUC,
-Commercial, Watchlist.
+Refuse regardless, unchanged: Valuation, Project Scorecard, Commercial,
+Watchlist.
 
-### What PropNex's Investment Suite does, and why most of it is off limits
+### Why most of PropNex's Investment Suite is off limits
 
-Reviewed 28 Aug. Their *Profitability* tab is gap 5, already built: matched
-repeat sales with purchase price, sale price and profit per transaction. Their
-*Tower View* is a stack plan showing every unit by number with the current
-owner's purchase price, an estimated valuation and estimated profit.
-
-Its footer reads **"for your personal use only"**. Unit-number-level purchase
-prices are REALIS-shaped, which rule 1 forbids outright, and a single Est. Val
-per unit breaks rule 2 independently. Useful to look at as a licensed agent.
-Not republishable here.
+Their *Tower View* is a stack plan showing every unit by number with the
+owner's purchase price, an estimated valuation and an estimated profit. Its
+footer reads "for your personal use only". Unit-number-level purchase prices
+are REALIS-shaped, which **rule 1 forbids outright**, and a single Est. Val per
+unit breaks **rule 2** independently.
 
 So gap 5 is worth building only in a form that does NOT identify a unit —
-matched on project, size band and date, reported as a range. If it needs a unit
-number to work, it is the wrong feature.
-
-**What was worth taking, and was taken:** their Planning Decisions tab, which
-led to the URA Data Service `Planning_Decision` endpoint now behind the `view`
-check. Public data, no licence problem, better than the zoning it replaced.
+matched on project, size band and date, reported as a range. **If it needs a
+unit number to work, it is the wrong feature.**
 
 ---
 
-## 2 · Known problems
+## 4 · The two live briefs, and what survives of them
 
-- **Share cards are SVG.** WhatsApp will not preview SVG, which is most of the
-  point of having them. Needs a PNG path — `sharp` at build time or
-  `@vercel/og`.
-- **`data/sources/rail-future.json` is empty.** Future MRT needs LTA's own
-  announcements. Do not populate opening years from memory (rule 13).
+Both came from other models. Each had a buildable half and a refusable half,
+and the refusals are the useful part of the record.
+
+**"How this land became this project"** (ChatGPT) — the strongest idea either
+produced, and the reason `lib/land.js` exists. **Half of it is now built:** the
+tender, the bids and the award render on the record page. What is NOT built is
+the second half — a restrained timeline down the page from tender to today's
+filed range, and the reverse view on `/land` showing the trail forward. Worth
+finishing.
+
+**"Capital Ledger / Opportunity Cost Engine"** (Gemini) — the honest core
+shipped as `/cost`. **Three things in it were refused and should stay refused:**
+
+- Scoring the purchase against historical STI, S&P 500 and gold. None of those
+  series is in the repo, each needs sourcing and licensing, and ranking a home
+  against equities is investment advice.
+- Historical BSD/ABSD tiers by purchase year. `lib/calc/constants.js` holds
+  current rates only. Backdating them is real work and needs IRAS as a source,
+  not memory.
+- `.tsx` and `recharts`. Three npm dependencies is the architecture.
+
+Also still refused, from earlier briefs: the GLS **breakeven ladder** (two of
+three inputs published by nobody, and it projects a launch price for a
+development that does not exist yet), the **floor-plan badge library** (a model
+assigning a verdict, plus developers' copyright), and the lease **"inflection
+point / when to exit"** (sell advice built on an invented 2% line).
+
+### Other ChatGPT suggestions not yet started
+
+"What changed since your last visit", an evidence-band record redesign, an EC
+eligibility decision tree, a school explorer. None assessed in depth.
+
+---
+
+## 5 · Known problems
+
+- **Share cards are SVG.** `app/og/route.js` returns `image/svg+xml`. WhatsApp
+  will not preview SVG, which is most of the point of having them. Needs a PNG
+  path — `sharp` at build time, or `@vercel/og`, which would be a fourth
+  dependency and therefore a decision.
+- **`data/sources/rail-future.json` is an empty array.** Future MRT needs LTA's
+  own announcements. **Do not populate opening years from memory** — rule 13.
+- **3 of 219 HDB land rows will not parse.** Printed on every run of
+  `npm run parse:hdb-sites`. Their column layouts differ from all three known
+  schemas.
+- **The HDB half of `/land` cannot auto-refresh.** HDB publishes those tables as
+  PDFs behind a page that builds its links client-side, with no stable download
+  URL and nothing on data.gov.sg. They are dropped into `land-in/` by hand and
+  parsed. URA's half does refresh.
 - **The deck scripts hardcode rates.** `build-scripts/deck1–4.py` should import
-  from `lib/calc/constants.js`. `test/guides.test.js` already catches drift
-  between the guides and the calculators; the decks are the gap. *Shervin is
-  amending these, 29 Aug.*
-- **The deck palette does not match the site.** Dark teal-green, gold, cream,
-  DM Serif against the site's white and teal. *Same, in progress.*
-- **`NEXT_PUBLIC_SITE_URL` is the Vercel URL.** Correct today by luck. It drives
-  `robots.txt` and the sitemap, so it must change when a real domain is
-  attached.
+  from `lib/calc/constants.js`. `test/guides.test.js` catches drift between the
+  guides and the calculators; the decks are the gap.
+- **The deck palette does not match the site** — and now matches a palette that
+  no longer exists either. See the warning at the top of this file.
 
 ---
 
-## 3 · Design — the largest thing outstanding
+## 6 · Design
 
-The interaction layer is done: a state layer with two timing tokens across
-every interactive surface, a 1px press, a slider thumb that grows, and the
-count-up fixed twice. The **visual** work never happened, because a correctness
-bug surfaced every time it was started.
+The interaction layer is done. The **visual** work on individual pages is the
+largest thing outstanding, in this order:
 
-There are none left on the list, so this is next.
-
-- **`/plan` first.** Highest traffic, weakest layout — twelve identical number
-  inputs stacked in a column. It is the site's most-used calculator and it
-  looks like a tax form.
+- **`/plan` first.** Highest traffic, weakest layout — a column of near-identical
+  number inputs. It is the site's most-used calculator and it looks like a tax
+  form. `/cost` and `/progressive` share its `.planlayout` markup, so whatever
+  is done there lands on three pages at once.
 - **Record pages** next, then the homepage.
-- Rules 1–4 in `app/globals.css` are not up for negotiation, and they are the
-  differentiation: one accent used loudly, no rounded corners anywhere, no
-  serif, the figure larger than the heading above it. `tabular-nums` is
-  deliberately rejected — Schibsted's tabular comma sets "S$1 , 420 , 000".
+- **Splitting the Tools menu.** Shervin has agreed it should happen and asked
+  for it to wait — more tools are coming first. The dropdown already scrolls;
+  the problem is length, not overflow.
+
+Rules 1–5 under "Styling" in `CLAUDE.md` are the differentiation and are not up
+for negotiation.
 
 ---
 
-## 4 · Editorial
+## 7 · Editorial
 
-The pipeline works end to end and has published one article. `npm run note`
-scaffolds a dated entry prefilled with what moved in the data.
-
-Make.com is not set up. It needs one HTTP module posting to
-`/api/webhook/article` with the Bearer secret from `.env.local`; the payload
-shape is in `SETUP.md` §4c. The endpoint is verified against production.
-Nothing depends on it — articles can be posted by hand.
-
-`/studio` is where volume arrives once it is running. The approval step is the
-feature; do not add a way to skip it.
-
----
-
-## Blocked on other people
-
-- Domain not registered
-- DNC check on 219 existing CRM contacts — `DNC Checked` is never auto-filled
-
-Huttons KEO approval came through on 28 Aug.
+The pipeline works end to end. `npm run note` scaffolds a dated entry prefilled
+with what moved in the data. `/studio` is where volume arrives once Make.com is
+running — **the approval step is the feature; do not add a way to skip it.**
 
 ---
 
 ## How to work in this repo
 
-- `npm test` before and after. 132 passing. A red test is a real finding.
+- `npm test` before and after. **277 passing.** A red test is a real finding.
 - `npm run preflight` before assuming a key works. It makes a real call to each
-  provider and only a 200 counts — it was written after a dead Gemini model
-  reported "Everything wired" over a feature that was 404ing on every request.
+  provider and only a 200 counts.
+- **Never run `next build` while a dev or production server is up.** They share
+  `.next` and the mix corrupts it. The process renames itself to `next-server`,
+  so `pgrep "next dev"` will not find it — check the port. This has now caught
+  three people, one of them twice.
+- A raw ingest download goes in `outputFileTracingExcludes` **as well as**
+  `.gitignore`. The tracer reads the disk, not the index. Forgotten twice.
 - Every new derivation gets a test that describes a failure someone could
-  actually cause. Several exist because the bug already happened.
-- Degrade, never break: a missing key or dataset disables one feature and says
-  so on the page.
-- Say what could not be measured. Silent truncation reads as completeness.
-- If a feature needs a model to produce a *number*, the feature is wrong.
+  actually cause. Several here exist because the bug already happened.
+- Degrade, never break. Say what could not be measured.
+- **If a feature needs a model to produce a number, the feature is wrong.**
