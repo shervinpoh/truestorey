@@ -84,6 +84,18 @@ test('the homepage is a deliberate route into the tools, not a second index', as
     'the homepage no longer uses the curated tool set from the shared nav');
 });
 
+test('a property record carries its identity into Blindspot, not an invented asking price', async () => {
+  const { readFileSync } = await import('node:fs');
+  const record = readFileSync(new URL('../components/RecordPage.jsx', import.meta.url), 'utf8');
+  const blindspot = readFileSync(new URL('../components/BlindspotReport.jsx', import.meta.url), 'utf8');
+  assert.match(record, /\/blindspot\?from=\$\{encodeURIComponent\(href\)\}/,
+    'record pages no longer link into Blindspot with their property identity');
+  assert.match(blindspot, /\/api\/record\?href=\$\{encodeURIComponent\(from\)\}/,
+    'Blindspot no longer resolves the public record carried in its URL');
+  assert.doesNotMatch(record, /\/blindspot\?[^`]*price=/,
+    'a record median is being passed to Blindspot as though it were an asking price');
+});
+
 test('the sitemap is driven by the nav rather than a second list', async () => {
   const { readFileSync } = await import('node:fs');
   const src = readFileSync(new URL('../app/sitemap.js', import.meta.url), 'utf8');

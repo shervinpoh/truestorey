@@ -166,6 +166,9 @@ function Fork({ price, planHref, href, hdb, hasFloor, hasNear }) {
             <li><a href={planHref}>
               <b>What it costs on the day, at ${price.toLocaleString('en-SG')}</b>
               <span>Loan, downpayment, the cash CPF cannot cover, and both stamp duties</span></a></li>
+            <li><a href={`/blindspot?from=${encodeURIComponent(href)}`}>
+              <b>Run four checks before you commit</b>
+              <span>The asking price, nearby MOP supply, land coming, and what could be built next door</span></a></li>
             {hasFloor && <li><a href="#floor">
               <b>What a higher floor is worth here</b>
               <span>Measured within this building, not across the country</span></a></li>}

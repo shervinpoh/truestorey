@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { f, num } from './fmt.js';
 import { titleCase } from '../lib/name.js';
@@ -23,15 +24,44 @@ import MoneyInput from './MoneyInput.jsx';
  * The paragraph at the top is written by a model. The number never is.
  */
 export default function BlindspotReport() {
+  const params = useSearchParams();
+  const from = params.get('from') || '';
   const [q, setQ] = useState('');
   const [hits, setHits] = useState([]);
   const [picked, setPicked] = useState(null);
+  const [prefill, setPrefill] = useState(from ? 'loading' : 'idle');
   const [price, setPrice] = useState('');
   const [area, setArea] = useState('');
   const [state, setState] = useState('idle');
   const [report, setReport] = useState(null);
   const [error, setError] = useState('');
   const box = useRef(null);
+
+  // A record page already knows the property. Make the reader supply only the
+  // two facts it cannot know: the actual asking price and this unit's area.
+  // The record itself is fetched from its public href rather than copied into
+  // the query string. The median is deliberately NOT carried across — putting
+  // it into a field labelled "what it is being asked for" would turn a filed
+  // middle into a seller's claim that nobody made.
+  useEffect(() => {
+    if (!from) { setPrefill('idle'); return; }
+    const ctl = new AbortController();
+    setPrefill('loading');
+    fetch(`/api/record?href=${encodeURIComponent(from)}`, { signal: ctl.signal })
+      .then(r => (r.ok ? r.json() : Promise.reject(new Error('no record'))))
+      .then(rec => {
+        setPicked({
+          href: rec.href,
+          label: rec.label,
+          n: rec.n,
+          sub: rec.kind === 'HDB' ? titleCase(rec.town) : `District ${rec.district}`,
+        });
+        setQ('');
+        setPrefill('done');
+      })
+      .catch(e => { if (e.name !== 'AbortError') setPrefill('failed'); });
+    return () => ctl.abort();
+  }, [from]);
 
   const term = q.trim();
   useEffect(() => {
@@ -80,12 +110,18 @@ export default function BlindspotReport() {
           <label className="lab" htmlFor="bs-q" style={{ display: 'block', marginBottom: 6 }}>
             The block or project
           </label>
-          {picked ? (
+          {prefill === 'loading' ? (
+            <div className="mapfocus" style={{ marginTop: 0 }}>
+              <b>Loading the property…</b>
+              <span>Carrying the record into these checks</span>
+            </div>
+          ) : picked ? (
             <div className="mapfocus" style={{ marginTop: 0 }}>
               <b>{titleCase(picked.label)}</b>
               <span className="mono">{picked.sub} · {num(picked.n)} filed</span>
-              <button type="button" className="linkish" style={{ marginLeft: 'auto' }}
-                onClick={() => { setPicked(null); setQ(''); setReport(null); setState('idle'); }}>
+              {from && <Link href={from}>← Back to the property</Link>}
+              <button type="button" className="linkish" style={{ marginLeft: from ? 0 : 'auto' }}
+                onClick={() => { setPicked(null); setQ(''); setReport(null); setState('idle'); setPrefill('idle'); }}>
                 Change
               </button>
             </div>
@@ -93,6 +129,11 @@ export default function BlindspotReport() {
             <>
               <input id="bs-q" value={q} onChange={e => setQ(e.target.value)} autoComplete="off"
                 placeholder="Blk 275A Bishan St 24, or a project name" />
+              {prefill === 'failed' && (
+                <p className="hint" style={{ margin: '8px 0 0' }}>
+                  The property could not be carried across. Search for it here instead.
+                </p>
+              )}
               {hits.length > 0 && (
                 <ul className="idx" style={{ marginTop: 8 }}>
                   {hits.map(h => (
@@ -131,7 +172,7 @@ export default function BlindspotReport() {
         <button type="submit" className="cta" disabled={!ready || state === 'loading'}>
           {state === 'loading' ? 'Checking…' : 'Run the checks'}
         </button>
-        {!picked && (
+        {!picked && prefill !== 'loading' && (
           <p className="hint" style={{ marginTop: 12 }}>
             Start by naming a block or project above — the checks are all measured
             against what has actually been filed at that address.

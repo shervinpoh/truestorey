@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import Masthead from '../../components/Masthead.jsx';
 import BlindspotReport from '../../components/BlindspotReport.jsx';
@@ -17,7 +18,9 @@ export default function Page() {
         sub="Four things worth checking before you commit, counted against filed transactions. Free, no sign-up, and the rubric is printed below so you can check the arithmetic." />
 
       <section className="pane">
-        <BlindspotReport />
+        <Suspense fallback={<p className="hint">Loading the checks…</p>}>
+          <BlindspotReport />
+        </Suspense>
       </section>
 
       <section className="pane">
