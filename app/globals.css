@@ -928,15 +928,14 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 .bandtable td:last-child{text-align:right;color:var(--mute);white-space:nowrap}
 
 /* ── the planner ────────────────────────────────────────────────────────── */
-.planform{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:18px}
+.planform{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}
 .planform label{display:block}
 .planform label span{display:block;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;
  letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-bottom:5px}
-.planform input,.planform select{padding:9px 11px;font-size:14px}
+.planform input,.planform select{min-height:44px;padding:9px 11px;font-size:14px}
 /* Price is the field people move rather than state, so it gets a slider under
    its box and the width to make the slider worth dragging. */
 .planform .wide2{grid-column:span 2}
-@media(max-width:480px){.planform .wide2{grid-column:span 1}}
 .planform input[type=range]{margin:8px 0 0;padding:0}
 
 /* ── towns within the ceiling ───────────────────────────────────────────────
@@ -973,9 +972,15 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
    produce them. */
 .planlayout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:0 34px;align-items:start;
  margin-top:18px}
-.plangroup{border:0;border-top:1px solid var(--line);margin:0;padding:14px 0 4px;min-width:0}
+.planinputs{counter-reset:plan-stage}
+.plangroup{counter-increment:plan-stage;border:0;border-top:1px solid var(--line);margin:0;
+ padding:20px 0 10px;min-width:0}
 .plangroup:first-child{border-top:0;padding-top:0}
-.plangroup > legend{padding:0;margin-bottom:2px}
+.plangroup > legend{width:100%;padding:0;margin-bottom:4px;font-family:"Archivo",sans-serif;
+ font-size:16px;font-weight:650;font-variation-settings:"wdth" 88;letter-spacing:-.025em;
+ text-transform:none;color:var(--ink)}
+.plangroup > legend:before{content:"0" counter(plan-stage) " / ";font-family:"IBM Plex Mono",ui-monospace,monospace;
+ font-size:10px;font-weight:500;letter-spacing:.09em;color:var(--acc-ink);vertical-align:2px}
 .plangroup .planform{margin-top:10px}
 .planfold{border-top:1px solid var(--line);padding-bottom:14px}
 .planfold summary{cursor:pointer;list-style:none;padding:2px 0}
@@ -996,12 +1001,18 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 /* The sticky bottom bar is the small-screen form of the same idea. */
 .planbar{display:none}
 @media(max-width:900px){
+ html{scroll-padding-bottom:76px}
  .planlayout{grid-template-columns:1fr;gap:0}
  .plansummary{position:static;margin-top:20px}
+ .planform input,.planform select,.seg button{scroll-margin-bottom:76px}
  .planbar{display:flex;position:sticky;bottom:0;z-index:20;gap:18px;justify-content:space-between;
   background:var(--paper);border-top:1px solid var(--ink);padding:9px 0;margin-top:18px}
  .planbar i{font-style:normal;display:block}
  .planbar b{font-size:15px;font-weight:700;letter-spacing:-.02em}
+}
+@media(max-width:359px){
+ .planform{grid-template-columns:1fr}
+ .planform .wide2{grid-column:span 1}
 }
 /* The chain, one step per line. Indented continuation rows read as parts of
    the line above them rather than as separate answers. */
