@@ -4,7 +4,7 @@ Rewritten 1 Sep 2026, at the handover to Codex. `CLAUDE.md` has the rules and
 the architecture — **read that first, it is not optional.** This file is only
 the ordered backlog.
 
-**State:** live at https://truestorey.vercel.app · **280 tests** · three npm
+**State:** live at https://truestorey.vercel.app · **282 tests** · three npm
 dependencies · Blindspot scoring out of 10 with all four checks running · data
 refreshing itself daily via `.github/workflows/refresh-data.yml`.
 
@@ -95,6 +95,10 @@ found. In brief:
   actual ask and unit area; the record median is deliberately not passed as an
   asking price. There is a route back to the property. Commits `42a08af`,
   `b5fde4f`, `69536b1`, `97034ed`.
+- **Preflight reports a request with no response.** The Supabase events probe
+  used to call `.slice()` on an absent body and crash the whole diagnostic on
+  a DNS failure. It now names the unreachable integration. A live unsandboxed
+  run on 1 Sep returned `ok` for all nine checks. Commit `151ea68`.
 
 - **The calculators cross all four property types.** `HDB`, `EC_DEVELOPER`,
   `EC_RESALE`, `PRIVATE` — MSR applies to the first two, TDSR to all, and the
