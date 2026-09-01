@@ -144,6 +144,18 @@ export default function Ledger() {
               {' '}CPF per month is the part of the instalment your Ordinary Account pays; the rest
               comes out of your pocket and is counted as cash.
             </p>
+            {/* A control must not use a different number from the one typed
+                into it. The excess is real money — it just never enters the
+                property, so it is not in this ledger. */}
+            {r.cpfEntry.clamped && (
+              <p className="hint warnline" style={{ margin: '8px 0 0' }}>
+                The instalment is only <b className="mono">{f(r.holding.instalment)}</b>, so that is
+                all your CPF can pay towards it. The remaining{' '}
+                <b className="mono">{f(r.cpfEntry.wanted - r.cpfEntry.used)}</b> a month stays in
+                your Ordinary Account earning the same {(r.cpf.rate * 100).toFixed(1)}% — it never
+                goes into the property, so it is not counted below.
+              </p>
+            )}
           </fieldset>
 
           <fieldset className="plangroup">
@@ -161,6 +173,14 @@ export default function Ledger() {
               is your figure and not a market average. GST at {(r.exit.gstRate * 100).toFixed(0)}% is
               added to it.
             </p>
+            {r.holding.repaidInYear && (
+              <p className="hint warnline" style={{ margin: '8px 0 0' }}>
+                The loan is repaid in year <b className="mono">{r.holding.repaidInYear}</b>, so
+                nothing more goes in after that. The CPF you had already used stays used, and its
+                accrued interest keeps running until the day you sell — which is why that figure
+                carries on climbing while the principal does not.
+              </p>
+            )}
           </fieldset>
         </div>
 
@@ -221,7 +241,9 @@ export default function Ledger() {
                 : (r.exit.ssd.regime ? 'None' : 'Not applicable')}</td></tr>
 
             <tr className="grp"><th colSpan={2} scope="colgroup">Comes back, but to CPF and not to you</th></tr>
-            <tr><td>CPF principal used</td><td className="r mono">{f(r.cpf.principal)}</td></tr>
+            <tr><td>CPF principal used{r.cpfEntry.used
+              ? ` — ${f(r.cpfEntry.used)} a month while the loan ran` : ''}</td>
+              <td className="r mono">{f(r.cpf.principal)}</td></tr>
             <tr><td>Accrued interest at {(r.cpf.rate * 100).toFixed(1)}%</td>
               <td className="r mono">{f(r.cpf.interest)}</td></tr>
             <tr className="sub"><td>Refunded to your Ordinary Account</td><td className="r mono">{f(r.cpf.total)}</td></tr>
@@ -229,7 +251,8 @@ export default function Ledger() {
             <tr className="grp"><th colSpan={2} scope="colgroup">Still owed</th></tr>
             <tr><td>Outstanding loan after {num(r.yearsHeld)} year{r.yearsHeld === 1 ? '' : 's'}</td>
               <td className="r mono">{f(r.holding.outstanding)}</td></tr>
-            <tr><td>Monthly instalment — {f(r.cash.perMonth)} of it cash</td>
+            <tr><td>Monthly instalment — {f(r.cash.perMonth)} of it cash
+              {r.holding.repaidInYear ? `, paid for ${r.holding.loanMonths / 12} years` : ''}</td>
               <td className="r mono">{f(r.holding.instalment)}</td></tr>
           </tbody>
         </table>

@@ -142,3 +142,51 @@ test('an outright purchase has no instalment and no monthly CPF', () => {
   assert.equal(r.cpf.principal, 200_000);
   assert.ok(r.cpf.interest > 0);
 });
+
+/* ── money stops flowing when the loan does ────────────────────────────────── */
+
+const tenYear = { ...base, purchaseDate: '2000-06-01', loan: 900_000, loanYears: 10,
+  cashDown: 300_000, cpfDown: 400_000, cpfMonthly: 3_000 };
+
+test('nothing goes in after the loan is repaid, but interest keeps accruing', () => {
+  // A ten-year loan held for twenty-five went on drawing CPF and cash for
+  // fifteen years after the mortgage ended: S$2,135,200 of "cash in" on a
+  // S$1.6m purchase. The withdrawal stops; the interest against it does not,
+  // because the money stays out of the account until the day of sale.
+  const at10 = ledger({ ...tenYear, yearsHeld: 10 });
+  const at25 = ledger({ ...tenYear, yearsHeld: 25 });
+  assert.equal(at25.cpf.principal, at10.cpf.principal, 'CPF principal must freeze at repayment');
+  assert.equal(at25.cash.total, at10.cash.total, 'cash in must freeze at repayment');
+  assert.equal(at25.holding.interestPaid, at10.holding.interestPaid);
+  assert.ok(at25.cpf.interest > at10.cpf.interest * 1.5,
+    'accrued interest must keep running to the sale');
+});
+
+test('the year the loan ran out is reported, and only when it did', () => {
+  assert.equal(ledger({ ...tenYear, yearsHeld: 25 }).holding.repaidInYear, 10);
+  // Sold inside the tenure — nothing ran out, so nothing to report.
+  assert.equal(ledger({ ...tenYear, yearsHeld: 5 }).holding.repaidInYear, null);
+});
+
+test('CPF cannot pay more of an instalment than the instalment is, and says so', () => {
+  // The excess never enters the property — it stays in the Ordinary Account
+  // earning the same rate. Applying the clamp silently would leave a control
+  // describing a number the page did not use.
+  const r = ledger({ ...base, cpfMonthly: 9_000 });
+  assert.equal(r.cpfEntry.wanted, 9_000);
+  assert.equal(r.cpfEntry.used, r.holding.instalment);
+  assert.equal(r.cpfEntry.clamped, true);
+  assert.equal(r.cash.perMonth, 0);
+  // And it is not reported when it did not happen.
+  assert.equal(ledger({ ...base, cpfMonthly: 1_000 }).cpfEntry.clamped, false);
+});
+
+test('a stream that never stops is unchanged by the two-phase accrual', () => {
+  // Held entirely within the tenure, payingMonths === months, so the new form
+  // must give exactly what the single-phase one did.
+  const a = cpfAccrual({ lump: 50_000, monthly: 1_200, months: 120 });
+  const b = cpfAccrual({ lump: 50_000, monthly: 1_200, months: 120, payingMonths: 120 });
+  assert.equal(a.interest, b.interest);
+  assert.ok(Math.abs(futureValue({ lump: 10_000, monthly: 500, months: 60 })
+    - futureValue({ lump: 10_000, monthly: 500, months: 60, payingMonths: 60 })) < 1e-9);
+});

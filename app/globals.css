@@ -1456,3 +1456,9 @@ sup.cite a:hover{text-decoration:underline}
 .bul{margin:8px 0 0;padding-left:17px}
 .bul li{margin:0 0 7px;line-height:1.55}
 .bul li:last-child{margin-bottom:0}
+
+/* A hint that is correcting the reader's own input, or telling them a figure
+   has stopped moving. --warn is the "could not be measured" colour and this is
+   its neighbour: a number that is not what you asked for. Not red — nothing
+   here is wrong, it is just not what the control implied. */
+.warnline{border-left:2px solid var(--warn);padding-left:10px;color:var(--ink2)}
