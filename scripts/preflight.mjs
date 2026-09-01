@@ -32,6 +32,10 @@ const rows = [];
 const add = (state, name, detail) => rows.push({ state, name, detail });
 
 const mask = v => !v ? '' : `${v.slice(0, 8)}…(${v.length} chars)`;
+// A request that fails before a response has no body. Error reporting is the
+// last place that should assume one exists: preflight must distinguish
+// unreachable from rejected, not crash while trying to print either.
+const brief = body => (JSON.stringify(body) || 'no response body').slice(0, 120);
 
 /* ── env ─────────────────────────────────────────────────────────────────── */
 // Read .env.local ourselves rather than requiring --env-file, so the failure
@@ -78,7 +82,7 @@ async function supabase() {
       add(BAD, 'Supabase · articles',
         'project reachable but the table is missing — run scripts/supabase-schema.sql in the SQL editor');
     } else {
-      add(BAD, 'Supabase · articles', `${r.status} ${JSON.stringify(r.body).slice(0, 120)}`);
+      add(BAD, 'Supabase · articles', `${r.status} ${brief(r.body)}`);
     }
   } else {
     add(MISS, 'Supabase · secret key', 'SUPABASE_SECRET_KEY empty — the webhook cannot write');
@@ -91,13 +95,14 @@ async function supabase() {
   // so nothing else will ever tell you.
   if (secret) {
     const r = await call(secret, 'events?select=id&limit=1');
-    if (r.status === 200) add(OK, 'Supabase · events', 'table exists — analytics are being recorded');
+    if (r.status === 0) add(BAD, 'Supabase · events reachable', r.error);
+    else if (r.status === 200) add(OK, 'Supabase · events', 'table exists — analytics are being recorded');
     else if (r.status === 404 || /does not exist|schema cache/i.test(JSON.stringify(r.body))) {
       add(BAD, 'Supabase · events',
         'MISSING — every event is being dropped. /api/track still answers 204, so ' +
         'nothing else reports this. Run scripts/supabase-events.sql in the SQL editor');
     } else {
-      add(BAD, 'Supabase · events', `${r.status} ${JSON.stringify(r.body).slice(0, 120)}`);
+      add(BAD, 'Supabase · events', `${r.status} ${brief(r.body)}`);
     }
   }
 
