@@ -72,6 +72,18 @@ test('every tool in the nav is listed on /tools', async () => {
   }
 });
 
+test('the homepage is a deliberate route into the tools, not a second index', async () => {
+  const { NAV } = await import('../lib/nav.js');
+  const { readFileSync } = await import('node:fs');
+  const page = readFileSync(new URL('../app/page.jsx', import.meta.url), 'utf8');
+  const tools = NAV.find(g => /tool/i.test(g.group))?.items.filter(t => t.href !== '/tools') || [];
+  const featured = tools.filter(t => t.home);
+  assert.ok(featured.length >= 4 && featured.length <= 6,
+    `the homepage should feature four to six decisions, not ${featured.length} equal tools`);
+  assert.match(page, /allTools\.filter\(i => i\.home\)/,
+    'the homepage no longer uses the curated tool set from the shared nav');
+});
+
 test('the sitemap is driven by the nav rather than a second list', async () => {
   const { readFileSync } = await import('node:fs');
   const src = readFileSync(new URL('../app/sitemap.js', import.meta.url), 'utf8');

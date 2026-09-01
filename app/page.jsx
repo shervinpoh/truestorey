@@ -67,7 +67,14 @@ export default function Home() {
   const blocks = towns.reduce((a, t) => a + t.blockCount, 0);
   const refreshed = getIndex().hdb?.accessedAt;
 
-  const tools = NAV.find(g => g.group === 'Tools').items.filter(i => i.href !== '/tools');
+  const allTools = NAV.find(g => g.group === 'Tools').items.filter(i => i.href !== '/tools');
+  // The homepage is a route into the product, not a second /tools. Printing
+  // every tool here made eleven equal 118px cards before the archive and the
+  // rest of the writing, with no clue which six answer the common buyer and
+  // owner decisions. `home` is explicit in the shared nav so adding a tool
+  // never promotes it here by accident; every tool still lives in the menu,
+  // footer, sitemap and the full index.
+  const tools = allTools.filter(i => i.home);
   const num = n => n.toLocaleString('en-SG');
 
   return (
@@ -147,7 +154,7 @@ export default function Home() {
 
       <section className="pane">
         <div className="sh"><span>What people work out here</span>
-          <Link href="/tools">All tools →</Link></div>
+          <Link href="/tools">All {allTools.length} tools →</Link></div>
         <div className="deck">
           {tools.map(t => (
             <Link className="deckcard" key={t.href} href={t.href}>

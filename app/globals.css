@@ -823,7 +823,7 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 .islandprov{margin-top:14px;max-width:96ch}
 
 /* ── what people work out here ─────────────────────────────────────────── */
-.deck{display:grid;grid-template-columns:repeat(auto-fit,minmax(212px,1fr));gap:1px;
+.deck{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;
  background:var(--line);border:1px solid var(--line);margin-top:14px}
 .deckcard{background:var(--paper);padding:16px 17px 18px;text-decoration:none;color:var(--ink);
  display:block;min-height:118px}
@@ -831,6 +831,9 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 .deckcard .b{display:block;font-size:12.5px;color:var(--ink2);line-height:1.5;margin-top:7px}
 .deckcard:hover{background:var(--acc)}
 .deckcard:hover .n,.deckcard:hover .b{color:var(--on-acc)}
+@media(max-width:760px){.deck{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.deck{grid-template-columns:1fr}}
+@media(max-width:520px){.deckcard{min-height:96px;padding:14px 14px 15px}}
 
 /* ── homepage lede · the writing, below the data it is built on ────────── */
 .lede{display:grid;grid-template-columns:1.45fr 1fr;gap:0;border-top:2px solid var(--ink);
