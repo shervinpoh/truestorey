@@ -4,7 +4,7 @@ Rewritten 1 Sep 2026, at the handover to Codex. `CLAUDE.md` has the rules and
 the architecture — **read that first, it is not optional.** This file is only
 the ordered backlog.
 
-**State:** live at https://truestorey.vercel.app · **277 tests** · three npm
+**State:** live at https://truestorey.vercel.app · **280 tests** · three npm
 dependencies · Blindspot scoring out of 10 with all four checks running · data
 refreshing itself daily via `.github/workflows/refresh-data.yml`.
 
@@ -79,6 +79,22 @@ whether OneMap offers a long-lived token.
 
 Git log is the detailed record; every commit says what broke and how it was
 found. In brief:
+
+- **The 1 Sep running design/flow pass** — `/plan`, `/cost` and `/progressive`
+  now read as numbered decisions in a fixed two-column grid rather than an
+  auto-fit tax form; the same controls fall to one column only below 360px.
+  The mobile result strip now gives focused controls enough scroll clearance.
+- **Record navigation exists in the first frame.** It used to discover anchors
+  after hydration, insert 43px above the figures and hide its last links beyond
+  an invisible horizontal edge. The server-known section list renders at once,
+  with real previous/next controls on an overflowing phone row.
+- **The homepage is not a second `/tools`.** Six common buyer/owner decisions
+  are featured in a complete 3×2 grid; “All 11 tools” remains explicit and all
+  eleven still live in the menu, footer, sitemap and index.
+- **A record carries its identity into Blindspot.** The buyer supplies the
+  actual ask and unit area; the record median is deliberately not passed as an
+  asking price. There is a route back to the property. Commits `42a08af`,
+  `b5fde4f`, `69536b1`, `97034ed`.
 
 - **The calculators cross all four property types.** `HDB`, `EC_DEVELOPER`,
   `EC_RESALE`, `PRIVATE` — MSR applies to the first two, TDSR to all, and the
@@ -198,22 +214,73 @@ eligibility decision tree, a school explorer. None assessed in depth.
 
 ---
 
-## 6 · Design
+## 6 · Design and product flow
 
-The interaction layer is done. The **visual** work on individual pages is the
-largest thing outstanding, in this order:
+The first running pass is complete: shared calculators, record navigation,
+record → Blindspot and homepage hierarchy are covered above. Rules 1–5 under
+"Styling" in `CLAUDE.md` remain the differentiation and are not up for
+negotiation.
 
-- **`/plan` first.** Highest traffic, weakest layout — a column of near-identical
-  number inputs. It is the site's most-used calculator and it looks like a tax
-  form. `/cost` and `/progressive` share its `.planlayout` markup, so whatever
-  is done there lands on three pages at once.
-- **Record pages** next, then the homepage.
-- **Splitting the Tools menu.** Shervin has agreed it should happen and asked
-  for it to wait — more tools are coming first. The dropdown already scrolls;
-  the problem is length, not overflow.
+### Next design order
 
-Rules 1–5 under "Styling" in `CLAUDE.md` are the differentiation and are not up
-for negotiation.
+1. **`/tools` itself.** The first screen is four quick calculators in tabs and
+   the rest of the page is the full index. “What can I borrow” is narrower than
+   `/plan` but uniquely applies the variable-income haircut. Do not delete it
+   until that input exists in `/plan`; then merge the two rather than keeping
+   overlapping answers. The sell timeline, duty-only answer and amortisation
+   view remain distinct.
+2. **Measure tool use before deleting specialist features.** First-party
+   analytics records page views, search, records and the lead funnel, but not a
+   tool run. Add coarse allowlisted tool-use events (tool id only; no figures)
+   before judging `/floorplan` or `/neighbourhood` by taste.
+3. **Record hierarchy.** Keep the filed median dominant with the observed range
+   beside it. A median from transactions is not a point valuation, and
+   reversing the hierarchy because an outside report grouped the two together
+   would make the first answer harder to scan without making it more honest.
+4. **Splitting the Tools menu.** Shervin has agreed it should happen and asked
+   for it to wait — more tools are coming first. The dropdown already scrolls;
+   the problem is length, not overflow.
+
+### Feature audit decisions
+
+**Preserve:** `/plan`, `/cost`, `/progressive`, Blindspot's deterministic rubric,
+Compare, Tower View, rental yield cohorts, the land → project trail, the island
+hero, the record buyer/owner fork, source-and-period lines, and the visible
+missing-data states. These are the product; none should be replaced by a new
+dashboard shell or a generic AI answer.
+
+**Validate before building:**
+
+- “What changed since the last visit” is the strongest small repeat-use idea:
+  local browser state, no account, and a natural match for Block Watch. Check
+  actual repeat-record traffic and alert use first; a median changing because
+  a thin cohort changed must never read as a valuation update.
+- A school explorer is useful only with MOE ballot results and the school's
+  authoritative land boundary. A list of blocks by measured band is viable; a
+  shaded 1km circle around a registered point is not MOE's boundary and does
+  not ship.
+- A personal MOP timeline may align known dates, eligible-to-list supply and
+  today's proceeds. It must not project a future index or recalculate future
+  sale proceeds from one; that would turn a known-date tool into a forecast.
+- The three still-open TRM gaps in section 3 remain ahead of another general
+  tool because they complete comparisons the site already invites.
+
+**Refused after the audit:**
+
+- “Renovation-age negotiation anchor.” Renovation is not in the filed data;
+  inferring it from a building or flat's age would dress an assumption as a
+  comparable.
+- Shaded school-radius geometry from a single coordinate, future-index proceeds
+  on an MOP timeline, any launch-price projection from land cost, and any
+  valuation/ranking badge. The refusal reasons are rules 2, 6, 12 and 13, not
+  build complexity.
+
+The Perplexity report dated 31 Aug was useful for buyer jobs and competitor
+patterns, but its reference appendix is partly corrupted: several early
+citations resolve to unrelated Vercel and template pages, and it called the
+land → project trail and mobile record navigation missing after both existed.
+Use its ideas as hypotheses; re-check every source against a primary agency
+before a feature becomes a published claim.
 
 ---
 
