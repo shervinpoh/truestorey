@@ -45,7 +45,7 @@
    MOE 1km line. --warn is a third thing again: a dataset that could not be
    measured. Never let any of them drift into decoration. */
 :root{
- --paper:#F6F5F2; --card:#FFFFFF; --sunk:#EFEEE9;
+ --paper:#F6F5F2; --paper-clear:rgba(246,245,242,0); --card:#FFFFFF; --sunk:#EFEEE9;
  /* --mute is darker than it looks like it should be, on purpose: it carries
     .prov and .lab, which are the source-and-period lines CEA PG 02-11 s3.1
     requires, at 10px. The first draft was #7B837F — 3.57:1 on this ground,
@@ -96,7 +96,7 @@
    that is not what this is. Dark is still defined below but only applies when
    something explicitly sets data-theme="dark". Nothing does today. */
 :root[data-theme="dark"]{
- --paper:#0B0D0F; --card:#121517; --sunk:#15181B;
+ --paper:#0B0D0F; --paper-clear:rgba(11,13,15,0); --card:#121517; --sunk:#15181B;
  --ink:#ECEEF0; --ink2:#AFB6BD; --mute:#79828B;
  --line:#232830; --line2:#191D22;
  --acc:#22D3DD; --on-acc:#04262A; --acc-soft:#0A2E32; --acc-line:#22D3DD; --acc-ink:#5CE1E8;
@@ -504,6 +504,12 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--ink)
 .secnav a:first-child{padding-left:0}
 .secnav a:hover{color:var(--ink)}
 .secnav a[aria-current="true"]{color:var(--ink);font-weight:700;border-bottom-color:var(--acc)}
+.secnavmore{position:absolute;top:0;bottom:1px;z-index:2;width:44px;border:0;color:var(--ink);
+ cursor:pointer;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:17px;line-height:1}
+.secnavmore.prev{left:0;text-align:left;padding:0 0 0 2px;
+ background:linear-gradient(to right,var(--paper) 62%,var(--paper-clear))}
+.secnavmore.next{right:0;text-align:right;padding:0 2px 0 0;
+ background:linear-gradient(to left,var(--paper) 62%,var(--paper-clear))}
 @media(max-width:560px){.secnav a{padding:11px 12px 10px;font-size:12px}}
 
 /* ── waterfall ─────────────────────────────────────────────────────────── */

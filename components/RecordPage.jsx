@@ -60,6 +60,15 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
   // that scrolls nowhere is worse than one fewer option.
   const hasFloor = Boolean(storey);
   const hasNear = Boolean(near);
+  const sectionIds = [
+    'overview',
+    rec.series?.length > 1 && 'history',
+    rec.recent?.length > 0 && 'transactions',
+    hasFloor && 'floor',
+    hasNear && 'nearby',
+    land && 'land',
+    'proceeds',
+  ].filter(Boolean);
 
   return (
     <main className="shell">
@@ -68,7 +77,7 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
           ? `${rec.n} filed resale transactions · ${titleCase(rec.town)} · ${rec.remainingLease} of lease left`
           : `${rec.n} filed transactions · District ${rec.district} · ${rec.segment}`} />
 
-      <SectionNav />
+      <SectionNav ids={sectionIds} />
 
       <section className="pane" id="overview">
         <RecordView rec={rec} attribution={attribution}

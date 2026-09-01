@@ -182,3 +182,19 @@ test('the map reserves its own box before any JavaScript runs', () => {
   // roundings of one number put the canvas a pixel proud of its own wrapper.
   assert.match(src, /h: el\.clientHeight/);
 });
+
+/* The record section bar used to discover its anchors in an effect. That made
+ * the server render no bar at all, then hydration inserted 43px above the
+ * headline figure. RecordPage already knows which optional sections it will
+ * render, so making the browser rediscover them was both slower and less
+ * truthful about the first frame. */
+test('the record section bar exists before hydration', () => {
+  const nav = readSrc('SectionNav.jsx');
+  const page = readSrc('RecordPage.jsx');
+  assert.match(page, /<SectionNav ids=\{sectionIds\}/,
+    'RecordPage no longer tells SectionNav which sections it renders');
+  assert.match(nav, /function SectionNav\(\{ ids \}\)/,
+    'SectionNav no longer accepts the server-known section ids');
+  assert.doesNotMatch(nav, /\[items,\s*setItems\]/,
+    'SectionNav is discovering its whole contents after paint again');
+});

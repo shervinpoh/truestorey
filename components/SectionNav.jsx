@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { still } from './Motion.jsx';
 
 /**
@@ -11,10 +11,12 @@ import { still } from './Motion.jsx';
  * scrolling past to find the one part you came for. So the sections name
  * themselves, and the bar says which one you are in.
  *
- * ONLY SECTIONS THAT EXIST. Items are filtered against the DOM on mount rather
- * than assumed: a block with no Tower View data has no #floor, and a link that
- * scrolls nowhere is worse than one fewer link. Filtering happens after paint
- * because the anchors live in sibling components.
+ * ONLY SECTIONS THAT EXIST. RecordPage passes the ids it is about to render:
+ * a block with no Tower View data has no #floor, and a link that scrolls
+ * nowhere is worse than one fewer link. This used to inspect the DOM after
+ * paint, which inserted the whole bar after hydration and pushed every record
+ * figure down by 43px. The server already knows the answer; the first frame
+ * should too.
  *
  * The active item comes from scroll position rather than IntersectionObserver
  * thresholds. Sections here vary from 200px to 2,000px tall, so "which section
@@ -35,14 +37,12 @@ const ITEMS = [
 /** Matches scroll-margin-top in globals.css, plus the sticky bars above it. */
 const OFFSET = 120;
 
-export default function SectionNav() {
-  const [items, setItems] = useState([]);
+export default function SectionNav({ ids }) {
+  const itemKey = ids.join('|');
+  const items = useMemo(() => ITEMS.filter(i => ids.includes(i.id)), [itemKey]);
   const [active, setActive] = useState(null);
+  const [edges, setEdges] = useState({ left: false, right: false });
   const barRef = useRef(null);
-
-  useEffect(() => {
-    setItems(ITEMS.filter(i => document.getElementById(i.id)));
-  }, []);
 
   useEffect(() => {
     if (!items.length) return;
@@ -66,6 +66,27 @@ export default function SectionNav() {
     return () => window.removeEventListener('scroll', onScroll);
   }, [items]);
 
+  // A hidden horizontal edge is not navigation. The active chip already
+  // recentres as the reader moves down the page, but that cannot reveal a
+  // section they have not found yet. These two flags put a real 44px control
+  // on whichever side has more links, and disappear at the edge rather than
+  // leaving a decorative arrow that changes nothing.
+  useEffect(() => {
+    const bar = barRef.current;
+    if (!bar || !items.length) return;
+    const readEdges = () => setEdges({
+      left: bar.scrollLeft > 2,
+      right: bar.scrollLeft + bar.clientWidth < bar.scrollWidth - 2,
+    });
+    readEdges();
+    bar.addEventListener('scroll', readEdges, { passive: true });
+    window.addEventListener('resize', readEdges);
+    return () => {
+      bar.removeEventListener('scroll', readEdges);
+      window.removeEventListener('resize', readEdges);
+    };
+  }, [items]);
+
   // Keep the active chip in view on a narrow screen, where the bar scrolls
   // sideways and the section you are in is often off the end of it.
   useEffect(() => {
@@ -79,14 +100,31 @@ export default function SectionNav() {
 
   if (items.length < 2) return null;
 
+  const move = direction => {
+    const bar = barRef.current;
+    if (!bar) return;
+    bar.scrollBy({
+      left: direction * Math.max(140, bar.clientWidth * 0.7),
+      behavior: still() ? 'auto' : 'smooth',
+    });
+  };
+
   return (
     <nav className="secnav" aria-label="On this page">
+      {edges.left && (
+        <button type="button" className="secnavmore prev" aria-label="Show previous sections"
+          onClick={() => move(-1)}>←</button>
+      )}
       <div className="secnavin" ref={barRef}>
         {items.map(i => (
           <a key={i.id} href={`#${i.id}`} data-id={i.id}
             aria-current={active === i.id ? 'true' : undefined}>{i.label}</a>
         ))}
       </div>
+      {edges.right && (
+        <button type="button" className="secnavmore next" aria-label="Show more sections"
+          onClick={() => move(1)}>→</button>
+      )}
     </nav>
   );
 }
