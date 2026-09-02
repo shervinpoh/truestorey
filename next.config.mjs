@@ -90,6 +90,9 @@ const nextConfig = {
     '/api/search': ['./data/search.json', './data/index.json'],
     '/api/lookup': ['./data/index.json'],
     '/api/record': ['./data/records/**', './data/index.json'],
+    // /cost reads a filed rent beside the cost of ownership. Both the rent
+    // index and the shards are opened at request time.
+    '/api/rent': ['./data/rents.json', './data/records/**', './data/index.json'],
     '/api/catalogue': ['./data/index.json'],
     // A watch is refused unless the block exists, and recordByHref reads a
     // shard by a path built at request time — the exact pattern the tracer

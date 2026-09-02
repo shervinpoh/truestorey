@@ -1608,3 +1608,21 @@ sup.cite a:hover{text-decoration:underline}
 .sitall{margin:12px 0 0;padding-top:10px;border-top:1px solid var(--line2);font-size:13px}
 .sitall a{color:var(--acc-ink);font-weight:600;text-decoration:none}
 .sitall a:hover,.sitall a:focus-visible{text-decoration:underline}
+
+/* ── Owning against renting ─────────────────────────────────────────────────
+   Three figures that only mean anything beside each other, so they sit in one
+   row on a desktop and stack on a phone. The third is the subtraction, given
+   its own weight because it is the one somebody repeats to a partner.
+
+   No green or red: those mean a price that moved and a school on the MOE
+   line, and "owning cost more" is neither good news nor bad — it depends
+   entirely on what the home did, which this page does not estimate. */
+.rentcmp{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:var(--r2);overflow:hidden;margin:0 0 14px}
+.rentcmp>div{background:var(--card);padding:14px 16px}
+.rentcmp .lab{display:block;margin-bottom:6px}
+.rentcmp b{display:block;font-size:23px;font-weight:600;letter-spacing:-.02em}
+.rentcmp .hint{display:block;margin-top:6px;font-size:12px;line-height:1.5}
+.rentcmp .diff{background:var(--sunk)}
+.rentcmp .diff b{color:var(--ink)}
+@media(max-width:860px){ .rentcmp{grid-template-columns:1fr} }

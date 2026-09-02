@@ -190,3 +190,41 @@ test('a stream that never stops is unchanged by the two-phase accrual', () => {
   assert.ok(Math.abs(futureValue({ lump: 10_000, monthly: 500, months: 60 })
     - futureValue({ lump: 10_000, monthly: 500, months: 60, payingMonths: 60 })) < 1e-9);
 });
+
+/* ── against renting ───────────────────────────────────────────────────────── */
+
+test('rent is compared against friction, not against everything paid', async () => {
+  const { rentInstead } = await import('../lib/calc/ledger.js');
+  // The loan principal and the CPF refund are not gone — they are yours in
+  // another form. Putting them on the same side as rent would make ownership
+  // look far worse than it is, which is the easiest way to get this wrong.
+  const r = ledger({ ...base, monthlyRent: 4000 });
+  assert.equal(r.renting.paid, 4000 * 60);
+  assert.equal(r.renting.friction, r.friction);
+  assert.equal(r.renting.difference, r.friction - r.renting.paid);
+  assert.ok(r.renting.friction < r.cash.total,
+    'friction must exclude the instalments that repaid principal');
+
+  assert.equal(rentInstead({ monthlyRent: 0, yearsHeld: 5, friction: 1 }), null);
+  assert.equal(rentInstead({ monthlyRent: 3000, yearsHeld: 0, friction: 1 }), null);
+});
+
+test('the ledger says rent is missing until it knows which home', () => {
+  // The omission was unconditional and stayed on the page after the figure
+  // arrived, which would have been a page contradicting itself.
+  const without = ledger(base);
+  assert.equal(without.renting, null);
+  assert.match(without.omissions[0], /^Rent\./);
+  assert.match(without.omissions[0], /Name a project/);
+
+  const with_ = ledger({ ...base, monthlyRent: 4000 });
+  assert.doesNotMatch(with_.omissions[0], /^Rent\./);
+  assert.match(with_.omissions[0], /Future rent movements/);
+  assert.match(with_.omissions[0], /held flat this is a floor/);
+});
+
+test('holding rent flat is stated, because it is the assumption doing the work', () => {
+  const r = ledger({ ...base, monthlyRent: 4000 });
+  assert.equal(r.renting.heldFlat, true);
+  assert.ok(r.omissions.some(o => /rents would have to FALL/i.test(o)));
+});

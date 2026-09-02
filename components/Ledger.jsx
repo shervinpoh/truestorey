@@ -1,9 +1,10 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import MoneyInput from './MoneyInput.jsx';
 import { Figure } from './Motion.jsx';
 import { f, num } from './fmt.js';
+import { titleCase } from '../lib/name.js';
 import { ledger } from '../lib/calc/ledger.js';
 
 /**
@@ -46,6 +47,41 @@ export default function Ledger() {
   const [held, setHeld] = useState(5);
   const [agent, setAgent] = useState(2);
 
+  /* Which home, so the ledger can read a filed rent for it. Optional: every
+     figure below works without it, and the omissions list says what is missing
+     while it is unset rather than quietly leaving a gap. */
+  const [q, setQ] = useState('');
+  const [hits, setHits] = useState([]);
+  const [picked, setPicked] = useState(null);
+  const [beds, setBeds] = useState('');
+  const [market, setMarket] = useState(null);
+  const [lookup, setLookup] = useState('idle');
+  const seq = useRef(0);
+
+  useEffect(() => {
+    const term = q.trim();
+    if (picked || term.length < 3) { setHits([]); return; }
+    const ctl = new AbortController();
+    const t = setTimeout(async () => {
+      try {
+        const r = await fetch(`/api/search?q=${encodeURIComponent(term)}&limit=6`, { signal: ctl.signal });
+        const j = await r.json();
+        setHits(j.hits || j.results || []);
+      } catch { /* a failed lookup leaves the ledger exactly as it was */ }
+    }, 220);
+    return () => { clearTimeout(t); ctl.abort(); };
+  }, [q, picked]);
+
+  useEffect(() => {
+    if (!picked) { setMarket(null); setLookup('idle'); return; }
+    const mine = ++seq.current;
+    setLookup('loading');
+    fetch(`/api/rent?href=${encodeURIComponent(picked.href)}${beds ? `&beds=${beds}` : ''}`)
+      .then(r => (r.ok ? r.json() : Promise.reject(new Error('no rent'))))
+      .then(j => { if (mine === seq.current) { setMarket(j); setLookup('done'); } })
+      .catch(() => { if (mine === seq.current) { setMarket(null); setLookup('failed'); } });
+  }, [picked, beds]);
+
   const p = Number(price) || 0;
   const loan = Math.max(0, p - (Number(cashDown) || 0) - (Number(cpfDown) || 0));
   const ltv = p > 0 ? loan / p : 0;
@@ -64,7 +100,9 @@ export default function Ledger() {
     cpfMonthly: Number(cpfMonthly) || 0,
     yearsHeld: Number(held) || 0,
     agentFeePct: Number(agent) || 0,
-  }), [p, bought, type, profile, owned, loan, rate, tenure, cashDown, cpfDown, cpfMonthly, held, agent]);
+    monthlyRent: market?.rent?.median ?? null,
+  }), [p, bought, type, profile, owned, loan, rate, tenure, cashDown, cpfDown, cpfMonthly, held, agent,
+       market?.rent?.median]);
 
   const clear = r.breakEven.returnOfCash;
   const pace = r.breakEven.cpfBaseline;
@@ -182,6 +220,61 @@ export default function Ledger() {
               </p>
             )}
           </fieldset>
+
+          <fieldset className="plangroup">
+            <legend className="lab">Which home (optional)</legend>
+            {picked ? (
+              <div className="mapfocus" style={{ marginTop: 0 }}>
+                <b>{titleCase(picked.label)}</b>
+                <span className="mono">
+                  {market?.n ? `${num(market.n)} filed sales` : 'looking up…'}
+                  {market?.medianPsf ? ` · median S$${num(market.medianPsf)} psf` : ''}
+                </span>
+                <button type="button" className="linkish" style={{ marginLeft: 'auto' }}
+                  onClick={() => { setPicked(null); setQ(''); setMarket(null); }}>Change</button>
+              </div>
+            ) : (
+              <>
+                <div className="planform">
+                  <label className="wide2"><span>Name the project or block</span>
+                    <input value={q} onChange={e => setQ(e.target.value)} autoComplete="off"
+                      placeholder="Normanton Park, or Blk 275A Bishan St 24" /></label>
+                </div>
+                {hits.length > 0 && (
+                  <ul className="idx" style={{ marginTop: 8 }}>
+                    {hits.map(h => (
+                      <li key={h.href}>
+                        <button type="button" className="pickrow"
+                          onClick={() => { setPicked(h); setHits([]); setQ(''); }}>
+                          <span className="n">{titleCase(h.label)}</span>
+                          <span className="s mono">{h.sub}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </>
+            )}
+            {picked && (
+              <div className="planform" style={{ marginTop: 10 }}>
+                <label><span>Bedrooms</span>
+                  <select value={beds} onChange={e => setBeds(e.target.value)}>
+                    <option value="">Any size</option>
+                    {['1', '2', '3', '4', '5'].map(b => <option key={b} value={b}>{b} bedroom{b === '1' ? '' : 's'}</option>)}
+                  </select></label>
+              </div>
+            )}
+            {/* The whole ledger works without this. Saying so stops it reading
+                as a required field somebody has to satisfy before an answer. */}
+            <p className="hint" style={{ margin: '8px 0 0' }}>
+              Every figure below works without this. Name a home and the ledger also reads what
+              places like it actually let for, from filed tenancy contracts — which is the one
+              number a cost of ownership is meaningless without.
+              {lookup === 'failed' && <> That lookup failed; the rest of the page is unaffected.</>}
+              {lookup === 'done' && !market?.rent && <> No filed tenancy contract cohort was found
+                for this one, so the rent comparison stays off.</>}
+            </p>
+          </fieldset>
         </div>
 
         <aside className="plansummary" aria-label="What a sale must clear">
@@ -215,6 +308,46 @@ export default function Ledger() {
           </div>
         </aside>
       </div>
+
+      {r.renting && (
+        <>
+          <div className="sh" style={{ marginTop: 26 }}><span>Against renting the same thing</span></div>
+          <div className="rentcmp">
+            <div>
+              <span className="lab">Gone for good, owning</span>
+              <b className="mono">{f(r.renting.friction)}</b>
+              <span className="hint">Duties, interest and fees. Not the loan principal or the CPF
+                refund — those are still yours, in another form.</span>
+            </div>
+            <div>
+              <span className="lab">Rent over the same {num(r.yearsHeld)} year{r.yearsHeld === 1 ? '' : 's'}</span>
+              <b className="mono">{f(r.renting.paid)}</b>
+              <span className="hint">
+                {f(r.renting.monthlyRent)} a month
+                {market?.rent && <> — the median of {num(market.rent.n)} filed{' '}
+                  {market.rent.beds ? `${market.rent.beds}-bedroom ` : ''}tenancy contracts
+                  {market.rent.basis === 'district' ? ` across District ${market.rent.district}` : ' here'}</>}
+                , held flat.
+              </span>
+            </div>
+            <div className={r.renting.difference > 0 ? 'diff over' : 'diff under'}>
+              <span className="lab">{r.renting.difference > 0 ? 'Owning cost more' : 'Owning cost less'}</span>
+              <b className="mono">{f(Math.abs(r.renting.difference))}</b>
+              <span className="hint">
+                Before any change in what the home is worth, which this page does not estimate.
+              </span>
+            </div>
+          </div>
+          {market?.rent && (
+            <p className="prov">
+              {market.rent.source} · {market.rent.n} contracts, {market.rent.from} to {market.rent.to} ·
+              {' '}{market.rent.basis === 'project' ? 'filed at this project' : `District ${market.rent.district}, all projects`} ·
+              {' '}floor area {num(market.rent.areaFromSqm)}–{num(market.rent.areaToSqm)} sqm ·
+              {' '}median monthly rent, not a projection
+            </p>
+          )}
+        </>
+      )}
 
       <div className="sh" style={{ marginTop: 26 }}><span>The ledger</span></div>
 
