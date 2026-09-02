@@ -50,9 +50,17 @@ const JOBS = [
    * $732 on /hdb. That gap only ever grows, and a map that quietly drifts from
    * the tables beside it is the exact failure this site exists not to commit.
    */
+  /* EVERYTHING DERIVED FROM THE TRANSACTIONS REBUILDS HERE. comps, trend and
+   * budget all read hdb.json and private.json — the two files this job
+   * replaces — so leaving them out is the same bug the note above records,
+   * with four more files in it: Blindspot would score against last month's
+   * comparables, the size trend would stop at last month's year, and a budget
+   * would be measured against prices that had moved. Silently, and passing
+   * every test, because each file on its own is still valid. */
   { key: 'transactions', file: 'index.json', every: 7,
     cmd: 'npm run ingest:hdb && npm run ingest:ura && npm run index'
-       + ' && npm run build:storey && npm run build:map',
+       + ' && npm run build:storey && npm run build:map'
+       + ' && npm run build:comps && npm run build:trend && npm run build:budget',
     why: 'HDB and URA file new transactions continuously, with a lag of weeks' },
   { key: 'price-index', file: 'hdb-index.json', every: 80, cmd: 'npm run ingest:index',
     why: 'the resale price index is quarterly' },
@@ -63,7 +71,11 @@ const JOBS = [
     why: 'HDB Property Information changes a few times a year' },
   { key: 'amenities', file: 'amenities.json', every: 180, cmd: 'npm run ingest:amenities && npm run build:nearby',
     why: 'stations, schools and hawker centres barely move' },
-  { key: 'rental', file: 'rental.json', every: 30, cmd: 'npm run ingest:rental && npm run build:yield',
+  // build:rents is the other reader of rental.json — /cost compares the cost of
+  // owning against what places like it actually let for, and a stale rent
+  // would be quoted beside a fresh instalment.
+  { key: 'rental', file: 'rental.json', every: 30,
+    cmd: 'npm run ingest:rental && npm run build:yield && npm run build:rents',
     why: 'URA files rental contracts quarterly, but in rolling batches' },
   { key: 'boundaries', file: 'boundaries.json', every: 365, cmd: 'npm run ingest:boundaries && npm run build:map',
     why: 'the Master Plan is redrawn about every five years — this is a formality, not a refresh' },
