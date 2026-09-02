@@ -21,15 +21,15 @@ export const metadata = {
  * mad?" had to translate their question into this site's vocabulary before
  * the site could help — and the vocabulary is the part they do not have.
  *
- * ── WHY THE SITUATIONS ARE NOT BEHIND A CLICK ──────────────────────────────
- * The brief said selecting a situation should REVEAL its recommendations. The
- * three cards below show theirs outright instead, for two reasons. A page
- * whose entire job is orientation should not answer its own question with
- * another question; and a click-to-reveal on a static page either costs
- * JavaScript or costs the anchor link from the menu. What the brief was
- * actually guarding against — a wall of undifferentiated choices — is handled
- * by the cap of three per situation, which test/situations.test.js enforces.
- * The longer tail per situation IS behind a disclosure.
+ * ── THE CARDS ROUTE ON, THEY DO NOT JUST SIT HERE ──────────────────────────
+ * They used to be anchors into this page — /tools#buying and the rest — which
+ * meant every item in the Tools menu landed on the same screen, with all three
+ * cards already above the fold, so the anchor did not even scroll. Three
+ * choices and one outcome; the menu looked broken because it was.
+ *
+ * Each situation has its own route now (app/tools/[situation]) and this page
+ * is the overview: three named cards, three recommendations each, and a way
+ * through to the full page for whichever one is true of the reader.
  *
  * ── THE FULL INDEX STAYS ───────────────────────────────────────────────────
  * Below, complete, subdued, and still the thing the sitemap and the footer
@@ -49,7 +49,7 @@ export default function Page() {
             const sit = situationTools(s.id);
             return (
               <div className="sit" key={s.id} id={s.id}>
-                <h3>{s.label}</h3>
+                <h3><Link href={s.href}>{s.label}</Link></h3>
                 <p className="sitsub">{s.sub}</p>
                 <ul className="sitlist">
                   {sit.primaryItems.map(i => (
@@ -61,16 +61,9 @@ export default function Page() {
                     </li>
                   ))}
                 </ul>
-                {sit.moreItems.length > 0 && (
-                  <details className="sitmore">
-                    <summary>Also useful here</summary>
-                    <ul>
-                      {sit.moreItems.map(i => (
-                        <li key={i.href}><Link href={i.href}>{i.plain || i.label}</Link></li>
-                      ))}
-                    </ul>
-                  </details>
-                )}
+                <p className="sitall"><Link href={s.href}>
+                  Everything for {s.label.replace(/^I(&rsquo;|')?m /, '').replace(/^I /, '')} &rarr;
+                </Link></p>
               </div>
             );
           })}

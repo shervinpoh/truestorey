@@ -182,3 +182,49 @@ test('every item still belongs to exactly one run', () => {
       `${g.group} loses or reorders items when split into runs`);
   }
 });
+
+/* ── the menu must lead somewhere different each time ──────────────────────── */
+
+test('every situation has its own route, and no two share one', () => {
+  // They were anchors into a single page that showed all three cards at once,
+  // so all three menu items landed on the same screen — and on a desktop the
+  // cards were already above the fold, so the anchor did not even scroll.
+  // Three choices, one outcome.
+  const hrefs = SITUATIONS.map(s => s.href);
+  for (const s of SITUATIONS) {
+    assert.ok(s.href, `${s.id} has no route`);
+    assert.doesNotMatch(s.href, /#/, `${s.id} is an anchor, not a page`);
+  }
+  assert.equal(new Set(hrefs).size, hrefs.length, 'two situations share a route');
+});
+
+test('each situation route is a real page that renders that situation', () => {
+  const src = readFileSync(new URL('../app/tools/[situation]/page.jsx', import.meta.url), 'utf8');
+  assert.match(src, /generateStaticParams/, 'the three routes must be prerendered');
+  assert.match(src, /dynamicParams = false/, 'an unknown situation must 404, not render empty');
+  for (const s of SITUATIONS)
+    assert.equal(s.href, `/tools/${s.id}`, `${s.id}'s route does not match its param`);
+});
+
+test('a situation page says something of its own', () => {
+  // A title and an opening paragraph per situation, or the three pages are
+  // the same page with a different list on it.
+  const seen = new Set();
+  for (const s of SITUATIONS) {
+    assert.ok(s.title && s.title.length > 20, `${s.id} has no page title`);
+    assert.ok(s.intro && s.intro.length > 80, `${s.id} has no opening paragraph`);
+    assert.doesNotMatch(s.title, JARGON, `${s.id} title: ${s.title}`);
+    seen.add(s.intro);
+  }
+  assert.equal(seen.size, SITUATIONS.length, 'two situations share an opening paragraph');
+});
+
+test('the situation pages are in the sitemap', async () => {
+  // The Tools menu no longer lists the tools, so these three pages ARE the
+  // guided route into the site. Absent from the sitemap they are invisible to
+  // a crawler — the same failure that once left every calculator out of it.
+  const { default: sitemap } = await import('../app/sitemap.js');
+  const urls = sitemap().map(e => e.url);
+  for (const s of SITUATIONS)
+    assert.ok(urls.some(u => u.endsWith(s.href)), `${s.href} is not in the sitemap`);
+});

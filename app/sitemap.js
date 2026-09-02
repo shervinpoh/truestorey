@@ -1,6 +1,6 @@
 import { allUrls } from '../lib/data/query.js';
 import { allInsights } from '../lib/insights.js';
-import { NAV } from '../lib/nav.js';
+import { NAV, SITUATIONS } from '../lib/nav.js';
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://truestorey.sg';
 
@@ -20,8 +20,13 @@ const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://truestorey.sg';
  * the two cannot drift again. External links are filtered out; nothing else
  * needs to know about them.
  */
-const navPaths = () => [...new Set(
-  NAV.flatMap(g => g.items.map(i => i.href)).filter(h => h.startsWith('/')))];
+const navPaths = () => [...new Set([
+  ...NAV.flatMap(g => g.items.map(i => i.href)),
+  // The three situation pages are real routes with their own titles, and the
+  // Tools menu no longer lists the tools themselves — so without these the
+  // guided half of the site is invisible to a crawler.
+  ...SITUATIONS.map(s => s.href),
+].filter(h => h.startsWith('/')))];
 export default function sitemap() {
   const { builtAt, urls } = allUrls();
   const lastModified = new Date(builtAt || Date.now());

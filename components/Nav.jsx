@@ -106,7 +106,7 @@ export default function Nav({ here = '' }) {
                   <div className="navdrop">
                     {g.guided ? <>
                       {SITUATIONS.map(sit => (
-                        <Link key={sit.id} href={`/tools#${sit.id}`}>
+                        <Link key={sit.id} href={sit.href}>
                           <b>{sit.label}</b><span>{sit.sub}</span>
                         </Link>
                       ))}
@@ -152,7 +152,7 @@ export default function Nav({ here = '' }) {
                       costs the most. Same three sentences here. */}
                   {g.guided ? <>
                     {SITUATIONS.map(sit => (
-                      <li key={sit.id}><Link href={`/tools#${sit.id}`}>{sit.label}</Link></li>
+                      <li key={sit.id}><Link href={sit.href}>{sit.label}</Link></li>
                     ))}
                     <li><Link href="/tools"
                       aria-current={here === '/tools' ? 'page' : undefined}>Browse every tool</Link></li>

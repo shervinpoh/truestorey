@@ -1603,3 +1603,8 @@ sup.cite a:hover{text-decoration:underline}
 .navrunlab{margin:9px 0 1px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;
   color:var(--mute);opacity:.8}
 .navrunlab:first-child{margin-top:0}
+/* The card's own way through to its page. It sits where the disclosure used
+   to, so the card keeps its height and the eye keeps its landmark. */
+.sitall{margin:12px 0 0;padding-top:10px;border-top:1px solid var(--line2);font-size:13px}
+.sitall a{color:var(--acc-ink);font-weight:600;text-decoration:none}
+.sitall a:hover,.sitall a:focus-visible{text-decoration:underline}
