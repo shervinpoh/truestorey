@@ -206,11 +206,32 @@ may simplify a claim and may not enlarge it — there is a test for that now.
    what changed it · what public data cannot know · the next useful action.
    Several tools do parts of this; none does it consistently.
 3. **No labelled human bridge.** "Shervin's note" or "What I would check next"
-   after the arithmetic. It must never change a deterministic score or assign a
-   number — same rule as everywhere else.
-4. **Photography.** Blocked on Shervin; see §0. Both new surfaces render
-   without a portrait rather than with a placeholder face.
-5. **"What can I borrow" is still separate from `/plan`.** Unchanged on
+   after the arithmetic, never changing a deterministic score or assigning a
+   number. **DEFERRED by Shervin on 2 Sep — do not start it uninvited.** It
+   remains the right answer to "not enough personal flavour", and it is worth
+   more than any amount of decoration: voice with substance behind it, in the
+   one place a reader has just finished reading a figure.
+4. **A portrait is NOT needed, and this was decided rather than postponed.**
+   The handoff asked for one at the top of `/about` and on the homepage. Both
+   surfaces are built to take one and both render fine without. Three reasons
+   it was dropped:
+   - A headshot is the most generic move available to a Singapore property
+     agent — on every listing and every namecard, and therefore invisible.
+     Being the property site WITHOUT one is closer to the positioning.
+   - It is a trust signal that works by not being evidence. Putting a face
+     above three principles that begin "if the source cannot be shown, it does
+     not publish" undercuts the page in the act of making it.
+   - The CEA registration on every page is a stronger accountability signal,
+     because it can be checked.
+
+   If a photograph of Shervin ever goes in, it belongs small and further down
+   `/about` — at work, somewhere ordinary and recognisably Singapore, not a
+   studio headshot — and it is a nice-to-have, not a blocker.
+5. **One editorial note in Shervin's own voice.** The MOP deep dive was deleted
+   on 2 Sep (it was written to demonstrate tone, not to publish), and it was
+   the ONLY place on the site carrying first-person judgment. `/insights` is
+   down to a single entry. Also deferred; also his to write, not an agent's.
+6. **"What can I borrow" is still separate from `/plan`.** Unchanged on
    purpose: it uniquely applies the variable-income haircut, and §6 says do not
    delete it until `/plan` can express that case.
 
