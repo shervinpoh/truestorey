@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { plan, maxPrice } from '../lib/calc/plan.js';
-import { SOURCES, RATES_REVIEWED, LTV_REVIEWED } from '../lib/calc/constants.js';
+import { SOURCES, RATES_REVIEWED, LTV_REVIEWED, PROPERTY_TYPES } from '../lib/calc/constants.js';
 import { f } from './fmt.js';
 import { titleCase } from '../lib/name.js';
 import { Figure } from './Motion.jsx';
@@ -337,13 +337,12 @@ function BuyingWhat({ type, setType, hdbLoan, setHdbLoan, price }) {
   );
 }
 
-const VALID_TYPES = ['HDB', 'EC_DEVELOPER', 'EC_RESALE', 'PRIVATE'];
 
 export default function Planner({ markets = {}, budget = null }) {
   const q = useSearchParams();
   const [price, setPrice] = useState(Number(q.get('price')) || 650000);
   // Record pages hand over HDB or PRIVATE; the EC branches are chosen here.
-  const [type, setType] = useState(VALID_TYPES.includes(q.get('type')) ? q.get('type') : 'HDB');
+  const [type, setType] = useState(PROPERTY_TYPES.includes(q.get('type')) ? q.get('type') : 'HDB');
   const [hdbLoan, setHdbLoan] = useState(true);
   const [a1, setA1] = useState(6000); const [g1, setG1] = useState(34);
   const [a2, setA2] = useState(5000); const [g2, setG2] = useState(32);

@@ -85,6 +85,14 @@ const nextConfig = {
       './data/comps.json',
       './data/trend.json',
       './data/storey.json',
+      // approvalsWithin() opens this on every report — the "what has been
+      // approved nearby" check. It was absent from this list and reaching the
+      // bundle only through @vercel/nft's fallback of pulling ALL of data/
+      // when it cannot resolve the runtime path. That fallback is a rescue,
+      // not a contract: anything added to the excludes above, or any change to
+      // how nft handles an unresolvable join, would have taken the check out
+      // silently — working in dev, and reporting nothing in production.
+      './data/planning.json',
       // Read by the lease check, which runs on every home whose tenure is known.
       './data/sources/leasehold-table.json',
     ],
