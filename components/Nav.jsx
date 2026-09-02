@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { NAV, SITUATIONS, isHere } from '../lib/nav.js';
+import { NAV, SITUATIONS, isHere, runsOf } from '../lib/nav.js';
 import BackLink from './BackLink.jsx';
 
 /**
@@ -114,12 +114,17 @@ export default function Nav({ here = '' }) {
                         aria-current={here === '/tools' ? 'page' : undefined}>
                         <b>Browse every tool</b><span>All eleven, and the four quick answers</span>
                       </Link>
-                    </> : g.items.map(l => (
-                      <Link key={l.href} href={l.href}
-                        aria-current={isHere(l, here) ? 'page' : undefined}>
-                        <b>{l.panelLabel || l.label}</b>
-                        {l.blurb && <span>{l.blurb}</span>}
-                      </Link>
+                    </> : runsOf(g).map(run => (
+                      <div className="navrun" key={run.label || 'all'}>
+                        {run.label && <span className="lab">{run.label}</span>}
+                        {run.items.map(l => (
+                          <Link key={l.href} href={l.href}
+                            aria-current={isHere(l, here) ? 'page' : undefined}>
+                            <b>{l.panelLabel || l.label}</b>
+                            {l.blurb && <span>{l.blurb}</span>}
+                          </Link>
+                        ))}
+                      </div>
                     ))}
                   </div>
                 )}
@@ -151,14 +156,17 @@ export default function Nav({ here = '' }) {
                     ))}
                     <li><Link href="/tools"
                       aria-current={here === '/tools' ? 'page' : undefined}>Browse every tool</Link></li>
-                  </> : g.items.map(l => (
-                    <li key={l.href}>
-                      <Link href={l.href}
-                        aria-current={isHere(l, here) ? 'page' : undefined}>
-                        {l.panelLabel || l.label}
-                      </Link>
-                    </li>
-                  ))}
+                  </> : runsOf(g).flatMap(run => [
+                    run.label ? <li key={run.label} className="navrunlab" aria-hidden="true">{run.label}</li> : null,
+                    ...run.items.map(l => (
+                      <li key={l.href}>
+                        <Link href={l.href}
+                          aria-current={isHere(l, here) ? 'page' : undefined}>
+                          {l.panelLabel || l.label}
+                        </Link>
+                      </li>
+                    )),
+                  ].filter(Boolean))}
                 </ul>
               </div>
             ))}

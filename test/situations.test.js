@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { NAV, SITUATIONS, QUICK, situationTools, itemFor } from '../lib/nav.js';
+import { NAV, SITUATIONS, QUICK, situationTools, itemFor, runsOf } from '../lib/nav.js';
 
 /**
  * The guided layer, held to the thing it was built for.
@@ -141,5 +141,44 @@ test('a calculator that opens on prefilled figures says they are an example', ()
   for (const r of ['plan', 'cost', 'progressive']) {
     const src = readFileSync(new URL(`../app/${r}/page.jsx`, import.meta.url), 'utf8');
     assert.match(src, /<ToolIntro[^>]*\bexample=/, `/${r} opens on defaults with no example label`);
+  }
+});
+
+/* ── how many choices are offered at once ──────────────────────────────────── */
+
+test('no menu offers more than four equally weighted choices in one run', () => {
+  // The criterion says "equally weighted", not "items". Look up holds six
+  // entries and they are not six of a kind: four are ways into the transaction
+  // data and two are about the market rather than any address. The fix was to
+  // stop rendering a flatness that was not there — not to hide two of them,
+  // which would have cost a tap on the site's main content to satisfy a count.
+  for (const g of NAV) {
+    if (g.guided) continue;               // renders SITUATIONS, asserted above
+    for (const run of runsOf(g))
+      assert.ok(run.items.length <= 4,
+        `${g.group} offers ${run.items.length} choices in one run` +
+        (run.label ? ` under "${run.label}"` : ' with no label to divide them'));
+  }
+});
+
+test('a run label describes its run and is not itself a destination', () => {
+  const hrefs = new Set(NAV.flatMap(g => g.items).map(i => i.href));
+  for (const g of NAV)
+    for (const run of runsOf(g)) {
+      if (!run.label) continue;
+      assert.ok(run.label.length > 3, `${g.group} has a run label too short to help`);
+      assert.ok(!hrefs.has(`/${run.label.toLowerCase().replace(/ /g, '-')}`),
+        `"${run.label}" collides with a real route — a reader will try to click it`);
+    }
+});
+
+test('every item still belongs to exactly one run', () => {
+  // runsOf() is what the menu renders. If it ever dropped an item the footer
+  // would still list it and the menu quietly would not, which is the
+  // nav-in-two-places failure this file exists to prevent.
+  for (const g of NAV) {
+    const flat = runsOf(g).flatMap(r => r.items);
+    assert.deepEqual(flat.map(i => i.href), g.items.map(i => i.href),
+      `${g.group} loses or reorders items when split into runs`);
   }
 });

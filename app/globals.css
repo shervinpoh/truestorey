@@ -1589,3 +1589,17 @@ sup.cite a:hover{text-decoration:underline}
 .wwho{margin:9px 0 0;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;
   letter-spacing:.01em;color:var(--mute)}
 @media(max-width:600px){ .whobuilt{padding:15px 15px} .wsay{font-size:14.5px} }
+
+/* A labelled run inside a dropdown. Look up holds four ways into the
+   transaction data and two things about the market; one flat list of six said
+   they were the same kind of thing. The label is the existing .lab treatment
+   so it reads as structure and not as another link. */
+.navrun + .navrun{margin-top:10px;padding-top:9px;border-top:1px solid var(--line2)}
+.navrun > .lab{display:block;padding:0 0 5px;color:var(--mute)}
+/* The phone panel already labels each GROUP with .lab, so the run label has to
+   sit a step below it or the two read as siblings. aria-hidden: the links
+   under it are self-describing and a screen reader gains nothing from a
+   heading that is purely visual grouping. */
+.navrunlab{margin:9px 0 1px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--mute);opacity:.8}
+.navrunlab:first-child{margin-top:0}
