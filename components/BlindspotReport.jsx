@@ -194,7 +194,7 @@ function Result({ report, boxRef }) {
   const pctOfMax = r.max ? r.points / r.max : 0;
 
   return (
-    <div ref={boxRef} style={{ marginTop: 30 }}>
+    <div ref={boxRef} style={{ marginTop: 30, scrollMarginTop: 76 }}>
       <div className="sh"><span>{titleCase(r.record.label)}</span></div>
 
       <div className="scorewrap">
@@ -261,17 +261,7 @@ function Result({ report, boxRef }) {
         </>
       )}
 
-      {r.detail?.price && (
-        <>
-          <div className="sh" style={{ marginTop: 26 }}><span>The sales behind the price check</span></div>
-          <p className="hint">
-            {r.detail.price.sample} filed sales here in the last {r.detail.price.months} months,
-            from ${f(r.detail.price.low).replace('S$', '')} to ${f(r.detail.price.high).replace('S$', '')} psf,
-            median ${f(r.detail.price.median).replace('S$', '')}. The asking price works out at{' '}
-            <b>${f(r.detail.price.asking).replace('S$', '')} psf</b>.
-          </p>
-        </>
-      )}
+      {r.detail?.price && <PriceEvidence price={r.detail.price} />}
 
       {r.detail?.supply?.basis === 'town' && (
         <p className="hint">
@@ -298,5 +288,103 @@ function Result({ report, boxRef }) {
         </Link>
       </div>
     </div>
+  );
+}
+
+function PriceEvidence({ price }) {
+  const observed = price.observed;
+  const scored = price.scored;
+  const comps = scored?.comparisons || [];
+  const lastMonth = comps.map(c => c.month).filter(Boolean).sort().at(-1);
+  const psf = v => `$${num(Math.round(v))} psf`;
+  const above = v => v == null ? null
+    : `${v >= 100 ? Math.round(v) : v.toFixed(1)}% above the highest comparable`;
+  const position = cohort => {
+    if (cohort.aboveHighPct != null) return above(cohort.aboveHighPct);
+    if (cohort.asking < cohort.low) return 'below the lowest observed comparable';
+    return 'inside that observed range';
+  };
+
+  return (
+    <>
+      <div className="sh" style={{ marginTop: 26 }}><span>The evidence behind the price check</span></div>
+
+      {observed && (
+        <div className="priceevidence">
+          <span className="lab">This block or project</span>
+          <p>
+            <b>{num(observed.sample)} filed sale{observed.sample === 1 ? '' : 's'} held</b>, from{' '}
+            {psf(observed.low)} to {psf(observed.high)} between {observed.from} and {observed.to}.
+            {' '}The asking price is {psf(observed.asking)}
+            {observed.aboveHighPct != null ? ` — ${above(observed.aboveHighPct)}.` : '.'}
+          </p>
+          <span className="prov">{price.source} · {price.period?.from} to {price.period?.to} · observed range, not a valuation</span>
+        </div>
+      )}
+
+      {scored ? (
+        <div className="priceevidence scored">
+          <span className="lab">The cohort that was scored</span>
+          {scored.basis === 'nearby' ? (
+            <p>
+              <b>{num(scored.sample)} comparable sales across {num(scored.blocks)} HDB blocks within{' '}
+              {num(Math.round(scored.radiusKm * 1000))}m.</b> Same {titleCase(price.flatType)}, floor area{' '}
+              {num(scored.areaFromSqm)}–{num(scored.areaToSqm)} sqm and lease commencement{' '}
+              {scored.leaseFrom}–{scored.leaseTo}. The filed range was {psf(scored.low)} to{' '}
+              {psf(scored.high)}, median {psf(scored.median)}. The asking price is{' '}
+              <b>{position(scored)}</b>.
+            </p>
+          ) : (
+            <p>
+              <b>{num(scored.sample)} sales at this address in the last {scored.months} months.</b>{' '}
+              The filed range was {psf(scored.low)} to {psf(scored.high)}, median {psf(scored.median)}.
+              The asking price is <b>{position(scored)}</b>.
+            </p>
+          )}
+          {scored.basis === 'nearby' && (
+            <p className="hint">
+              Treated as {titleCase(price.flatType)} from {price.flatTypeBasis}. Not adjusted for
+              storey. Distance is straight-line from the searched block.
+            </p>
+          )}
+          <span className="prov">
+            {scored.cutoff} to {lastMonth || 'latest held month'} · {scored.sample} filed transactions ·
+            HDB Resale Flat Prices via data.gov.sg
+          </span>
+        </div>
+      ) : (
+        <div className="priceevidence off">
+          <span className="lab">Not scored</span>
+          <p>{price.unavailable}</p>
+        </div>
+      )}
+
+      {comps.length > 0 && (
+        <details className="compdetails">
+          <summary>Show all {num(comps.length)} comparable sales</summary>
+          <div className="tablewrap">
+            <table className="bandtable pricecomps">
+              <thead>
+                <tr>
+                  <th scope="col">Block</th><th scope="col">Filed</th>
+                  <th scope="col">Unit</th><th scope="col">PSF</th><th scope="col">Straight-line</th>
+                </tr>
+              </thead>
+              <tbody>
+                {comps.map((c, i) => (
+                  <tr key={`${c.href}-${c.month}-${c.price}-${i}`}>
+                    <th scope="row"><Link href={c.href}>{titleCase(c.label)}</Link></th>
+                    <td className="mono">{c.month}</td>
+                    <td>{c.areaSqm ? `${c.areaSqm} sqm` : '—'}{c.storey ? ` · ${c.storey}` : ''}</td>
+                    <td className="mono">${num(c.psf)}</td>
+                    <td className="mono">{c.distanceM ? `${num(c.distanceM)}m` : 'this block'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
+      )}
+    </>
   );
 }

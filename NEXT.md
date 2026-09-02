@@ -4,7 +4,7 @@ Rewritten 1 Sep 2026, at the handover to Codex. `CLAUDE.md` has the rules and
 the architecture — **read that first, it is not optional.** This file is only
 the ordered backlog.
 
-**State:** live at https://truestorey.vercel.app · **282 tests** · three npm
+**State:** live at https://truestorey.vercel.app · **284 tests** · three npm
 dependencies · Blindspot scoring out of 10 with all four checks running · data
 refreshing itself daily via `.github/workflows/refresh-data.yml`.
 
@@ -95,6 +95,12 @@ found. In brief:
   actual ask and unit area; the record median is deliberately not passed as an
   asking price. There is a route back to the property. Commits `42a08af`,
   `b5fde4f`, `69536b1`, `97034ed`.
+- **Blindspot no longer loses the asking price on a thin HDB block.** It always
+  shows the sales held at the searched block, then — only when fewer than five
+  suitable recent sales exist — scores a transparent nearby cohort of the same
+  flat type, similar size and lease. Every comparable, radius and filter is
+  printed. If even that cohort is too thin, the report says the price was not
+  assessed and cannot call the result “Little flagged”. Rubric `2026-09-v3`.
 - **Preflight reports a request with no response.** The Supabase events probe
   used to call `.slice()` on an absent body and crash the whole diagnostic on
   a DNS failure. It now names the unreachable integration. A live unsandboxed
@@ -298,7 +304,7 @@ running — **the approval step is the feature; do not add a way to skip it.**
 
 ## How to work in this repo
 
-- `npm test` before and after. **277 passing.** A red test is a real finding.
+- `npm test` before and after. **284 passing.** A red test is a real finding.
 - `npm run preflight` before assuming a key works. It makes a real call to each
   provider and only a 200 counts.
 - **Never run `next build` while a dev or production server is up.** They share

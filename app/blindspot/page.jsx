@@ -6,7 +6,7 @@ import { CHECKS, totalPossible, RUBRIC_VERSION } from '../../lib/blindspot/rubri
 
 export const metadata = {
   title: 'Blindspot — four checks on a Singapore property, free | Truestorey',
-  description: 'Where the asking price sits against what has actually sold there, how many flats nearby reach MOP, what land is coming, and what could be built next door. A published rubric, not a model’s opinion.',
+  description: 'Where the asking price sits against filed sales at the address or a transparent nearby cohort, how many flats nearby reach MOP, what land is coming, and what was approved next door. A published rubric, not a model’s opinion.',
   alternates: { canonical: '/blindspot' },
 };
 
@@ -68,9 +68,10 @@ export default function Page() {
           could measure, and the page prints which ones were missing.
         </div>
         <div className="note">
-          <b>Nothing here is a valuation.</b> The price check tells you where an asking price sits
-          among sales that have actually been filed at that same address — a distribution, not a
-          verdict. This site does not publish an opinion of what a home is worth, and will not.
+          <b>Nothing here is a valuation.</b> The price check starts with sales filed at the same
+          address. When an HDB block is too thin, it uses a printed cohort of nearby flats with the
+          same type, similar floor area and similar lease — a distribution with every comparable
+          shown, not a verdict. This site does not publish an opinion of what a home is worth.
         </div>
         <div className="note">
           <b>Then there is everything public data cannot see.</b> The lease, the CPF position, the

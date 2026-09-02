@@ -74,6 +74,6 @@ export async function POST(req) {
     summary,
     summaryAvailable: configured.anthropic(),
     // Said out loud in the payload so no client can present this as a valuation.
-    disclaimer: 'This counts things worth checking. It is not a valuation, not advice, and not a verdict on the property. Every figure above is a median of filed transactions with its source named.',
+    disclaimer: 'This counts things worth checking. It is not a valuation, not advice, and not a verdict on the property. Every market figure names its source and period; price ranges come from the filed transactions shown.',
   });
 }

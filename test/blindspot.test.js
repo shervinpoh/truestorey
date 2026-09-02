@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { score, scoreCheck, CHECKS, BANDS, totalPossible } from '../lib/blindspot/rubric.js';
-import { pricePercentile, supplyInTown, mopCoverage } from '../lib/blindspot/measure.js';
+import { pricePercentile, nearbyHdbPrice, supplyInTown, mopCoverage } from '../lib/blindspot/measure.js';
 
 /**
  * The rubric is the reason this tool is allowed to publish a number at all.
@@ -43,6 +43,17 @@ test('nothing measurable at all returns no score rather than a clean bill', () =
   assert.equal(none.ratio, null);
   assert.equal(none.band, null, 'zero checks must not band as low risk');
   assert.equal(none.checks.length, 0);
+});
+
+test('a partial result cannot say little flagged when the asking price was not assessed', () => {
+  const partial = score({ supply: 0.01, gls: 0, view: 0 }, {
+    price: { unavailable: 'Only two comparable sales were available.' },
+  });
+  assert.equal(partial.points, 0);
+  assert.equal(partial.max, 7);
+  assert.equal(partial.band, 'Incomplete — price not assessed');
+  assert.match(partial.meaning, /asking price did not enter/i);
+  assert.match(partial.skipped.find(s => s.key === 'price').needs, /Only two/);
 });
 
 /*
@@ -117,6 +128,49 @@ test('an asking price above everything filed reads as above 100%', () => {
   const r = rec([['2026-07', 900], ['2026-06', 910], ['2026-05', 920], ['2026-04', 930], ['2026-03', 940]]);
   assert.equal(pricePercentile(r, 2000, { now }).percentile, 1);
   assert.equal(pricePercentile(r, 100, { now }).percentile, 0);
+});
+
+test('a thin HDB block expands to the first sufficient nearby comparable radius', () => {
+  const target = {
+    kind: 'HDB', href: '/hdb/test/100-test-road', shard: 'hdb/test',
+    leaseCommence: 1992,
+  };
+  const sale = (month, psf, areaSqm = 120, flatType = '5 ROOM') => ({
+    month, psf, price: psf * areaSqm * 10.7639, areaSqm, flatType, storey: '04 TO 06',
+  });
+  const block = (href, leaseCommence, recent) => ({
+    kind: 'HDB', href, label: href.split('/').at(-1), leaseCommence, recent,
+  });
+  const records = {
+    target: block(target.href, 1992, [sale('2025-12', 806)]),
+    a: block('/hdb/test/101-test-road', 1991, [sale('2026-02', 766), sale('2026-06', 774)]),
+    b: block('/hdb/test/102-test-road', 1994, [sale('2026-07', 760)]),
+    // The fifth eligible sale is beyond 500m, so the cohort must expand once.
+    c: block('/hdb/test/103-test-road', 1990, [sale('2026-07', 745)]),
+    wrongType: block('/hdb/test/104-test-road', 1992, [sale('2026-07', 900, 120, '4 ROOM')]),
+    wrongArea: block('/hdb/test/105-test-road', 1992, [sale('2026-07', 900, 150)]),
+    wrongLease: block('/hdb/test/106-test-road', 1980, [sale('2026-07', 900)]),
+  };
+  const geoRecords = {
+    [target.href]: { lat: 1.35, lon: 103.8 },
+    '/hdb/test/101-test-road': { lat: 1.35, lon: 103.801 },
+    '/hdb/test/102-test-road': { lat: 1.35, lon: 103.802 },
+    '/hdb/test/103-test-road': { lat: 1.35, lon: 103.8054 },
+    '/hdb/test/104-test-road': { lat: 1.35, lon: 103.801 },
+    '/hdb/test/105-test-road': { lat: 1.35, lon: 103.801 },
+    '/hdb/test/106-test-road': { lat: 1.35, lon: 103.801 },
+  };
+
+  const r = nearbyHdbPrice(target, 5008, 120, '5 ROOM', {
+    now: new Date('2026-09-02'), records, geoRecords,
+  });
+  assert.equal(r.radiusKm, 0.75);
+  assert.equal(r.sample, 5);
+  assert.equal(r.blocks, 4);
+  assert.deepEqual([r.low, r.median, r.high], [745, 766, 806]);
+  assert.equal(r.percentile, 1);
+  assert.ok(r.aboveHighPct > 500, 'the distance beyond the observed range disappeared');
+  assert.ok(r.comparisons.every(c => c.flatType === '5 ROOM' && c.areaSqm >= 108 && c.areaSqm <= 132));
 });
 
 /* These read the real repo data, so they skip on a clone that has not built. */

@@ -1160,6 +1160,28 @@ input[type=range]:active::-moz-range-thumb{transform:scale(1.15);cursor:grabbing
 .checkrow.off{opacity:.6}
 .checkrow.off .pts{color:var(--ink2)}
 
+/* The asking-price check keeps two kinds of evidence separate: what happened
+   at the selected address, and the nearby cohort used only when that address
+   is too thin. A shared panel would visually blend them back into one claim. */
+.priceevidence{padding:14px 0;border-bottom:1px solid var(--line2)}
+.priceevidence p{margin:6px 0 5px;font-size:13.5px;color:var(--ink2);line-height:1.6}
+.priceevidence p b{color:var(--ink)}
+.priceevidence .prov{display:block;margin:8px 0 0}
+.priceevidence.scored{border-left:3px solid var(--acc);padding-left:15px}
+.priceevidence.off{border-left:3px solid var(--warn);padding-left:15px}
+.compdetails{margin-top:12px;border-bottom:1px solid var(--line)}
+.compdetails summary{cursor:pointer;min-height:44px;padding:11px 0;font-size:13px;font-weight:600;
+ list-style:none}
+.compdetails summary::-webkit-details-marker{display:none}
+.compdetails summary:before{content:"+ ";font-family:"IBM Plex Mono",ui-monospace,monospace;color:var(--mute)}
+.compdetails[open] summary:before{content:"− "}
+.pricecomps{min-width:690px;margin:0 0 14px}
+.pricecomps tbody th{white-space:nowrap;width:auto;color:var(--ink)}
+.pricecomps tbody th a{text-underline-offset:2px}
+.pricecomps td:nth-child(2){white-space:nowrap}
+.pricecomps td:nth-child(3){white-space:nowrap}
+.pricecomps td:last-child{text-align:right;color:var(--mute);white-space:nowrap}
+
 /* Search results that are buttons, not links — they pick rather than navigate. */
 .pickrow{display:block;width:100%;text-align:left;background:none;border:0;padding:11px 0;
  font:inherit;cursor:pointer;color:inherit}
