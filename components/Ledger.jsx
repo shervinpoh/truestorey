@@ -105,7 +105,7 @@ export default function Ledger() {
        market?.rent?.median]);
 
   const clear = r.breakEven.returnOfCash;
-  const pace = r.breakEven.cpfBaseline;
+  const cpfBack = r.cpfReturns;
   // Against what was paid — a comparison with the reader's OWN purchase price,
   // not with any estimate of what the property is worth now.
   const overPaid = clear && p ? clear / p - 1 : null;
@@ -283,23 +283,31 @@ export default function Ledger() {
               <span className="lab">A sale must clear</span>
               <Figure value={clear} format={f} />
               <p className="hint">
-                to return every dollar of cash you have put in — after settling the loan, refunding
-                CPF with its interest, and paying the commission and legal fees
-                {r.exit.ssd.rate ? ', and Seller’s Stamp Duty' : ''}.
+                to return every dollar of cash you have put in — after settling the loan
+                {cpfBack ? ', refunding CPF with its interest,' : ''} and paying the commission and
+                legal fees{r.exit.ssd.rate ? ', and Seller’s Stamp Duty' : ''}.
                 {overPaid !== null && <> That is <b>{(overPaid * 100).toFixed(1)}%</b> above what
                   you paid.</>}
               </p>
             </div>
-            <div className="plansumfig">
-              <span className="lab">To have kept pace with CPF OA</span>
-              <Figure value={pace} format={f} />
-              <p className="hint">
-                the same cash, had it earned the Ordinary Account rate of{' '}
-                {(r.cpf.rate * 100).toFixed(1)}% instead. The difference is{' '}
-                <b className="mono">{f(r.breakEven.forgone)}</b> of interest it did not earn while
-                it was a home. A reference, not a recommendation.
-              </p>
-            </div>
+            {/* Only when CPF was actually used. This slot used to grow the
+                reader's CASH at the Ordinary Account rate and call it a
+                benchmark — but cash outside CPF cannot earn that rate, and a
+                purchase with no CPF at all still got the figure. What is true
+                is that the refund goes to the ACCOUNT, not to the seller. */}
+            {cpfBack && (
+              <div className="plansumfig">
+                <span className="lab">Goes back to CPF, not to you</span>
+                <Figure value={cpfBack.total} format={f} />
+                <p className="hint">
+                  {f(cpfBack.principal)} you took out, plus{' '}
+                  <b className="mono">{f(cpfBack.interest)}</b> of accrued interest —{' '}
+                  {(cpfBack.interestShare * 100).toFixed(0)}% of the refund is money you never
+                  had. It returns to your Ordinary Account at completion, so it is not part of
+                  what you walk away with.
+                </p>
+              </div>
+            )}
             <div className="plansumrows">
               <div><span>Gone for good</span><b className="mono">{f(r.friction)}</b></div>
               <div><span>CPF to refund</span><b className="mono">{f(r.cpf.total)}</b></div>

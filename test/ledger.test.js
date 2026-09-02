@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ledger, cpfAccrual, futureValue, breakEven } from '../lib/calc/ledger.js';
+import { readFileSync } from 'node:fs';
+import { ledger, cpfAccrual, breakEven } from '../lib/calc/ledger.js';
 import { cpfAccruedInterest } from '../lib/calc/proceeds.js';
 import { CPF_OA_RATE, GST_RATE } from '../lib/calc/constants.js';
 
@@ -56,24 +57,41 @@ test('costs that would eat the whole price return nothing, not Infinity', () => 
 
 /* ── the ledger ────────────────────────────────────────────────────────────── */
 
-test('keeping pace with CPF always asks more than getting the cash back', () => {
-  // These two are compared side by side, so they must be built from the same
-  // cash stream. An earlier draft measured entry capital against the OA rate
-  // and the whole stream against itself, which made "keep pace" come out the
-  // SMALLER of the two — arithmetically fine and completely misleading.
-  for (const y of [1, 3, 5, 10, 20]) {
-    const r = ledger({ ...base, yearsHeld: y });
-    assert.ok(r.breakEven.cpfBaseline > r.breakEven.returnOfCash,
-      `at ${y}y keep-pace ${r.breakEven.cpfBaseline} is not above return-of-cash ${r.breakEven.returnOfCash}`);
-    assert.ok(r.breakEven.forgone > 0);
-  }
+test('there is no benchmark that grows cash at the CPF rate', () => {
+  // Cash held outside CPF does not earn the Ordinary Account rate and cannot
+  // be made to — you cannot put savings into your OA to collect 2.5%. The
+  // ledger used to grow the reader's cash at it and call the result the price
+  // a sale had to clear "to keep pace", which measured them against something
+  // they could not have had. Worst of all, a purchase with NO CPF still got
+  // the figure.
+  const noCpf = ledger({ ...base, cashDown: 500_000, cpfDown: 0, cpfMonthly: 0 });
+  assert.equal(noCpf.cpfReturns, null, 'no CPF used, nothing to say about CPF');
+  assert.deepEqual(Object.keys(noCpf.breakEven), ['returnOfCash'],
+    'a cash-versus-OA baseline has come back');
+  assert.ok(noCpf.caveats.some(c => /cannot be made to/i.test(c)),
+    'the page must say why no investment comparison is offered');
 });
 
-test('the gap between them is the forgone interest and nothing else', () => {
-  const r = ledger(base);
-  const expected = futureValue({ lump: r.cash.atEntry, monthly: r.cash.perMonth, months: r.months, rate: CPF_OA_RATE })
-    - r.cash.total;
-  assert.ok(Math.abs(r.breakEven.forgone - expected) <= 1);
+test('what CPF gets back is the refund, and the interest inside it is named', () => {
+  // The OA rate IS relevant to CPF that was used, and it is already fully
+  // accounted for: money out of an OA stops compounding, and the refund puts
+  // back exactly what it would have earned. So there is no shortfall to
+  // report — only the fact that all of it goes to the ACCOUNT and none of it
+  // into the seller's hands.
+  const r = ledger({ ...base, cashDown: 200_000, cpfDown: 300_000, cpfMonthly: 2_000 });
+  assert.equal(r.cpfReturns.principal, r.cpf.principal);
+  assert.equal(r.cpfReturns.interest, r.cpf.interest);
+  assert.equal(r.cpfReturns.total, r.cpf.principal + r.cpf.interest);
+  assert.ok(r.cpfReturns.interestShare > 0 && r.cpfReturns.interestShare < 1);
+  assert.equal(r.cpfReturns.rate, CPF_OA_RATE);
+});
+
+test('the longer it is held, the more of the refund is interest', () => {
+  // The part nobody expects. It is a share of a refund, not a loss, and the
+  // page has to be able to say which.
+  const five = ledger({ ...base, cpfDown: 300_000, cpfMonthly: 2_000, yearsHeld: 5 });
+  const twenty = ledger({ ...base, cpfDown: 300_000, cpfMonthly: 2_000, yearsHeld: 20 });
+  assert.ok(twenty.cpfReturns.interestShare > five.cpfReturns.interestShare);
 });
 
 test('SSD follows the purchase date, and vanishes when the schedule runs out', () => {
@@ -187,8 +205,6 @@ test('a stream that never stops is unchanged by the two-phase accrual', () => {
   const a = cpfAccrual({ lump: 50_000, monthly: 1_200, months: 120 });
   const b = cpfAccrual({ lump: 50_000, monthly: 1_200, months: 120, payingMonths: 120 });
   assert.equal(a.interest, b.interest);
-  assert.ok(Math.abs(futureValue({ lump: 10_000, monthly: 500, months: 60 })
-    - futureValue({ lump: 10_000, monthly: 500, months: 60, payingMonths: 60 })) < 1e-9);
 });
 
 /* ── against renting ───────────────────────────────────────────────────────── */
@@ -227,4 +243,13 @@ test('holding rent flat is stated, because it is the assumption doing the work',
   const r = ledger({ ...base, monthlyRent: 4000 });
   assert.equal(r.renting.heldFlat, true);
   assert.ok(r.omissions.some(o => /rents would have to FALL/i.test(o)));
+});
+
+test('the headline does not mention a CPF refund when there was no CPF', () => {
+  // Small, and the same class of error as the benchmark itself: text that
+  // describes a component of the calculation which is not in this reader's
+  // calculation at all.
+  const src = readFileSync(new URL('../components/Ledger.jsx', import.meta.url), 'utf8');
+  const line = src.slice(src.indexOf('to return every dollar of cash'), src.indexOf('to return every dollar of cash') + 320);
+  assert.match(line, /cpfBack \?/, 'the CPF clause must be conditional on CPF having been used');
 });
