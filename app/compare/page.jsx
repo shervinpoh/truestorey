@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { recordByHref, getIndex } from '../../lib/data/query.js';
 import { titleCase } from '../../lib/name.js';
 import Masthead from '../../components/Masthead.jsx';
+import ToolIntro from '../../components/ToolIntro.jsx';
 import ComparePicker from '../../components/ComparePicker.jsx';
 
 export const metadata = {
@@ -69,6 +70,7 @@ export default async function Page({ searchParams }) {
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
         title="Compare"
         sub="Put two or three blocks or projects next to each other. Every figure here is the same filed figure its own page shows — nothing is scored, ranked or recommended." />
+      <ToolIntro href="/compare" />
 
       <section className="pane">
         <ComparePicker selected={recs.map(r => ({ href: r.href, label: titleCase(r.label) }))} />

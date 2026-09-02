@@ -1504,3 +1504,72 @@ sup.cite a:hover{text-decoration:underline}
    its neighbour: a number that is not what you asked for. Not red — nothing
    here is wrong, it is just not what the control implied. */
 .warnline{border-left:2px solid var(--warn);padding-left:10px;color:var(--ink2)}
+
+/* ── The decision router on /tools ──────────────────────────────────────────
+   Three situations, side by side on a desktop and stacked on a phone. Cards
+   rather than a flat list because the grouping IS the help: the problem was
+   never that the tools were hidden, it was that fifteen of them at one level
+   made the reader supply the structure themselves.
+
+   --r2 on the card, --acc on the rule above each heading. No --acc-lit
+   anywhere here: none of this is live or selected data, and an accent on
+   navigation is how an accent stops meaning anything. */
+.situations{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:var(--r2);overflow:hidden}
+.sit{background:var(--card);padding:16px 17px 14px;scroll-margin-top:120px}
+.sit h3{margin:0;font-size:17px;letter-spacing:-.01em;line-height:1.25}
+.sit h3:before{content:"";display:block;width:26px;height:2px;background:var(--acc);margin:0 0 9px}
+.sitsub{margin:6px 0 12px;font-size:13px;color:var(--mute);line-height:1.5}
+.sitlist{list-style:none;margin:0;padding:0}
+.sitlist li{border-top:1px solid var(--line2)}
+/* 44px minimum touch target, and the whole row is the target rather than the
+   words inside it. */
+.sitlist a{display:block;padding:11px 0;min-height:44px;text-decoration:none;color:inherit}
+.sitlist a:hover .n,.sitlist a:focus-visible .n{text-decoration:underline}
+.sitlist .n{display:block;font-weight:600;font-size:14px;line-height:1.35;color:var(--acc-ink)}
+.sitlist .s{display:block;margin-top:3px;font-size:12.5px;color:var(--ink2);line-height:1.5}
+.sitmore{margin-top:10px;border-top:1px solid var(--line2)}
+.sitmore summary{cursor:pointer;min-height:44px;display:flex;align-items:center;
+  font-size:12.5px;color:var(--mute);list-style:none}
+.sitmore summary::-webkit-details-marker{display:none}
+.sitmore summary:before{content:"+ ";font-family:"IBM Plex Mono",ui-monospace,monospace}
+.sitmore[open] summary:before{content:"− "}
+.sitmore ul{margin:0 0 10px;padding-left:16px}
+.sitmore li{margin:0 0 6px;font-size:13px}
+@media(max-width:820px){ .situations{grid-template-columns:1fr} }
+
+/* "Browse every tool" closes the menu's own list, so it reads as the way out
+   of the three questions rather than as a fourth question. */
+.navdrop .navall b{color:var(--mute)}
+
+/* The four quick calculators wrapped to a second row at 390px and the orphan
+   read as a detached control. Let them wrap deliberately, in pairs. */
+.segwrap{flex-wrap:wrap}
+.segwrap button{flex:1 1 calc(50% - 1px)}
+@media(min-width:900px){ .segwrap button{flex:1 1 auto} }
+.quickget{margin:12px 0 0;font-size:13px;color:var(--ink2);line-height:1.6}
+.quickget b{color:var(--ink)}
+
+/* ── What a tool is for, above its inputs ───────────────────────────────────
+   Three terms and three sentences. A definition list because that is what it
+   is; a grid so the terms line up and the eye can skip whichever one it
+   already knows. The whole block is one hairline panel rather than three,
+   so it reads as a label on the page and not as the first section of it. */
+.toolintro{border:1px solid var(--line);border-radius:var(--r2);background:var(--card);
+  padding:13px 16px;margin:0 0 20px}
+.toolintro dl{display:grid;grid-template-columns:auto 1fr;gap:7px 16px;margin:0}
+.toolintro dl>div{display:contents}
+.toolintro dt{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);
+  white-space:nowrap;padding-top:2px}
+.toolintro dd{margin:0;font-size:13.5px;color:var(--ink2);line-height:1.55}
+/* Below 560px the label above its sentence: two columns would leave the
+   sentence four words wide. */
+@media(max-width:560px){
+  .toolintro dl{grid-template-columns:1fr;gap:2px}
+  .toolintro dl>div{display:block;margin-bottom:9px}
+}
+/* --warn, because a prefilled figure that is not yours is exactly "a value
+   this page could not know". Green and red stay reserved. */
+.egnote{margin:11px 0 0;padding-top:10px;border-top:1px solid var(--line2);
+  font-size:12.5px;color:var(--ink2);line-height:1.55}
+.egnote b{color:var(--warn)}

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Masthead from '../../components/Masthead.jsx';
+import ToolIntro from '../../components/ToolIntro.jsx';
 import FloorplanUpload from '../../components/FloorplanUpload.jsx';
 
 export const metadata = {
@@ -14,6 +15,7 @@ export default function Page() {
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
         title="Floor plan check"
         sub="What the plan shows about the layout, and the questions it raises for your renovation. Free, and the image is discarded the moment it is read." />
+      <ToolIntro href="/floorplan" />
       <section className="pane"><FloorplanUpload /></section>
       <section className="pane">
         <div className="note">

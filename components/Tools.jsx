@@ -6,6 +6,8 @@ import { sellTimeline } from '../lib/calc/timeline.js';
 import { amortise, extraPaymentSaving } from '../lib/calc/amortise.js';
 import { SOURCES, TDSR_LIMIT, MSR_LIMIT, STRESS_TEST_RATE, VARIABLE_INCOME_HAIRCUT } from '../lib/calc/constants.js';
 import { f } from './fmt.js';
+import { useSearchParams } from 'next/navigation';
+import { QUICK } from '../lib/nav.js';
 
 /**
  * The three calculators that were built, tested, and reachable from nowhere.
@@ -25,15 +27,38 @@ const money = n => (Number.isFinite(n) ? f(Math.round(n)) : '—');
 const pc = n => `${(n * 100).toFixed(n * 100 % 1 ? 1 : 0)}%`;
 
 export default function Tools({ ratesReviewed }) {
-  const [tab, setTab] = useState('sell');
+  /* The tab is in the URL so one of these can be LINKED. Before this, every
+     route into the quick calculators opened "When can I sell" and left the
+     reader to find the one they were sent for — which meant a situation card,
+     an article or a support reply could not point at the stamp-duty answer at
+     all. Read once for the initial tab; written with replaceState afterwards
+     so switching tabs does not push a history entry the back button then has
+     to walk through. */
+  const params = useSearchParams();
+  const asked = params.get('calc');
+  const [tab, setTab] = useState(QUICK.some(q => q.id === asked) ? asked : 'sell');
+
+  const choose = id => {
+    setTab(id);
+    if (typeof window === 'undefined') return;
+    const u = new URL(window.location.href);
+    u.searchParams.set('calc', id);
+    window.history.replaceState(null, '', u);
+  };
+
+  const shown = QUICK.find(q => q.id === tab);
+
   return (
     <>
-      <div className="seg" role="group" aria-label="Choose a calculator">
-        <button aria-pressed={tab === 'sell'} onClick={() => setTab('sell')}>When can I sell</button>
-        <button aria-pressed={tab === 'afford'} onClick={() => setTab('afford')}>What can I borrow</button>
-        <button aria-pressed={tab === 'duty'} onClick={() => setTab('duty')}>Stamp duty</button>
-        <button aria-pressed={tab === 'loan'} onClick={() => setTab('loan')}>The loan over time</button>
+      <div className="seg segwrap" role="group" aria-label="Choose a calculator">
+        {QUICK.map(q => (
+          <button key={q.id} aria-pressed={tab === q.id} onClick={() => choose(q.id)}>{q.label}</button>
+        ))}
       </div>
+      {/* What this one gives you, before it gives it. Four tabs that each
+          produce a different kind of answer are otherwise four unlabelled
+          doors. */}
+      {shown && <p className="quickget"><b>You will get:</b> {shown.get}</p>}
       <div style={{ marginTop: 22 }}>
         {tab === 'sell' && <Sell />}
         {tab === 'afford' && <Afford />}

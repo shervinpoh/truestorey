@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import Masthead from '../../components/Masthead.jsx';
+import ToolIntro from '../../components/ToolIntro.jsx';
 import BlindspotReport from '../../components/BlindspotReport.jsx';
 import { CHECKS, totalPossible, RUBRIC_VERSION } from '../../lib/blindspot/rubric.js';
 
@@ -16,6 +17,7 @@ export default function Page() {
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
         title="Blindspot"
         sub="Four things worth checking before you commit, counted against filed transactions. Free, no sign-up, and the rubric is printed below so you can check the arithmetic." />
+      <ToolIntro href="/blindspot" />
 
       <section className="pane">
         <Suspense fallback={<p className="hint">Loading the checks…</p>}>

@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import Masthead from '../../components/Masthead.jsx';
+import ToolIntro from '../../components/ToolIntro.jsx';
 import LeaseView from '../../components/LeaseView.jsx';
 import { getIndex } from '../../lib/data/query.js';
 import { parseRemaining } from '../../lib/calc/lease.js';
@@ -17,6 +18,7 @@ export default function Page() {
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
         title="What a lease is worth"
         sub="The leasehold relativity table — what the State applies when it prices a lease renewal — and what one more year of holding costs on it." />
+      <ToolIntro href="/lease" />
       <section className="pane">
         <LeaseView observed={observed()} />
       </section>

@@ -1,4 +1,5 @@
 import Masthead from '../../components/Masthead.jsx';
+import ToolIntro from '../../components/ToolIntro.jsx';
 import Ledger from '../../components/Ledger.jsx';
 
 export const metadata = {
@@ -13,6 +14,7 @@ export default function Page() {
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
         title="What owning it actually costs"
         sub="Every price conversation is about what a home is worth. This one is about what it costs to hold, whatever it turns out to be worth." />
+      <ToolIntro href="/cost" example="figures" />
       <section className="pane">
         <Ledger />
       </section>

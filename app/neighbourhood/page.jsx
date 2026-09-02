@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Masthead from '../../components/Masthead.jsx';
+import ToolIntro from '../../components/ToolIntro.jsx';
 import NeighbourhoodChat from '../../components/NeighbourhoodChat.jsx';
 
 export const metadata = {
@@ -14,6 +15,7 @@ export default function Page() {
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
         title="Neighbourhood tracker"
         sub="Ask about a town, an estate or a project and get what has actually been published, with the links. Free, and nothing is saved." />
+      <ToolIntro href="/neighbourhood" />
       <section className="pane"><NeighbourhoodChat /></section>
       <section className="pane">
         <div className="note">

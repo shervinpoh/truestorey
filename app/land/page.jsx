@@ -1,4 +1,5 @@
 import Masthead from '../../components/Masthead.jsx';
+import ToolIntro from '../../components/ToolIntro.jsx';
 import LandView from '../../components/LandView.jsx';
 import { glsAwards, hdbSitesLinked } from '../../lib/data/query.js';
 
@@ -17,6 +18,7 @@ export default function Page() {
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
         title="What developers paid for the land"
         sub="Every Government Land Sales site URA has awarded since 1993 — the winning tender, the rate, and how many wanted it." />
+      <ToolIntro href="/land" />
       <section className="pane">
         {d ? <LandView data={d} /> : (
           <div className="warn">

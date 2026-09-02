@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import Masthead from '../../components/Masthead.jsx';
+import ToolIntro from '../../components/ToolIntro.jsx';
 import Planner from '../../components/Planner.jsx';
 import { allTowns, allDistricts, getIndex } from '../../lib/data/query.js';
 import { titleCase } from '../../lib/name.js';
@@ -60,6 +61,7 @@ export default function Page() {
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
         title="Can I afford it"
         sub="TDSR, the loan-to-value ceiling, the downpayment, the cash CPF cannot cover, and both stamp duties — as one answer instead of four." />
+      <ToolIntro href="/plan" example="figures" />
 
       <section className="pane">
         <Suspense fallback={<p className="hint">Loading…</p>}>
