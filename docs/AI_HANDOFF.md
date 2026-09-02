@@ -1,7 +1,43 @@
 # AI handoff — Truestorey
 
-Current 2 Sep 2026. This file is the state of play, not a transcript. Overwrite
-it at the next handoff.
+Current 2 Sep 2026, updated after the comprehension pass. This file is the
+state of play, not a transcript. Overwrite it at the next handoff.
+
+## Status since this file was written
+
+The comprehension and personality phase below has been **largely done**. Three
+commits on master, none pushed — a push to master IS a deploy:
+
+- `b390c47` — the Blindspot price fix, committed out of the dirty tree. It was
+  complete and tested; leaving it uncommitted while building on top of it was
+  the risk. Nothing in it was changed.
+- `f851b4d` — navigation, the `/tools` router, per-tool introductions, the
+  addressable quick calculators, the 390px tab wrap.
+- `89daeb8` — the personal layer on the homepage and `/about`.
+
+**295 tests, build clean.** Against the acceptance criteria at the bottom of
+this file: 1, 3, 4, 5, 6, 7, 8, 9, 10, 11 and 12 are met and verified in a
+browser at 1440x900 and 390x844. Criterion 2 is met for Tools and **not** for
+`Look up`, which still offers six. That was left rather than decided alone —
+those six are content indexes rather than mechanisms, and grouping them adds a
+tap to the site's main content.
+
+**Still open from the phase:** the result hierarchy (answer · what changed it ·
+what public data cannot know · next action), the labelled "Shervin's note"
+bridge, and photography. `NEXT.md` §2 lists them under "What that pass did NOT
+finish".
+
+**The first-person copy is a DRAFT.** Nothing biographical is asserted anywhere
+— no history, no track record, no story, because none of it is in this
+repository. Every clause on the homepage bridge and `/about` is provable from
+the product. Shervin should approve or replace the words; the structure is the
+part that was contributed.
+
+One correction to the recommendations below: the suggested `/yield` label
+"What rent does this price imply?" overstates the tool, which reports a GROSS
+return from filed rents over filed prices and implies no rent at all.
+`test/situations.test.js` now asserts that a plain label may simplify a claim
+and may not enlarge it.
 
 ---
 
@@ -38,8 +74,8 @@ restrained radii, and motion only when it explains information.
 - Branch: master
 - HEAD: fbf5c01
 - origin/master is at the same commit.
-- The worktree is intentionally dirty with the completed Blindspot price fix.
-  **Do not reset or discard it.**
+- The Blindspot price fix is no longer in the worktree: it is committed at
+  `b390c47`, unchanged. Nothing was reset or discarded.
 - Modified before this handoff:
   - NEXT.md
   - app/api/ai/blindspot/route.js

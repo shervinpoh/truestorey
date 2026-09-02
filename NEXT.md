@@ -4,9 +4,13 @@ Rewritten 1 Sep 2026, at the handover to Codex. `CLAUDE.md` has the rules and
 the architecture — **read that first, it is not optional.** This file is only
 the ordered backlog.
 
-**State:** live at https://truestorey.vercel.app · **284 tests** · three npm
+**State:** live at https://truestorey.vercel.app · **295 tests** · three npm
 dependencies · Blindspot scoring out of 10 with all four checks running · data
 refreshing itself daily via `.github/workflows/refresh-data.yml`.
+
+**Unpushed on master:** `b390c47` (Blindspot price fix, committed out of the
+dirty tree), `f851b4d` (navigation and comprehension), `89daeb8` (the personal
+layer). A push to master IS a deploy — see the top of `AGENTS.md`.
 
 ---
 
@@ -138,6 +142,54 @@ found. In brief:
 
 ---
 
+### The 2 Sep comprehension pass
+
+The complaint was "too many things and not enough explanation". It was a
+navigation problem, not a decoration problem, and it is largely fixed.
+
+- **The doorway is three sentences.** The Tools menu was twelve destinations
+  named after mechanisms in a panel that had to scroll. It is now `I'm buying`
+  / `I own, or I'm selling` / `I'm checking one specific home` plus a way to
+  browse everything — four choices, measured at 245px against an 804px ceiling.
+  The phone menu shows the same four instead of eleven bare routes.
+- **The words live in `lib/nav.js`.** One description drives the menu, the
+  `/tools` router and each tool's own header. `SITUATIONS` caps recommendations
+  at three per situation and `test/situations.test.js` fails if that or the
+  no-acronym rule is broken.
+- **`/tools` routes instead of listing.** Three situation cards, three
+  recommended starts each, long tail behind a disclosure, full index below.
+- **Every tool says what it is for** before its first input — `ToolIntro`,
+  use/need/get. Calculators that open on prefilled figures say so in `--warn`.
+- **The quick calculators are addressable** — `/tools?calc=duty`. Every route
+  in used to open "When can I sell". Their tabs also stop wrapping 3+1 at 390px.
+- **Somebody built this.** Four sentences on the homepage after the search, and
+  `/about` reordered to who → why → three principles → particulars → method.
+  **The first-person copy is a DRAFT for Shervin to approve or replace.**
+  Nothing biographical is asserted; every clause is provable from the product.
+
+Corrected on the way: the handoff proposed "What rent does this price imply?"
+for `/yield`, which reports a GROSS return and implies no rent. Plain language
+may simplify a claim and may not enlarge it — there is a test for that now.
+
+### What that pass did NOT finish
+
+1. **`Look up` still shows six items.** Acceptance criterion 2 says no primary
+   surface offers more than four equally weighted choices. Tools is fixed; this
+   group is not. It is a weaker case — those six are content indexes, not
+   mechanisms, and grouping them adds a tap to the site's main content — so it
+   was left rather than decided unilaterally.
+2. **No result hierarchy.** The brief asks every tool to end with: the answer ·
+   what changed it · what public data cannot know · the next useful action.
+   Several tools do parts of this; none does it consistently.
+3. **No labelled human bridge.** "Shervin's note" or "What I would check next"
+   after the arithmetic. It must never change a deterministic score or assign a
+   number — same rule as everywhere else.
+4. **Photography.** Blocked on Shervin; see §0. Both new surfaces render
+   without a portrait rather than with a placeholder face.
+5. **"What can I borrow" is still separate from `/plan`.** Unchanged on
+   purpose: it uniquely applies the variable-income haircut, and §6 says do not
+   delete it until `/plan` can express that case.
+
 ## 3 · The TRM gaps still open
 
 Three remain, all buildable from data already held.
@@ -247,9 +299,12 @@ negotiation.
    beside it. A median from transactions is not a point valuation, and
    reversing the hierarchy because an outside report grouped the two together
    would make the first answer harder to scan without making it more honest.
-4. **Splitting the Tools menu.** Shervin has agreed it should happen and asked
-   for it to wait — more tools are coming first. The dropdown already scrolls;
-   the problem is length, not overflow.
+4. ~~**Splitting the Tools menu.**~~ **Done, 2 Sep.** The wait was superseded
+   by Shervin's direct feedback that the site is confusing to a normal person.
+   The menu is now three situations plus "Browse every tool"; the inventory
+   moved to `/tools`, the footer and the sitemap, which is where an inventory
+   belongs. A new tool now needs a `plain`, `use`, `need` and `get` in
+   `lib/nav.js` or `test/situations.test.js` goes red.
 
 ### Feature audit decisions
 
@@ -304,7 +359,7 @@ running — **the approval step is the feature; do not add a way to skip it.**
 
 ## How to work in this repo
 
-- `npm test` before and after. **284 passing.** A red test is a real finding.
+- `npm test` before and after. **295 passing.** A red test is a real finding.
 - `npm run preflight` before assuming a key works. It makes a real call to each
   provider and only a 200 counts.
 - **Never run `next build` while a dev or production server is up.** They share
@@ -317,3 +372,6 @@ running — **the approval step is the feature; do not add a way to skip it.**
   actually cause. Several here exist because the bug already happened.
 - Degrade, never break. Say what could not be measured.
 - **If a feature needs a model to produce a number, the feature is wrong.**
+- **JSX text does not process `\uXXXX` escapes.** Write the character. An em
+  dash written as an escape reached a rendered page once;
+  `test/jsx-escapes.test.js` is why it did not ship.
