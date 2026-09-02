@@ -1573,3 +1573,19 @@ sup.cite a:hover{text-decoration:underline}
 .egnote{margin:11px 0 0;padding-top:10px;border-top:1px solid var(--line2);
   font-size:12.5px;color:var(--ink2);line-height:1.55}
 .egnote b{color:var(--warn)}
+
+/* ── Who built this ─────────────────────────────────────────────────────────
+   Sits between the hero and the lead article: after the search, so somebody
+   who arrived with an address is never made to read about the author first,
+   and before the fold ends, so it is not effectively absent.
+
+   A rule and warm ground rather than a card — a card would make it an advert.
+   --acc for the rule because it is structure; the light teal stays on live
+   data, where it means something. */
+.whobuilt{border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  background:var(--sunk);padding:18px 20px;margin:0 0 26px;border-left:3px solid var(--acc)}
+.wsay{margin:0;max-width:72ch;font-size:15px;line-height:1.65;color:var(--ink2)}
+.wsay b{color:var(--ink);font-weight:600}
+.wwho{margin:9px 0 0;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;
+  letter-spacing:.01em;color:var(--mute)}
+@media(max-width:600px){ .whobuilt{padding:15px 15px} .wsay{font-size:14.5px} }

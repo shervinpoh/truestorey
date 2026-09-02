@@ -10,9 +10,30 @@ export const metadata = {
 
 /**
  * The page a sceptical reader goes to before deciding whether to believe the
- * rest of the site. It is therefore mostly about method and limits, not about
- * him — anyone can claim expertise, and this site's whole argument is that
- * claims are worth less than disclosed arithmetic against a cited source.
+ * rest of the site.
+ *
+ * It was ALL method and no person: it opened "About this site" above a page
+ * count, a town count and an archive count. That is a good answer to "can I
+ * trust these numbers" and no answer at all to "who is telling me this",
+ * which is the question the word "about" makes a reader expect — and an odd
+ * gap on a site published under one named agent's registration.
+ *
+ * So the order is inverted. Who, then why, then the three principles, then
+ * the particulars, then the method that used to be the whole page. The method
+ * sections are unchanged: they were never the problem.
+ *
+ * THE PRINCIPLES ARE NOT ASPIRATIONS. Each one names the thing in the product
+ * that already enforces it, because a stated value with no mechanism behind it
+ * is marketing, and this site's entire argument is that claims are worth less
+ * than disclosed arithmetic against a cited source. Saying so and then
+ * printing three unfalsifiable virtues would lose the argument on its own
+ * page.
+ *
+ * The first-person copy is a DRAFT for Shervin to approve or rewrite. Nothing
+ * biographical is asserted anywhere on it — no history, no track record, no
+ * story — because none of that is in this repository, and inventing a
+ * person's background is not a thing to do on their behalf. A portrait
+ * belongs at the top and there is none in the repo yet.
  */
 export default function Page() {
   const cat = catalogue();
@@ -22,10 +43,37 @@ export default function Page() {
 
   return (
     <main className="shell">
-      <Masthead crumbs={[{ href: '/', label: 'Home' }]} title="About this site"
-        sub={`Written by ${name}. Every figure comes from public government data, and every page shows which dataset and which period it came from.`} />
+      <Masthead crumbs={[{ href: '/', label: 'Home' }]} title={`Hi, I’m ${name.split(' ')[0]}`}
+        sub="I am a licensed agent, and this is the site I wanted to exist when people asked me what a flat was actually worth." />
 
       <section className="pane">
+        <p className="lede" style={{ maxWidth: '68ch' }}>
+          Almost every property conversation in Singapore starts with a number somebody cannot
+          show you the working for. I built Truestorey so that the working is the product: what
+          was actually filed, which dataset it came from, which months it covers, and what the
+          data cannot tell you. It is free, there is no account, and there is no tier holding
+          anything back — that is the position, not an introductory offer.
+        </p>
+
+        <div className="sh" style={{ marginTop: 22 }}><span>Three rules I hold this site to</span></div>
+        <div className="note"><b>If the source cannot be shown, it does not publish.</b> Every
+          derived figure on the site prints the dataset and the period beside it. Where a check
+          could not run, the page says so rather than scoring it as nothing to worry about.</div>
+        <div className="note"><b>A range is more honest than a single valuation.</b> Nothing here
+          will ever give you one number for what a home is worth, because no public dataset can
+          see your floor, your facing, your renovation or your lease.</div>
+        <div className="note"><b>A useful tool should not need your phone number.</b> There is no
+          number field on this site. Consent is per channel, it is never bundled, and an enquiry
+          is not consent to be called.</div>
+
+        <p className="prov" style={{ marginTop: 16 }}>
+          {name}{process.env.NEXT_PUBLIC_CEA_REG ? ` · CEA Reg. No. ${process.env.NEXT_PUBLIC_CEA_REG}` : ''}
+          {process.env.NEXT_PUBLIC_AGENCY ? ` · ${process.env.NEXT_PUBLIC_AGENCY}` : ''}
+        </p>
+      </section>
+
+      <section className="pane">
+        <div className="sh"><span>What the site is made of</span></div>
         <div className="kpi3">
           <div><div className="v">{urls.length ? urls.length.toLocaleString('en-SG') : '13,269'}</div>
             <span className="lab">Pages</span></div>

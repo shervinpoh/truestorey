@@ -3,6 +3,7 @@ import { catalogue, hdbIndex, allUrls, archive, allTowns, projects, boundaries, 
 import { allInsights } from '../lib/insights.js';
 import { NAV } from '../lib/nav.js';
 import Search from '../components/Search.jsx';
+import WhoBuilt from '../components/WhoBuilt.jsx';
 import IslandMap from '../components/IslandMap.jsx';
 
 export const metadata = { alternates: { canonical: '/' } };
@@ -105,6 +106,8 @@ export default function Home() {
           <Link href="/map" className="islandgo">Open the full map →</Link>
         </div>
       </section>
+
+      <WhoBuilt />
 
       {lead && (
         <section className="lede">
