@@ -61,7 +61,31 @@ Nothing below can be finished by an agent. Ordered by what unblocks the most.
 9. **Make.com HTTP module** posting to `/api/webhook/article` with the Bearer
    secret from `.env.local`. Payload shape is in `SETUP.md` §4c. The endpoint is
    verified against production; nothing depends on it.
-10. **Photos into `photos-in/` with a manifest**, then `npm run photos`.
+10. **Photos.** Ten are in `photos-in/` as of 2 Sep and `photos.json` is drafted
+    — every `alt` is written from the actual frame. Three things are needed
+    before `npm run photos` will publish any of them:
+    - **`place` is missing on nine of ten, on purpose.** Where a photograph was
+      taken cannot be read off the picture, and the ingest refuses an entry
+      without it rather than captioning a guess. Only `IMG_3193` has one: the
+      name is on the entrance signage in frame, and it is Perfect Ten, which
+      is a record here with 239 filed transactions.
+    - **Three files are stored sideways** — `IMG_1679`, `IMG_1780`, `IMG_3193`.
+      There is no orientation tag to correct them (`sips -g orientation`
+      returns nil), so they will publish rotated. Rotate the originals, or say
+      the word and `ingest-photos.mjs` can take a `rotate` field.
+    - **Three are off-brief**: a showflat scale model, a condominium pool deck,
+      and office towers with a Christmas tree. Those are the visual language of
+      the marketing portals this site defines itself against, and the scale
+      model is a developer's property besides. The three strongest are the HDB
+      precinct with the playgrounds, the estate over the expressway, and the
+      forest edge under a storm.
+11. **Still no portrait.** `/about` and the homepage bridge are both built to
+    take one and both render without rather than showing a placeholder face.
+    Nothing in the current ten is a photograph of a person.
+12. **Approve or replace the first-person copy.** `/about` carries a
+    PLACEHOLDER ORIGIN, marked as such in the source. It says why the SITE
+    exists and asserts nothing about your history, because that is the only
+    version safe to write on your behalf.
 
 ---
 

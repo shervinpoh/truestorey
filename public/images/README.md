@@ -4,9 +4,9 @@ Drop files here. Reference them from a post's frontmatter:
 
 ```yaml
 ---
-title: Everyone says sell the moment you hit MOP
-image: /images/2026-08-mop-blocks.png
-imageAlt: Isometric diagram of HDB blocks with units past their fifth year picked out
+title: What the resale index did this quarter
+image: /images/2026-09-rpi.png
+imageAlt: The HDB Resale Price Index by quarter, with the latest reading picked out
 imageCredit: Shervin Poh          # omit for generated illustrations
 ---
 ```

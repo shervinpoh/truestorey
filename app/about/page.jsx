@@ -44,15 +44,37 @@ export default function Page() {
   return (
     <main className="shell">
       <Masthead crumbs={[{ href: '/', label: 'Home' }]} title={`Hi, I’m ${name.split(' ')[0]}`}
-        sub="I am a licensed agent, and this is the site I wanted to exist when people asked me what a flat was actually worth." />
+        sub="I am a licensed agent, and this is the site I wanted to exist." />
 
       <section className="pane">
+        {/* ─────────────────────────────────────────────────────────────────
+            PLACEHOLDER ORIGIN — written to be replaced.
+
+            Shervin asked for something to stand here until he writes his own.
+            It is deliberately an origin for the SITE and not a biography of
+            the person: every sentence below is checkable against this
+            repository or against what HDB and URA publish, and not one of
+            them asserts anything about his history, his track record or his
+            clients. A model writing a person's past from nothing is how a bio
+            becomes a fabrication, and this one goes out under a real CEA
+            registration number.
+
+            When the real version arrives, replace the two paragraphs. Keep
+            the property that makes this safe: say why the SITE exists, and
+            let the person say the rest in his own words.
+            ───────────────────────────────────────────────────────────────── */}
         <p className="lede" style={{ maxWidth: '68ch' }}>
-          Almost every property conversation in Singapore starts with a number somebody cannot
-          show you the working for. I built Truestorey so that the working is the product: what
-          was actually filed, which dataset it came from, which months it covers, and what the
-          data cannot tell you. It is free, there is no account, and there is no tier holding
-          anything back — that is the position, not an introductory offer.
+          The data has always been public. HDB publishes every filed resale; URA publishes every
+          private transaction. What has never been public is the <em>working</em> — those figures
+          reach most people as a spreadsheet nobody can read, or from behind a subscription, or
+          as one confident valuation with the arithmetic taken out of it.
+        </p>
+        <p className="lede" style={{ maxWidth: '68ch' }}>
+          Truestorey is the working. Nothing here is a number I am asking you to take on trust:
+          it is a number with its source, its period and its limits printed beside it, and where
+          something could not be measured the page says so instead of quietly rounding it to
+          nothing. It is free, there is no account, and no tier holds anything back — that is the
+          position, not an introductory offer.
         </p>
 
         <div className="sh" style={{ marginTop: 22 }}><span>Three rules I hold this site to</span></div>
