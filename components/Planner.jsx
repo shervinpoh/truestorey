@@ -122,6 +122,73 @@ function FromProperty({ href }) {
  * It says median PRICE. Half of what was filed sold above it — this is
  * somewhere to start looking, not a claim that a home exists at this price.
  */
+/**
+ * What SIZE the budget reaches, which is the half of the question the panel
+ * above cannot answer.
+ *
+ * A town median is a median over every flat type in it, so "Ang Mo Kio is
+ * inside your budget" can be true because of its two-room flats while every
+ * four-room there is out of reach. The figure a buyer needs is not which town
+ * they can afford, it is which SIZE they can afford and then where.
+ *
+ * The lower quartile decides reachability, not the median: a quarter of what
+ * traded went at or below it, so it is the honest answer to "could I be
+ * here". The cheapest single sale is not used at all — one low price is a
+ * story about one home, and quoting it would send somebody looking for
+ * something that mostly is not there.
+ */
+function SizeWithin({ budget, cap, type }) {
+  if (!budget?.rows?.length || !Number.isFinite(cap)) return null;
+  const scope = type === 'HDB' ? 'HDB' : 'PRIVATE';
+  const rows = budget.rows.filter(r => r.scope === scope);
+  if (!rows.length) return null;
+
+  const byType = new Map();
+  for (const r of rows) {
+    const t = byType.get(r.type) || byType.set(r.type, { type: r.type, within: [], all: 0, cheapest: null }).get(r.type);
+    t.all++;
+    if (t.cheapest === null || r.p25 < t.cheapest.p25) t.cheapest = r;
+    if (r.p25 <= cap) t.within.push(r);
+  }
+  const list = [...byType.values()].sort((a, b) => b.within.length - a.within.length || a.type.localeCompare(b.type));
+  if (!list.length) return null;
+
+  return (
+    <div className="within">
+      <div className="sh">
+        <span>And what size that reaches</span>
+        <span>lower quartile of filed sales</span>
+      </div>
+      <ul className="sizewithin">
+        {list.map(t => (
+          <li key={t.type} className={t.within.length ? undefined : 'out'}>
+            <span className="n">{titleCase(t.type)}</span>
+            {t.within.length ? (
+              <span className="s">
+                Reachable in <b>{t.within.length}</b> of {t.all}{' '}
+                {scope === 'HDB' ? 'towns' : 'districts'} — cheapest{' '}
+                {titleCase(t.within[0] && t.within.reduce((lo, r) => (r.p25 < lo.p25 ? r : lo), t.within[0]).area)}{' '}
+                at {money(t.within.reduce((lo, r) => (r.p25 < lo.p25 ? r : lo), t.within[0]).p25)}
+              </span>
+            ) : (
+              <span className="s">
+                Out of reach everywhere filed — the cheapest quarter starts at{' '}
+                {money(t.cheapest.p25)} in {titleCase(t.cheapest.area)}
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
+      <p className="prov">
+        {budget.source} · last {budget.months} months, from {budget.from} · a group of fewer than{' '}
+        {budget.minSales} filed sales is not shown. The lower quartile is the cheaper end of what
+        actually traded, not the cheapest sale. Reaching a price is not the same as a home being
+        available at it.
+      </p>
+    </div>
+  );
+}
+
 function MarketWithin({ market, cap }) {
   const [all, setAll] = useState(false);
   const [sort, setSort] = useState('closest');
@@ -272,7 +339,7 @@ function BuyingWhat({ type, setType, hdbLoan, setHdbLoan, price }) {
 
 const VALID_TYPES = ['HDB', 'EC_DEVELOPER', 'EC_RESALE', 'PRIVATE'];
 
-export default function Planner({ markets = {} }) {
+export default function Planner({ markets = {}, budget = null }) {
   const q = useSearchParams();
   const [price, setPrice] = useState(Number(q.get('price')) || 650000);
   // Record pages hand over HDB or PRIVATE; the EC branches are chosen here.
@@ -447,6 +514,7 @@ export default function Planner({ markets = {} }) {
       </div>
 
       <MarketWithin market={market} cap={cap} />
+      <SizeWithin budget={budget} cap={cap} type={type} />
 
       <div className="plansteps">
         <Row label="A bank would assess you for" value={money(r.afford.maxLoan)}

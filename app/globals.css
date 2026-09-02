@@ -1632,3 +1632,17 @@ sup.cite a:hover{text-decoration:underline}
 .trendtable i{font-style:normal;font-size:11px;color:var(--mute)}
 .trendtable tr.thinyear td{color:var(--mute)}
 .trendtable tr.thinyear td:first-child:after{content:" ·";color:var(--warn)}
+
+/* What size a budget reaches. A list rather than tiles: these are categories
+   with a sentence each, not places to click through to. */
+.sizewithin{list-style:none;margin:12px 0 0;padding:0}
+.sizewithin li{padding:9px 0;border-bottom:1px solid var(--line2);display:flex;
+  gap:14px;align-items:baseline;flex-wrap:wrap}
+.sizewithin li:last-child{border-bottom:0}
+.sizewithin .n{font-weight:600;font-size:14px;min-width:11ch}
+.sizewithin .s{font-size:13px;color:var(--ink2);line-height:1.5}
+.sizewithin .s b{color:var(--ink)}
+/* Out of reach is stated, not hidden — knowing a size is nowhere inside the
+   budget is as useful as knowing where it is. --mute, not red: it is a fact
+   about a budget, not a warning. */
+.sizewithin li.out .n,.sizewithin li.out .s{color:var(--mute)}

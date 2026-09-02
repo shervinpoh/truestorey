@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Masthead from '../../components/Masthead.jsx';
 import ToolIntro from '../../components/ToolIntro.jsx';
 import Planner from '../../components/Planner.jsx';
-import { allTowns, allDistricts, getIndex } from '../../lib/data/query.js';
+import { allTowns, allDistricts, getIndex, budget } from '../../lib/data/query.js';
 import { titleCase } from '../../lib/name.js';
 
 export const metadata = {
@@ -65,7 +65,7 @@ export default function Page() {
 
       <section className="pane">
         <Suspense fallback={<p className="hint">Loading…</p>}>
-          <Planner markets={markets} />
+          <Planner markets={markets} budget={budget()} />
         </Suspense>
       </section>
 
