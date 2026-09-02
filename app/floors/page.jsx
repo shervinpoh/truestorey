@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { storey } from '../../lib/data/query.js';
 import Masthead from '../../components/Masthead.jsx';
 import ToolIntro from '../../components/ToolIntro.jsx';
+import ToolUse from '../../components/ToolUse.jsx';
 import FloorView from '../../components/FloorView.jsx';
 
 export const metadata = {
@@ -17,6 +18,7 @@ export default function Page() {
       <main className="shell">
         <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]} title="Tower view" />
       <ToolIntro href="/floors" />
+      <ToolUse id="floors" />
         <div className="warn"><p style={{ margin: 0 }}>Not built yet. Run <code>npm run build:storey</code>.</p></div>
       </main>
     );

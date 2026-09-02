@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Masthead from '../../../components/Masthead.jsx';
 import { SITUATIONS, situationTools } from '../../../lib/nav.js';
+import SituationSeen from '../../../components/SituationSeen.jsx';
 
 /**
  * One page per situation somebody is actually in.
@@ -51,6 +52,7 @@ export default async function Page({ params }) {
         crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
         title={s.label}
         sub={s.sub} />
+      <SituationSeen id={s.id} />
 
       <section className="pane">
         <p className="lede" style={{ maxWidth: '68ch' }}>{s.intro}</p>

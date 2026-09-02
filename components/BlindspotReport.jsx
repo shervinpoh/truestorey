@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { toolRun } from './Track.jsx';
 import { f, num } from './fmt.js';
 import { titleCase } from '../lib/name.js';
 import { Figure, still } from './Motion.jsx';
@@ -83,7 +84,7 @@ export default function BlindspotReport() {
   async function run(e) {
     e.preventDefault();
     if (!ready || state === 'loading') return;
-    setState('loading'); setError(''); setReport(null);
+    setState('loading'); setError(''); setReport(null); toolRun('blindspot');
     try {
       const res = await fetch('/api/ai/blindspot', {
         method: 'POST',

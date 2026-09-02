@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { yields } from '../../lib/data/query.js';
 import Masthead from '../../components/Masthead.jsx';
 import ToolIntro from '../../components/ToolIntro.jsx';
+import ToolUse from '../../components/ToolUse.jsx';
 import YieldView from '../../components/YieldView.jsx';
 
 export const metadata = {
@@ -22,6 +23,7 @@ export default function Page() {
           title="Rental yields"
           sub="Filed rents over filed prices, matched on unit size." />
       <ToolIntro href="/yield" />
+      <ToolUse id="yield" />
         <section className="pane">
           <div className="warn">
             <p style={{ margin: 0 }}>

@@ -8,6 +8,7 @@ import { SOURCES, TDSR_LIMIT, MSR_LIMIT, STRESS_TEST_RATE, VARIABLE_INCOME_HAIRC
 import { f } from './fmt.js';
 import { useSearchParams } from 'next/navigation';
 import { QUICK } from '../lib/nav.js';
+import { toolRun } from './Track.jsx';
 
 /**
  * The three calculators that were built, tested, and reachable from nowhere.
@@ -40,6 +41,10 @@ export default function Tools({ ratesReviewed }) {
 
   const choose = id => {
     setTab(id);
+    // Four tools behind one route. Counting them as "/tools" would say the
+    // page was used and never which of the four, which is the only part worth
+    // knowing before deciding whether to merge or drop one.
+    toolRun(`quick:${id}`);
     if (typeof window === 'undefined') return;
     const u = new URL(window.location.href);
     u.searchParams.set('calc', id);

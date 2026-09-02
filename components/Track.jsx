@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { EVENTS } from '../lib/analytics.js';
 
@@ -64,4 +64,32 @@ export default function Track() {
   }, [path]);
 
   return null;
+}
+
+/**
+ * Fires TOOL_RUN once per tool per tab, on the first real interaction.
+ *
+ * Not on mount. A pageview already records that somebody arrived, and counting
+ * arrivals as uses would make every tool look used and the number mean
+ * nothing. `used()` is called by the tool at the point something actually
+ * happened — a figure moved, a report ran, a project was picked.
+ *
+ * The latch is per tab and per tool, so a reader dragging a slider thirty
+ * times is one use, which is the honest count.
+ */
+const RAN = new Set();
+export function toolRun(tool) {
+  if (!tool || RAN.has(tool)) return;
+  RAN.add(tool);
+  track(EVENTS.TOOL_RUN, { tool });
+}
+
+/** A hook for the common case: latch on the first change to any input. */
+export function useToolRun(tool) {
+  const fired = useRef(false);
+  return useCallback(() => {
+    if (fired.current) return;
+    fired.current = true;
+    toolRun(tool);
+  }, [tool]);
 }

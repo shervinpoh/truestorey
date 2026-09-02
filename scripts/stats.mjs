@@ -11,6 +11,11 @@
  */
 import fs from 'node:fs/promises';
 import { FUNNEL, EVENTS } from '../lib/analytics.js';
+import { NAV } from '../lib/nav.js';
+
+/** Tool routes, from the nav, so this list cannot drift from the site. */
+const TOOLS = NAV.find(g => /tool/i.test(g.group)).items
+  .map(i => i.href.replace('/', '')).filter(t => t && t !== 'tools');
 import { recentEvents, configured } from '../lib/supabase/rest.js';
 
 const arg = process.argv[2];
@@ -141,6 +146,41 @@ async function main() {
   if (picks.length) {
     console.log('\n\nMOST OPENED FROM SEARCH\n');
     for (const [h, n] of tally(picks, 'href').slice(0, 12)) console.log(`  ${rpad(num(n), 6)}  ${h}`);
+  }
+
+  /* ---- which tools are actually used ---- */
+  const runs = events.filter(e => e.e === EVENTS.TOOL_RUN);
+  const seenTools = new Set(views.map(e => String(e.p || '').split('/')[1]).filter(Boolean));
+  if (runs.length) {
+    console.log('\n\nTOOLS ACTUALLY USED  (one per tool per visit, not per click)\n');
+    for (const [t, n] of tally(runs, 'tool')) console.log(`  ${rpad(num(n), 6)}  ${t}`);
+
+    /* The line that answers the question this was added for. A tool with
+     * visits and no runs is one people open and walk away from, and NEXT.md
+     * says that is what must be measured before any specialist tool is judged
+     * by taste. Named here rather than left to be noticed in the list above. */
+    const ran = new Set(runs.map(e => e.tool));
+    const opened = [...seenTools].filter(t => TOOLS.includes(t));
+    const cold = opened.filter(t => !ran.has(t));
+    if (cold.length) {
+      console.log('\n  Opened but never used: ' + cold.join(', '));
+      console.log('  That is a page people land on and leave. Before cutting one, check');
+      console.log('  whether it is the tool or the way in that is failing.');
+    }
+  } else if (seenTools.size) {
+    console.log('\n\nTOOLS ACTUALLY USED\n\n  No runs recorded yet. Either nobody has used one');
+    console.log('  since tracking was added, or a page is missing its <ToolUse id>.');
+  }
+
+  /* ---- did the guided paths get taken ---- */
+  const sits = events.filter(e => e.e === EVENTS.SITUATION);
+  if (sits.length || runs.length) {
+    const idx = views.filter(e => e.p === '/tools').length;
+    console.log('\n\nHOW PEOPLE REACHED THE TOOLS\n');
+    for (const [id, n] of tally(sits, 'id')) console.log(`  ${rpad(num(n), 6)}  situation: ${id}`);
+    console.log(`  ${rpad(num(idx), 6)}  the full index at /tools`);
+    console.log('\n  The navigation rebuild rests on people preferring a situation to a');
+    console.log('  tool. If the index still wins by a distance, it did not.');
   }
 
   /* ---- leads ---- */

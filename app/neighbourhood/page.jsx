@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Masthead from '../../components/Masthead.jsx';
 import ToolIntro from '../../components/ToolIntro.jsx';
+import ToolUse from '../../components/ToolUse.jsx';
 import NeighbourhoodChat from '../../components/NeighbourhoodChat.jsx';
 
 export const metadata = {
@@ -16,6 +17,7 @@ export default function Page() {
         title="Neighbourhood tracker"
         sub="Ask about a town, an estate or a project and get what has actually been published, with the links. Free, and nothing is saved." />
       <ToolIntro href="/neighbourhood" />
+      <ToolUse id="neighbourhood" />
       <section className="pane"><NeighbourhoodChat /></section>
       <section className="pane">
         <div className="note">

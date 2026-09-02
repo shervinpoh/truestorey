@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import Masthead from '../../components/Masthead.jsx';
 import ToolIntro from '../../components/ToolIntro.jsx';
+import ToolUse from '../../components/ToolUse.jsx';
 import Progressive from '../../components/Progressive.jsx';
 
 export const metadata = {
@@ -16,6 +17,7 @@ export default function Page() {
         title="Paying for a home still being built"
         sub="The nine stages a developer may bill you for, in the order the law sets them — and what your loan and your instalment are doing at each one." />
       <ToolIntro href="/progressive" example="figures" />
+      <ToolUse id="progressive" />
       <section className="pane">
         <Suspense fallback={<p className="hint">Loading…</p>}>
           <Progressive />
