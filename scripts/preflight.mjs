@@ -187,24 +187,58 @@ async function reason(res) {
   } catch { return ''; }
 }
 
+/**
+ * One retry, and only for weather.
+ *
+ * A single probe reported Gemini as BROKEN on 2 Sep. It was not: three manual
+ * attempts against the same key and model returned 200, 200, 503. The endpoint
+ * was flaky for a few minutes, and one attempt is not enough to tell that from
+ * a key that has stopped working — which is the distinction this whole script
+ * exists to make.
+ *
+ * BROKEN also exits non-zero, so a passing cloud provider having a bad minute
+ * would fail a deploy check and teach everyone to ignore it. That is worse
+ * than no check.
+ *
+ * Retried only on a TIMEOUT, a 5xx or a network error, and only once. A 401 is
+ * not weather and is not retried: a rejected key rejects twice, and asking
+ * again only delays the report.
+ */
+const TRANSIENT = e => /timeout|abort|fetch failed|network|ECONN|ENOTFOUND/i.test(String(e?.message || e));
+
+async function probeTwice(p, key) {
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const res = await p.probe(key);
+      if (res.status < 500 || attempt === 2) return { res, attempt };
+    } catch (e) {
+      if (!TRANSIENT(e) || attempt === 2) throw e;
+    }
+    await new Promise(r => setTimeout(r, 1500));
+  }
+}
+
 async function models() {
   for (const p of providers) {
     const key = val(p.env);
     if (!key) { add(MISS, p.name, `${p.env} not set — ${p.feature} is off and says so`); continue; }
     try {
-      const res = await p.probe(key);
-      if (res.status === 200) { add(OK, p.name, `live — ${mask(key)} answered`); continue; }
+      const { res, attempt } = await probeTwice(p, key);
+      if (res.status === 200) {
+        add(OK, p.name, `live — ${mask(key)} answered${attempt > 1 ? ' (first attempt failed; retried)' : ''}`);
+        continue;
+      }
 
       const why = await reason(res);
       const lead =
         res.status === 401 || res.status === 403 ? 'key rejected'
         : res.status === 404 ? 'MODEL GONE — the key is fine, the model id is not'
         : res.status === 429 ? 'rate limited or out of credit'
-        : res.status >= 500 ? 'provider error — may be transient, run again'
+        : res.status >= 500 ? 'provider error on both attempts — theirs, not the key'
         : 'refused';
       add(BAD, p.name, `${lead} (${res.status})${why ? ' — ' + why : ''}`);
     } catch (e) {
-      add(BAD, p.name, `could not reach the API — ${e.message}`);
+      add(BAD, p.name, `could not reach the API on two attempts — ${e.message}`);
     }
   }
 }
@@ -223,6 +257,37 @@ function secrets() {
 
   const u = val('URA_ACCESS_KEY');
   add(u ? OK : MISS, 'URA access key', u ? 'set — ingest:ura and ingest:rental can run' : 'not set — those two ingests cannot run');
+
+  /* ── the block digest ──────────────────────────────────────────────────────
+   * Both of these gate the same thing, and half of it is the dangerous state:
+   * lib/email.js only reports configured when BOTH are present, so a
+   * RESEND_API_KEY on its own leaves the subscribe form hidden and every
+   * signup refused, with nothing anywhere saying why. That is exactly the
+   * shape of the failure this whole script exists to surface — a feature
+   * silently off, looking from the outside like a feature that does not
+   * exist.
+   *
+   * They are needed in THREE places and it is easy to do two of them: Vercel
+   * (so the form renders and /api/watch accepts), GitHub Actions secrets (the
+   * digest runs inside refresh-data.yml, not on Vercel), and .env.local (so
+   * this check and a dry run can see them). This only reads the local file,
+   * so it says so rather than implying the other two are done. */
+  const k = val('RESEND_API_KEY');
+  const from = val('DIGEST_FROM');
+  if (k && from) {
+    const addr = /<([^>]+)>/.exec(from)?.[1] || from;
+    const domain = addr.split('@')[1] || '';
+    add(OK, 'Block digest', `${mask(k)} · sending as ${addr}`);
+    if (!/@/.test(addr)) add(BAD, 'Block digest', `DIGEST_FROM has no address in it: ${from}`);
+    else if (!domain.includes('.')) add(BAD, 'Block digest', `the sending domain looks wrong: ${domain}`);
+  } else if (k || from) {
+    add(BAD, 'Block digest',
+      `${k ? 'DIGEST_FROM' : 'RESEND_API_KEY'} is missing — the other is set, so this reads as `
+      + 'configured and is not. The form stays hidden and every signup is refused.');
+  } else {
+    add(MISS, 'Block digest', 'RESEND_API_KEY and DIGEST_FROM not set here — the form is hidden '
+      + 'and nothing can send. Set both in Vercel, in GitHub Actions secrets, and in .env.local.');
+  }
 }
 
 /* ── report ──────────────────────────────────────────────────────────────── */

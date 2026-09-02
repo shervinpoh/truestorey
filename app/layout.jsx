@@ -4,7 +4,9 @@ import NavHere from '../components/NavHere.jsx';
 import SiteFooter from '../components/SiteFooter.jsx';
 
 export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://truestorey.sg'),
+  // See the note in app/sitemap.js: a fallback that does not resolve is worse
+  // than an ugly one, because it goes into every canonical and OG URL.
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://truestorey.vercel.app'),
   title: {
     default: 'Truestorey — every block, in filed numbers',
     template: '%s',

@@ -228,3 +228,18 @@ test('the situation pages are in the sitemap', async () => {
   for (const s of SITUATIONS)
     assert.ok(urls.some(u => u.endsWith(s.href)), `${s.href} is not in the sitemap`);
 });
+
+test('every fallback site URL is the same, and is one that resolves', () => {
+  // sitemap.js, robots.js and layout.jsx fell back to truestorey.sg while
+  // send-digest.mjs fell back to the Vercel URL. Harmless while the variable
+  // is set, and the moment it is not, robots.txt and every canonical point a
+  // crawler at a domain that does not answer.
+  const seen = new Set();
+  for (const f of ['app/sitemap.js', 'app/robots.js', 'app/layout.jsx', 'scripts/send-digest.mjs']) {
+    const src = readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
+    const m = /NEXT_PUBLIC_SITE_URL \|\| '([^']+)'/.exec(src);
+    assert.ok(m, `${f} has no fallback for NEXT_PUBLIC_SITE_URL`);
+    seen.add(m[1]);
+  }
+  assert.equal(seen.size, 1, `four files, ${seen.size} different fallbacks: ${[...seen].join(', ')}`);
+});
