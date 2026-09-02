@@ -241,7 +241,7 @@ Three remain, all buildable from data already held.
 
 | | Tool | Notes |
 |---|---|---|
-| 5 | **Price history and realised returns** | Repeat sales of the same unit. `data/private.json` has project, area, floorRange and contractDate — enough to pair them. **Read the PropNex note below first.** |
+| ~~5~~ | ~~**Price history and realised returns**~~ | **REFUSED 2 Sep — it cannot be built from this data, and the attempt is the record.** Pairing filed sales needs a unit identifier and neither HDB nor URA publishes one, deliberately: unit-level purchase prices are the REALIS-shaped data rule 1 forbids outright. The closest available match is address + floor area + floor band, and it is NOT a unit — Blk 362C Sembawang Crescent filed fifteen 4-room 93 sqm sales on storeys 7–9 inside seventeen months, two in the same month. A first build of it paired those and produced a confident median holding period out of fifteen different families' homes. **What shipped instead** is `sizeTrend` in `lib/blindspot/measure.js` over `data/trend.json`: median psf by year in 10 sqm bands, beside the same figure for every size at that address. A headline year-on-year figure is a median over whatever happened to sell, so it moves when the MIX moves — The Sail's 60–70 sqm homes fell 4.1% while the address rose 7.2%. That gap is the finding, and it is true. |
 | 6 | **Quantum by year** | What buyers actually paid, by region, size and year. A pivot over data already held. |
 | 8 | **URA Private Residential Property Index** | Only HDB's index is published on the site today, so anyone comparing a flat to a condo has to leave. `data/hdb-index.json` is the shape to follow. |
 

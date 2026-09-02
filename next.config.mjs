@@ -83,6 +83,8 @@ const nextConfig = {
       // map exists to prevent: fine in dev, where the repo is on disk, and
       // "price not assessed" for every private address in production.
       './data/comps.json',
+      './data/trend.json',
+      './data/storey.json',
       // Read by the lease check, which runs on every home whose tenure is known.
       './data/sources/leasehold-table.json',
     ],

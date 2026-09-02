@@ -1626,3 +1626,9 @@ sup.cite a:hover{text-decoration:underline}
 .rentcmp .diff{background:var(--sunk)}
 .rentcmp .diff b{color:var(--ink)}
 @media(max-width:860px){ .rentcmp{grid-template-columns:1fr} }
+/* The size trend beside the address's own. Counts are set small and muted
+   because they qualify the figure rather than competing with it. */
+.trendtable{min-width:420px}
+.trendtable i{font-style:normal;font-size:11px;color:var(--mute)}
+.trendtable tr.thinyear td{color:var(--mute)}
+.trendtable tr.thinyear td:first-child:after{content:" ·";color:var(--warn)}

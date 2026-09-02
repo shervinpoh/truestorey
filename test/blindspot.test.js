@@ -416,3 +416,47 @@ test('an extreme adjustment is left as filed rather than applied', async () => {
   assert.equal(r.psf, 1000, 'a capped comparable keeps the figure it was filed at');
   assert.ok(FLOOR_ADJUST_CAP > 0 && FLOOR_ADJUST_CAP < 1);
 });
+
+/* ── what this size has done ───────────────────────────────────────────────── */
+
+test('a size trend is shown against the whole address, not instead of it', async () => {
+  const { sizeTrend } = await import('../lib/blindspot/measure.js');
+  // A project's headline is a median over whatever sold, so it moves when the
+  // MIX moves. The Sail's 60-70 sqm homes fell while the address rose; a
+  // reader taking the headline as a fact about their own flat would have it
+  // backwards, and only showing both lines can say so.
+  const index = {
+    bandSqm: 10, source: 'test',
+    records: { '/x': {
+      '60': [['2021', 1843, 4], ['2026', 1768, 5]],
+      all: [['2021', 1858, 28], ['2026', 1991, 18]],
+    } },
+  };
+  const t = sizeTrend({ href: '/x' }, 65, { index });
+  assert.ok(t.sizedChange < 0, 'this size fell');
+  assert.ok(t.allChange > 0, 'the address rose');
+  assert.equal(t.diverges, true);
+  assert.equal(t.rows.length, 2);
+  assert.equal(t.rows[0].allN, 28, 'the address count must ride along with the size count');
+});
+
+test('a thin year is kept and marked, never dropped', async () => {
+  const { sizeTrend } = await import('../lib/blindspot/measure.js');
+  // A reader can discount a year of two sales. They cannot discount one that
+  // was silently removed, and the shape of the line would change without it.
+  const index = { bandSqm: 10, source: 'test', records: { '/x': {
+    '70': [['2024', 2000, 1], ['2025', 2100, 9]], all: [['2024', 2000, 2], ['2025', 2100, 40]],
+  } } };
+  const t = sizeTrend({ href: '/x' }, 75, { index });
+  assert.equal(t.rows.length, 2);
+  assert.equal(t.rows[0].thin, true);
+  assert.equal(t.rows[1].thin, false);
+});
+
+test('one year of data is not a trend', async () => {
+  const { sizeTrend } = await import('../lib/blindspot/measure.js');
+  const index = { bandSqm: 10, source: 'test', records: { '/x': {
+    '70': [['2025', 2100, 9]], all: [['2025', 2100, 40]],
+  } } };
+  assert.equal(sizeTrend({ href: '/x' }, 75, { index }), null);
+});

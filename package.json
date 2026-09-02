@@ -10,8 +10,8 @@
     "ingest:hdb": "node scripts/ingest-hdb.mjs",
     "ingest:ura": "node --env-file-if-exists=.env.local scripts/ingest-ura.mjs",
     "index": "node scripts/build-index.mjs",
-    "data": "npm run ingest:hdb && npm run ingest:index && npm run ingest:mop && npm run index && npm run build:comps && npm run build:rents && npm run build:storey && npm run build:guides",
-    "data:all": "npm run ingest:hdb && npm run ingest:ura && npm run ingest:index && npm run ingest:sora && npm run ingest:mop && npm run index && npm run build:comps && npm run build:rents && npm run build:storey",
+    "data": "npm run ingest:hdb && npm run ingest:index && npm run ingest:mop && npm run index && npm run build:comps && npm run build:rents && npm run build:trend && npm run build:storey && npm run build:guides",
+    "data:all": "npm run ingest:hdb && npm run ingest:ura && npm run ingest:index && npm run ingest:sora && npm run ingest:mop && npm run index && npm run build:comps && npm run build:rents && npm run build:trend && npm run build:storey",
     "test": "node --test test/*.test.js",
     "ingest:index": "node scripts/ingest-index.mjs",
     "ingest:sora": "node scripts/ingest-sora.mjs",
@@ -45,7 +45,8 @@
     "ingest:gls-awards": "node scripts/ingest-gls-awards.mjs",
     "parse:hdb-sites": "node scripts/parse-hdb-sites.mjs",
     "build:comps": "node scripts/build-comps.mjs",
-    "build:rents": "node scripts/build-rents.mjs"
+    "build:rents": "node scripts/build-rents.mjs",
+    "build:trend": "node scripts/build-trend.mjs"
   },
   "dependencies": {
     "next": "^15.0.0",

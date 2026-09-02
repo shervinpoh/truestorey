@@ -272,6 +272,7 @@ function Result({ report, boxRef }) {
       )}
 
       {r.detail?.price && <PriceEvidence price={r.detail.price} />}
+      {r.detail?.trend && <SizeTrend t={r.detail.trend} />}
 
       {r.detail?.supply?.basis === 'town' && (
         <p className="hint">
@@ -422,6 +423,62 @@ function PriceEvidence({ price }) {
           </div>
         </details>
       )}
+    </>
+  );
+}
+
+/**
+ * What homes of this size have done here, beside what the whole address did.
+ *
+ * The two lines exist to be compared. A project's year-on-year figure is a
+ * median over whatever happened to sell, so it moves when the MIX moves — and
+ * anyone reading it as a fact about their own flat is reading a fact about the
+ * sales calendar. Where the two disagree, the disagreement is the point, and
+ * the page says so in a sentence rather than leaving it to be spotted.
+ *
+ * Not scored. A price that moved is a fact worth showing and not a risk this
+ * rubric knows how to weigh: which direction is bad depends entirely on
+ * whether the reader is buying or selling, and the rubric does not ask.
+ */
+function SizeTrend({ t }) {
+  const pc = v => (v == null ? '—' : `${v > 0 ? '+' : ''}${v}%`);
+  return (
+    <>
+      <div className="sh" style={{ marginTop: 26 }}><span>What this size has done here</span></div>
+      {t.diverges && (
+        <p className="lede" style={{ maxWidth: '70ch', marginTop: 0 }}>
+          Homes of about this size moved <b>{pc(t.sizedChange)}</b> between {t.from} and {t.to},
+          while the address as a whole moved <b>{pc(t.allChange)}</b>. A headline figure is a median
+          over whatever happened to sell that year, so it moves when the mix of sizes moves — which
+          is why the two can disagree, and why the one on the left is the one about your home.
+        </p>
+      )}
+      <div className="tablewrap">
+        <table className="landtable trendtable">
+          <caption className="prov">
+            Median rate per square foot by year. {t.band} band against every size at this address.
+            A year with fewer than {t.min} sales is kept and marked, not dropped.
+          </caption>
+          <thead><tr>
+            <th scope="col">Year</th>
+            <th scope="col" className="num">{t.band}</th>
+            <th scope="col" className="num">Every size here</th>
+          </tr></thead>
+          <tbody>
+            {t.rows.map(r => (
+              <tr key={r.year} className={r.thin ? 'thinyear' : undefined}>
+                <td className="mono">{r.year}</td>
+                <td className="mono num">${num(r.sizedPsf)} <i>({num(r.sizedN)})</i></td>
+                <td className="mono num">{r.allPsf ? <>${num(r.allPsf)} <i>({num(r.allN)})</i></> : '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="prov">
+        {t.source} · {t.from} to {t.to} · counts in brackets · medians of filed transactions,
+        not a projection and not a valuation
+      </p>
     </>
   );
 }
