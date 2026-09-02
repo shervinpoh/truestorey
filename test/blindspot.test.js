@@ -353,3 +353,66 @@ test('nothing on the site claims a check count the rubric does not have', () => 
     assert.equal(hit, null, `${f} says "${hit?.[0]}" but the rubric has ${n}`);
   }
 });
+
+/* ── the floor a comparable was on ─────────────────────────────────────────── */
+
+test('a floor band is read from either vendor’s way of writing one', async () => {
+  const { floorMid } = await import('../lib/blindspot/measure.js');
+  assert.equal(floorMid('10 TO 12'), 11);   // HDB
+  assert.equal(floorMid('11-15'), 13);      // URA
+  assert.equal(floorMid('7'), 7);
+  assert.equal(floorMid('-'), null);
+  assert.equal(floorMid(null), null);
+});
+
+test('a floor curve that does not rise is refused, not applied', async () => {
+  const { storeyCurve } = await import('../lib/blindspot/measure.js');
+  // Fifteen of the sixty private district curves fall rather than rise —
+  // District 05 reads S$2,104 psf across floors 1-5 and S$2,046 across 16-20.
+  // That is a thin sample, not a market where height is worth less, and
+  // adjusting a comparable DOWNWARD for being higher would put the artefact
+  // into the reader's percentile as though it were about their home.
+  const d5 = storeyCurve({ kind: 'PRIVATE', district: '05' }, 'Apartment');
+  assert.equal(d5, null, 'a falling curve must not be used');
+  // Where it does rise it is used, and only ever the local one.
+  const bishan = storeyCurve({ kind: 'HDB', town: 'BISHAN' }, '5 ROOM');
+  assert.equal(bishan.scope, 'local');
+  assert.equal(bishan.where, 'BISHAN');
+  assert.ok(bishan.points.at(-1).psf > bishan.points[0].psf);
+});
+
+test('the national curve is never used to adjust a floor', async () => {
+  // It is not a floor premium. It runs S$1,848 psf across floors 1-5 to
+  // S$2,811 across 26-30, and most of that gap is that tall buildings stand in
+  // expensive districts — so it would move a Bishan comparable by nearly 40%
+  // for a reason that has nothing to do with height.
+  const src = readFileSync(new URL('../lib/blindspot/measure.js', import.meta.url), 'utf8');
+  const fn = src.slice(src.indexOf('export function storeyCurve'), src.indexOf('export function curveAt'));
+  assert.doesNotMatch(fn, /\['national', side\.national\]/,
+    'storeyCurve has fallen back to the national curve again');
+});
+
+test('adjusting to a higher floor changes the answer, and says it did', async () => {
+  const { analyse } = await import('../lib/blindspot/analyse.js');
+  const ask = { href: '/hdb/bishan/242-bishan-st-22', askPrice: 1_100_000, areaSqft: 1292 };
+  const low = analyse({ ...ask, floor: 2 });
+  const high = analyse({ ...ask, floor: 20 });
+  assert.ok(low.detail.price.scored.percentile > high.detail.price.scored.percentile,
+    'the same ask must rank lower against comparables lifted to a high floor');
+  assert.equal(high.detail.price.scored.adjusted.where, 'BISHAN');
+  assert.ok(high.detail.price.scored.adjusted.moved > 0);
+  // And the comparables keep what they actually filed alongside.
+  assert.ok(high.detail.price.scored.comparisons.some(c => Number.isFinite(c.psfFiled)));
+
+  const none = analyse(ask);
+  assert.equal(none.detail.price.scored.adjusted, null, 'no floor given, nothing adjusted');
+});
+
+test('an extreme adjustment is left as filed rather than applied', async () => {
+  const { adjustForFloor, FLOOR_ADJUST_CAP } = await import('../lib/blindspot/measure.js');
+  const steep = { points: [{ mid: 3, psf: 1000 }, { mid: 20, psf: 3000 }, { mid: 40, psf: 5000 }] };
+  const r = adjustForFloor(1000, '01-05', 40, steep);
+  assert.equal(r.capped, true);
+  assert.equal(r.psf, 1000, 'a capped comparable keeps the figure it was filed at');
+  assert.ok(FLOOR_ADJUST_CAP > 0 && FLOOR_ADJUST_CAP < 1);
+});

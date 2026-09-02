@@ -46,7 +46,7 @@ const geo = read('geo.json', { records: {} }).records || {};
 /* Sale tuples are positional to keep the file small: at ~65,000 sales, a
  * six-key object per sale costs three times what an array does, and this file
  * is read on a request. The reader in lib/blindspot/measure.js names them. */
-const SALE = ['month', 'psf', 'areaSqm', 'type'];
+const SALE = ['month', 'psf', 'areaSqm', 'type', 'floor'];
 
 let kept = 0, noCoord = 0, noSales = 0;
 const records = {};
@@ -65,7 +65,12 @@ for (const ns of ['hdb', 'condo', 'landed']) {
         // HDB calls the category flatType, URA calls it propertyType. One field
         // here, named for what it means rather than for whichever agency
         // happened to supply it.
-        .map(s => [s.month, Math.round(s.psf), Math.round(s.areaSqm), s.flatType || s.propertyType || null]);
+        // Floor rides along because the price check adjusts for it. HDB writes
+        // "10 TO 12" and URA writes "11-15"; both are kept verbatim and
+        // normalised at read time, because rewriting a vendor's own band is how
+        // a band quietly becomes the wrong one.
+        .map(s => [s.month, Math.round(s.psf), Math.round(s.areaSqm),
+                   s.flatType || s.propertyType || null, s.storey || s.floor || null]);
       if (!sales.length) { noSales++; continue; }
 
       records[r.href] = {

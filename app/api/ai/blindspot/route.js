@@ -37,7 +37,7 @@ export async function POST(req) {
   try { body = await req.json(); }
   catch { return NextResponse.json({ error: 'Could not read that request.' }, { status: 400 }); }
 
-  const { href, askPrice, areaSqft } = body || {};
+  const { href, askPrice, areaSqft, floor } = body || {};
   if (!href || typeof href !== 'string') {
     return NextResponse.json({ error: 'Choose a block or project first.' }, { status: 400 });
   }
@@ -47,6 +47,7 @@ export async function POST(req) {
     href,
     askPrice: Number(askPrice) || null,
     areaSqft: Number(areaSqft) || null,
+    floor: Number(floor) || null,
   });
   if (report.error) return NextResponse.json(report, { status: 404 });
 

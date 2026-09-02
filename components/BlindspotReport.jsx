@@ -26,6 +26,7 @@ import MoneyInput from './MoneyInput.jsx';
 export default function BlindspotReport() {
   const params = useSearchParams();
   const from = params.get('from') || '';
+  const [floor, setFloor] = useState('');
   const [q, setQ] = useState('');
   const [hits, setHits] = useState([]);
   const [picked, setPicked] = useState(null);
@@ -87,7 +88,8 @@ export default function BlindspotReport() {
       const res = await fetch('/api/ai/blindspot', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ href: picked.href, askPrice: Number(price), areaSqft: Number(area) }),
+        body: JSON.stringify({ href: picked.href, askPrice: Number(price), areaSqft: Number(area),
+                               floor: floor ? Number(floor) : null }),
       });
       const j = await res.json();
       if (!res.ok) throw new Error(j.error || 'That did not work.');
@@ -161,6 +163,14 @@ export default function BlindspotReport() {
               placeholder="S$1,250,000" ariaLabel="What it is being asked for" /></label>
           <label><span>Floor area, sq ft</span>
             <input type="number" step="10" value={area} onChange={e => setArea(e.target.value)} placeholder="1292" /></label>
+          {/* Optional, and it changes the answer more than anything else here:
+              adjusting comparables to the reader's own floor moved Blk 242
+              Bishan from "above every comparable" on the second storey to the
+              80th percentile on the twentieth. Left blank, the comparables are
+              used exactly as filed and the report says so. */}
+          <label><span>Floor <small>(optional)</small></span>
+            <input type="number" step="1" min="1" max="70" value={floor}
+              onChange={e => setFloor(e.target.value)} placeholder="e.g. 12" /></label>
           <label><span>Which is</span>
             <input readOnly value={psf ? `$${f(psf).replace('S$', '')} psf` : '—'} tabIndex={-1}
               style={{ background: 'var(--sunk)', color: 'var(--mute)' }} /></label>
@@ -355,10 +365,23 @@ function PriceEvidence({ price }) {
               )}
             </p>
           )}
-          {scored.basis === 'nearby' && (
+          {scored.adjusted ? (
             <p className="hint">
-              Treated as {titleCase(price.flatType)} from {price.flatTypeBasis}. Not adjusted for
-              storey. Distance is straight-line from the searched address.
+              Every comparable is restated as though it had been on floor {scored.adjusted.to},
+              using the floor curve for {scored.adjusted.where} — {num(scored.adjusted.moved)} of{' '}
+              {num(scored.adjusted.of)} moved
+              {scored.adjusted.capped > 0 && <>, and {num(scored.adjusted.capped)} were left as filed
+                because the adjustment would have exceeded a third</>}
+              . The table shows both figures.
+              {scored.basis === 'nearby' && ' Distance is straight-line from the searched address.'}
+            </p>
+          ) : (
+            <p className="hint">
+              {price.floor
+                ? 'The floor curve for this town or district does not rise with height — too thin a sample to adjust with — so the comparables are used exactly as filed.'
+                : 'Comparables are used as filed and not adjusted for storey. Give a floor above and they will be restated on it.'}
+              {scored.basis === 'nearby' && <> Treated as {titleCase(price.flatType)} from{' '}
+                {price.flatTypeBasis}. Distance is straight-line from the searched address.</>}
             </p>
           )}
           <span className="prov">
