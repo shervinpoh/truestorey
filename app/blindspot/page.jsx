@@ -6,7 +6,7 @@ import BlindspotReport from '../../components/BlindspotReport.jsx';
 import { CHECKS, totalPossible, RUBRIC_VERSION } from '../../lib/blindspot/rubric.js';
 
 export const metadata = {
-  title: 'Blindspot — five checks on a Singapore property, free | Truestorey',
+  title: 'Blindspot — six checks on a Singapore property, free | Truestorey',
   description: 'Where the asking price sits against filed sales at the address or a transparent nearby cohort, how many flats nearby reach MOP, what land is coming, and what was approved next door. A published rubric, not a model’s opinion.',
   alternates: { canonical: '/blindspot' },
 };
@@ -66,7 +66,7 @@ export default function Page() {
         </div>
         <div className="note">
           <b>A check that cannot run scores nothing, and says so.</b> It is never counted as zero
-          risk. If two of the five checks have no data, the score is out of what the other three
+          risk. If two of the six checks have no data, the score is out of what the other four
           could measure, and the page prints which ones were missing.
         </div>
         <div className="note">

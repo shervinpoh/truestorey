@@ -87,6 +87,42 @@ for (const ns of ['hdb', 'condo', 'landed']) {
 
 const months = Object.values(records).flatMap(r => r.sales.map(s => s[0]));
 months.sort();
+
+/**
+ * How often anything changes hands at an address, per year, and where the
+ * quiet end of that distribution actually sits.
+ *
+ * ── WHY THE THRESHOLDS ARE DERIVED AND NOT WRITTEN DOWN ────────────────────
+ * Liquidity is the blind spot nobody checks: buyers ask what a home costs and
+ * never ask whether they will be able to sell it. But "few sales" is only
+ * meaningful against a distribution, and the two markets are not the same
+ * shape — HDB blocks turn over at a median of about 3 a year and private
+ * projects at about 2.5, with a far longer thin tail. A single hardcoded
+ * number would score most private projects as illiquid and say nothing.
+ *
+ * So the percentiles are measured here, from the same data the check reads,
+ * and they move when the data does. The check can then say "in the quietest
+ * tenth of HDB blocks" and have that be a fact about this dataset rather than
+ * a threshold somebody once liked.
+ */
+function salesPerYear(r) {
+  const ms = r.sales.map(s => s[0]).sort();
+  if (!ms.length) return 0;
+  const [ay, am] = ms[0].split('-').map(Number);
+  const [by, bm] = ms.at(-1).split('-').map(Number);
+  // +1 so a single month counts as a month, not as zero elapsed time.
+  const span = (by - ay) * 12 + (bm - am) + 1;
+  return r.sales.length / (span / 12);
+}
+
+const liquidity = {};
+for (const kind of ['HDB', 'PRIVATE']) {
+  const rates = Object.values(records).filter(r => r.kind === kind).map(salesPerYear).sort((a, b) => a - b);
+  if (!rates.length) continue;
+  const at = q => Math.round(rates[Math.floor(rates.length * q)] * 100) / 100;
+  liquidity[kind] = { n: rates.length, p10: at(0.10), p25: at(0.25), median: at(0.50) };
+}
+for (const r of Object.values(records)) r.rate = Math.round(salesPerYear(r) * 100) / 100;
 const out = {
   builtAt: new Date().toISOString(),
   note: 'Comparable-sale index for Blindspot\'s price check. Sales are positional '
@@ -96,6 +132,9 @@ const out = {
   source: 'HDB via data.gov.sg · URA Data Service',
   period: { from: months[0] || null, to: months.at(-1) || null },
   counts: { records: kept, sales: months.length, noCoordinate: noCoord, noSales },
+  /* Sales per year at each address, and the shape of that across the market.
+   * `rate` is on every record; these are the percentiles it is judged against. */
+  liquidity,
   records,
 };
 

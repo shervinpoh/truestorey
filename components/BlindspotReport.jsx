@@ -8,7 +8,7 @@ import { Figure, still } from './Motion.jsx';
 import MoneyInput from './MoneyInput.jsx';
 
 /**
- * Blindspot — five checks, one score, every point traceable.
+ * Blindspot — six checks, one score, every point traceable.
  *
  * The design job here is entirely about stopping a number being read as a
  * verdict. Three things do that work:
@@ -281,7 +281,7 @@ function Result({ report, boxRef }) {
 
       <div className="mapfocus" style={{ marginTop: 22 }}>
         <b>Want this run properly?</b>
-        <span>Five checks is what can be done from public data alone. Your CPF, your
+        <span>Six checks is what can be done from public data alone. Your CPF, your
           timeline and the actual condition of the unit are not in any of it.</span>
         <Link href={`/plan?price=${r.input.askPrice || ''}&from=${encodeURIComponent(r.record.href)}`}>
           Price the purchase →

@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { score, scoreCheck, CHECKS, BANDS, totalPossible } from '../lib/blindspot/rubric.js';
 import { pricePercentile, nearbyComps, leaseFinding, leaseYearsLeft, tenureKey, supplyInTown, mopCoverage } from '../lib/blindspot/measure.js';
 import { relativity, annualDecay } from '../lib/calc/lease.js';
@@ -20,9 +21,9 @@ test('the same inputs always produce the same score', () => {
 
 test('a check with no data is skipped, never scored as zero risk', () => {
   // The whole failure mode: absence of evidence reading as evidence of safety.
-  const partial = score({ price: 0.95, lease: null, supply: null, gls: null, view: null });
+  const partial = score({ price: 0.95, lease: null, liquidity: null, supply: null, gls: null, view: null });
   assert.equal(partial.checks.length, 1);
-  assert.equal(partial.skipped.length, 4);
+  assert.equal(partial.skipped.length, 5);
   assert.equal(partial.max, CHECKS.price.max, 'the denominator must only count checks that ran');
   assert.equal(partial.points, 3);
   for (const s of partial.skipped) assert.ok(s.needs, `${s.key} does not say what it needs`);
@@ -33,7 +34,8 @@ test('the denominator is what ran, and the full score needs every check', () => 
   assert.equal(two.max, CHECKS.price.max + CHECKS.supply.max);
   assert.equal(two.outOfTen, null, 'a full-mark denominator off two checks is a lie');
 
-  const all = score({ price: 0.4, lease: 70, supply: 0.06, gls: 100, view: 1.0 });
+  const all = score({ price: 0.4, lease: 70, liquidity: 9, supply: 0.06, gls: 100, view: 1.0 },
+    { liquidity: { rate: 9, kind: 'HDB', median: 3.4, quieter: null, sales: 12 } });
   assert.equal(all.max, totalPossible());
   assert.equal(all.outOfTen, all.points);
 });
@@ -65,8 +67,10 @@ test('a partial result cannot say little flagged when the asking price was not a
  * how this test caught the change rather than sleeping through it.
  */
 test('more risk scores higher, and the bands say so', () => {
-  const low = score({ price: 0.2, lease: Infinity, supply: 0.01, gls: 0, view: 0 });
-  const high = score({ price: 0.99, lease: 35, supply: 0.4, gls: 2000, view: 39 });
+  const low = score({ price: 0.2, lease: 9999, liquidity: 9, supply: 0.01, gls: 0, view: 0 },
+    { liquidity: { rate: 9, kind: 'HDB', median: 3.4, quieter: null, sales: 12 } });
+  const high = score({ price: 0.99, lease: 35, liquidity: 1.1, supply: 0.4, gls: 2000, view: 39 },
+    { liquidity: { rate: 1.1, kind: 'HDB', median: 3.4, quieter: 'p10', sales: 3 } });
   assert.ok(high.points > low.points);
   assert.equal(high.points, totalPossible());
   assert.match(high.direction, /Higher means more to check/);
@@ -248,4 +252,104 @@ test('a finding names the kind of building it actually counted', () => {
   });
   assert.doesNotMatch(priv.finding, /HDB/, 'a condominium cohort is not HDB blocks');
   assert.match(priv.finding, /nearby projects/);
+});
+
+test('no check transports a value JSON cannot carry', () => {
+  // Infinity survives arithmetic and does not survive JSON.stringify — it
+  // arrives as null, which in this rubric is the signal for "did not run".
+  // A freehold lease check that scored zero was reaching the client looking
+  // exactly like a check with no data, which is the one distinction the whole
+  // thing is built to preserve.
+  const fh = leaseFinding({ kind: 'PRIVATE', tenure: 'Freehold' });
+  const ran = scoreCheck('lease', fh.years, fh);
+  const roundTripped = JSON.parse(JSON.stringify({ check: ran, detail: fh }));
+  assert.notEqual(roundTripped.check.value, null,
+    'the lease check ran; a null value would read as "no data"');
+  assert.ok(Number.isFinite(roundTripped.check.value));
+  assert.equal(roundTripped.detail.freehold, true);
+  assert.equal(roundTripped.check.points, 0);
+  assert.match(roundTripped.check.finding, /freehold/i);
+});
+
+test('MOP supply is not scored against a private home, and says why', async () => {
+  // "Only 0.0% of nearby flats reach MOP in the next five years" is true of a
+  // freehold condominium in District 10 and tells its buyer nothing — while
+  // scoring zero, which reads as a clean bill on a question never asked.
+  const { analyse } = await import('../lib/blindspot/analyse.js');
+  const priv = analyse({ href: '/condo/perfect-ten', askPrice: 3_200_000, areaSqft: 1076 });
+  assert.ok(!priv.checks.some(c => c.key === 'supply'), 'supply must not score a condominium');
+  const skipped = priv.skipped.find(s => s.key === 'supply');
+  assert.match(skipped.needs, /not a measure of supply in the private market/i);
+
+  // It still scores where it means something.
+  const hdb = analyse({ href: '/hdb/bishan/242-bishan-st-22', askPrice: 1_200_000, areaSqft: 1292 });
+  assert.ok(hdb.checks.some(c => c.key === 'supply'), 'supply is the point of an HDB report');
+});
+
+/* ── liquidity ─────────────────────────────────────────────────────────────── */
+
+test('liquidity is judged against the market, not against a number somebody liked', async () => {
+  const { liquidityFinding } = await import('../lib/blindspot/measure.js');
+  // Two markets, two shapes. A rate that is unremarkable for a private project
+  // can be the quietest tenth of HDB blocks, so one hardcoded threshold would
+  // be wrong for at least one of them.
+  const index = {
+    records: {
+      '/a': { kind: 'HDB', rate: 1.2, sales: 4 },
+      '/b': { kind: 'HDB', rate: 5.0, sales: 12 },
+      '/c': { kind: 'PRIVATE', rate: 1.2, sales: 4 },
+    },
+    liquidity: {
+      HDB: { n: 100, p10: 1.7, p25: 2.4, median: 3.4 },
+      PRIVATE: { n: 100, p10: 0.9, p25: 1.8, median: 3.9 },
+    },
+  };
+  assert.equal(liquidityFinding({ href: '/a', kind: 'HDB' }, { index }).quieter, 'p10');
+  assert.equal(liquidityFinding({ href: '/b', kind: 'HDB' }, { index }).quieter, null);
+  // Same rate, other market, different verdict — which is the whole point.
+  assert.equal(liquidityFinding({ href: '/c', kind: 'PRIVATE' }, { index }).quieter, 'p25');
+});
+
+test('a quiet address flags, and the finding names the median it was judged against', () => {
+  const c = { rate: 1.2, sales: 4, kind: 'HDB', p10: 1.7, p25: 2.4, median: 3.4, quieter: 'p10' };
+  const r = scoreCheck('liquidity', c.rate, c);
+  assert.equal(r.points, 2);
+  assert.match(r.finding, /quietest tenth/);
+  assert.match(r.finding, /3\.4/, 'a comparison with no comparator is not substantiated');
+
+  const busy = { ...c, rate: 9, quieter: null };
+  assert.equal(scoreCheck('liquidity', busy.rate, busy).points, 0);
+
+  // URA files landed by street, so the finding must count streets. Naming the
+  // wrong kind of thing is the error that had a freehold condominium
+  // reporting "7 HDB blocks" — right number, wrong noun, invisible to a reader.
+  const street = { ...c, kind: 'PRIVATE', landed: true, quieter: null, rate: 9 };
+  assert.match(scoreCheck('liquidity', street.rate, street).finding, /landed streets/);
+  const project = { ...street, landed: false };
+  assert.match(scoreCheck('liquidity', project.rate, project).finding, /private projects/);
+});
+
+test('the held-sales cap is disclosed where it could mislead', () => {
+  // Only 20 sales are held per address, so a busier address cannot be told
+  // from a busy one. That limit bites at the active end, and the check is
+  // about the quiet end — but saying so is cheaper than being asked.
+  const capped = { rate: 40, sales: 20, kind: 'PRIVATE', p10: 0.9, p25: 1.8, median: 3.9, quieter: null };
+  assert.match(scoreCheck('liquidity', capped.rate, capped).caveat, /twenty most recent/);
+  const thin = { ...capped, sales: 4, rate: 1 };
+  assert.equal(scoreCheck('liquidity', thin.rate, thin).caveat, undefined);
+});
+
+test('nothing on the site claims a check count the rubric does not have', () => {
+  // "Four checks" survived into user-facing copy across five files after the
+  // fifth was added, and again after the sixth. A count in prose is a fact
+  // about CHECKS, and it belongs in a test.
+  const WORD = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
+  const n = Object.keys(CHECKS).length;
+  const stale = new RegExp(`\\\\b(${WORD.filter((_, i) => i !== n).join('|')}) checks\\\\b`, 'i');
+  for (const f of ['app/blindspot/page.jsx', 'lib/nav.js', 'lib/blindspot/analyse.js',
+                   'lib/blindspot/rubric.js', 'components/BlindspotReport.jsx']) {
+    const src = readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
+    const hit = stale.exec(src);
+    assert.equal(hit, null, `${f} says "${hit?.[0]}" but the rubric has ${n}`);
+  }
 });
