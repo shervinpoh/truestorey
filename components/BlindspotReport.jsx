@@ -8,7 +8,7 @@ import { Figure, still } from './Motion.jsx';
 import MoneyInput from './MoneyInput.jsx';
 
 /**
- * Blindspot — four checks, one score, every point traceable.
+ * Blindspot — five checks, one score, every point traceable.
  *
  * The design job here is entirely about stopping a number being read as a
  * verdict. Three things do that work:
@@ -281,7 +281,7 @@ function Result({ report, boxRef }) {
 
       <div className="mapfocus" style={{ marginTop: 22 }}>
         <b>Want this run properly?</b>
-        <span>Four checks is what can be done from public data alone. Your lease, your CPF, your
+        <span>Five checks is what can be done from public data alone. Your CPF, your
           timeline and the actual condition of the unit are not in any of it.</span>
         <Link href={`/plan?price=${r.input.askPrice || ''}&from=${encodeURIComponent(r.record.href)}`}>
           Price the purchase →
@@ -327,10 +327,19 @@ function PriceEvidence({ price }) {
           <span className="lab">The cohort that was scored</span>
           {scored.basis === 'nearby' ? (
             <p>
-              <b>{num(scored.sample)} comparable sales across {num(scored.blocks)} HDB blocks within{' '}
+              <b>{num(scored.sample)} comparable sales across {num(scored.blocks)}{' '}
+              {scored.leaseFrom ? 'HDB blocks' : 'nearby projects'} within{' '}
               {num(Math.round(scored.radiusKm * 1000))}m.</b> Same {titleCase(price.flatType)}, floor area{' '}
-              {num(scored.areaFromSqm)}–{num(scored.areaToSqm)} sqm and lease commencement{' '}
-              {scored.leaseFrom}–{scored.leaseTo}. The filed range was {psf(scored.low)} to{' '}
+              {num(scored.areaFromSqm)}–{num(scored.areaToSqm)} sqm
+              {/* HDB blocks are matched on when the lease started; private on
+                  tenure, because a freehold and a 99-year unit of the same size
+                  in the same street are not the same product. */}
+              {scored.leaseFrom
+                ? <> and lease commencement {scored.leaseFrom}–{scored.leaseTo}</>
+                : scored.tenure === 'freehold'
+                  ? <>, freehold only</>
+                  : <>, leasehold with a similar number of years left</>}
+              . The filed range was {psf(scored.low)} to{' '}
               {psf(scored.high)}, median {psf(scored.median)}. The asking price is{' '}
               <b>{position(scored)}</b>.
             </p>
@@ -339,17 +348,22 @@ function PriceEvidence({ price }) {
               <b>{num(scored.sample)} sales at this address in the last {scored.months} months.</b>{' '}
               The filed range was {psf(scored.low)} to {psf(scored.high)}, median {psf(scored.median)}.
               The asking price is <b>{position(scored)}</b>.
+              {scored.months > 12 && (
+                <> The last twelve months held too few to score, so the window was widened
+                  before looking anywhere else — a sale in this building is a closer comparable
+                  than a recent one next door.</>
+              )}
             </p>
           )}
           {scored.basis === 'nearby' && (
             <p className="hint">
               Treated as {titleCase(price.flatType)} from {price.flatTypeBasis}. Not adjusted for
-              storey. Distance is straight-line from the searched block.
+              storey. Distance is straight-line from the searched address.
             </p>
           )}
           <span className="prov">
-            {scored.cutoff} to {lastMonth || 'latest held month'} · {scored.sample} filed transactions ·
-            HDB Resale Flat Prices via data.gov.sg
+            {scored.cutoff} to {lastMonth || 'latest held month'} · {scored.sample} filed transactions ·{' '}
+            {price.source || 'HDB via data.gov.sg · URA Data Service'}
           </span>
         </div>
       ) : (

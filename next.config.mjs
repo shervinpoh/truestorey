@@ -77,6 +77,14 @@ const nextConfig = {
       './data/index.json',
       './data/gls.json',
       './data/zoning.json',
+      // The comparables index, read at request time by the price check. It is
+      // the difference between the check running on 86% of private lookups and
+      // on 30% of them, and leaving it out is precisely the failure this whole
+      // map exists to prevent: fine in dev, where the repo is on disk, and
+      // "price not assessed" for every private address in production.
+      './data/comps.json',
+      // Read by the lease check, which runs on every home whose tenure is known.
+      './data/sources/leasehold-table.json',
     ],
     // Search, lookup and the record API all read the shards.
     '/api/search': ['./data/search.json', './data/index.json'],

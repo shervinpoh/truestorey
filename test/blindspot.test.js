@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { score, scoreCheck, CHECKS, BANDS, totalPossible } from '../lib/blindspot/rubric.js';
-import { pricePercentile, nearbyHdbPrice, supplyInTown, mopCoverage } from '../lib/blindspot/measure.js';
+import { pricePercentile, nearbyComps, leaseFinding, leaseYearsLeft, tenureKey, supplyInTown, mopCoverage } from '../lib/blindspot/measure.js';
+import { relativity, annualDecay } from '../lib/calc/lease.js';
 
 /**
  * The rubric is the reason this tool is allowed to publish a number at all.
@@ -19,20 +20,20 @@ test('the same inputs always produce the same score', () => {
 
 test('a check with no data is skipped, never scored as zero risk', () => {
   // The whole failure mode: absence of evidence reading as evidence of safety.
-  const partial = score({ price: 0.95, supply: null, gls: null, view: null });
+  const partial = score({ price: 0.95, lease: null, supply: null, gls: null, view: null });
   assert.equal(partial.checks.length, 1);
-  assert.equal(partial.skipped.length, 3);
+  assert.equal(partial.skipped.length, 4);
   assert.equal(partial.max, CHECKS.price.max, 'the denominator must only count checks that ran');
   assert.equal(partial.points, 3);
   for (const s of partial.skipped) assert.ok(s.needs, `${s.key} does not say what it needs`);
 });
 
-test('the denominator is what ran, and ten is only claimed when all four did', () => {
+test('the denominator is what ran, and the full score needs every check', () => {
   const two = score({ price: 0.4, supply: 0.06 });
-  assert.equal(two.max, 6);
-  assert.equal(two.outOfTen, null, 'a ten-point score off six points of evidence is a lie');
+  assert.equal(two.max, CHECKS.price.max + CHECKS.supply.max);
+  assert.equal(two.outOfTen, null, 'a full-mark denominator off two checks is a lie');
 
-  const all = score({ price: 0.4, supply: 0.06, gls: 100, view: 1.0 });
+  const all = score({ price: 0.4, lease: 70, supply: 0.06, gls: 100, view: 1.0 });
   assert.equal(all.max, totalPossible());
   assert.equal(all.outOfTen, all.points);
 });
@@ -64,8 +65,8 @@ test('a partial result cannot say little flagged when the asking price was not a
  * how this test caught the change rather than sleeping through it.
  */
 test('more risk scores higher, and the bands say so', () => {
-  const low = score({ price: 0.2, supply: 0.01, gls: 0, view: 0 });
-  const high = score({ price: 0.99, supply: 0.4, gls: 2000, view: 39 });
+  const low = score({ price: 0.2, lease: Infinity, supply: 0.01, gls: 0, view: 0 });
+  const high = score({ price: 0.99, lease: 35, supply: 0.4, gls: 2000, view: 39 });
   assert.ok(high.points > low.points);
   assert.equal(high.points, totalPossible());
   assert.match(high.direction, /Higher means more to check/);
@@ -130,47 +131,77 @@ test('an asking price above everything filed reads as above 100%', () => {
   assert.equal(pricePercentile(r, 100, { now }).percentile, 0);
 });
 
-test('a thin HDB block expands to the first sufficient nearby comparable radius', () => {
-  const target = {
-    kind: 'HDB', href: '/hdb/test/100-test-road', shard: 'hdb/test',
-    leaseCommence: 1992,
-  };
-  const sale = (month, psf, areaSqm = 120, flatType = '5 ROOM') => ({
-    month, psf, price: psf * areaSqm * 10.7639, areaSqm, flatType, storey: '04 TO 06',
-  });
-  const block = (href, leaseCommence, recent) => ({
-    kind: 'HDB', href, label: href.split('/').at(-1), leaseCommence, recent,
-  });
-  const records = {
-    target: block(target.href, 1992, [sale('2025-12', 806)]),
-    a: block('/hdb/test/101-test-road', 1991, [sale('2026-02', 766), sale('2026-06', 774)]),
-    b: block('/hdb/test/102-test-road', 1994, [sale('2026-07', 760)]),
-    // The fifth eligible sale is beyond 500m, so the cohort must expand once.
-    c: block('/hdb/test/103-test-road', 1990, [sale('2026-07', 745)]),
-    wrongType: block('/hdb/test/104-test-road', 1992, [sale('2026-07', 900, 120, '4 ROOM')]),
-    wrongArea: block('/hdb/test/105-test-road', 1992, [sale('2026-07', 900, 150)]),
-    wrongLease: block('/hdb/test/106-test-road', 1980, [sale('2026-07', 900)]),
-  };
-  const geoRecords = {
-    [target.href]: { lat: 1.35, lon: 103.8 },
-    '/hdb/test/101-test-road': { lat: 1.35, lon: 103.801 },
-    '/hdb/test/102-test-road': { lat: 1.35, lon: 103.802 },
-    '/hdb/test/103-test-road': { lat: 1.35, lon: 103.8054 },
-    '/hdb/test/104-test-road': { lat: 1.35, lon: 103.801 },
-    '/hdb/test/105-test-road': { lat: 1.35, lon: 103.801 },
-    '/hdb/test/106-test-road': { lat: 1.35, lon: 103.801 },
-  };
+test('a thin block expands to the first sufficient nearby cohort, and no further', () => {
+  // The radius must widen only until it has enough, because a percentile off
+  // five sales within 500m and one off five within 1km are different claims
+  // and only one of them is printed.
+  const sale = (month, psf, areaSqm = 120, type = '5 ROOM') => [month, psf, areaSqm, type];
+  const at = (lat, lon, sales, leaseCommence = 1992) =>
+    ({ lat, lon, kind: 'HDB', label: 'blk', tenure: null, leaseCommence, sales });
+  const index = { records: {
+    '/hdb/test/100-test-road': at(1.35, 103.8, [sale('2025-12', 806)]),
+    '/hdb/test/101-test-road': at(1.35, 103.801, [sale('2026-02', 766), sale('2026-06', 774)], 1991),
+    '/hdb/test/102-test-road': at(1.35, 103.802, [sale('2026-07', 760)], 1994),
+    // The fourth and fifth eligible sales sit beyond 500m, so the cohort must
+    // widen once — and the subject's own sale does NOT make up the number,
+    // because a "nearby" cohort that counts this address is not nearby.
+    '/hdb/test/103-test-road': at(1.35, 103.8054, [sale('2026-07', 745), sale('2026-05', 752)], 1990),
+    // Each of these fails exactly one filter and must not appear.
+    '/hdb/test/104-test-road': at(1.35, 103.801, [sale('2026-07', 900, 120, '4 ROOM')]),
+    '/hdb/test/105-test-road': at(1.35, 103.801, [sale('2026-07', 900, 150)]),
+    '/hdb/test/106-test-road': at(1.35, 103.801, [sale('2026-07', 900)], 1980),
+  } };
+  const target = { kind: 'HDB', href: '/hdb/test/100-test-road', leaseCommence: 1992 };
 
-  const r = nearbyHdbPrice(target, 5008, 120, '5 ROOM', {
-    now: new Date('2026-09-02'), records, geoRecords,
-  });
-  assert.equal(r.radiusKm, 0.75);
+  const r = nearbyComps(target, 5008, 120, '5 ROOM', { now: new Date('2026-09-02'), index });
+  assert.equal(r.radiusKm, 0.75, 'stopped at the first radius that had enough');
   assert.equal(r.sample, 5);
-  assert.equal(r.blocks, 4);
-  assert.deepEqual([r.low, r.median, r.high], [745, 766, 806]);
-  assert.equal(r.percentile, 1);
-  assert.ok(r.aboveHighPct > 500, 'the distance beyond the observed range disappeared');
-  assert.ok(r.comparisons.every(c => c.flatType === '5 ROOM' && c.areaSqm >= 108 && c.areaSqm <= 132));
+  assert.equal(r.blocks, 3);
+  assert.equal(r.percentile, 1, 'an ask above every comparable is the whole range');
+  for (const c of r.comparisons)
+    assert.notEqual(c.href, target.href, 'the subject must not be its own comparable');
+});
+
+test('tenure is matched on years left, not on the words in the lease', () => {
+  // URA's tenure field is free text: this dataset holds 103-year and 946-year
+  // leases. Grouping by the nominal term gave each its own family and starved
+  // the cohort — 8 @ Mount Sophia found nothing inside 1.5km while sitting
+  // among hundreds of comparable leasehold flats.
+  const now = new Date('2026-09-02');
+  assert.equal(leaseYearsLeft('Freehold', now), Infinity);
+  assert.equal(leaseYearsLeft('946 yrs lease commencing from 1938', now), Infinity,
+    'a lease with eight centuries left does not decay in any way a buyer meets');
+  assert.equal(leaseYearsLeft('103 yrs lease commencing from 2002', now), 79);
+  assert.equal(leaseYearsLeft('99 yrs lease commencing from 2002', now), 75);
+  assert.equal(leaseYearsLeft('nonsense', now), null);
+  // 79 and 75 are the same product; freehold and 75 are not.
+  assert.equal(tenureKey('103 yrs lease commencing from 2002', now).family, 'leasehold');
+  assert.equal(tenureKey('Freehold', now).family, 'freehold');
+});
+
+test('the lease check runs on freehold and scores it zero', () => {
+  // A check that vanished on freehold would leave a reader unable to tell
+  // "nothing to worry about here" from "we could not look".
+  const fh = leaseFinding({ kind: 'PRIVATE', tenure: 'Freehold' });
+  assert.equal(fh.freehold, true);
+  const scored = scoreCheck('lease', fh.years, fh);
+  assert.equal(scored.points, 0);
+  assert.match(scored.finding, /freehold/i);
+});
+
+test('a shorter lease scores higher, and the figures come from the published table', () => {
+  const now = new Date('2026-09-02');
+  const at = y => leaseFinding({ kind: 'HDB', remainingLease: `${y} years 0 months` }, now);
+  const pts = y => scoreCheck('lease', at(y).years, at(y)).points;
+  assert.ok(pts(35) > pts(55), '35 years left must flag harder than 55');
+  assert.ok(pts(55) > pts(75));
+  assert.equal(pts(95), 0);
+  // Not invented: the relativity and the annual decay are read out of
+  // data/sources/leasehold-table.json, and the finding prints both.
+  const sixty = at(60);
+  assert.equal(sixty.relativity, relativity(60));
+  assert.equal(sixty.decay, annualDecay(60));
+  assert.match(scoreCheck('lease', sixty.years, sixty).finding, /% of freehold/);
 });
 
 /* These read the real repo data, so they skip on a clone that has not built. */
@@ -198,4 +229,23 @@ test('MOP geocode coverage is reported honestly', has, () => {
   // with the MOP register included. What matters is that it is MEASURED, so
   // the supply check knows to fall back to the town instead of reporting a
   // radius it cannot actually see.
+});
+
+test('a finding names the kind of building it actually counted', () => {
+  // Perfect Ten, a freehold condominium, reported "13 comparable filed sales
+  // across 7 HDB blocks". The word was hardcoded while the nearby cohort was
+  // HDB-only and survived the change to cover private — an error a reader has
+  // no way to catch, because the number beside it is correct.
+  const hdb = scoreCheck('price', 0.95, {
+    basis: 'nearby', sample: 5, blocks: 4, radiusKm: 1, months: 12,
+    leaseFrom: 1987, leaseTo: 1997,
+  });
+  assert.match(hdb.finding, /HDB blocks/);
+
+  const priv = scoreCheck('price', 0.95, {
+    basis: 'nearby', sample: 13, blocks: 7, radiusKm: 0.5, months: 12,
+    tenure: 'freehold', leaseFrom: null,
+  });
+  assert.doesNotMatch(priv.finding, /HDB/, 'a condominium cohort is not HDB blocks');
+  assert.match(priv.finding, /nearby projects/);
 });
