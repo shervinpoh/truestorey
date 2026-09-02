@@ -16,7 +16,7 @@ export default function Page() {
     <main className="shell">
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
         title="Blindspot"
-        sub="Four things worth checking before you commit, counted against filed transactions. Free, no sign-up, and the rubric is printed below so you can check the arithmetic." />
+        sub="Six things worth checking before you commit, counted against filed transactions. Free, no sign-up, and the rubric is printed below so you can check the arithmetic." />
       <ToolIntro href="/blindspot" />
 
       <section className="pane">
