@@ -300,10 +300,11 @@ eligibility decision tree, a school explorer. None assessed in depth.
 
 ## 5 · Known problems
 
-- **Share cards are SVG.** `app/og/route.js` returns `image/svg+xml`. WhatsApp
-  will not preview SVG, which is most of the point of having them. Needs a PNG
-  path — `sharp` at build time, or `@vercel/og`, which would be a fourth
-  dependency and therefore a decision.
+- ~~**Share cards are SVG.**~~ **Done 2 Sep — and it cost no dependency.**
+  `next/og` ships inside Next 15, so `app/og/route.jsx` renders PNG through the
+  same renderer `@vercel/og` provides, from a package the repo already has.
+  It was also the last surface still on the design retired on 29 Aug; it is on
+  the live palette now.
 - **`data/sources/rail-future.json` is an empty array.** Future MRT needs LTA's
   own announcements. **Do not populate opening years from memory** — rule 13.
 - **3 of 219 HDB land rows will not parse.** Printed on every run of
