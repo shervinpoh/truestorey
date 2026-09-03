@@ -38,7 +38,16 @@ Nothing below can be finished by an agent. Ordered by what unblocks the most.
 1. **A domain.** Drives three things: a Resend account with a verified sending
    domain, `NEXT_PUBLIC_SITE_URL` (which today is the Vercel URL and is correct
    only by luck — it drives `robots.txt` and the sitemap), and the OG cards.
-2. **`RESEND_API_KEY` and `DIGEST_FROM`** in Vercel and `.env.local`. These are
+2. **`RESEND_API_KEY` and `DIGEST_FROM`** in Vercel, in GitHub Actions
+   secrets, and in `.env.local` — THREE places, and it is easy to do one.
+   Vercel makes the form render and `/api/watch` accept a signup; GitHub is
+   where the digest actually runs (inside `refresh-data.yml`, not on Vercel);
+   `.env.local` is what lets `npm run preflight` and a dry run see them.
+   A Resend sending domain was verified on 2 Sep; the keys are not yet set
+   anywhere. **Verify with `curl … | grep watchbox`, not by looking for an
+   email field** — the lead form has one too, and its consent checkbox uses
+   the same wording from `lib/consent.js`. Commit 5946fa8's message claims the
+   form was rendering in production. It was not; that was a bad check. These are
    the only two environment variables referenced in code and absent from
    `.env.local`. Until they exist, `lib/watch.js` refuses every subscription
    and the form does not render — deliberately. See "A consent tick promised
