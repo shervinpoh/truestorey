@@ -305,3 +305,39 @@ test('the homepage does not promise a refresh cadence the data does not keep', (
     'this claims the data is a day old; sync.mjs refreshes transactions weekly');
   assert.match(line[1], /checked daily|weekly/i, 'say which cadence is being claimed');
 });
+
+/* ── the refusals ──────────────────────────────────────────────────────────── */
+
+test('every refusal is checkable and carries its reason', async () => {
+  // The page is only worth having if a sceptic can go and read the code. An
+  // entry without a file to point at is a marketing claim.
+  const { ALL } = await import('../lib/refusals.js');
+  assert.ok(ALL.length >= 12, `only ${ALL.length} refusals — the page needs to be worth the click`);
+  for (const r of ALL) {
+    assert.ok(r.what && r.what.length > 12, 'a refusal with no subject');
+    assert.ok(r.asked && r.asked.length > 20, `${r.what} — does not say who asked for it`);
+    assert.ok(r.why && r.why.length > 80, `${r.what} — the reason is too thin to be one`);
+    assert.ok(r.rule, `${r.what} — no rule or basis named`);
+    assert.ok(r.where, `${r.what} — nothing to check it against`);
+  }
+});
+
+test('every file a refusal points at actually exists', async () => {
+  // A citation that 404s is worse than none, and these are paths in a repo
+  // that moves. This is the test that makes the page checkable rather than
+  // merely claiming to be.
+  const { existsSync } = await import('node:fs');
+  const { ALL } = await import('../lib/refusals.js');
+  for (const r of ALL) {
+    const p = new URL(`../${r.where}`, import.meta.url);
+    assert.ok(existsSync(p), `${r.what} cites ${r.where}, which does not exist`);
+  }
+});
+
+test('the refusals page is reachable and in the sitemap', async () => {
+  const { NAV } = await import('../lib/nav.js');
+  const hrefs = NAV.flatMap(g => g.items).map(i => i.href);
+  assert.ok(hrefs.includes('/refused'), '/refused is not in the nav, so it is not in the sitemap either');
+  const { default: sitemap } = await import('../app/sitemap.js');
+  assert.ok(sitemap().some(e => e.url.endsWith('/refused')));
+});
