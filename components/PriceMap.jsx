@@ -4,6 +4,7 @@ import { still } from './Motion.jsx';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { titleCase } from '../lib/name.js';
+import { tilesFor, BASEMAP } from '../lib/tiles.js';
 
 /**
  * Every block and project in Singapore, plotted by price per square foot.
@@ -130,6 +131,7 @@ export default function PriceMap({ map }) {
   const router = useRouter();
   const wrapRef = useRef(null);
   const cvsRef = useRef(null);
+  const baseRef = useRef(null);
   const labelsRef = useRef([]);          // hit rects for the drawn labels
   const animRef = useRef(0);
 
@@ -137,6 +139,12 @@ export default function PriceMap({ map }) {
   const [sel, setSel] = useState(-1);
   const [showRail, setShowRail] = useState(false);
   const [raise3d, setRaise3d] = useState(false);
+  /* On by default. The map used to draw a coastline on blank ground, which is
+     recognisable to somebody who already knows the shape of Singapore and to
+     nobody else — no expressway, no town name, nothing to place yourself
+     against. Off is kept as an option because the plain version reads the
+     price bands more cleanly once you know where you are. */
+  const [showBase, setShowBase] = useState(true);
   const [hover, setHover] = useState(null);
   const [hoverRegion, setHoverRegion] = useState(-1);
   const [size, setSize] = useState({ w: 0, h: 0 });
@@ -441,6 +449,46 @@ export default function PriceMap({ map }) {
     while (b < breaks.length && psf > breaks[b]) b++;
     return b;
   };
+
+  /* ── the basemap ───────────────────────────────────────────────────────────
+   * Its own canvas, under the data one, because tiles arrive asynchronously
+   * and the data layer redraws synchronously on every pan. Sharing a canvas
+   * would mean either blocking the data on a network round trip or clearing
+   * the data every time a tile landed.
+   *
+   * Each tile is positioned by projecting its OWN lat/lon corners through the
+   * map's projection — not by tile arithmetic in pixel space. That is what
+   * guarantees the background cannot drift away from the dots: if the
+   * projection changes, both move together.
+   *
+   * `seq` discards tiles that arrive after the view has moved on. Without it a
+   * slow tile from three pans ago paints itself over the current map.
+   */
+  const tileSeq = useRef(0);
+  useEffect(() => {
+    const cvs = baseRef.current;
+    if (!cvs || !size.w || !showBase) return;
+    const mine = ++tileSeq.current;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cvs.width = size.w * dpr;
+    cvs.height = size.h * dpr;
+    const ctx = cvs.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, size.w, size.h);
+
+    for (const t of tilesFor(view, size.w)) {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        if (mine !== tileSeq.current) return;
+        const [x0, y0] = project(t.north, t.west, size.w, size.h);
+        const [x1, y1] = project(t.south, t.east, size.w, size.h);
+        // +1 closes the hairline seams rounding leaves between tiles.
+        ctx.drawImage(img, x0, y0, x1 - x0 + 1, y1 - y0 + 1);
+      };
+      img.src = BASEMAP.url(t);
+    }
+  }, [view, size.w, size.h, project, showBase]);
 
   useEffect(() => {
     const cvs = cvsRef.current;
@@ -768,6 +816,9 @@ export default function PriceMap({ map }) {
             count. Offered at any zoom and applied once there is room — asking
             for it at island scale and getting a hairbrush would read as
             broken rather than as "come closer". */}
+        <button className="mapopt" aria-pressed={showBase} onClick={() => setShowBase(v => !v)}>
+          {showBase ? '✓ ' : ''}Streets and names
+        </button>
         {kind === 0 && (
           <button className="mapopt" aria-pressed={raise3d} onClick={() => setRaise3d(v => !v)}>
             {raise3d ? '✓ ' : ''}Stand the blocks up
@@ -805,6 +856,12 @@ export default function PriceMap({ map }) {
         * by a subpixel and blur every label.
         */}
       <div className="mapwrap" ref={wrapRef} style={{ aspectRatio: aspect }}>
+        {/* Under the data, and dimmed. OneMap's Grey layer still carries
+            expressway names, town names and station marks — which is the whole
+            point, since a coastline alone is not recognisable to most people —
+            but at full strength its POI icons compete with the price bands. */}
+        {showBase && <canvas ref={baseRef} className="mapbase"
+          style={{ width: size.w, height: size.h }} aria-hidden="true" />}
         <canvas ref={cvsRef}
           style={{
             width: size.w, height: size.h,
@@ -910,8 +967,11 @@ export default function PriceMap({ map }) {
         </p>
         <p className="hint" style={{ margin: '6px 0 0' }}>
           {land
-            ? <>The land is {land.source}, simplified and stored in this repo — there is still no tile
-              server and no map library.{' '}
+            ? <>The land is {land.source}, simplified and stored in this repo. Streets and names, when
+              switched on, are tiles from <a href={BASEMAP.href} target="_blank" rel="noopener noreferrer">OneMap</a>{' '}
+              — {BASEMAP.credit}. Still no map library: a tile is a PNG at a URL computed from three
+              integers, and the projection is this map&rsquo;s own, so the background cannot drift
+              from the dots.{' '}
               {/*
                 * THE THREE VIEWS DO NOT BEHAVE THE SAME AND THIS USED TO CLAIM
                 * THEY DID. "A {region} name sits at the centroid of its own

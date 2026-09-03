@@ -1670,3 +1670,16 @@ sup.cite a:hover{text-decoration:underline}
    budget is as useful as knowing where it is. --mute, not red: it is a fact
    about a budget, not a warning. */
 .sizewithin li.out .n,.sizewithin li.out .s{color:var(--mute)}
+
+/* The OneMap basemap, under the data canvas. Dimmed because OneMap's Grey
+   layer still carries POI icons and orange route lines that compete with the
+   price bands — the map is about the prices, and the streets are there so a
+   reader can place themselves, not to be read. */
+.mapbase{position:absolute;inset:0;display:block;opacity:.55;pointer-events:none}
+@media (prefers-color-scheme: dark){
+  /* The tiles are a light basemap and there is no dark equivalent, so on a
+     dark ground they are dimmed further and slightly inverted in luminance
+     rather than left glaring. */
+  :root:not([data-theme="light"]) .mapbase{opacity:.32;filter:invert(1) hue-rotate(180deg)}
+}
+:root[data-theme="dark"] .mapbase{opacity:.32;filter:invert(1) hue-rotate(180deg)}
