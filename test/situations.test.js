@@ -243,3 +243,51 @@ test('every fallback site URL is the same, and is one that resolves', () => {
   }
   assert.equal(seen.size, 1, `four files, ${seen.size} different fallbacks: ${[...seen].join(', ')}`);
 });
+
+/* ── the watch loop has somewhere to go ────────────────────────────────────── */
+
+test('the confirmation page can link back to the block it confirmed', () => {
+  // It knew the block's NAME and not its href, so it could say "Blk 242
+  // Bishan St 22" in bold and could not send anybody there. Two links to
+  // somewhere else, and none to the thing they had just subscribed to.
+  const route = readFileSync(new URL('../app/api/watch/confirm/route.js', import.meta.url), 'utf8');
+  assert.match(route, /h=\$\{encodeURIComponent\(data\.href/, 'the confirm redirect drops the href');
+  const page = readFileSync(new URL('../app/watch/confirmed/page.jsx', import.meta.url), 'utf8');
+  assert.match(page, /Back to \{block\}/, 'no link back to the confirmed block');
+  // An href out of a query string, rendered as a link, is an open redirect
+  // unless it is checked.
+  assert.match(page, /\^\\\/\[a-z0-9\/-\]\*\$/i, 'the href from the query string is not validated');
+});
+
+test('a local watch note never claims to be the subscription', () => {
+  // The server holds the subscriptions; the browser holds a note. They can
+  // disagree in both directions, and a page that implied otherwise would have
+  // someone "unsubscribe" by tidying a list.
+  for (const f of ['components/WatchList.jsx', 'components/WatchBlock.jsx', 'lib/watching.js']) {
+    const src = readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
+    assert.match(src, /this (browser|device)/i, `${f} does not say the note is per-device`);
+  }
+  const list = readFileSync(new URL('../components/WatchList.jsx', import.meta.url), 'utf8');
+  assert.match(list, /not the subscription/i);
+  assert.match(list, /Forget /, 'the local remove must not be worded as an unsubscribe');
+  assert.doesNotMatch(list, />\s*Stop\s*</, '"Stop" would read as an unsubscribe');
+});
+
+test('every localStorage call is wrapped, so a private window still works', () => {
+  // A browser set to refuse site data throws on the ACCESSOR, not on the read,
+  // so an unguarded call takes the whole component down rather than degrading.
+  // Only the functions that touch storage directly need the guard —
+  // isWatching() delegates to watching(), which has one.
+  const src = readFileSync(new URL('../lib/watching.js', import.meta.url), 'utf8');
+  for (const fn of src.split('export ').slice(1)) {
+    if (!/localStorage/.test(fn)) continue;
+    assert.match(fn, /try\s*\{[\s\S]*catch/,
+      `unguarded localStorage in: ${fn.split('\n')[0].slice(0, 50)}`);
+  }
+  // And the whole file must never assume window exists — it is imported by a
+  // client component that React also renders on the server.
+  // Module scope means column zero. The earlier version of this allowed
+  // leading whitespace and so matched a guarded read INSIDE a function.
+  assert.doesNotMatch(src, /^(const|let)\s+\w+\s*=\s*localStorage/m,
+    'localStorage read at module scope would run during SSR');
+});

@@ -1,6 +1,8 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { CONSENT_COPY } from '../lib/consent.js';
+import { isWatching } from '../lib/watching.js';
 
 /**
  * Ask to hear when something is filed at this block.
@@ -27,6 +29,11 @@ import { CONSENT_COPY } from '../lib/consent.js';
 export default function WatchBlock({ href, label }) {
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
+  /* Null until the browser has been asked. Three states, not two: the form
+     must not flash on screen for somebody who is already subscribed, and the
+     "you are on the list" panel must not flash for somebody who is not. */
+  const [known, setKnown] = useState(null);
+  useEffect(() => { setKnown(isWatching(href)); }, [href]);
   const [state, setState] = useState('idle');
   const [msg, setMsg] = useState('');
 
@@ -53,6 +60,32 @@ export default function WatchBlock({ href, label }) {
       <div className="note" style={{ marginTop: 22 }}>
         <b>Check your inbox.</b> There is a confirmation link waiting — nothing is sent until you
         open it, which is what stops anyone signing up an address that is not theirs.
+      </div>
+    );
+  }
+
+  /* Already on the list, according to this browser. Says "this device"
+     because that is all it knows — the subscription lives on the server and
+     the note here can be missing (a different phone, a cleared browser)
+     without the emails stopping. Never used to decide whether somebody IS
+     subscribed, only whether to offer to sign them up again. */
+  if (known) {
+    return (
+      <div className="watchbox">
+        <span className="filtn">You are on the list for this block</span>
+        <p className="hint" style={{ margin: '6px 0 0' }}>
+          Updates start with the next transaction filed at {label}, and nothing goes out in a
+          month when nothing was filed. Every update carries a one-click link that stops it.
+        </p>
+        <p className="hint" style={{ margin: '10px 0 0' }}>
+          This is remembered in this browser only — on another device the form will appear again,
+          and signing up twice with the same address changes nothing.{' '}
+          <Link href="/watch">Blocks you are watching</Link>
+          {' · '}
+          <button type="button" className="linkish" onClick={() => setKnown(false)}>
+            Show the form anyway
+          </button>
+        </p>
       </div>
     );
   }

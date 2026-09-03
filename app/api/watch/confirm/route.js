@@ -20,5 +20,10 @@ export async function GET(req) {
   const { data, error } = await confirmWatch(token);
   if (error) return to('/watch/confirmed?state=error');
   if (!data) return to('/watch/confirmed?state=bad');
-  return to(`/watch/confirmed?state=ok&b=${encodeURIComponent(data.label || '')}`);
+  // The href as well as the label. Without it the confirmation page can name
+  // the block and cannot link to it, which is how that page became a dead end:
+  // the one place a reader wants to go next is the thing they just subscribed
+  // to, and it was the one link not on it.
+  return to(`/watch/confirmed?state=ok&b=${encodeURIComponent(data.label || '')}`
+    + `&h=${encodeURIComponent(data.href || '')}`);
 }
