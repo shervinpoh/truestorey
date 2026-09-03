@@ -43,11 +43,17 @@ Nothing below can be finished by an agent. Ordered by what unblocks the most.
    Vercel makes the form render and `/api/watch` accept a signup; GitHub is
    where the digest actually runs (inside `refresh-data.yml`, not on Vercel);
    `.env.local` is what lets `npm run preflight` and a dry run see them.
-   A Resend sending domain was verified on 2 Sep; the keys are not yet set
-   anywhere. **Verify with `curl … | grep watchbox`, not by looking for an
-   email field** — the lead form has one too, and its consent checkbox uses
-   the same wording from `lib/consent.js`. Commit 5946fa8's message claims the
-   form was rendering in production. It was not; that was a bad check. These are
+   **Vercel: DONE 3 Sep.** Sending domain verified, both keys set, redeployed.
+   The form renders on production block pages and `/api/watch` gets past its
+   own 503 gate — probed with a deliberately invalid address, which returns
+   the validation error and creates nothing.
+   **GitHub Actions secrets: unconfirmed.** Without them the form collects
+   subscribers and no digest ever sends, and because that step is
+   `continue-on-error` the daily run stays GREEN while it happens.
+   **Verify with `curl … | grep watchbox`, not by looking for an email
+   field** — the lead form has one too, and its consent checkbox uses the same
+   wording from `lib/consent.js`. Commit 5946fa8's message claimed the form was
+   rendering when it was not; that was a bad check, corrected in 37fcc47. These are
    the only two environment variables referenced in code and absent from
    `.env.local`. Until they exist, `lib/watch.js` refuses every subscription
    and the form does not render — deliberately. See "A consent tick promised
