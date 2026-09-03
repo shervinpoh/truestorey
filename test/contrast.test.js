@@ -83,3 +83,20 @@ test('decorative rules are deliberately below the control threshold', () => {
   assert.ok(ratio(token('line'), token('paper')) < 3,
     '--line has been darkened to control strength; use --edge for controls instead');
 });
+
+/* ── controls that must show their own state ───────────────────────────────── */
+
+test('a checkbox is exempted from the global appearance:none', () => {
+  // The `input,textarea,select` rule sets appearance:none so text fields can be
+  // drawn by hand, and it caught both checkboxes on the site — which are both
+  // PDPA s14 consent ticks. They rendered as an empty square that never
+  // changed when ticked. The click registered every time; there was no way to
+  // see it, and it was reported as a control that could not be clicked.
+  assert.match(css, /input,\s*textarea,\s*select\{[^}]*appearance:\s*none/,
+    'the global rule moved — check this test still describes it');
+  const rule = /input\[type=checkbox\]\{([^}]*)\}/.exec(css);
+  assert.ok(rule, 'no input[type=checkbox] rule — a consent tick will not show its state');
+  assert.match(rule[1], /appearance:\s*auto/, 'the checkbox must get its rendering back');
+  assert.match(rule[1], /accent-color:\s*var\(--acc\)/,
+    'a control is --acc; --acc-lit is live data only');
+});

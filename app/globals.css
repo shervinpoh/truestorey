@@ -338,6 +338,30 @@ input,textarea,select{width:100%;padding:11px 12px;border:1px solid var(--edge);
  color:var(--ink);font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:15px;-webkit-appearance:none;appearance:none}
 input::placeholder{color:var(--mute)}
 input:focus,button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--acc-line);outline-offset:1px}
+/* ── checkboxes, exempted from the rule above ───────────────────────────────
+   The `input,textarea,select` rule sets appearance:none so text fields can be
+   drawn by hand. It also caught every CHECKBOX on the site, and there was no
+   override — so both of them rendered as an empty bordered square that never
+   changed when ticked. The click always registered and the state always
+   updated; there was simply no way to see it, which is indistinguishable from
+   a broken control and was reported as one.
+
+   Both checkboxes here are PDPA s14 consent ticks — the lead form and the
+   block watch. A consent control that cannot show whether it is set is worse
+   than a cosmetic bug: it is the one control on the site where a person has to
+   be certain what they agreed to, and equally certain when they have not.
+
+   appearance:auto rather than a hand-drawn box: the native control is tinted
+   by accent-color, is correct in both themes without a second definition, and
+   carries the platform's own focus and keyboard behaviour, which is worth more
+   here than matching the hairlines exactly. --acc, not --acc-lit: this is an
+   interface control, not live data. */
+input[type=checkbox]{
+  -webkit-appearance:auto;appearance:auto;
+  width:18px;height:18px;min-width:18px;flex:0 0 18px;
+  padding:0;margin:0;border:0;background:none;
+  accent-color:var(--acc);cursor:pointer}
+
 input[type=range]{-webkit-appearance:none;background:transparent;border:0;padding:0;margin:10px 0 2px}
 input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--ink)}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--ink);
