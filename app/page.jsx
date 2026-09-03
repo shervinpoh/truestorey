@@ -97,7 +97,13 @@ export default function Home() {
           <dl className="proof">
             <div><dt>{num(blocks)}</dt><dd>HDB blocks with a filed resale</dd></div>
             <div><dt>{num(hdbSales + privateSales)}</dt><dd>filed transactions behind them</dd></div>
-            <div><dt>{refreshed || '—'}</dt><dd>last refreshed · daily</dd></div>
+            {/* "daily" was the check, not the data, and printing it beside a
+                date five days old said the opposite. The workflow runs every
+                morning; each dataset refreshes on the cadence its SOURCE
+                publishes at — SORA daily, transactions weekly, the resale
+                index quarterly. Re-pulling a quarterly index every night
+                would be noise, and claiming it was fresh would be worse. */}
+            <div><dt>{refreshed || '—'}</dt><dd>transactions · checked daily</dd></div>
           </dl>
         </div>
         <div className="heromap">
