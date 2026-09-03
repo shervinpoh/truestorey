@@ -1675,14 +1675,21 @@ sup.cite a:hover{text-decoration:underline}
    layer still carries POI icons and orange route lines that compete with the
    price bands — the map is about the prices, and the streets are there so a
    reader can place themselves, not to be read. */
-.mapbase{position:absolute;inset:0;display:block;opacity:.55;pointer-events:none}
+/* z-index, and it is load-bearing. An absolutely-positioned element paints
+   ABOVE a static sibling regardless of DOM order, so the basemap — added
+   first, intended as a backdrop — was painting on top of the price dots and
+   washing the whole map out. The data canvas is lifted explicitly rather than
+   the base pushed to -1, which would drop it behind the wrapper's own
+   background and make it disappear entirely. */
+.mapbase{position:absolute;inset:0;display:block;z-index:0;opacity:.42;pointer-events:none}
+.mapwrap canvas:not(.mapbase){position:relative;z-index:1}
 @media (prefers-color-scheme: dark){
   /* The tiles are a light basemap and there is no dark equivalent, so on a
      dark ground they are dimmed further and slightly inverted in luminance
      rather than left glaring. */
-  :root:not([data-theme="light"]) .mapbase{opacity:.32;filter:invert(1) hue-rotate(180deg)}
+  :root:not([data-theme="light"]) .mapbase{opacity:.28;filter:invert(1) hue-rotate(180deg)}
 }
-:root[data-theme="dark"] .mapbase{opacity:.32;filter:invert(1) hue-rotate(180deg)}
+:root[data-theme="dark"] .mapbase{opacity:.28;filter:invert(1) hue-rotate(180deg)}
 
 /* ── the refusals ───────────────────────────────────────────────────────────
    Long-form entries, one per refusal. A rule and a filename close each one,

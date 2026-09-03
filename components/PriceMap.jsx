@@ -521,11 +521,23 @@ export default function PriceMap({ map }) {
       for (const [, slug, , rings] of land.areas) {
         const path = areaPath(rings);
         const on = selSlug && slug === selSlug;
-        ctx.fillStyle = on ? '#E8FAFB' : '#EEF1F4';
-        ctx.fill(path);
-        ctx.strokeStyle = on ? '#00A7B0' : '#DFE3E8';
-        ctx.lineWidth = on ? 1.4 : 0.7;
-        ctx.stroke(path);
+        /* With the basemap on, THE TILES ARE THE LAND. Painting the opaque
+           #EEF1F4 fill over them was the second half of the washed-out look:
+           two grey layers stacked, one of them hiding the streets the whole
+           feature exists to show. Only the selected area is still filled, and
+           only faintly, because "which town am I looking at" has to survive. */
+        if (showBase) {
+          if (on) { ctx.fillStyle = 'rgba(22,79,82,.13)'; ctx.fill(path); }
+          ctx.strokeStyle = on ? '#164F52' : 'rgba(17,20,20,.22)';
+          ctx.lineWidth = on ? 1.6 : 0.6;
+          ctx.stroke(path);
+        } else {
+          ctx.fillStyle = on ? '#E8FAFB' : '#EEF1F4';
+          ctx.fill(path);
+          ctx.strokeStyle = on ? '#00A7B0' : '#DFE3E8';
+          ctx.lineWidth = on ? 1.4 : 0.7;
+          ctx.stroke(path);
+        }
       }
     }
 
@@ -731,7 +743,7 @@ export default function PriceMap({ map }) {
       ctx.lineWidth = 1.5;
       ctx.strokeRect(x - 5, y - 5, 10, 10);
     }
-  }, [shown, order, size, hover, project, view, breaks, regions, sel, showRail, rail, scale, land, region, raised]);
+  }, [shown, order, size, hover, project, view, breaks, regions, sel, showRail, rail, scale, land, region, raised, showBase]);
 
   function pick(e) {
     const cvs = cvsRef.current;
