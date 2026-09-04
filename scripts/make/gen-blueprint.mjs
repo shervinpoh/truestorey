@@ -2,42 +2,67 @@
  * Build a Make.com blueprint for the Truestorey daily article pipeline.
  *
  * Written as a generator rather than by hand because the request bodies are
- * JSON strings living inside a JSON document, and hand-escaping two levels of
- * quotes is how you spend an hour on a typo.
+ * JSON documents living inside a JSON document, and hand-escaping two levels
+ * of quotes is how you spend an hour on a typo. Keys are placeholders; filling
+ * them is a job for the Make UI and never for this file.
  *
- * Keys are placeholders. Filling them is the user's job, in the Make UI.
+ * ── THE ESCAPING PROBLEM, AND WHY THE FIX IS IN THE PROMPT ─────────────────
+ * Make pastes a mapped value into a raw body WITHOUT escaping it. The body is
+ * a JSON document held in a text field, so the first double quote inside any
+ * mapped value terminates the string it landed in and the whole request stops
+ * being valid JSON. Gemini answers that with:
+ *
+ *     400 Invalid JSON payload received. Expected , or } after key:value pair.
+ *
+ * which names neither the field nor the module that caused it.
+ *
+ * Perplexity's answer was JSON — eleven hundred characters of quotes — so
+ * every populated run failed. The empty days passed only because {"items":[]}
+ * never reached the next module.
+ *
+ * Three fixes were tried in the live tool and two of them failed:
+ *   · replace(...; /\x22/g; "'")  — Make's regex engine does not interpret
+ *     \x22. The expression evaluated, matched nothing, returned the content
+ *     unchanged, and the identical 400 came back. A transformation that
+ *     silently does nothing is indistinguishable from one that never ran.
+ *   · replace(...; /"/g; "'")     — Make's own parser rejects it: "Invalid
+ *     reference in parameter". A literal quote cannot appear inside a Make
+ *     expression that itself sits inside a JSON string.
+ *   · ASK FOR TEXT THAT HAS NO QUOTES IN IT. This one. Nothing to escape.
+ *
+ * So module 1 asks Perplexity for one line of delimited plain text with no
+ * quote characters and no line breaks, and Gemini is told the same about the
+ * values it returns. Every mapped value is then safe to drop into a body by
+ * construction rather than by transformation.
+ *
+ * It also removes a module: there is no longer any JSON to parse between
+ * Perplexity and Gemini, and the "did we find anything" filter reads the text
+ * directly. Eight modules instead of nine, and one less operation per run on
+ * a plan that counts them.
  */
 import fs from 'node:fs';
 
-const P_SYSTEM = "You index primary sources. You never summarise a news report. Every item you return must be a document published by the agency itself — a press release, a media release, a circular, a data release or a speech on that agency's own site. If your only evidence for something is a news article about it, find the agency page and return that; if there is no agency page, drop the item entirely. Reply with JSON only, no prose and no code fences.";
+/* The delimiters. Chosen because no agency headline will contain them and
+   because neither needs escaping anywhere in this pipeline. */
+const FIELD_SEP = ' ~ ';
+const ITEM_SEP = ' ;; ';
+const NOTHING = 'NONE';
+
+const P_SYSTEM = "You index primary sources. You never summarise a news report. Every item you return must be a document published by the agency itself — a press release, a media release, a circular, a data release or a speech on that agency's own site. If your only evidence for something is a news article about it, find the agency page and return that; if there is no agency page, drop the item entirely.";
 
 const P_USER = `What did Singapore government agencies publish in the last 24 hours that materially affects someone buying, owning or selling residential property here? Consider URA, HDB, MND, MAS, IRAS, CPF, LTA, MOE, SingStat and data.gov.sg.
 
-Return:
-{"items":[{"agency":"URA","headline":"exact title of the release","url":"https://…","published":"YYYY-MM-DD","what_changed":"one sentence, factual","who_it_affects":"one sentence","is_primary":true}]}
+FORMAT — follow this exactly:
+Reply with ONE LINE of plain text. No JSON. No line breaks. And never use the double-quote character anywhere in your reply; if a title contains one, replace it with an apostrophe.
 
-If nothing qualifies, return {"items":[]}. Do not pad the list. An empty answer is a correct answer.`;
+Each item is six fields separated by${FIELD_SEP.replace(/ /g, ' ')}in this order:
+agency${FIELD_SEP}exact title of the release${FIELD_SEP}url${FIELD_SEP}published date as YYYY-MM-DD${FIELD_SEP}what changed, one sentence${FIELD_SEP}who it affects, one sentence
 
-/**
- * Make pastes a mapped value into a raw body WITHOUT escaping it, so any
- * mapped string containing a double quote terminates the JSON string it sits
- * in and the whole request becomes invalid. Gemini's answer to that is
- * HTTP 400 "Expected , or } after key:value pair", which names neither the
- * field nor the module that caused it.
- *
- * Perplexity's output is 1,100-odd characters of quote-heavy JSON, so this is
- * not an edge case — it is every populated run.
- *
- * Swapping the quotes for apostrophes was measured against the live API:
- * the raw form fails to parse locally, the swapped form returns 200 and a
- * real choice. Neither model needs strict JSON to READ a list, and the outer
- * body stays valid, which is the part that has to be.
- *
- * \x22 is the regex escape for a double quote. It is used rather than a
- * literal quote because a literal quote inside an expression that itself
- * lives inside a JSON string is the original bug wearing a different hat.
- */
-const safe = ref => `{{replace(${ref}; /"/g; "'")}}`;
+Separate items with${ITEM_SEP}
+
+If nothing qualifies, reply with exactly:${' ' + NOTHING}
+
+Do not pad the list. An empty answer is a correct answer.`;
 
 const perplexityBody = {
   model: 'sonar',
@@ -53,36 +78,55 @@ const perplexityBody = {
   ],
 };
 
-const GEMINI_PROMPT = `You are the editor. For each item below decide whether it is worth an article on a Singapore property site written for ordinary buyers, owners and sellers.
+/* ── WHY THE TRIAGE IS PERMISSIVE, NOT STRICT ──────────────────────────────
+   The first version dropped a URA Government Land Sales release under "of
+   interest only to the industry rather than to a household". That is exactly
+   backwards: a site launched at Orchard Boulevard is a launch in that area in
+   a couple of years, and the winning land bid is the floor under its price.
+   It is the subject of /land and /gls on this site.
+   Measured: on the only item the live search returned that week, the strict
+   rules chose ZERO and these chose one, with a sound angle. A triage that
+   rejects everything is not cautious, it is a pipeline that produces nothing
+   and quietly looks like it is working. */
+const GEMINI_PROMPT = `You are the editor. Each item below is six fields separated by${FIELD_SEP}— agency, headline, url, published, what changed, who it affects — and items are separated by${ITEM_SEP}
 
-DROP anything that is: not published by the agency itself; a routine scheduled data release with no change in it; about commercial or industrial property only; a re-announcement of something already in force; or of interest only to the industry rather than to a household.
+For each one decide whether it is worth an article on a Singapore property site written for ordinary buyers, owners and sellers.
 
-KEEP something only if a reader could act differently because of it.
+KEEP anything that changes what a household can borrow, buy, sell or wait for. That explicitly includes:
+- Government Land Sales: sites launched, tenders closing, sites awarded. A new site is a future launch in that area, and the land price is the floor under it.
+- BTO and SBF launches, HDB eligibility, income ceilings, grants, MOP.
+- Loan rules, CPF rules, stamp duty, ABSD, TDSR, MSR, LTV.
+- Index and transaction releases where a figure actually moved.
+- Planning decisions and Master Plan changes affecting where people live.
 
-Rank what survives and return AT MOST TWO. Returning zero is normal and correct on most days — do not pad.
+DROP only: purely administrative notices with no substance for a household; anything about commercial or industrial property alone; a straight re-announcement of something already in force; and anything not published by the agency itself.
 
-Return JSON only:
+When in doubt, KEEP. A quiet week with one modest piece is better than a silent one.
+
+Rank what survives and return AT MOST TWO.
+
+Return JSON only, in this shape:
 {"chosen":[{"agency":"","headline":"","url":"","published":"","angle":"the one thing a reader needs to understand, in a sentence","category":"policy|note|deep_dive|editorial","why_it_matters":"two sentences, plain"}]}
 
+NEVER use a double-quote character inside any VALUE. The structural quotes of
+the JSON are fine; a quote inside a headline or a sentence is not. Use an
+apostrophe instead. Those values are copied into another request later and a
+stray double quote breaks it.
+
 THE ITEMS:
-${safe('1.data.choices[1].message.content')}`;
+{{1.data.choices[1].message.content}}`;
 
 const geminiBody = {
   contents: [{ parts: [{ text: GEMINI_PROMPT }] }],
   generationConfig: {
     temperature: 0.1,
-    /* 8192, and NO thinkingConfig. Both halves were measured against the live
-       API rather than reasoned about, after a first guess made it worse.
-         - thinkingConfig.thinkingBudget 0 returns HTTP 400, invalid argument.
-           It cannot be switched off on gemini-3.6-flash, and thinkingLevel is
-           not a field either. A 400 leaves module 4 with an empty mapping,
-           which reads as "the model returned nothing" and sends you looking at
-           the wrong module.
-         - Thinking tokens still count against the ceiling: 455 of them against
-           a 264-token probe. So the budget has to absorb them. 4096 against a
-           month of items is tight; 8192 is not.
-       responseMimeType stays. Without it the answer comes back wrapped in
-       triple-backtick json fences and Parse JSON refuses them. */
+    /* 8192, and no thinkingConfig. Both measured against the live API.
+       thinkingConfig.thinkingBudget 0 returns HTTP 400 on gemini-3.6-flash —
+       it cannot be switched off, and thinkingLevel is not a field either. But
+       thinking tokens DO count against this ceiling (455 of them against a
+       264-token probe), so the budget has to absorb them: 4096 against a month
+       of items is tight, 8192 is not. responseMimeType stays, because without
+       it the answer comes back wrapped in fences that Parse JSON refuses. */
     maxOutputTokens: 8192,
     responseMimeType: 'application/json',
   },
@@ -94,7 +138,7 @@ YOU ARE WRITING COMMENTARY ON A LINKED PRIMARY SOURCE. You are not summarising i
 
 HARD RULES. Breaking any of these makes the piece unpublishable:
 - Never state a valuation, an estimate of what any property is worth, or a price forecast. Ranges with the evidence shown are fine; a verdict is not.
-- Never invent a number. Every figure must be in the source you were given, and must be written with the agency and the period beside it: "URA, Q2 2026". If you want a figure you were not given, describe it in words instead.
+- Never invent a number. Every figure must be in the source you were given, and must be written with the agency and the period beside it: URA, Q2 2026. If you want a figure you were not given, describe it in words instead.
 - Never use: undervalued, best deal, expert, specialist, guaranteed, hot market, must buy, once in a lifetime.
 - Never imply a school place. The MOE 1km band is ballot priority, nothing more.
 - Never give a walking time or a distance to anything.
@@ -103,7 +147,7 @@ HARD RULES. Breaking any of these makes the piece unpublishable:
 
 HOUSE STYLE:
 - British spelling. Singapore dollars as S$1,234,567.
-- No first-person plural. "I" is allowed sparingly; "we" is not.
+- No first-person plural. I is allowed sparingly; we is not.
 - Short paragraphs. No bullet list longer than five items.
 - Do not open with "In a move that" or "As Singapore's property market".
 - End on the practical consequence, not a summary of what you just said.
@@ -119,7 +163,7 @@ OUTPUT. Return one JSON object and nothing else — no prose, no code fences. Th
   "source_urls": ["the agency URL you were given, and nothing else"]
 }
 
-NEVER put a double quote character inside title or excerpt. Use a single quote if you need one. Those two fields are copied into another request later and a stray double quote breaks it.
+NEVER put a double-quote character inside title or excerpt. Use an apostrophe. Those two fields are copied into another request later and a stray double quote breaks it. content_html may contain quotes; it is forwarded verbatim and never rebuilt.
 
 content_html RULES — it is sanitised on the way in against an allowlist and anything outside it is silently dropped:
 - Allowed: p br hr h2 h3 h4 strong b em i u s sup sub mark ul ol li blockquote figure figcaption cite a img table thead tbody tr th td caption code pre span div small time
@@ -128,53 +172,41 @@ content_html RULES — it is sanitised on the way in against an allowlist and an
 - 600 to 900 words for a note, 1,200 to 1,600 for a deep_dive.
 - Link the agency release in the first two paragraphs, in the prose, by name.`;
 
-const CLAUDE_USER = `Agency: ${safe('5.agency')}
-Headline: ${safe('5.headline')}
-URL: ${safe('5.url')}
-Published: ${safe('5.published')}
-Suggested category: ${safe('5.category')}
-The angle: ${safe('5.angle')}
-Why it matters: ${safe('5.why_it_matters')}`;
+/* Every one of these is a mapped value landing inside a JSON string. They are
+   safe without transformation because Gemini was told not to put a quote in
+   any of them — which is the whole point of the redesign. */
+const CLAUDE_USER = `Agency: {{4.agency}}
+Headline: {{4.headline}}
+URL: {{4.url}}
+Published: {{4.published}}
+Suggested category: {{4.category}}
+The angle: {{4.angle}}
+Why it matters: {{4.why_it_matters}}`;
 
 const claudeBody = {
   model: 'claude-opus-5',
   max_tokens: 4000,
-  temperature: 0.4,
+  /* No temperature. Opus 5 rejects it outright: "`temperature` is deprecated
+     for this model." Caught by running the chain rather than by reading a
+     changelog, which is the only reason it was caught before the first live
+     morning run. */
   system: CLAUDE_SYSTEM,
   messages: [{ role: 'user', content: CLAUDE_USER }],
 };
 
-/* The notify body. Built as a template string rather than an object because
-   the mapped values are Make expressions, not literals. */
-const notifyBody = `{"secret":"REPLACE_WITH_MAKE_SECRET","kind":"articles","items":[{"id":"{{7.data.id}}","title":"${safe('8.title')}","slug":"{{7.data.slug}}","category":"{{8.category}}","excerpt":"${safe('8.excerpt')}","sources":["{{5.url}}"]}]}`;
+const notifyBody = `{"secret":"REPLACE_WITH_MAKE_SECRET","kind":"articles","items":[{"id":"{{6.data.id}}","title":"{{7.title}}","slug":"{{6.data.slug}}","category":"{{7.category}}","excerpt":"{{7.excerpt}}","sources":["{{4.url}}"]}]}`;
 
 const httpMapper = (url, headers, data) => ({
-  ca: '',
-  qs: [],
-  url,
-  data,
-  gzip: true,
-  method: 'post',
-  headers,
-  timeout: '',
-  useMtls: false,
-  authPass: '',
-  authUser: '',
-  bodyType: 'raw',
-  contentType: 'application/json',
-  serializeUrl: false,
-  shareCookies: false,
-  parseResponse: true,
-  followRedirect: true,
-  useQuerystring: false,
-  followAllRedirects: false,
-  rejectUnauthorized: true,
+  ca: '', qs: [], url, data, gzip: true, method: 'post', headers,
+  timeout: '', useMtls: false, authPass: '', authUser: '',
+  bodyType: 'raw', contentType: 'application/json',
+  serializeUrl: false, shareCookies: false, parseResponse: true,
+  followRedirect: true, useQuerystring: false,
+  followAllRedirects: false, rejectUnauthorized: true,
 });
 
 const http = (id, x, url, headers, data, extra = {}) => ({
-  id,
-  module: 'http:ActionSendData',
-  version: 3,
+  id, module: 'http:ActionSendData', version: 3,
   parameters: { handleErrors: false, useNewZLibDeCompress: true },
   mapper: httpMapper(url, headers, data),
   metadata: { designer: { x, y: 0 } },
@@ -182,20 +214,11 @@ const http = (id, x, url, headers, data, extra = {}) => ({
 });
 
 const parseJson = (id, x, json, extra = {}) => ({
-  id,
-  module: 'json:ParseJSON',
-  version: 1,
+  id, module: 'json:ParseJSON', version: 1,
   parameters: { type: '' },
   mapper: { json },
   metadata: { designer: { x, y: 0 } },
   ...extra,
-});
-
-const notEmpty = (name, value) => ({
-  filter: {
-    name,
-    conditions: [[{ a: `{{length(${value})}}`, b: '0', o: 'number:greater' }]],
-  },
 });
 
 const flow = [
@@ -204,43 +227,55 @@ const flow = [
     { name: 'Content-Type', value: 'application/json' },
   ], JSON.stringify(perplexityBody)),
 
-  parseJson(2, 300, '{{1.data.choices[1].message.content}}'),
-
-  http(3, 600, 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=REPLACE_WITH_GEMINI_KEY',
+  /* The filter reads Perplexity's text directly. There is no JSON to parse any
+     more, which is the module this redesign removed. */
+  http(2, 300, 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=REPLACE_WITH_GEMINI_KEY',
     [{ name: 'Content-Type', value: 'application/json' }],
     JSON.stringify(geminiBody),
-    notEmpty('Perplexity found something', '2.items')),
+    {
+      filter: {
+        name: 'Perplexity found something',
+        conditions: [[{
+          a: '{{1.data.choices[1].message.content}}',
+          b: NOTHING,
+          o: 'text:notcontain',
+        }]],
+      },
+    }),
 
-  parseJson(4, 900, '{{3.data.candidates[1].content.parts[1].text}}'),
+  parseJson(3, 600, '{{2.data.candidates[1].content.parts[1].text}}'),
 
   {
-    id: 5,
+    id: 4,
     module: 'builtin:BasicFeeder',
     version: 1,
     parameters: {},
-    mapper: { array: '{{4.chosen}}' },
-    metadata: { designer: { x: 1200, y: 0 } },
-    ...notEmpty('The editor chose at least one', '4.chosen'),
+    mapper: { array: '{{3.chosen}}' },
+    metadata: { designer: { x: 900, y: 0 } },
+    filter: {
+      name: 'The editor chose at least one',
+      conditions: [[{ a: '{{length(3.chosen)}}', b: '0', o: 'number:greater' }]],
+    },
   },
 
-  http(6, 1500, 'https://api.anthropic.com/v1/messages', [
+  http(5, 1200, 'https://api.anthropic.com/v1/messages', [
     { name: 'x-api-key', value: 'REPLACE_WITH_ANTHROPIC_KEY' },
     { name: 'anthropic-version', value: '2023-06-01' },
     { name: 'Content-Type', value: 'application/json' },
   ], JSON.stringify(claudeBody)),
 
-  /* Claude's own JSON is forwarded VERBATIM as the request body. Rebuilding it
-     field by field would mean re-escaping content_html, which is full of
-     quotes and angle brackets — the single most likely thing to break. */
-  http(7, 1800, 'https://truestorey.vercel.app/api/webhook/article', [
+  /* Claude's own JSON is forwarded VERBATIM. Rebuilding it field by field
+     would mean re-escaping content_html, which is full of quotes and angle
+     brackets — the exact failure this whole redesign exists to avoid. */
+  http(6, 1500, 'https://truestorey.vercel.app/api/webhook/article', [
     { name: 'Authorization', value: 'Bearer REPLACE_WITH_ARTICLE_WEBHOOK_SECRET' },
     { name: 'Content-Type', value: 'application/json' },
-  ], '{{6.data.content[1].text}}'),
+  ], '{{5.data.content[1].text}}'),
 
   /* Parsed only to get a title and an excerpt for the notification. */
-  parseJson(8, 2100, '{{6.data.content[1].text}}'),
+  parseJson(7, 1800, '{{5.data.content[1].text}}'),
 
-  http(9, 2400, 'REPLACE_WITH_APPS_SCRIPT_EXEC_URL',
+  http(8, 2100, 'REPLACE_WITH_APPS_SCRIPT_EXEC_URL',
     [{ name: 'Content-Type', value: 'application/json' }],
     notifyBody),
 ];
@@ -252,16 +287,9 @@ const blueprint = {
     instant: false,
     version: 1,
     scenario: {
-      roundtrips: 1,
-      maxErrors: 3,
-      autoCommit: true,
-      autoCommitTriggerLast: true,
-      sequential: false,
-      slots: null,
-      confidential: false,
-      dataloss: false,
-      dlq: false,
-      freshVariables: false,
+      roundtrips: 1, maxErrors: 3, autoCommit: true, autoCommitTriggerLast: true,
+      sequential: false, slots: null, confidential: false, dataloss: false,
+      dlq: false, freshVariables: false,
     },
     designer: { orphans: [] },
     zone: 'eu1.make.com',
@@ -270,8 +298,20 @@ const blueprint = {
 
 const out = new URL('./truestorey-articles.blueprint.json', import.meta.url);
 fs.writeFileSync(out, JSON.stringify(blueprint, null, 2));
+
+/* A body that cannot survive its own mapped values is the bug this file was
+   rewritten to remove, so the check runs on every build. */
+const stray = [];
+for (const m of flow) {
+  if (m.module !== 'http:ActionSendData') continue;
+  const withValues = m.mapper.data.replace(/\{\{[^}]*\}\}/g, 'SUBSTITUTED');
+  if (withValues.trim().startsWith('{')) {
+    try { JSON.parse(withValues); } catch (e) { stray.push(`${m.id}: ${e.message}`); }
+  }
+}
 console.log('wrote', out.pathname);
-console.log('modules:', flow.map(m => `${m.id}:${m.module}`).join(' → '));
-console.log('placeholders to fill:',
-  [...JSON.stringify(blueprint).matchAll(/REPLACE_WITH_[A-Z_]+/g)]
-    .map(m => m[0]).filter((v, i, a) => a.indexOf(v) === i).join(', '));
+console.log('modules:', flow.map(m => `${m.id}:${m.module.replace(/^.*:/, '')}`).join(' → '));
+console.log('bodies still valid once every mapping is substituted:',
+  stray.length ? 'NO — ' + stray.join('; ') : 'yes');
+console.log('placeholders:', [...new Set([...JSON.stringify(blueprint)
+  .matchAll(/REPLACE_WITH_[A-Z_]+/g)].map(m => m[0]))].join(', '));
