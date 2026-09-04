@@ -44,13 +44,21 @@ test('every HDB town label links to a town page that exists', has, () => {
   }
 });
 
-test('districts are not given a page they do not have', has, () => {
+test('private regions are place names, and still have no page of their own', has, () => {
+  // The label was D01..D28 and is now the URA planning area the projects
+  // physically sit in, so every tab of the map reads as place names instead of
+  // a place name in one and a postal code in the next. A record with no usable
+  // coordinate cannot be put inside a polygon and keeps its D-number — better
+  // a postal code than a confident placement somewhere it might not be.
+  let named = 0, fallback = 0;
   for (const code of ['1', '2']) {
     for (const r of map.regions[code]) {
       assert.equal(r[R.HREF], null, `${r[R.LABEL]} was given the href ${r[R.HREF]}`);
-      assert.match(r[R.LABEL], /^D\d{2}$/);
+      if (/^D\d{1,2}$/.test(r[R.LABEL])) fallback++; else named++;
     }
   }
+  assert.ok(named > 40, `only ${named} private regions carry a place name`);
+  assert.ok(fallback <= 5, `${fallback} regions fell back to a D-number — check the geocodes`);
 });
 
 /* Real coordinates, so a swapped lat/lon or a mean-instead-of-median centroid
@@ -92,14 +100,14 @@ test('HDB town medians match the figure /hdb publishes', has, () => {
   }
 });
 
-test('a district figure is that district own type, not all private housing', has, () => {
-  // D10 has both condos and landed. If the two layers ever report the same
-  // median it means one of them is being fed the all-private figure again.
-  const c = map.regions['1'].find(r => r[R.LABEL] === 'D10');
-  const l = map.regions['2'].find(r => r[R.LABEL] === 'D10');
-  assert.ok(c && l, 'D10 should appear on both the condo and landed layers');
-  assert.notEqual(c[R.PSF], l[R.PSF], 'condo and landed D10 report the same median — layers are crossed');
-  assert.notEqual(c[R.SALES], l[R.SALES], 'condo and landed D10 report the same sale count');
+test('a region figure is that region own type, not all private housing', has, () => {
+  // Bukit Timah has both condos and landed. If the two layers ever report the
+  // same median it means one of them is being fed the all-private figure again.
+  const c = map.regions['1'].find(r => r[R.LABEL] === 'BUKIT TIMAH');
+  const l = map.regions['2'].find(r => r[R.LABEL] === 'BUKIT TIMAH');
+  assert.ok(c && l, 'Bukit Timah should appear on both the condo and landed layers');
+  assert.notEqual(c[R.PSF], l[R.PSF], 'condo and landed report the same median — layers are crossed');
+  assert.notEqual(c[R.SALES], l[R.SALES], 'condo and landed report the same sale count');
 });
 
 test('stations are stations, deduplicated, and inside Singapore', has, () => {

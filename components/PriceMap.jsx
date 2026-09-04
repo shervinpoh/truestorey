@@ -107,18 +107,23 @@ const R = { LABEL: 0, HREF: 1, LAT: 2, LON: 3, PSF: 4, SALES: 5, MEMBERS: 6, PLO
  * already settled on "District 1": ProjectBrowse and FloorView both write it
  * out. The map was the only surface still printing the raw key.
  *
- * WHAT IS NOT DONE HERE, AND WHY. The obvious next step is to give a district
- * its locality names, so D15 reads "Katong · Joo Chiat" and a reader can see
- * how it relates to the East Coast they know. That needs URA's published
- * district list as a source, transcribed the way data/sources/gls-programme
- * .json is. Writing twenty-eight of them from memory onto a page that carries
- * a CEA registration number is exactly the thing rule 13 refuses for geometry,
- * and the reasoning does not change because these are words.
+ * SOLVED BY GROUPING, NOT BY RENAMING. An earlier version of this note said a
+ * district could not be given a place name, because an HDB town and a postal
+ * district are different shapes that merely overlap — calling D15 "East Coast"
+ * would be wrong rather than helpful. That is still true, and it is not what
+ * happens now. Private points are GROUPED by the URA planning area their
+ * coordinate physically falls inside, so the label is honestly the planning
+ * area of the projects under it. Nothing is renamed and no locality list is
+ * transcribed from memory, which rule 13 would refuse for words as readily as
+ * for geometry.
  *
- * An HDB town and a postal district are also genuinely different shapes that
- * merely overlap — East Coast is a planning area, D15 is a postal district,
- * and naming one after the other would be wrong rather than helpful. The
- * caption under the map says so.
+ * So every tab reads as place names. The district still exists and still
+ * matters — it is the vocabulary private property is discussed in — and it
+ * belongs beside a project, not as the name of a shape on a map.
+ *
+ * A record with no usable coordinate cannot be put inside a polygon and keeps
+ * its D-number: two landed regions do. Better a postal code than a confident
+ * placement in somewhere it might not be.
  */
 const regionName = label => (/^D\d{1,2}$/.test(String(label))
   ? `District ${Number(String(label).slice(1))}`

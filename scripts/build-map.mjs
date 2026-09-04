@@ -28,10 +28,17 @@
  *    of repeated key names. Positional arrays cut it to a third before gzip.
  */
 import fs from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
+import { areaAt } from '../lib/geojson.js';
 
 const ROOT = process.cwd();
 const USABLE = new Set(['exact', 'good', 'street']);
+/* URA's 55 planning areas, for putting private projects in a named place
+   rather than a postal district. A project whose coordinate falls outside all
+   of them keeps its district — better a D-number than a wrong place name. */
+const AREAS = JSON.parse(readFileSync(new URL('../data/boundaries.json', import.meta.url), 'utf8')).areas;
+
 const NS = { hdb: 0, condo: 1, landed: 2 };
 
 const read = async f => JSON.parse(await fs.readFile(path.join(ROOT, 'data', f), 'utf8'));
@@ -70,13 +77,42 @@ async function main() {
     for (const f of files.filter(f => f.endsWith('.json'))) {
       const shard = JSON.parse(await fs.readFile(path.join(ROOT, 'data', 'records', ns, f), 'utf8'));
       for (const r of Object.values(shard)) {
+        /* The geocode is resolved BEFORE the key, because a planning area is a
+           polygon and needs a coordinate to fall inside. A private record with
+           no usable coordinate keeps its district rather than being dropped
+           into a place it might not be in. */
+        const g0 = geo.records[r.href];
+        const placed = g0 && USABLE.has(g0.match);
         if (Number.isFinite(r.medianPsf)) {
-          const key = ns === 'hdb' ? `hdb:${r.town}` : `${ns}:${r.district}`;
+          /* ── ONE VOCABULARY ON THE MAP ────────────────────────────────
+           * HDB read "ANG MO KIO" and private read "D20": a place name in one
+           * tab and a postal code in the next, in the same control, on the
+           * same map. Private points are grouped by the URA PLANNING AREA
+           * their coordinate actually falls in now, so every tab reads as
+           * place names.
+           *
+           * This is not the thing the note in PriceMap.jsx refuses. That
+           * refuses NAMING a district after a planning area — calling D15
+           * "East Coast" — because the two are different shapes that merely
+           * overlap. This does not rename anything: it groups the points by
+           * the polygon they are physically inside, so the label is honestly
+           * the planning area of the projects under it. The district is kept
+           * on the row and shown in the tooltip, because "District 10" is the
+           * vocabulary private property is actually discussed in.
+           *
+           * HDB is left alone. It keeps HDB's own town names, which is what
+           * HDB publishes and what /hdb shades its tiles by — and 24 of the 26
+           * coincide with a planning area name anyway. Forcing HDB onto
+           * planning areas would split KALLANG/WHAMPOA and make the map
+           * disagree with its own town page. */
+          const pa = (ns === 'hdb' || !placed) ? null : areaAt(g0.lon, g0.lat, AREAS);
+          const key = ns === 'hdb' ? `hdb:${r.town}`
+            : `${ns}:${pa ? pa.name : `D${r.district}`}`;
           const e = pool.get(key) || { psf: [], sales: 0, members: 0 };
           e.psf.push(r.medianPsf); e.sales += r.n || 0; e.members++;
           pool.set(key, e);
         }
-        const g = geo.records[r.href];
+        const g = g0;
         if (!g) { skipped.noCoord++; continue; }
         if (!USABLE.has(g.match)) { skipped.weak++; continue; }
         if (!Number.isFinite(r.medianPsf)) { skipped.noPsf++; continue; }
@@ -91,7 +127,9 @@ async function main() {
           r.href,
           r.label,
           r.n,
-          ns === 'hdb' ? `hdb:${r.town}` : `${ns}:${r.district}`,
+          // The same key the pool used, or the point lands in no region.
+          ns === 'hdb' ? `hdb:${r.town}`
+            : `${ns}:${(areaAt(g.lon, g.lat, AREAS) || { name: `D${r.district}` }).name}`,
           /*
            * Published storey count, HDB only, or 0.
            *
@@ -161,7 +199,9 @@ async function main() {
       const psf = own ? own.medianPsf : median(p0.psf);
       list.push([
         key,
-        name === 'hdb' ? raw : `D${raw}`,
+        // The key already carries the right words: an HDB town, a planning
+        // area, or a D-number for the few private points outside every area.
+        raw,
         name === 'hdb' ? `/hdb/${slug(raw)}` : null,   // districts have no page of their own
         Math.round(median(g.map(p => p[1])) * 1e5) / 1e5,
         Math.round(median(g.map(p => p[2])) * 1e5) / 1e5,

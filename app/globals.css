@@ -879,7 +879,7 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
  .ledeside{padding-left:0;padding-top:22px}}
 
 /* ── price map ─────────────────────────────────────────────────────────── */
-.mapwrap{position:relative;margin-top:18px;border:1px solid var(--line);background:var(--sunk);
+.mapwrap{position:relative;margin-top:18px;border:1px solid var(--line);background:var(--card);
  overflow:hidden}
 .mapwrap canvas{display:block}
 .maptip{position:absolute;z-index:5;pointer-events:none;background:var(--paper);
@@ -1681,15 +1681,21 @@ sup.cite a:hover{text-decoration:underline}
    washing the whole map out. The data canvas is lifted explicitly rather than
    the base pushed to -1, which would drop it behind the wrapper's own
    background and make it disappear entirely. */
-.mapbase{position:absolute;inset:0;display:block;z-index:0;opacity:.42;pointer-events:none}
+/* Near-full strength. The dimming only ever existed because the layer was
+   painting ON TOP of the data — once it is underneath, a basemap held at 42%
+   is not subtle, it is unreadable: OneMap's tiles are already a pale grey
+   cartography, and washing them further left the whole map a flat taupe slab
+   with the streets invisible and the price dots sitting on nothing. The dots
+   carry the colour; the map underneath is allowed to look like a map. */
+.mapbase{position:absolute;inset:0;display:block;z-index:0;opacity:.9;pointer-events:none}
 .mapwrap canvas:not(.mapbase){position:relative;z-index:1}
 @media (prefers-color-scheme: dark){
   /* The tiles are a light basemap and there is no dark equivalent, so on a
      dark ground they are dimmed further and slightly inverted in luminance
      rather than left glaring. */
-  :root:not([data-theme="light"]) .mapbase{opacity:.28;filter:invert(1) hue-rotate(180deg)}
+  :root:not([data-theme="light"]) .mapbase{opacity:.55;filter:invert(1) hue-rotate(180deg)}
 }
-:root[data-theme="dark"] .mapbase{opacity:.28;filter:invert(1) hue-rotate(180deg)}
+:root[data-theme="dark"] .mapbase{opacity:.55;filter:invert(1) hue-rotate(180deg)}
 
 /* ── the refusals ───────────────────────────────────────────────────────────
    Long-form entries, one per refusal. A rule and a filename close each one,
