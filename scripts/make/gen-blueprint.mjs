@@ -50,8 +50,16 @@ const geminiBody = {
   contents: [{ parts: [{ text: GEMINI_PROMPT }] }],
   generationConfig: {
     temperature: 0.1,
-    maxOutputTokens: 4096,
+    /* 8192, and thinking off. Gemini's thinking tokens count against this
+       ceiling, and at 4096 it spent the whole budget reasoning and returned an
+       EMPTY text part — module 4 then failed with "got an empty json field".
+       CLAUDE.md records the same failure once already: 942 thinking tokens
+       plus 498 of answer against a 1600 ceiling, truncating JSON mid-object,
+       intermittently. This step triages a list that is already filtered; it
+       does not need to think. */
+    maxOutputTokens: 8192,
     responseMimeType: 'application/json',
+    thinkingConfig: { thinkingBudget: 0 },
   },
 };
 
