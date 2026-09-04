@@ -37,7 +37,7 @@ If nothing qualifies, return {"items":[]}. Do not pad the list. An empty answer 
  * literal quote because a literal quote inside an expression that itself
  * lives inside a JSON string is the original bug wearing a different hat.
  */
-const safe = ref => `{{replace(${ref}; /\\x22/g; "'")}}`;
+const safe = ref => `{{replace(${ref}; /"/g; "'")}}`;
 
 const perplexityBody = {
   model: 'sonar',
