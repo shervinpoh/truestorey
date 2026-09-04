@@ -1,0 +1,341 @@
+{
+  "name": "Truestorey · daily articles",
+  "flow": [
+    {
+      "id": 1,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {
+        "handleErrors": false,
+        "useNewZLibDeCompress": true
+      },
+      "mapper": {
+        "ca": "",
+        "qs": [],
+        "url": "https://api.perplexity.ai/chat/completions",
+        "data": "{\"model\":\"sonar\",\"temperature\":0.1,\"max_tokens\":1500,\"search_recency_filter\":\"day\",\"search_domain_filter\":[\"ura.gov.sg\",\"hdb.gov.sg\",\"mas.gov.sg\",\"lta.gov.sg\",\"mnd.gov.sg\",\"iras.gov.sg\",\"cpf.gov.sg\",\"moe.gov.sg\",\"data.gov.sg\",\"singstat.gov.sg\"],\"messages\":[{\"role\":\"system\",\"content\":\"You index primary sources. You never summarise a news report. Every item you return must be a document published by the agency itself — a press release, a media release, a circular, a data release or a speech on that agency's own site. If your only evidence for something is a news article about it, find the agency page and return that; if there is no agency page, drop the item entirely. Reply with JSON only, no prose and no code fences.\"},{\"role\":\"user\",\"content\":\"What did Singapore government agencies publish in the last 24 hours that materially affects someone buying, owning or selling residential property here? Consider URA, HDB, MND, MAS, IRAS, CPF, LTA, MOE, SingStat and data.gov.sg.\\n\\nReturn:\\n{\\\"items\\\":[{\\\"agency\\\":\\\"URA\\\",\\\"headline\\\":\\\"exact title of the release\\\",\\\"url\\\":\\\"https://…\\\",\\\"published\\\":\\\"YYYY-MM-DD\\\",\\\"what_changed\\\":\\\"one sentence, factual\\\",\\\"who_it_affects\\\":\\\"one sentence\\\",\\\"is_primary\\\":true}]}\\n\\nIf nothing qualifies, return {\\\"items\\\":[]}. Do not pad the list. An empty answer is a correct answer.\"}]}",
+        "gzip": true,
+        "method": "post",
+        "headers": [
+          {
+            "name": "Authorization",
+            "value": "Bearer REPLACE_WITH_PERPLEXITY_KEY"
+          },
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "timeout": "",
+        "useMtls": false,
+        "authPass": "",
+        "authUser": "",
+        "bodyType": "raw",
+        "contentType": "application/json",
+        "serializeUrl": false,
+        "shareCookies": false,
+        "parseResponse": true,
+        "followRedirect": true,
+        "useQuerystring": false,
+        "followAllRedirects": false,
+        "rejectUnauthorized": true
+      },
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {
+        "type": ""
+      },
+      "mapper": {
+        "json": "{{1.data.choices[1].message.content}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {
+        "handleErrors": false,
+        "useNewZLibDeCompress": true
+      },
+      "mapper": {
+        "ca": "",
+        "qs": [],
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=REPLACE_WITH_GEMINI_KEY",
+        "data": "{\"contents\":[{\"parts\":[{\"text\":\"You are the editor. For each item below decide whether it is worth an article on a Singapore property site written for ordinary buyers, owners and sellers.\\n\\nDROP anything that is: not published by the agency itself; a routine scheduled data release with no change in it; about commercial or industrial property only; a re-announcement of something already in force; or of interest only to the industry rather than to a household.\\n\\nKEEP something only if a reader could act differently because of it.\\n\\nRank what survives and return AT MOST TWO. Returning zero is normal and correct on most days — do not pad.\\n\\nReturn JSON only:\\n{\\\"chosen\\\":[{\\\"agency\\\":\\\"\\\",\\\"headline\\\":\\\"\\\",\\\"url\\\":\\\"\\\",\\\"published\\\":\\\"\\\",\\\"angle\\\":\\\"the one thing a reader needs to understand, in a sentence\\\",\\\"category\\\":\\\"policy|note|deep_dive|editorial\\\",\\\"why_it_matters\\\":\\\"two sentences, plain\\\"}]}\\n\\nTHE ITEMS:\\n{{1.data.choices[1].message.content}}\"}]}],\"generationConfig\":{\"temperature\":0.1,\"maxOutputTokens\":4096,\"responseMimeType\":\"application/json\"}}",
+        "gzip": true,
+        "method": "post",
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "timeout": "",
+        "useMtls": false,
+        "authPass": "",
+        "authUser": "",
+        "bodyType": "raw",
+        "contentType": "application/json",
+        "serializeUrl": false,
+        "shareCookies": false,
+        "parseResponse": true,
+        "followRedirect": true,
+        "useQuerystring": false,
+        "followAllRedirects": false,
+        "rejectUnauthorized": true
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "filter": {
+        "name": "Perplexity found something",
+        "conditions": [
+          [
+            {
+              "a": "{{length(2.items)}}",
+              "b": "0",
+              "o": "number:greater"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {
+        "type": ""
+      },
+      "mapper": {
+        "json": "{{3.data.candidates[1].content.parts[1].text}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 5,
+      "module": "builtin:BasicFeeder",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "array": "{{4.chosen}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0
+        }
+      },
+      "filter": {
+        "name": "The editor chose at least one",
+        "conditions": [
+          [
+            {
+              "a": "{{length(4.chosen)}}",
+              "b": "0",
+              "o": "number:greater"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {
+        "handleErrors": false,
+        "useNewZLibDeCompress": true
+      },
+      "mapper": {
+        "ca": "",
+        "qs": [],
+        "url": "https://api.anthropic.com/v1/messages",
+        "data": "{\"model\":\"claude-opus-5\",\"max_tokens\":4000,\"temperature\":0.4,\"system\":\"You write for Truestorey, a Singapore property site published by Shervin Poh, CEA Reg. No. R066925H, Huttons Asia Pte Ltd. Everything you write goes out under that registration number. Write as him: plain, direct, unhurried, more interested in what a figure does not say than in what it does.\\n\\nYOU ARE WRITING COMMENTARY ON A LINKED PRIMARY SOURCE. You are not summarising it and you are certainly not retelling anyone's news coverage of it. Assume the reader can click the link. Your job is what it means for someone buying, owning or selling a home — the consequence, the thing that is easy to misread, the question it should make them ask.\\n\\nHARD RULES. Breaking any of these makes the piece unpublishable:\\n- Never state a valuation, an estimate of what any property is worth, or a price forecast. Ranges with the evidence shown are fine; a verdict is not.\\n- Never invent a number. Every figure must be in the source you were given, and must be written with the agency and the period beside it: \\\"URA, Q2 2026\\\". If you want a figure you were not given, describe it in words instead.\\n- Never use: undervalued, best deal, expert, specialist, guaranteed, hot market, must buy, once in a lifetime.\\n- Never imply a school place. The MOE 1km band is ballot priority, nothing more.\\n- Never give a walking time or a distance to anything.\\n- Never quote or paraphrase Straits Times, Business Times, EdgeProp, Stacked or any other publisher. If a fact is not in the agency release, leave it out.\\n- Never predict what prices will do. You may say what has happened, with dates.\\n\\nHOUSE STYLE:\\n- British spelling. Singapore dollars as S$1,234,567.\\n- No first-person plural. \\\"I\\\" is allowed sparingly; \\\"we\\\" is not.\\n- Short paragraphs. No bullet list longer than five items.\\n- Do not open with \\\"In a move that\\\" or \\\"As Singapore's property market\\\".\\n- End on the practical consequence, not a summary of what you just said.\\n\\nOUTPUT. Return one JSON object and nothing else — no prose, no code fences. This object is POSTed verbatim as a request body, so it must be valid JSON on its own:\\n{\\n  \\\"title\\\": \\\"under 70 characters, specific, no colon-subtitle construction\\\",\\n  \\\"slug\\\": \\\"lowercase-hyphenated\\\",\\n  \\\"category\\\": \\\"policy | note | deep_dive | editorial\\\",\\n  \\\"excerpt\\\": \\\"one sentence under 200 characters\\\",\\n  \\\"content_html\\\": \\\"…\\\",\\n  \\\"tags\\\": [\\\"three or four lowercase tags\\\"],\\n  \\\"source_urls\\\": [\\\"the agency URL you were given, and nothing else\\\"]\\n}\\n\\nNEVER put a double quote character inside title or excerpt. Use a single quote if you need one. Those two fields are copied into another request later and a stray double quote breaks it.\\n\\ncontent_html RULES — it is sanitised on the way in against an allowlist and anything outside it is silently dropped:\\n- Allowed: p br hr h2 h3 h4 strong b em i u s sup sub mark ul ol li blockquote figure figcaption cite a img table thead tbody tr th td caption code pre span div small time\\n- NO <h1>. The page supplies it, and a second one breaks the heading order a screen reader announces.\\n- On <a>, only href title rel target. No inline styles, no classes, no event handlers — they will be stripped.\\n- 600 to 900 words for a note, 1,200 to 1,600 for a deep_dive.\\n- Link the agency release in the first two paragraphs, in the prose, by name.\",\"messages\":[{\"role\":\"user\",\"content\":\"Agency: {{5.agency}}\\nHeadline: {{5.headline}}\\nURL: {{5.url}}\\nPublished: {{5.published}}\\nSuggested category: {{5.category}}\\nThe angle: {{5.angle}}\\nWhy it matters: {{5.why_it_matters}}\"}]}",
+        "gzip": true,
+        "method": "post",
+        "headers": [
+          {
+            "name": "x-api-key",
+            "value": "REPLACE_WITH_ANTHROPIC_KEY"
+          },
+          {
+            "name": "anthropic-version",
+            "value": "2023-06-01"
+          },
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "timeout": "",
+        "useMtls": false,
+        "authPass": "",
+        "authUser": "",
+        "bodyType": "raw",
+        "contentType": "application/json",
+        "serializeUrl": false,
+        "shareCookies": false,
+        "parseResponse": true,
+        "followRedirect": true,
+        "useQuerystring": false,
+        "followAllRedirects": false,
+        "rejectUnauthorized": true
+      },
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 7,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {
+        "handleErrors": false,
+        "useNewZLibDeCompress": true
+      },
+      "mapper": {
+        "ca": "",
+        "qs": [],
+        "url": "https://truestorey.vercel.app/api/webhook/article",
+        "data": "{{6.data.content[1].text}}",
+        "gzip": true,
+        "method": "post",
+        "headers": [
+          {
+            "name": "Authorization",
+            "value": "Bearer REPLACE_WITH_ARTICLE_WEBHOOK_SECRET"
+          },
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "timeout": "",
+        "useMtls": false,
+        "authPass": "",
+        "authUser": "",
+        "bodyType": "raw",
+        "contentType": "application/json",
+        "serializeUrl": false,
+        "shareCookies": false,
+        "parseResponse": true,
+        "followRedirect": true,
+        "useQuerystring": false,
+        "followAllRedirects": false,
+        "rejectUnauthorized": true
+      },
+      "metadata": {
+        "designer": {
+          "x": 1800,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 8,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {
+        "type": ""
+      },
+      "mapper": {
+        "json": "{{6.data.content[1].text}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 2100,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 9,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {
+        "handleErrors": false,
+        "useNewZLibDeCompress": true
+      },
+      "mapper": {
+        "ca": "",
+        "qs": [],
+        "url": "REPLACE_WITH_APPS_SCRIPT_EXEC_URL",
+        "data": "{\"secret\":\"REPLACE_WITH_MAKE_SECRET\",\"kind\":\"articles\",\"items\":[{\"id\":\"{{7.data.id}}\",\"title\":\"{{8.title}}\",\"slug\":\"{{7.data.slug}}\",\"category\":\"{{8.category}}\",\"excerpt\":\"{{8.excerpt}}\",\"sources\":[\"{{5.url}}\"]}]}",
+        "gzip": true,
+        "method": "post",
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "timeout": "",
+        "useMtls": false,
+        "authPass": "",
+        "authUser": "",
+        "bodyType": "raw",
+        "contentType": "application/json",
+        "serializeUrl": false,
+        "shareCookies": false,
+        "parseResponse": true,
+        "followRedirect": true,
+        "useQuerystring": false,
+        "followAllRedirects": false,
+        "rejectUnauthorized": true
+      },
+      "metadata": {
+        "designer": {
+          "x": 2400,
+          "y": 0
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "eu1.make.com"
+  }
+}
