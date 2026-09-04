@@ -50,16 +50,20 @@ const geminiBody = {
   contents: [{ parts: [{ text: GEMINI_PROMPT }] }],
   generationConfig: {
     temperature: 0.1,
-    /* 8192, and thinking off. Gemini's thinking tokens count against this
-       ceiling, and at 4096 it spent the whole budget reasoning and returned an
-       EMPTY text part — module 4 then failed with "got an empty json field".
-       CLAUDE.md records the same failure once already: 942 thinking tokens
-       plus 498 of answer against a 1600 ceiling, truncating JSON mid-object,
-       intermittently. This step triages a list that is already filtered; it
-       does not need to think. */
+    /* 8192, and NO thinkingConfig. Both halves were measured against the live
+       API rather than reasoned about, after a first guess made it worse.
+         - thinkingConfig.thinkingBudget 0 returns HTTP 400, invalid argument.
+           It cannot be switched off on gemini-3.6-flash, and thinkingLevel is
+           not a field either. A 400 leaves module 4 with an empty mapping,
+           which reads as "the model returned nothing" and sends you looking at
+           the wrong module.
+         - Thinking tokens still count against the ceiling: 455 of them against
+           a 264-token probe. So the budget has to absorb them. 4096 against a
+           month of items is tight; 8192 is not.
+       responseMimeType stays. Without it the answer comes back wrapped in
+       triple-backtick json fences and Parse JSON refuses them. */
     maxOutputTokens: 8192,
     responseMimeType: 'application/json',
-    thinkingConfig: { thinkingBudget: 0 },
   },
 };
 
