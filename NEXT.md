@@ -72,9 +72,16 @@ Nothing below can be finished by an agent. Ordered by what unblocks the most.
    token; they are new roads. Only a properly sourced coordinate goes in.
 8. **A URA URL for district locality names**, so the map can label a district
    consistently instead of mixing "East Coast" with "District 15".
-9. **Make.com HTTP module** posting to `/api/webhook/article` with the Bearer
-   secret from `.env.local`. Payload shape is in `SETUP.md` §4c. The endpoint is
-   verified against production; nothing depends on it.
+9. **The Make.com scenario.** Being built 4 Sep. **The whole thing is specified
+   in `docs/PIPELINE.md`** — nine modules, the three request bodies, Claude's
+   system prompt in full, and the smoke test that tells a missing Vercel
+   variable apart from a wrong one. The code half is done and live: the webhook
+   files a draft, `/studio` approves, `Insight.jsx` renders the source links.
+   Two things are still unverified from outside and both fail closed, which is
+   why they look identical to a wrong password: `ARTICLE_WEBHOOK_SECRET` and the
+   Supabase pair **in Vercel** rather than only in `.env.local`. Run the curl in
+   §"Before you open Make.com" — 201 means wired, 401 means the secret, 503
+   means Supabase.
 10. **Photos.** Ten are in `photos-in/` as of 2 Sep and `photos.json` is drafted
     — every `alt` is written from the actual frame. Three things are needed
     before `npm run photos` will publish any of them:

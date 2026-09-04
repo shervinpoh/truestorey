@@ -92,6 +92,10 @@ Two columns are not in the original blueprint and both are deliberate:
 
 **b.** Fill in the Supabase block of `.env.local` from `.env.example`.
 
+**c.** Point Make.com at the endpoint below. **The full scenario — every
+module, every prompt, and the reason rule 9 shapes the first one — is in
+`docs/PIPELINE.md`.** This section is only the contract.
+
 **c.** Point Make.com at:
 
 ```
