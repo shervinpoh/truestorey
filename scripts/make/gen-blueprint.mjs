@@ -18,6 +18,27 @@ Return:
 
 If nothing qualifies, return {"items":[]}. Do not pad the list. An empty answer is a correct answer.`;
 
+/**
+ * Make pastes a mapped value into a raw body WITHOUT escaping it, so any
+ * mapped string containing a double quote terminates the JSON string it sits
+ * in and the whole request becomes invalid. Gemini's answer to that is
+ * HTTP 400 "Expected , or } after key:value pair", which names neither the
+ * field nor the module that caused it.
+ *
+ * Perplexity's output is 1,100-odd characters of quote-heavy JSON, so this is
+ * not an edge case — it is every populated run.
+ *
+ * Swapping the quotes for apostrophes was measured against the live API:
+ * the raw form fails to parse locally, the swapped form returns 200 and a
+ * real choice. Neither model needs strict JSON to READ a list, and the outer
+ * body stays valid, which is the part that has to be.
+ *
+ * \x22 is the regex escape for a double quote. It is used rather than a
+ * literal quote because a literal quote inside an expression that itself
+ * lives inside a JSON string is the original bug wearing a different hat.
+ */
+const safe = ref => `{{replace(${ref}; /\\x22/g; "'")}}`;
+
 const perplexityBody = {
   model: 'sonar',
   temperature: 0.1,
@@ -44,7 +65,7 @@ Return JSON only:
 {"chosen":[{"agency":"","headline":"","url":"","published":"","angle":"the one thing a reader needs to understand, in a sentence","category":"policy|note|deep_dive|editorial","why_it_matters":"two sentences, plain"}]}
 
 THE ITEMS:
-{{1.data.choices[1].message.content}}`;
+${safe('1.data.choices[1].message.content')}`;
 
 const geminiBody = {
   contents: [{ parts: [{ text: GEMINI_PROMPT }] }],
@@ -107,13 +128,13 @@ content_html RULES — it is sanitised on the way in against an allowlist and an
 - 600 to 900 words for a note, 1,200 to 1,600 for a deep_dive.
 - Link the agency release in the first two paragraphs, in the prose, by name.`;
 
-const CLAUDE_USER = `Agency: {{5.agency}}
-Headline: {{5.headline}}
-URL: {{5.url}}
-Published: {{5.published}}
-Suggested category: {{5.category}}
-The angle: {{5.angle}}
-Why it matters: {{5.why_it_matters}}`;
+const CLAUDE_USER = `Agency: ${safe('5.agency')}
+Headline: ${safe('5.headline')}
+URL: ${safe('5.url')}
+Published: ${safe('5.published')}
+Suggested category: ${safe('5.category')}
+The angle: ${safe('5.angle')}
+Why it matters: ${safe('5.why_it_matters')}`;
 
 const claudeBody = {
   model: 'claude-opus-5',
@@ -125,7 +146,7 @@ const claudeBody = {
 
 /* The notify body. Built as a template string rather than an object because
    the mapped values are Make expressions, not literals. */
-const notifyBody = `{"secret":"REPLACE_WITH_MAKE_SECRET","kind":"articles","items":[{"id":"{{7.data.id}}","title":"{{8.title}}","slug":"{{7.data.slug}}","category":"{{8.category}}","excerpt":"{{8.excerpt}}","sources":["{{5.url}}"]}]}`;
+const notifyBody = `{"secret":"REPLACE_WITH_MAKE_SECRET","kind":"articles","items":[{"id":"{{7.data.id}}","title":"${safe('8.title')}","slug":"{{7.data.slug}}","category":"{{8.category}}","excerpt":"${safe('8.excerpt')}","sources":["{{5.url}}"]}]}`;
 
 const httpMapper = (url, headers, data) => ({
   ca: '',
