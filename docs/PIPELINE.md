@@ -283,17 +283,33 @@ The notification is **not** the approval. `/studio` is the approval. So use
 whatever channel is cheapest to set up, and do not let this module block the
 rest of the scenario.
 
-- **Telegram** — a bot, a free Make module, working in ten minutes. Start here.
-- **Email via Resend** — already configured for the block digest, so the domain
-  is verified and the key exists. One HTTP module.
-- **WhatsApp** — needs the WhatsApp Business Cloud API: a Meta app, a verified
-  business, a phone number that is not your personal one, and a message template
-  approved by Meta for anything business-initiated. Worth doing eventually
-  because it is where you already read messages. It is not worth doing before
-  the pipeline runs.
+**Use the WhatsApp bot that already exists.** An earlier draft of this file
+said WhatsApp needed a Meta app, a verified business and an approved template
+before it was worth doing. That was written without looking, and it was wrong:
+"RE BOT SCRIPT" in Shervin's Apps Script is 1,223 lines of working two-way
+bot — `sendWhatsApp()` posts to `graph.facebook.com/v18.0/<phone_number_id>/
+messages` with a token out of Script Properties, `doPost()` takes Meta's
+webhook and routes owner commands, and `callClaude()` is already wired. The
+Meta setup that was described as the blocker was done in May.
 
-Message body: how many drafts, their titles, and the `/studio` link. Nothing
-else — the piece is read in the studio, not in a chat window.
+So Make.com's last module is one HTTP POST to that script's `/exec` URL, and
+Telegram is not needed. Two notes on doing it:
+
+- **The script is deployed `ANYONE_ANONYMOUS`**, which is what Meta's webhook
+  requires. `doPost` currently keeps that safe by ignoring any message not from
+  the owner's own number. A new route that Make calls is not a WhatsApp message
+  and does not pass that gate, so it needs its own shared secret in the body —
+  the same shape `crm-webhook.gs` already uses.
+- **`/api/studio/publish` closes the loop.** It takes `{id, status}` behind the
+  same Basic auth as `/studio`, which Apps Script can send. That makes a reply
+  of `/pub 1` a real publish.
+
+Message body: the title, the excerpt, **the source domains**, and the `/studio`
+link. The domains matter more than they look — they are what lets a rule 9
+breach be caught from a phone without opening anything. The piece itself is
+still read in the studio before it goes out; `app/api/studio/publish/route.js`
+says why in its own header, and a reply that publishes something unread hollows
+that out whatever the transport.
 
 ---
 
