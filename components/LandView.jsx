@@ -1,6 +1,7 @@
 'use client';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { siteSlug } from '../lib/land.js';
 import Chart from './Chart.jsx';
 import { Figure } from './Motion.jsx';
 
@@ -194,8 +195,11 @@ export default function LandView({ data }) {
                     actually hold — see lib/land.js, which will not guess.
                     Unlinked names still show, because "HDB says this became X"
                     is worth reading even when X is not on this site. */}
+                {/* Through to the parcel's own page, not straight to the
+                    record: the page between them is the arc — this tender,
+                    every bid on it, and what has been filed there since. */}
                 <td className="who">{s.record
-                  ? <Link href={s.record.href}>{s.project}</Link>
+                  ? <Link href={`/land/${siteSlug(s)}`}>{s.project}</Link>
                   : s.project || <span style={{ color: 'var(--mute)' }}>{s.winner || '—'}</span>}</td>
               </tr>
             ))}

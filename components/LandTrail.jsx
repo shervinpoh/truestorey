@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { f, num } from './fmt.js';
-import { landRate } from '../lib/land.js';
+import { landRate, siteSlug } from '../lib/land.js';
 
 /**
  * How this ground was sold, years before anyone lived on it.
@@ -153,7 +153,8 @@ export default function LandTrail({ land, label, rec }) {
         {' · '}transcribed from HDB&rsquo;s published tables on {land.transcribed}
         {' · '}prices are nominal and are not adjusted for inflation.
         {' '}HDB names the development on this row as &ldquo;{s.project}&rdquo;.
-        {' '}<Link href="/land">Every land sale</Link>
+        {' '}<Link href={`/land/${siteSlug(s)}`}>This parcel, from tender to today</Link>
+        {' · '}<Link href="/land">Every land sale</Link>
       </p>
     </section>
   );
