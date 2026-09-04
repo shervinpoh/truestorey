@@ -6,6 +6,7 @@ import { Figure } from './Motion.jsx';
 import { f, num } from './fmt.js';
 import { titleCase } from '../lib/name.js';
 import { ledger } from '../lib/calc/ledger.js';
+import Downside from './Downside.jsx';
 
 /**
  * What owning it costs, before it does anything.
@@ -33,7 +34,7 @@ const TYPES = [
   ['PRIVATE', 'Private'],
 ];
 
-export default function Ledger() {
+export default function Ledger({ indices = {} }) {
   const [price, setPrice] = useState(1_600_000);
   const [bought, setBought] = useState('2021-06');
   const [type, setType] = useState('PRIVATE');
@@ -357,6 +358,8 @@ export default function Ledger() {
         </>
       )}
 
+      <Downside indices={indices} r={r} price={p} propertyType={type} />
+
       <div className="sh" style={{ marginTop: 26 }}><span>The ledger</span></div>
 
       <div className="tablewrap">
@@ -400,10 +403,12 @@ export default function Ledger() {
       </div>
 
       <div className="note">
-        <b>This is not a valuation.</b> Every figure above comes from what you typed and from
-        published rates. Nothing here reads the market, so nothing here is an opinion about what
-        your home is worth or what it will fetch — only about what it has cost you to hold. What a
-        sale would actually realise is a separate question, and{' '}
+        <b>This is not a valuation.</b> Every figure above comes from what you typed, from
+        published rates, and — in the section on being wrong — from a published index applied to
+        your own purchase price over periods that are named and dated. None of it is an opinion
+        about what your home is worth or what it will fetch: an index is a market and a home is one
+        home, and no number on this page claims to be the second. What a sale would actually
+        realise is a separate question, and{' '}
         <Link href="/condo">the filed transaction ranges</Link> are the evidence for it.
       </div>
 

@@ -2,6 +2,7 @@ import Masthead from '../../components/Masthead.jsx';
 import ToolIntro from '../../components/ToolIntro.jsx';
 import ToolUse from '../../components/ToolUse.jsx';
 import Ledger from '../../components/Ledger.jsx';
+import { priceIndices } from '../../lib/data/query.js';
 
 export const metadata = {
   title: 'What owning it actually costs — the ledger before the property does anything | Truestorey',
@@ -18,7 +19,7 @@ export default function Page() {
       <ToolIntro href="/cost" example="figures" />
       <ToolUse id="cost" />
       <section className="pane">
-        <Ledger />
+        <Ledger indices={priceIndices()} />
       </section>
     </main>
   );

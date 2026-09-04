@@ -1743,3 +1743,32 @@ sup.cite a:hover{text-decoration:underline}
 .bar2{display:inline-block;width:60px;height:5px;background:var(--sunk);border-radius:99px;
   margin-right:9px;vertical-align:middle;overflow:hidden}
 .bar2 i{display:block;height:100%;background:var(--acc-lit);border-radius:99px}
+
+/* ── What it costs to be wrong ──────────────────────────────────────────────
+   The downside section on /cost. Green and red are legitimate here and only
+   here in this block: rule 4 reserves them for a price that MOVED, and every
+   percentage in it is a published index change over a dated period. They are
+   carried by .pill.u / .pill.d, which already own that meaning, rather than
+   by anything new.
+
+   The break-even line is set apart because it is the finding, not the
+   preamble: a percentage a sale must clear means nothing until it is set
+   beside how many windows in the record failed to deliver it. Everything
+   below it is the illustration. */
+.wrongintro{font-size:15px;line-height:1.6;color:var(--ink2);margin:0 0 16px;max-width:62ch}
+.wrongline{border:1px solid var(--line);border-left:3px solid var(--acc);
+  border-radius:var(--r2);background:var(--card);padding:14px 18px;margin:0 0 14px}
+.wrongline p{margin:0;font-size:14.5px;line-height:1.6;color:var(--ink2)}
+.wrongline p + p{margin-top:8px;padding-top:8px;border-top:1px solid var(--line2)}
+.wrongcount{color:var(--ink)}
+/* Where the reader's own purchase sits in the record. Muted, because it is
+   context for the count above it and not a fourth headline — and because the
+   one thing it must not be mistaken for is a statement about their home. */
+.wrongline p.wrongsince{color:var(--mute);font-size:13px}
+.wrongcount b{color:var(--dn)}
+.wrongcount.ok b{color:var(--up)}
+/* The dated window sits last and small. It is what makes the figure above it
+   a fact rather than a scenario, so it is present on every card and never
+   competes with the number it qualifies. */
+.wrong3 .wrongwhen{margin-top:10px;color:var(--mute);font-size:11px;letter-spacing:.03em}
+.wrong3 .pill{align-self:start}

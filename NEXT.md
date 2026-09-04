@@ -4,13 +4,12 @@ Rewritten 1 Sep 2026, at the handover to Codex. `CLAUDE.md` has the rules and
 the architecture — **read that first, it is not optional.** This file is only
 the ordered backlog.
 
-**State:** live at https://truestorey.vercel.app · **295 tests** · three npm
+**State:** live at https://truestorey.vercel.app · **378 tests** · three npm
 dependencies · Blindspot scoring out of 10 with all four checks running · data
 refreshing itself daily via `.github/workflows/refresh-data.yml`.
 
-**Unpushed on master:** `b390c47` (Blindspot price fix, committed out of the
-dirty tree), `f851b4d` (navigation and comprehension), `89daeb8` (the personal
-layer). A push to master IS a deploy — see the top of `AGENTS.md`.
+**Nothing is unpushed.** A push to master IS a deploy — see the top of
+`AGENTS.md`.
 
 ---
 
@@ -258,7 +257,7 @@ Three remain, all buildable from data already held.
 |---|---|---|
 | ~~5~~ | ~~**Price history and realised returns**~~ | **REFUSED 2 Sep — it cannot be built from this data, and the attempt is the record.** Pairing filed sales needs a unit identifier and neither HDB nor URA publishes one, deliberately: unit-level purchase prices are the REALIS-shaped data rule 1 forbids outright. The closest available match is address + floor area + floor band, and it is NOT a unit — Blk 362C Sembawang Crescent filed fifteen 4-room 93 sqm sales on storeys 7–9 inside seventeen months, two in the same month. A first build of it paired those and produced a confident median holding period out of fifteen different families' homes. **What shipped instead** is `sizeTrend` in `lib/blindspot/measure.js` over `data/trend.json`: median psf by year in 10 sqm bands, beside the same figure for every size at that address. A headline year-on-year figure is a median over whatever happened to sell, so it moves when the MIX moves — The Sail's 60–70 sqm homes fell 4.1% while the address rose 7.2%. That gap is the finding, and it is true. |
 | 6 | **Quantum by year** | What buyers actually paid, by region, size and year. A pivot over data already held. |
-| 8 | **URA Private Residential Property Index** | Only HDB's index is published on the site today, so anyone comparing a flat to a condo has to leave. `data/hdb-index.json` is the shape to follow. |
+| 8 | **URA Private Residential Property Index** | **The DATA is in — 4 Sep. The PAGE is not.** `npm run ingest:ppi` writes `data/ppi.json`: three series (all, landed, non-landed), 206 quarters, 1975-Q1 to date, base 1Q2009 = 100 — the SAME base as HDB's, which is what lets the two sit beside each other without either being rebased here. It is **not on data.gov.sg**; that was established by looking, not by one failed guess — its dataset search ignores the query string entirely and returns the same six unrelated datasets for every term. SingStat Table Builder carries it as table M212261 and names URA as the datasource in the response, which is the attribution stored and rendered. `/cost` uses it already. **What is left is `/market`**, which still shows HDB's index alone, and that is the leaving-the-site problem this row was written about. |
 
 Refuse regardless, unchanged: Valuation, Project Scorecard, Commercial,
 Watchlist.
@@ -276,6 +275,68 @@ matched on project, size band and date, reported as a range. **If it needs a
 unit number to work, it is the wrong feature.**
 
 ---
+
+## 3b · The three that were meant to be levels above
+
+Asked for on 3 Sep, after a look at haio.sg and intel.therealmatters.sg turned
+up the same six tools everyone has: "I need a few stand out features that
+really make my website levels above." Three were proposed. **All three are
+built.** They are recorded here because none of them is obvious from the
+routes alone, and each one exists because of a rule rather than in spite of it.
+
+1. **The land arc — `/land/[site]`.** 192 parcel pages, tender to award to the
+   project standing on it, with `SinceThen.jsx` closing the gap at the near
+   end. The half that was already on the record page is now walkable from
+   either direction.
+2. **What it costs to be wrong — the new section on `/cost`.** Below.
+3. **`/refused`.** Fifteen things this site will not do, each with the rule
+   that forbids it and a real file path asserted by a test. It is the shortest
+   honest answer to "why do they have more features?", and it is the only page
+   here a competitor cannot copy without first giving something up.
+
+### What "wrong" actually shipped as — 4 Sep
+
+`components/Downside.jsx`, `lib/calc/windows.js`, `saleOutcome()` in
+`lib/calc/ledger.js`, and `scripts/ingest-ppi.mjs` behind them.
+
+**The problem it solves.** Every calculator in this market models the upside.
+Ask one what a home will be worth in five years and it picks a rate that reads
+well and compounds it. The other tail is never drawn, and the other tail is
+where the decision lives.
+
+**How it avoids being a forecast.** It never picks a rate. It reads a published
+index and takes EVERY window of the reader's own holding length that has
+actually run — 126 five-year stretches in HDB's index, 186 in URA's — and
+applies what happened in each to the price the reader typed. The worst is
+dated. So is the best. Nothing is extrapolated and nothing is averaged into one
+answer.
+
+**Why it is not a valuation, in the rule 2 sense.** No figure on the page
+estimates what the home is worth. Every one is the reader's OWN purchase price
+moved by a published national index over a named period, shown as the whole
+range rather than a number. The conditional is written on the page in those
+words, and so is its limit: an index is a market, a home is one home, and the
+gap between them is what `/blindspot` exists to measure.
+
+**The figure the feature exists for is not the worst case.** It is the
+BREAK-EVEN FREQUENCY. A sale has to clear a particular rise just to return the
+reader's own money — duties, interest and commission see to that — and the page
+counts how many windows in the published record failed to deliver it. On the
+default example that is 86 of 186. It turns "property goes up over time" from a
+belief into a count.
+
+**Two things it keeps apart on purpose.** A sale that falls short of the loan
+needs cash on completion day, because the bank must be paid. CPF takes what is
+left and waives the rest at market value — real money, gone from a retirement
+account, but not money anyone has to find. Collapsing those two into one "loss"
+is what makes a downside model either alarmist or useless, and
+`test/windows.test.js` pins them apart.
+
+**What is deliberately absent.** No probability. Overlapping windows are not
+independent samples and the page says so rather than dressing a count as a
+chance. No index built here from transactions — a median moves when the MIX
+moves, which is the `sizeTrend` finding one row up, and a bespoke series would
+make every figure ours instead of the agency's.
 
 ## 4 · The two live briefs, and what survives of them
 

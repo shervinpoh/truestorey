@@ -119,7 +119,7 @@ SSR and no-JS readers get the number.
 
 ```
 npm run dev            localhost:3000
-npm test               195 tests, node:test, no framework
+npm test               378 tests, node:test, no framework
 npm run build          data build + next build. NOT the deploy command —
                        vercel.json pins that to `next build`, because this runs
                        three live data.gov.sg ingests first.
@@ -131,6 +131,10 @@ npm run sync           refresh only what is past due
 npm run geocode        OneMap. Includes the MOP register — see the note below.
 npm run ingest:hdb     HDB resales via data.gov.sg
 npm run ingest:ura     URA private transactions
+npm run ingest:ppi     URA private residential PRICE INDEX, via SingStat
+                       Table Builder table M212261. data.gov.sg does not
+                       carry it. Same 1Q2009 base as HDB's, which is what
+                       lets the two sit beside each other unrebased.
 npm run ingest:rental  URA rental contracts
 npm run ingest:boundaries   URA Master Plan planning areas
 npm run ingest:zoning       URA Master Plan land use + plot ratio
@@ -329,7 +333,7 @@ content/
   insights/     hand-written notes (markdown)
   guides/       GENERATED — edit the build pack, not these
   source/       the deck research base
-test/           node:test. 195 passing.
+test/           node:test. 378 passing.
 ```
 
 ---

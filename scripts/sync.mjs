@@ -64,6 +64,11 @@ const JOBS = [
     why: 'HDB and URA file new transactions continuously, with a lag of weeks' },
   { key: 'price-index', file: 'hdb-index.json', every: 80, cmd: 'npm run ingest:index',
     why: 'the resale price index is quarterly' },
+  // URA's index is quarterly too, and it is the series /cost stress-tests a
+  // private purchase against. Same 80 days as HDB's for the same reason: a
+  // quarter is 91, and 80 catches the republication without asking twice.
+  { key: 'ppi', file: 'ppi.json', every: 80, cmd: 'npm run ingest:ppi',
+    why: 'URA\'s private residential price index is quarterly' },
   // build:map reads mop.json for HDB's published storey counts — the heights
   // the 3D blocks are extruded from — so refreshing the register without
   // rebuilding the map leaves the towers standing at last quarter's heights.
