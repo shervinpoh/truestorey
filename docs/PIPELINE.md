@@ -212,6 +212,43 @@ about an unused last module. Modules 1–6 are the whole pipeline; you review at
 To test before the schedule is on, change module 1's
 `"search_recency_filter": "day"` to `"month"`, run, then change it back.
 
+## The WhatsApp leg
+
+`scripts/whatsapp-bot.gs` is it. Paste it over Code.gs in the "RE BOT SCRIPT"
+Apps Script project, add three Script Properties, run `installTriggers()` once,
+and redeploy with **Version: New** — the `/exec` URL does not change, so Meta's
+webhook keeps working.
+
+Two jobs and no others:
+
+| | |
+|---|---|
+| Leads | `/leads` who is due · `/new Name \| Number \| Type \| Property` · `/log Name notes` |
+| Articles | `/drafts` what is waiting · `/pub 1` publish · `/skip 1` archive |
+
+New Script Properties: `MAKE_SECRET` (any long random string, also pasted into
+Make module 8) and `STUDIO_PASSWORD` (the same value as `.env.local` and
+Vercel). `CLAUDE_API_KEY` and `WA_TOKEN` are already there.
+
+**Two things from v4 are deliberately not carried over.** `/brief` had a model
+produce market commentary with no source behind it — the thing rule 9 and "a
+model never assigns a number" exist to prevent, and the pipeline now does that
+job properly from a `.gov.sg` release. `/broadcast` sent WhatsApp to CRM
+contacts; consent has been email-only since 24 Aug 2026 and the DNC check on
+those 219 contacts is still outstanding. Bringing it back needs a per-contact
+consent column and a real check first, not a rewrite.
+
+**Why the bot does not send the article itself.**
+`app/api/studio/publish/route.js` says a person reads the piece and presses the
+button, and that the draft state exists for that. Pasting 900 words into a chat
+so they can be approved on a thumb-scroll would hollow that out while appearing
+to honour it. The message carries the title, the excerpt and the **source
+domains** — enough to catch the one failure that matters from a phone — and a
+link to read the rest.
+
+Verified against production: `/api/studio/publish` accepts HTTP Basic with any
+username, refuses a wrong password with 401, and returns 200 with the slug.
+
 ## Images
 
 **Skip them for the first month.** An Unsplash image adds a licence obligation
