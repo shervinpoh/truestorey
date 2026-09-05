@@ -148,6 +148,28 @@ re-escaping `content_html`, which is full of quotes and angle brackets. That is
 also why Claude is told it may use quotes there, but never in `title` or
 `excerpt` — those two are copied into the notification body and rebuilt.
 
+## Make reports a failed request as a green tick
+
+This cost more time than everything else combined, and it did it three separate
+times. **Make's HTTP module treats any status as success unless told otherwise.**
+A 400 shows the same green tick and the same `✓1` badge as a 201, so:
+
+- Gemini's 400 surfaced two modules later as "empty json field", which sent us
+  both looking at the wrong module, twice.
+- The webhook's 400 surfaced as nothing at all: a fully green run, eight
+  modules, two articles written, and not one draft in the database.
+
+**A green run is not evidence.** After any change, open the last module's
+output bundle and read `Status code` with your own eyes, or query the database:
+
+```bash
+node -e "…" # scripts/make has no runner; check /studio, or the articles table
+```
+
+It is the same lesson as `ingest:sora` in `CLAUDE.md` — an exit code is a claim,
+not evidence — and it is worth turning on **"Evaluate all states as errors
+(except for 2xx and 3xx)"** on every HTTP module where the UI offers it.
+
 ## Three settings that were measured, not reasoned about
 
 - **Gemini `maxOutputTokens: 8192`, and no `thinkingConfig`.**
@@ -159,6 +181,16 @@ also why Claude is told it may use quotes there, but never in `title` or
   back wrapped in ```` ```json ```` fences and Parse JSON refuses them.
 - **No `temperature` on Claude.** Opus 5 rejects it: *"`temperature` is
   deprecated for this model."*
+- **`thinking: {"type": "disabled"}` on Claude, and this is about indexes.**
+  With thinking on, Opus 5 returns TWO content blocks — thinking, then text —
+  and Make is 1-indexed, so `content[1]` resolves to the thinking block, which
+  has no `.text` field at all. Module 6 then POSTs an empty body,
+  `/api/webhook/article` answers `400 Could not read that JSON.`, and Make
+  paints module 6 GREEN because it reports any status as success. Two finished
+  articles were written and both were thrown away without a red mark anywhere
+  on the canvas. `content[2]` would work today and break the first time a
+  response comes back without a thinking block; disabling gives exactly one
+  block, so `content[1]` is right by construction.
 
 ## Filling it in
 

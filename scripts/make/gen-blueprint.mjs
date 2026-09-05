@@ -186,6 +186,17 @@ Why it matters: {{4.why_it_matters}}`;
 const claudeBody = {
   model: 'claude-opus-5',
   max_tokens: 4000,
+  /* THINKING OFF, AND THIS IS ABOUT INDEXES, NOT ABOUT QUALITY.
+     With thinking on, Opus 5 returns TWO content blocks — a thinking block
+     and then the text — and Make is 1-indexed, so content[1] resolves to the
+     thinking block, which has no .text field at all. Module 6 then POSTs an
+     empty body and /api/webhook/article answers 400 "Could not read that
+     JSON.", while Make paints module 6 green because it reports any status as
+     success. Two articles were written and both were thrown away, silently.
+     content[2] would also work today and would break the day a response comes
+     back without a thinking block. Disabled gives exactly one block, so
+     content[1] is right by construction. */
+  thinking: { type: 'disabled' },
   /* No temperature. Opus 5 rejects it outright: "`temperature` is deprecated
      for this model." Caught by running the chain rather than by reading a
      changelog, which is the only reason it was caught before the first live
