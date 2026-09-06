@@ -157,45 +157,40 @@ function botPublish(to, arg, status) {
     (status === 'published' ? '\n' + artSite_() + '/insights/' + d.slug : ''));
 }
 
-//  ===========================================================================
-//  THE THREE HOOKS — add these to 07_Bot.gs by hand.
-//
-//  Line comments, not a block comment, and that is deliberate: the help text
-//  below contains WhatsApp bold markers, and an asterisk followed by a slash
-//  CLOSES a block comment. Pasted as a block, this file dies with "Invalid or
-//  unexpected token" on the first such line. It did.
-//  ---------------------------------------------------------------------------
-//
-//  1 · In doPost, immediately AFTER the p.action === 'addContacts' block and
-//      BEFORE   const body = JSON.parse(e.postData.contents);   add:
-//
-//        // Make.com filing a Truestorey draft. Its own secret, because the
-//        // deployment is open to anyone (Meta requires that) and this call
-//        // never passes the myNumber_() gate below.
-//        const artSecret = prop_('MAKE_SECRET', false);
-//        const artBody = JSON.parse(e.postData.contents);
-//        if (artBody && artBody.kind === 'articles') {
-//          if (!artSecret || artBody.secret !== artSecret) return ok_();
-//          artFromMake_(artBody);
-//          return ok_();
-//        }
-//
-//      Then change the line below it to reuse what was already parsed:
-//        const body = artBody;
-//
-//  2 · In handleCommand_, in the "daily" group, add:
-//
-//        if (lower === '/drafts')           return botDrafts(from);
-//        if (lower.indexOf('/pub ') === 0)  return botPublish(from, after(5), 'published');
-//        if (lower.indexOf('/skip ') === 0) return botPublish(from, after(6), 'archived');
-//
-//  3 · In botHelp, under the Daily heading, add two lines to the string for
-//      /drafts and /pub. Use the same bold markers the other entries use —
-//      inside a normal string they are harmless; it is only block comments
-//      they break.
-//
-//  ALSO: WA_WEBHOOK_KEY IS SET on this project, so verifyRequest_ rejects any
-//  POST whose URL does not carry the same ?k= value. Make module 8's URL must
-//  end with /exec?k=<WA_WEBHOOK_KEY>. Without it doPost returns OK and does
-//  nothing, Make shows a green tick, and no message ever arrives.
-//  ===========================================================================
+/*  ============================================================================
+    THE THREE HOOKS — add these to 07_Bot.gs by hand.
+    ----------------------------------------------------------------------------
+
+    1 · In doPost, immediately AFTER the `p.action === 'addContacts'` block and
+        BEFORE `const body = JSON.parse(e.postData.contents);` add:
+
+          // Make.com filing a Truestorey draft. Its own secret, because the
+          // deployment is open to anyone (Meta requires that) and this call
+          // never passes the myNumber_() gate below.
+          const artSecret = prop_('MAKE_SECRET', false);
+          const artBody = JSON.parse(e.postData.contents);
+          if (artBody && artBody.kind === 'articles') {
+            if (!artSecret || artBody.secret !== artSecret) return ok_();
+            artFromMake_(artBody);
+            return ok_();
+          }
+
+        Then change the line below it to reuse what was already parsed:
+          const body = artBody;
+
+    2 · In handleCommand_, in the "daily" group, add:
+
+          if (lower === '/drafts')                 return botDrafts(from);
+          if (lower.indexOf('/pub ') === 0)        return botPublish(from, after(5), 'published');
+          if (lower.indexOf('/skip ') === 0)       return botPublish(from, after(6), 'archived');
+
+    3 · In botHelp, under *Daily:*, add:
+
+          '*/drafts* — Truestorey drafts waiting\n' +
+          '*/pub 1* · */skip 1*\n' +
+
+    ALSO: if WA_WEBHOOK_KEY is set as a script property, verifyRequest_ will
+    reject Make unless its URL carries the same ?k= value. Either append
+    &k=<WA_WEBHOOK_KEY> to the URL in Make module 8, or leave WA_WEBHOOK_KEY
+    unset. Check Project Settings → Script Properties to see which applies.
+    ============================================================================ */
