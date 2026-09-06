@@ -214,40 +214,53 @@ To test before the schedule is on, change module 1's
 
 ## The WhatsApp leg
 
-`scripts/whatsapp-bot.gs` is it. Paste it over Code.gs in the "RE BOT SCRIPT"
-Apps Script project, add three Script Properties, run `installTriggers()` once,
-and redeploy with **Version: New** — the `/exec` URL does not change, so Meta's
-webhook keeps working.
+`scripts/10_Articles.gs` is **additive**. It goes into the existing **Property
+CRM** Apps Script project as a new file — it replaces nothing, and every name
+in it is prefixed so it cannot collide with the eleven files already there.
+Three small hooks into `07_Bot.gs` are listed at the bottom of the file.
 
-Two jobs and no others:
-
-| | |
-|---|---|
-| Leads | `/leads` who is due · `/new Name \| Number \| Type \| Property` · `/log Name notes` |
-| Articles | `/drafts` what is waiting · `/pub 1` publish · `/skip 1` archive |
+An earlier version of this section told Shervin to paste a whole replacement
+`Code.gs` over the bot. That was written from an old standalone copy found in
+Drive, without knowing the live bot was a mature eleven-file project bound to a
+different spreadsheet, with 219 contacts and real PDPA/DNC columns. Pasting it
+would have thrown a duplicate-`const` error at load and taken the whole bot
+down. **Read the project before writing for it.**
 
 New Script Properties: `MAKE_SECRET` (any long random string, also pasted into
 Make module 8) and `STUDIO_PASSWORD` (the same value as `.env.local` and
-Vercel). `CLAUDE_API_KEY` and `WA_TOKEN` are already there.
+Vercel).
 
-**Two things from v4 are deliberately not carried over.** `/brief` had a model
-produce market commentary with no source behind it — the thing rule 9 and "a
-model never assigns a number" exist to prevent, and the pipeline now does that
-job properly from a `.gov.sg` release. `/broadcast` sent WhatsApp to CRM
-contacts; consent has been email-only since 24 Aug 2026 and the DNC check on
-those 219 contacts is still outstanding. Bringing it back needs a per-contact
-consent column and a real check first, not a rewrite.
+Commands added: `/drafts`, `/pub 1`, `/skip 1`. The leads half already exists
+and is better than anything worth replacing it with.
 
 **Why the bot does not send the article itself.**
 `app/api/studio/publish/route.js` says a person reads the piece and presses the
 button, and that the draft state exists for that. Pasting 900 words into a chat
-so they can be approved on a thumb-scroll would hollow that out while appearing
-to honour it. The message carries the title, the excerpt and the **source
+to be approved on a thumb-scroll would hollow that out while appearing to
+honour it. The message carries the title, the excerpt and the **source
 domains** — enough to catch the one failure that matters from a phone — and a
 link to read the rest.
 
 Verified against production: `/api/studio/publish` accepts HTTP Basic with any
 username, refuses a wrong password with 401, and returns 200 with the slug.
+
+### A bug found in 07_Bot.gs while reading it
+
+`aiCall_` returned `json.content[0].text`. On a thinking model the first block
+is the THINKING block and has no `.text` at all, so the function returned an
+empty string and every AI command — `/brief`, `/draft`, `/revive`, `/content`,
+`/objection`, `/listing` and free-form chat — printed its header with nothing
+underneath. Measured: `claude-sonnet-5` returns `[text]`, `claude-opus-5`
+returns `[thinking, text]`. Read the block by TYPE, not by position:
+
+```js
+const block = (json.content || []).filter(function (b) { return b.type === 'text'; })[0];
+return (block && block.text) || '';
+```
+
+This is the third appearance of the same mistake in one build — the Make
+webhook POSTed an empty body for exactly this reason and threw away two
+finished articles behind a green tick.
 
 ## Images
 
