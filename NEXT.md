@@ -72,16 +72,17 @@ Nothing below can be finished by an agent. Ordered by what unblocks the most.
    token; they are new roads. Only a properly sourced coordinate goes in.
 8. **A URA URL for district locality names**, so the map can label a district
    consistently instead of mixing "East Coast" with "District 15".
-9. **The Make.com scenario.** Being built 4 Sep. **The whole thing is specified
-   in `docs/PIPELINE.md`** — nine modules, the three request bodies, Claude's
-   system prompt in full, and the smoke test that tells a missing Vercel
-   variable apart from a wrong one. The code half is done and live: the webhook
-   files a draft, `/studio` approves, `Insight.jsx` renders the source links.
-   Two things are still unverified from outside and both fail closed, which is
-   why they look identical to a wrong password: `ARTICLE_WEBHOOK_SECRET` and the
-   Supabase pair **in Vercel** rather than only in `.env.local`. Run the curl in
-   §"Before you open Make.com" — 201 means wired, 401 means the secret, 503
-   means Supabase.
+9. ~~**The Make.com scenario.**~~ **LIVE 7 Sep.** Perplexity finds a `.gov.sg`
+   release, Gemini triages it, Claude writes it, `/api/webhook/article` files a
+   draft, and the Apps Script bot WhatsApps the title, excerpt and source
+   domain with a `/studio` link. `/pub 1` publishes. Scheduled daily at 07:15.
+   Eight modules; on a quiet day it stops at the first filter for two
+   operations. `docs/PIPELINE.md` has the whole thing and every trap in it.
+   **What is left on it:** the triage is not deterministic (the same item was
+   chosen twice on one run and zero on the next at temperature 0.1), and
+   Perplexity's `day` window occasionally misses a release it found under
+   `month`. Both are liveable; the fix for the second is a seen-URL list on the
+   Articles tab so `week` could be used without refiling duplicates.
 10. **Photos.** Ten are in `photos-in/` as of 2 Sep and `photos.json` is drafted
     — every `alt` is written from the actual frame. Three things are needed
     before `npm run photos` will publish any of them:

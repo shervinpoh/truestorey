@@ -148,6 +148,24 @@ re-escaping `content_html`, which is full of quotes and angle brackets. That is
 also why Claude is told it may use quotes there, but never in `title` or
 `excerpt` — those two are copied into the notification body and rebuilt.
 
+## It is live — 7 Sep 2026
+
+Scheduled daily at 07:15. Verified end to end: Perplexity returned a URA release,
+Gemini kept it, Claude wrote it, `/api/webhook/article` filed it as a draft, and
+the bot delivered the title, excerpt and **`Source: ura.gov.sg`** to WhatsApp
+with a `/studio` link.
+
+Two things to expect, neither of them a fault:
+
+- **The triage is not deterministic.** The same item was chosen twice on one run
+  and zero on the next, at temperature 0.1. A single empty day is not a broken
+  scenario.
+- **Perplexity's `day` window sometimes misses** a release it finds under
+  `month` — a URA release from five days earlier was absent from a `week`
+  search. `day` is still correct, because it is the only setting that cannot
+  refile the same piece every morning. The proper fix is a seen-URL list on the
+  Articles tab, after which `week` becomes safe.
+
 ## Make reports a failed request as a green tick
 
 This cost more time than everything else combined, and it did it three separate
