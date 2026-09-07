@@ -40,6 +40,13 @@ test('a series with a hole in it is refused rather than silently closed up', () 
 
 const flat = { from: '2000-Q1', values: Array.from({ length: 41 }, (_, i) => 100 + i) };
 
+/* Long enough to be READ, which is now a separate thing from long enough to
+   produce windows. `flat` yields 29 five-year windows and only 2 that do not
+   overlap, so distribution() refuses it — correctly, and that refusal is
+   asserted below. 50 years is what the tests about the SHAPE of a distribution
+   need in order to get one at all. */
+const long = { from: '1976-Q1', values: Array.from({ length: 201 }, (_, i) => 100 + i) };
+
 test('there is one window per possible start, and the last one ends on the last point', () => {
   const w = windowsOf(flat, 4);
   assert.equal(w.length, flat.values.length - 4);
@@ -58,9 +65,35 @@ test('a holding period the series cannot cover scores nothing and says so', () =
   assert.equal(distribution({ from: '2020-Q1', values: [100, 101, 102] }, 5), null);
 });
 
+/**
+ * The window count was being read as a sample size, and it is not one. Over a
+ * 17-year hold every window shares 99% of its length with the next; URA's 51
+ * years hold 3 seventeen-year stretches that do not overlap, and the page said
+ * 138. More than half of those windows start before 1996 and carry the run-up
+ * from an index that stood at 10.5 in 1975, so the MIDDLE came out at +114%
+ * and the best at +818.8% — S$14.7m from a S$1.6m home. The contamination is
+ * not confined to the tail, so no choice of statistic survives it.
+ */
+test('a holding period with too few non-overlapping stretches refuses to read', () => {
+  // 50 years of quarters: 12-year windows leave 4 independent stretches, 13
+  // leave fewer. The bar is the same 4 already applied to the window count.
+  assert.ok(distribution(long, 12), '12 years should still read on a 50-year series');
+  assert.equal(distribution(long, 13), null, '13 years leaves under 4 independent stretches');
+  assert.equal(distribution(long, 17), null);
+
+  // And the shorter the series, the sooner it must refuse.
+  assert.equal(distribution(flat, 5), null, '10 years of index cannot report a 5-year hold');
+});
+
+test('the reported independent count is the non-overlapping one', () => {
+  const d = distribution(long, 5);
+  assert.equal(d.independent, Math.floor(long.values.length / 20));
+  assert.ok(d.independent < d.n / 10, 'independent must be far below the window count');
+});
+
 test('the middle window is a real dated window, not an interpolation', () => {
-  const d = distribution(flat, 3);
-  const all = windowsOf(flat, 12);
+  const d = distribution(long, 3);
+  const all = windowsOf(long, 12);
   assert.ok(all.some(w => w.from === d.middle.from && w.to === d.middle.to
     && Math.abs(w.change - d.middle.change) < 1e-12),
     'middle must be one of the windows that actually ran');
@@ -68,7 +101,7 @@ test('the middle window is a real dated window, not an interpolation', () => {
 });
 
 test('the count at or below a change agrees with counting them one by one', () => {
-  const d = distribution(flat, 5);
+  const d = distribution(long, 5);
   for (const x of [-1, -0.05, 0, 0.03, 0.2, 5]) {
     const brute = d.sorted.filter(w => w.change <= x).length;
     assert.equal(countAtOrBelow(d, x).count, brute, `at or below ${x}`);

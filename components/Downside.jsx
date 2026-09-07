@@ -1,7 +1,7 @@
 'use client';
 import { useMemo, useState } from 'react';
 import { f, num } from './fmt.js';
-import { distribution, countAtOrBelow, qNum, qLabel } from '../lib/calc/windows.js';
+import { distribution, countAtOrBelow, cagrFromTotal, qNum, qLabel } from '../lib/calc/windows.js';
 import { saleOutcome } from '../lib/calc/ledger.js';
 
 /**
@@ -60,6 +60,7 @@ export default function Downside({ indices = {}, r, price, propertyType }) {
   const clear = r.breakEven.returnOfCash;
   const needed = clear && price ? clear / price - 1 : null;
   const missed = dist && needed !== null ? countAtOrBelow(dist, needed) : null;
+  const neededCagr = needed === null ? null : cagrFromTotal(needed, r.yearsHeld);
 
   const outcomes = useMemo(() => {
     if (!dist) return null;
@@ -159,8 +160,15 @@ export default function Downside({ indices = {}, r, price, propertyType }) {
 
       {idx && !dist && (
         <p className="note warnline">
-          {idx.name} does not go back far enough to contain enough {spanAdj} stretches to read —
-          it starts at {idx.series.from}. Nothing is inferred from the few that fit.
+          <b>This does not read at {yrs}.</b> {idx.name} starts at {idx.series.from}, so it holds
+          about <b className="mono">{Math.floor((idx.series.values.length / 4) / r.yearsHeld)}</b>{' '}
+          {spanAdj} stretches that do not overlap each other. Windows that share {yrs === '1 year'
+            ? 'most of their length'
+            : `all but a quarter of their ${r.yearsHeld} years`} are one reading counted many times,
+          not many readings, and a distribution built from them says more about when the index
+          starts than about what a {spanAdj} hold has done. Nothing is inferred from the few that
+          fit, and this is not being reported as no risk. Set the holding period to 12 years or
+          fewer to read it.
         </p>
       )}
 
@@ -174,7 +182,21 @@ export default function Downside({ indices = {}, r, price, propertyType }) {
               <p>
                 A sale has to clear <b className="mono">{f(clear)}</b> just to return the money you
                 put in — <b className="mono">{pct(needed)}</b> above what you paid, before this home
-                has made you a cent.
+                has made you a cent. Across {yrs} that is{' '}
+                <b className="mono">{neededCagr === null ? '—' : pct(neededCagr)}</b> a year.
+              </p>
+              {/* The question this answers is the one every reader asks of the
+                  figure above it: why does holding LONGER mean selling HIGHER?
+                  Because the bar is "return every dollar of cash", and the
+                  dollars keep going in — S$359k at three years, S$856k at
+                  seventeen. The total rises and the RATE it asks for falls, and
+                  quoting only the total made a 2.7%-a-year bar read as a
+                  58.3% one. */}
+              <p className="wrongwhy">
+                That total rises the longer you hold, because you keep putting cash in —{' '}
+                <b className="mono">{f(r.cash.total)}</b> so far, and every instalment adds to it.
+                The rate it asks for falls at the same time. A longer hold is a bigger number and
+                an easier one.
               </p>
               <p className={missed.count ? 'wrongcount' : 'wrongcount ok'}>
                 <b className="mono">{num(missed.count)} of the {num(missed.of)}</b> {spanAdj}{' '}
@@ -236,7 +258,9 @@ export default function Downside({ indices = {}, r, price, propertyType }) {
               : <>None of those {num(dist.n)} stretches ended lower than it started — which is a fact
                   about {r.yearsHeld} years and not about {r.yearsHeld - 1}.</>}
             {' '}Every window overlaps its neighbours, so these are {num(dist.n)} readings of one
-            history and not {num(dist.n)} independent trials. They are counted, not turned into a
+            history and not {num(dist.n)} independent trials — the index holds{' '}
+            <b className="mono">{num(dist.independent)}</b> {spanAdj} stretches that share no
+            quarter with each other. They are counted, not turned into a
             probability, for that reason. The worst of them started in{' '}
             <span className="mono">{dist.worst.from.slice(0, 4)}</span> and the best in{' '}
             <span className="mono">{dist.best.from.slice(0, 4)}</span>: they are the boundaries of

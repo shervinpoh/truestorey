@@ -1802,6 +1802,7 @@ sup.cite a:hover{text-decoration:underline}
 /* The dated window sits last and small. It is what makes the figure above it
    a fact rather than a scenario, so it is present on every card and never
    competes with the number it qualifies. */
+.wrongline .wrongwhy{margin-top:8px;color:var(--ink2);font-size:13px}
 .wrong3 .wrongera{margin-top:8px;padding-top:8px;border-top:1px solid var(--line2);
   color:var(--mute);font-size:11.5px}
 .wrong3 .wrongwhen{margin-top:10px;color:var(--mute);font-size:11px;letter-spacing:.03em}
