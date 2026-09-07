@@ -85,6 +85,31 @@ export default function Downside({ indices = {}, r, price, propertyType }) {
   const yrs = `${num(r.yearsHeld)} year${r.yearsHeld === 1 ? '' : 's'}`;
   const spanAdj = `${num(r.yearsHeld)}-year`;
 
+  /* ── what the index STOOD AT, for the windows that need saying ────────────
+     "The best 3 years on record: +278.6%" is true, dated, and unbelievable.
+     It is 1978-Q2 to 1981-Q2, when the index went from 11.7 to 44.3 — against
+     210.6 today. Reported bare it discredits the section, because a reader who
+     cannot place a figure treats it as invented, and this section's entire
+     claim is that none of it is.
+
+     So the levels are named. Not a second superlative, not a friendlier span
+     picked after looking at the numbers: two published values with dates on
+     them, which is what lets a reader see for themselves that the window
+     belongs to a market at a fraction of this one's size.
+
+     The trigger is that the index then was under half what it is now. That is
+     the condition under which the sentence is worth reading — it fires on the
+     windows nobody believes and stays silent on the rest, and it describes
+     itself rather than encoding a chosen year. */
+  const era = useMemo(() => {
+    if (!idx || !dist) return null;
+    const v = idx.series.values;
+    const i = qNum(dist.best.from) - qNum(idx.series.from);
+    const then = v[i], now = v.at(-1);
+    if (!(then > 0) || !(now > 0) || then >= now / 2) return null;
+    return { then, now, to: v[i + dist.quarters] };
+  }, [idx, dist]);
+
   /* Where the reader's own purchase sits in the published record. Not a
      valuation and not about this home: it is what the INDEX did between the
      quarter they bought in and the latest one published, which is a market
@@ -190,6 +215,14 @@ export default function Downside({ indices = {}, r, price, propertyType }) {
                     {o.cpfShortfall > 0 && <> And <b className="mono">{f(o.cpfShortfall)}</b> of your
                       CPF never goes back into the account.</>}
                   </span>
+                  {k === 'best' && era && (
+                    <span className="hint wrongera">
+                      The index stood at <b className="mono">{era.then}</b> when that window opened
+                      and <b className="mono">{era.to}</b> when it closed. It is{' '}
+                      <b className="mono">{era.now}</b> now — that stretch belongs to a market a
+                      fraction of this one&rsquo;s size, which is why it looks the way it does.
+                    </span>
+                  )}
                   <span className="hint mono wrongwhen">{o.from} → {o.to}</span>
                 </div>
               );

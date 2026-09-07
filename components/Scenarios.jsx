@@ -36,13 +36,22 @@ import { distribution, countAtOrBelow, totalFromCagr } from '../lib/calc/windows
  */
 
 const PCT = x => `${x > 0 ? '+' : ''}${(x * 100).toFixed(1)}%`;
+const PCTP = p => `${p > 0 ? '+' : ''}${p.toFixed(1)}%`;
 
 /* Defaults are a starting position, not a house view. Bear below zero because
-   a stress tester whose worst case is growth is not one. */
+   a stress tester whose worst case is growth is not one.
+ *
+ * STATE IS THE PERCENT, NOT THE RATE. Holding 0.035 and rendering
+ * value={0.035 * 100} puts 3.5000000000000004 into a controlled input whose
+ * step is 0.5. The browser snaps the DOM value back to 3.5, React re-asserts
+ * the unsnapped one on the next render, and the two argue — invisible with a
+ * mouse, and on a touchscreen, where a drag is a stream of small moves, enough
+ * to make the thumb stick or jump back. The percent round-trips exactly; the
+ * rate is derived where it is needed. */
 const START = [
-  { id: 'bear', label: 'Bear', cagr: -0.015 },
-  { id: 'base', label: 'Base', cagr: 0.02 },
-  { id: 'bull', label: 'Bull', cagr: 0.04 },
+  { id: 'bear', label: 'Bear', pct: -1.5 },
+  { id: 'base', label: 'Base', pct: 2 },
+  { id: 'bull', label: 'Bull', pct: 4 },
 ];
 
 export default function Scenarios({ indices = {}, r, price, propertyType }) {
@@ -58,7 +67,7 @@ export default function Scenarios({ indices = {}, r, price, propertyType }) {
   const dist = useMemo(() => (idx ? distribution(idx.series, years) : null), [idx, years]);
 
   const rows = useMemo(() => rates.map(s => {
-    const change = totalFromCagr(s.cagr, years);
+    const change = totalFromCagr(s.pct / 100, years);
     const sale = price * (1 + change);
     const o = saleOutcome({
       salePrice: sale,
@@ -80,7 +89,7 @@ export default function Scenarios({ indices = {}, r, price, propertyType }) {
        r.exit.legal, r.exit.agentRate, r.exit.ssd.rate, r.cash.total]);
 
   const tallest = Math.max(...rows.map(x => x.salePrice), 1);
-  const setRate = (id, v) => setRates(rs => rs.map(s => (s.id === id ? { ...s, cagr: v } : s)));
+  const setRate = (id, v) => setRates(rs => rs.map(s => (s.id === id ? { ...s, pct: v } : s)));
 
   return (
     <>
@@ -93,16 +102,23 @@ export default function Scenarios({ indices = {}, r, price, propertyType }) {
         you have set — so the assumption stays yours, and how common it has been does not.
       </p>
 
+      {/* A <div>, not a <label>. Wrapping the whole card in a label forwards a
+          tap ANYWHERE inside it — including the two lines of explanation under
+          the track — to the range input, which jumps the value to wherever the
+          finger landed horizontally. Reading the note about your assumption
+          must not silently change your assumption. The name is a real label
+          bound by id instead. */}
       <div className="scenset">
         {rates.map(s => {
           const row = rows.find(x => x.id === s.id);
           return (
-            <label key={s.id} className="scenslider">
-              <span className="lab">{s.label}</span>
-              <b className="mono">{PCT(s.cagr)} <i>a year</i></b>
-              <input type="range" min={-8} max={10} step={0.5}
-                value={s.cagr * 100}
-                onChange={e => setRate(s.id, Number(e.target.value) / 100)} />
+            <div key={s.id} className="scenslider">
+              <label className="lab" htmlFor={`scen-${s.id}`}>{s.label}</label>
+              <b className="mono">{PCTP(s.pct)} <i>a year</i></b>
+              <input id={`scen-${s.id}`} type="range" min={-8} max={10} step={0.5}
+                value={s.pct}
+                aria-valuetext={`${PCTP(s.pct)} a year`}
+                onChange={e => setRate(s.id, Number(e.target.value))} />
               <span className="hint">
                 {PCT(row.change)} over {num(years)} year{years === 1 ? '' : 's'}
                 {row.hist
@@ -110,7 +126,7 @@ export default function Scenarios({ indices = {}, r, price, propertyType }) {
                       on record finished at or below this</>
                   : <> · no index long enough to say how often</>}
               </span>
-            </label>
+            </div>
           );
         })}
       </div>
@@ -126,11 +142,25 @@ export default function Scenarios({ indices = {}, r, price, propertyType }) {
         </span>
       </label>
 
+      {/* The key sits ABOVE the bars, not below them. On a phone the three bars
+          stack, so a legend underneath lands two screens away from the first
+          thing it explains — and a touchscreen has no hover, so the segments'
+          title attributes name nothing at all there. */}
+      <ul className="scenkey">
+        <li><i className="s4" />Selling costs</li>
+        <li><i className="s3" />Redeems the loan</li>
+        <li><i className="s2" />Back to CPF</li>
+        <li><i className="s1" />To you</li>
+      </ul>
+
       <div className="scenbars">
         {rows.map(row => (
           <div key={row.id} className="scenbar">
             <div className="scenplot">
-              <div className="scencol" style={{ height: `${(row.salePrice / tallest) * 100}%` }}>
+              {/* A custom property, because the same ratio is the bar's HEIGHT
+                  on a wide screen and its WIDTH on a narrow one, and an inline
+                  style cannot answer a media query. */}
+              <div className="scencol" style={{ '--share': row.salePrice / tallest }}>
                 {[['s4', row.sellingCosts, 'Selling costs'],
                   ['s3', row.outstanding, 'Redeems the loan'],
                   ['s2', row.cpfRefunded, 'Back to CPF'],
@@ -170,13 +200,6 @@ export default function Scenarios({ indices = {}, r, price, propertyType }) {
           </div>
         ))}
       </div>
-
-      <ul className="scenkey">
-        <li><i className="s1" />To you</li>
-        <li><i className="s2" />Back to CPF</li>
-        <li><i className="s3" />Redeems the loan</li>
-        <li><i className="s4" />Selling costs</li>
-      </ul>
 
       <div className="note" style={{ marginTop: 16 }}>
         <b>These are three arithmetics on three rates you typed.</b> None of them is a forecast and

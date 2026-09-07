@@ -362,10 +362,25 @@ input[type=checkbox]{
   padding:0;margin:0;border:0;background:none;
   accent-color:var(--acc);cursor:pointer}
 
-input[type=range]{-webkit-appearance:none;background:transparent;border:0;padding:0;margin:10px 0 2px}
+/* ── the slider's hit area is not its hairline ──────────────────────────────
+   A 1px track with a 16px thumb is 16px tall, and 16px is what the FINGER
+   gets. Reported as "the slider doesn't work" on a phone, which is exactly
+   what a control you cannot reliably grab is: every miss scrolls the page
+   instead, so the thing appears inert rather than fiddly.
+
+   height:44px is the hit area and nothing else — the track stays 1px and the
+   thumb stays 16px, so the drawing is unchanged on every screen. The margin
+   moved onto the box because the box now carries the height. touch-action
+   keeps a horizontal drag on the slider from being claimed by the page's
+   vertical scroll, which is the other half of the same failure.
+
+   This is site-wide: /plan's sliders had the same 16px target and nobody had
+   said so yet. */
+input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;border:0;
+ padding:0;margin:0;height:44px;touch-action:pan-y pinch-zoom;cursor:pointer}
 input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--ink)}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--ink);
- margin-top:-8px;border:0;cursor:grab}
+ margin-top:-7.5px;border:0;cursor:grab}
 input[type=range]::-moz-range-track{height:1px;background:var(--ink)}
 input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--ink);border:0;cursor:grab}
 .f2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
@@ -663,7 +678,12 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 .post code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.85em;background:var(--sunk);padding:1px 5px}
 .post pre{background:var(--sunk);padding:13px 15px;overflow-x:auto;margin:0 0 18px}
 .post pre code{background:none;padding:0;font-size:12.5px}
-.tablewrap{overflow-x:auto;margin:0 0 20px}
+/* overscroll-behavior-x, because a sideways swipe that runs out of table
+   inside must not carry on into the page behind it. On iOS the chained scroll
+   slides the whole column sideways and the reader lands on a page whose left
+   gutter is gone, which reads as a broken layout rather than as a table they
+   dragged. */
+.tablewrap{overflow-x:auto;overscroll-behavior-x:contain;margin:0 0 20px}
 .post table{border-collapse:collapse;width:100%;font-size:14px}
 .post th{text-align:left;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:9px;letter-spacing:.12em;
  text-transform:uppercase;color:var(--mute);font-weight:400;padding:0 12px 7px 0;border-bottom:1px solid var(--ink)}
@@ -969,7 +989,7 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 /* Price is the field people move rather than state, so it gets a slider under
    its box and the width to make the slider worth dragging. */
 .planform .wide2{grid-column:span 2}
-.planform input[type=range]{margin:8px 0 0;padding:0}
+.planform input[type=range]{margin:0;padding:0}
 
 /* ── towns within the ceiling ───────────────────────────────────────────────
    The affordability answer used to end at a number. This turns it back into
@@ -1507,7 +1527,13 @@ sup.cite a:hover{text-decoration:underline}
    that have nothing to do with each other. The group heads are TH with
    scope=colgroup so a screen reader announces which part of the account each
    figure belongs to. */
-.ledgertable{width:100%;min-width:420px;border-collapse:collapse;font-size:14px}
+/* min(420px, 100%) rather than 420px flat. A fixed floor wider than the
+   viewport means the ledger ALWAYS scrolls sideways on a phone: the figures
+   are pinned right, so what a swipe takes away is the labels, and every row
+   becomes a number with no name on it. The floor still applies wherever there
+   is room for it. At 375px the table lays out at 335 with the labels on one
+   line and the figures at their natural 110 — it never needed the 420. */
+.ledgertable{width:100%;min-width:min(420px,100%);border-collapse:collapse;font-size:14px}
 .ledgertable td{padding:7px 0;border-bottom:1px solid var(--line2);color:var(--ink2)}
 .ledgertable .r{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;
   color:var(--ink);width:1%;padding-left:18px}
@@ -1645,14 +1671,20 @@ sup.cite a:hover{text-decoration:underline}
   border:1px solid var(--line);border-radius:var(--r2);overflow:hidden;margin:0 0 14px}
 .rentcmp>div{background:var(--card);padding:14px 16px}
 .rentcmp .lab{display:block;margin-bottom:6px}
-.rentcmp b{display:block;font-size:23px;font-weight:600;letter-spacing:-.02em}
+/* > b, not a descendant selector. Downside's cards carry inline <b> figures
+   INSIDE .hint prose — "against S$385,072 of cash you put in" — and a
+   descendant rule turned every one of them into a 23px block, which broke each
+   sentence into a column of numbers and left the full stop on a line of its
+   own. The rent comparison never noticed because its figures are all direct
+   children. Second time this exact selector shape has done this. */
+.rentcmp>div>b{display:block;font-size:23px;font-weight:600;letter-spacing:-.02em}
 .rentcmp .hint{display:block;margin-top:6px;font-size:12px;line-height:1.5}
 .rentcmp .diff{background:var(--sunk)}
-.rentcmp .diff b{color:var(--ink)}
+.rentcmp .diff>b{color:var(--ink)}
 @media(max-width:860px){ .rentcmp{grid-template-columns:1fr} }
 /* The size trend beside the address's own. Counts are set small and muted
    because they qualify the figure rather than competing with it. */
-.trendtable{min-width:420px}
+.trendtable{min-width:min(420px,100%)}
 .trendtable i{font-style:normal;font-size:11px;color:var(--mute)}
 .trendtable tr.thinyear td{color:var(--mute)}
 .trendtable tr.thinyear td:first-child:after{content:" ·";color:var(--warn)}
@@ -1770,6 +1802,8 @@ sup.cite a:hover{text-decoration:underline}
 /* The dated window sits last and small. It is what makes the figure above it
    a fact rather than a scenario, so it is present on every card and never
    competes with the number it qualifies. */
+.wrong3 .wrongera{margin-top:8px;padding-top:8px;border-top:1px solid var(--line2);
+  color:var(--mute);font-size:11.5px}
 .wrong3 .wrongwhen{margin-top:10px;color:var(--mute);font-size:11px;letter-spacing:.03em}
 .wrong3 .pill{align-self:start}
 
@@ -1792,7 +1826,7 @@ sup.cite a:hover{text-decoration:underline}
 .scenslider > b{display:block;font-size:20px;font-weight:600;letter-spacing:-.02em}
 .scenslider > b i{font-style:normal;font-size:12px;color:var(--mute);font-weight:400}
 .scenslider .hint b{font-size:inherit;font-weight:600;color:var(--ink)}
-.scenslider input[type=range]{width:100%;margin:8px 0 6px}
+.scenslider input[type=range]{width:100%;margin:0}
 .scenslider .hint{display:block;font-size:11.5px;line-height:1.5}
 @media(max-width:860px){ .scenset{grid-template-columns:1fr} }
 
@@ -1810,7 +1844,7 @@ sup.cite a:hover{text-decoration:underline}
    need a resolved parent height; sizing the column against a grid row that is
    itself content-sized collapses it to nothing. */
 .scenplot{height:190px;display:flex;align-items:flex-end}
-.scencol{width:100%;display:flex;flex-direction:column-reverse;min-height:8px;
+.scencol{width:100%;height:calc(var(--share) * 100%);display:flex;flex-direction:column-reverse;min-height:8px;
   border-radius:var(--r1);overflow:hidden;border:1px solid var(--line)}
 .scencol .seg{display:block;min-height:2px}
 .seg.s1,.scenkey i.s1{background:#164F52}
@@ -1818,15 +1852,32 @@ sup.cite a:hover{text-decoration:underline}
 .seg.s3,.scenkey i.s3{background:#9CB6B7}
 .seg.s4,.scenkey i.s4{background:#D6E0E0}
 .scenfoot{padding-top:9px;border-top:1px solid var(--line);margin-top:9px}
-.scenfoot b{display:block;font-size:17px;font-weight:600}
+.scenfoot>b{display:block;font-size:17px;font-weight:600}
 .scenfoot .lab{display:block;margin:2px 0 4px}
 .scenfoot .hint{display:block;font-size:11.5px;line-height:1.5}
 .scenshort{display:block;font-size:12px;color:var(--dn);font-weight:600;margin-top:2px}
 .scenup{color:var(--up)}
 .scendown{color:var(--dn)}
-@media(max-width:640px){ .scenbars{grid-template-columns:1fr} .scenplot{height:120px} }
+/* ── the same chart, turned on its side ─────────────────────────────────────
+   One column per scenario works because the three stand side by side and
+   their heights compare at a glance. Below 640px they stack, and a column
+   chart read one column per screenful compares nothing: three squat slabs of
+   the same size, 190px of vertical budget each, and an 18px height difference
+   between the bear case and the bull case spread across two scroll positions.
 
-.scenkey{list-style:none;display:flex;flex-wrap:wrap;gap:14px;margin:0 0 4px;padding:0;
+   Turned horizontal they share a left edge and a scale, so the lengths still
+   compare — and stacking is what a phone wanted them to do anyway. Same
+   markup, same segments, same ratio: only the axis the ratio is spent on
+   changes, which is why it travels as a custom property. */
+@media(max-width:640px){
+  .scenbars{grid-template-columns:1fr;gap:14px}
+  .scenplot{height:auto;display:block}
+  .scencol{flex-direction:row;height:34px;width:calc(var(--share) * 100%);min-width:24px}
+  .scencol .seg{min-height:0;min-width:2px}
+  .scenfoot{padding-top:7px;margin-top:7px}
+}
+
+.scenkey{list-style:none;display:flex;flex-wrap:wrap;gap:6px 14px;margin:0 0 12px;padding:0;
   font-size:11.5px;color:var(--mute)}
 .scenkey li{display:flex;align-items:center;gap:6px}
 .scenkey i{width:11px;height:11px;border-radius:2px;display:inline-block;
