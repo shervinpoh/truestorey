@@ -7,6 +7,7 @@ import { f, num } from './fmt.js';
 import { titleCase } from '../lib/name.js';
 import { ledger } from '../lib/calc/ledger.js';
 import Downside from './Downside.jsx';
+import Scenarios from './Scenarios.jsx';
 
 /**
  * What owning it costs, before it does anything.
@@ -359,6 +360,8 @@ export default function Ledger({ indices = {} }) {
       )}
 
       <Downside indices={indices} r={r} price={p} propertyType={type} />
+
+      <Scenarios indices={indices} r={r} price={p} propertyType={type} />
 
       <div className="sh" style={{ marginTop: 26 }}><span>The ledger</span></div>
 

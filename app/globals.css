@@ -1772,3 +1772,62 @@ sup.cite a:hover{text-decoration:underline}
    competes with the number it qualifies. */
 .wrong3 .wrongwhen{margin-top:10px;color:var(--mute);font-size:11px;letter-spacing:.03em}
 .wrong3 .pill{align-self:start}
+
+/* ── Three you set yourself ─────────────────────────────────────────────────
+   The scenario block on /cost. Its bar is a COMPOSITION — where a sale price
+   goes — so it may not use the up/down pair: rule 4 reserves green and red for
+   a price that moved, and "what redeems the loan" is neither good news nor
+   bad. Four steps of --acc instead, darkest for the part that reaches the
+   seller, which is the segment a reader is looking for.
+
+   The one place red is allowed here is a shortfall the seller has to bring to
+   completion. That IS the consequence of a price that moved, and it is the
+   same --dn the section above uses for a negative window. */
+.scenset{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:var(--r2);overflow:hidden;margin:0 0 14px}
+.scenslider{background:var(--card);padding:13px 15px;display:block}
+.scenslider .lab{display:block;margin-bottom:4px}
+/* Direct child only. As a descendant rule this also caught the <b> inside the
+   hint underneath, and rendered the window count at 20px. */
+.scenslider > b{display:block;font-size:20px;font-weight:600;letter-spacing:-.02em}
+.scenslider > b i{font-style:normal;font-size:12px;color:var(--mute);font-weight:400}
+.scenslider .hint b{font-size:inherit;font-weight:600;color:var(--ink)}
+.scenslider input[type=range]{width:100%;margin:8px 0 6px}
+.scenslider .hint{display:block;font-size:11.5px;line-height:1.5}
+@media(max-width:860px){ .scenset{grid-template-columns:1fr} }
+
+.scencost{display:block;margin:0 0 18px;max-width:420px}
+.scencost>span:first-child{display:block;font-size:12px;color:var(--ink2);margin-bottom:5px}
+.scencost input{width:130px}
+.scencost .hint{display:block;margin-top:6px;max-width:60ch}
+
+/* Bars are laid out in flex so each segment's share of the column is its share
+   of the sale price. flexGrow carries the dollars; no width arithmetic in JS,
+   and nothing to drift when a figure changes. */
+.scenbars{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:0 0 12px}
+.scenbar{display:flex;flex-direction:column}
+/* The plot is a fixed box the column is measured against. Percentage heights
+   need a resolved parent height; sizing the column against a grid row that is
+   itself content-sized collapses it to nothing. */
+.scenplot{height:190px;display:flex;align-items:flex-end}
+.scencol{width:100%;display:flex;flex-direction:column-reverse;min-height:8px;
+  border-radius:var(--r1);overflow:hidden;border:1px solid var(--line)}
+.scencol .seg{display:block;min-height:2px}
+.seg.s1,.scenkey i.s1{background:#164F52}
+.seg.s2,.scenkey i.s2{background:#4E7E80}
+.seg.s3,.scenkey i.s3{background:#9CB6B7}
+.seg.s4,.scenkey i.s4{background:#D6E0E0}
+.scenfoot{padding-top:9px;border-top:1px solid var(--line);margin-top:9px}
+.scenfoot b{display:block;font-size:17px;font-weight:600}
+.scenfoot .lab{display:block;margin:2px 0 4px}
+.scenfoot .hint{display:block;font-size:11.5px;line-height:1.5}
+.scenshort{display:block;font-size:12px;color:var(--dn);font-weight:600;margin-top:2px}
+.scenup{color:var(--up)}
+.scendown{color:var(--dn)}
+@media(max-width:640px){ .scenbars{grid-template-columns:1fr} .scenplot{height:120px} }
+
+.scenkey{list-style:none;display:flex;flex-wrap:wrap;gap:14px;margin:0 0 4px;padding:0;
+  font-size:11.5px;color:var(--mute)}
+.scenkey li{display:flex;align-items:center;gap:6px}
+.scenkey i{width:11px;height:11px;border-radius:2px;display:inline-block;
+  border:1px solid var(--line)}

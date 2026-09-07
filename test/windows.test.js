@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
-import { qNum, qLabel, compact, windowsOf, distribution, countAtOrBelow } from '../lib/calc/windows.js';
+import { qNum, qLabel, compact, windowsOf, distribution, countAtOrBelow,
+         totalFromCagr, cagrFromTotal } from '../lib/calc/windows.js';
 import { ledger, breakEven, saleOutcome } from '../lib/calc/ledger.js';
 
 const read = f => JSON.parse(readFileSync(new URL(`../data/${f}`, import.meta.url), 'utf8'));
@@ -179,4 +180,55 @@ test('an index change is applied to the reader’s own price and to nothing else
   const r = ledger({ ...base, propertyType: 'HDB' });
   const o = outcomeAt(r, base.price * (1 + d.worst.change));
   assert.ok(Math.abs(o.salePrice - Math.round(base.price * (1 + d.worst.change))) <= 1);
+});
+
+/* ── annual rate against total change ──────────────────────────────────────── */
+
+test('a rate and its total round-trip, and compounding is not division', () => {
+  
+  for (const [rate, years] of [[0.02, 5], [-0.015, 3], [0.04, 10], [0, 7]]) {
+    const total = totalFromCagr(rate, years);
+    assert.ok(Math.abs(cagrFromTotal(total, years) - rate) < 1e-12,
+      `${rate} over ${years}y did not round-trip`);
+  }
+  // 2% a year over five years is 10.41%, not 10%. A stress tester that divides
+  // is flattering by construction, and the gap widens with the horizon.
+  assert.ok(Math.abs(totalFromCagr(0.02, 5) - 0.1040808) < 1e-6);
+  assert.ok(totalFromCagr(0.02, 5) > 0.02 * 5);
+});
+
+test('a total loss has no annual rate, and says so', () => {
+  
+  assert.equal(cagrFromTotal(-1, 5), null);
+  assert.equal(cagrFromTotal(-1.2, 5), null);
+  assert.equal(cagrFromTotal(0.1, 0), null);
+  assert.equal(totalFromCagr(0.02, 0), null);
+});
+
+/* ── the scenario bar ──────────────────────────────────────────────────────── */
+
+test('a scenario bar segments to exactly the sale price', () => {
+  // The bar on /cost lays out four segments by their dollar share. If they
+  // stopped summing to the sale price the picture would quietly stop matching
+  // the ledger printed beside it, at every rate the reader drags to.
+  const r = ledger(base);
+  for (const cagr of [-0.08, -0.015, 0, 0.02, 0.04, 0.1]) {
+    const change = totalFromCagr(cagr, r.yearsHeld);
+    const o = outcomeAt(r, base.price * (1 + change));
+    const stack = o.sellingCosts + o.outstanding + o.cpfRefunded + o.toSeller;
+    assert.ok(Math.abs(stack - (o.salePrice + o.cashToComplete)) <= 2,
+      `at ${cagr}: segments ${stack} vs price ${o.salePrice} + ${o.cashToComplete} to bring`);
+  }
+});
+
+test('the anchor counts the same windows the section above reports', () => {
+  // Two components read the record; one distribution. If the scenario block
+  // ever built its own the two halves of the page could disagree about how
+  // often 2% a year has happened, which is the whole point of the anchor.
+  const s = compact(read('hdb-index.json').points);
+  const d = distribution(s, 5);
+  const at2pc = countAtOrBelow(d, totalFromCagr(0.02, 5));
+  const brute = d.sorted.filter(w => w.change <= Math.pow(1.02, 5) - 1).length;
+  assert.equal(at2pc.count, brute);
+  assert.ok(at2pc.of === d.n);
 });
