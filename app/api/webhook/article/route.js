@@ -95,11 +95,19 @@ export async function POST(req) {
      different slugs, so the collision check below saw nothing, and the feed
      advertised its own automation more loudly than it reported the news.
 
+     Compared on TITLE AND SLUG. The three titles share almost no words — "Two
+     Prime GLS Sites Open, And The Timeline They Set" against "What the Marina
+     Gardens Lane and Orchard Boulevard tenders tell you" scores 0.00 — because
+     a headline is meant to vary. The subject does not, and the pipeline puts
+     it in the slug, which carries marina-gardens-lane-orchard-boulevard-gls in
+     all three.
+
      Refused at intake rather than at publish, so the queue stays readable: a
      person should not have to notice that three of the five drafts in front
      of them are the same tender. 409 with the slug it duplicates, so the
      pipeline can log which story it already had. */
-  const priorTitle = duplicateOf(title, await recentTitles());
+  const candidateSlug = slugify(body.slug || title);
+  const priorTitle = duplicateOf({ title, slug: candidateSlug }, await recentTitles());
   if (priorTitle) {
     return NextResponse.json({
       error: 'That story has already been filed.',
@@ -110,7 +118,7 @@ export async function POST(req) {
     }, { status: 409 });
   }
 
-  let slug = slugify(body.slug || title);
+  let slug = candidateSlug;
   if (!slug) slug = `article-${Date.now()}`;
   // Collisions are resolved rather than rejected: a pipeline that files two
   // pieces on the same town in a week should not need a human to rename one.

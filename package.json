@@ -48,7 +48,8 @@
     "build:comps": "node scripts/build-comps.mjs",
     "build:rents": "node scripts/build-rents.mjs",
     "build:trend": "node scripts/build-trend.mjs",
-    "build:budget": "node scripts/build-budget.mjs"
+    "build:budget": "node scripts/build-budget.mjs",
+    "audit:articles": "node scripts/audit-articles.mjs"
   },
   "dependencies": {
     "next": "^15.0.0",

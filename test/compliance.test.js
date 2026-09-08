@@ -14,8 +14,8 @@
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { PROHIBITED, scanLanguage, publishBlockers, similarity, duplicateOf, tokens }
-  from '../lib/compliance.js';
+import { PROHIBITED, scanLanguage, publishBlockers, similarity, duplicateOf, tokens,
+         subject, DUPLICATE_AT } from '../lib/compliance.js';
 
 test('the phrases that made one article unpublishable are all caught', () => {
   const found = id => scanLanguage(`<p>${id}</p>`).map(h => h.id);
@@ -58,51 +58,102 @@ test('every prohibited entry states its reason', () => {
   }
 });
 
-/* ── the same story, filed three times ─────────────────────────────────────── */
+/* ── the same story, filed three times ─────────────────────────────────────
+   THESE ARE THE REAL TITLES. The first version of this test invented titles
+   that happened to match the slugs, so it measured slug overlap and reported
+   it as title overlap — the check looked calibrated and had never been run
+   against anything the pipeline actually produced. A headline is meant to
+   vary; the subject is not, and the pipeline puts the subject in the slug. */
 
-const MARINA = [
-  'Marina Gardens Lane, Orchard Boulevard GLS launch 2026',
-  'Marina Gardens Lane / Orchard Boulevard GLS tenders',
-  'URA Marina Gardens Lane Orchard Boulevard GLS 2H2026',
+const SAME_STORY = [
+  { title: 'Two Prime GLS Sites Open, And The Timeline They Set',
+    slug: 'marina-gardens-lane-orchard-boulevard-gls-launch-2026' },
+  { title: 'What the Marina Gardens Lane and Orchard Boulevard tenders tell you',
+    slug: 'marina-gardens-lane-orchard-boulevard-gls-tenders' },
+  { title: 'Two Prime GLS Sites Go Live, and the Clock Starts',
+    slug: 'ura-marina-gardens-lane-orchard-boulevard-gls-2h2026' },
 ];
 const OTHERS = [
-  'New Upper Changi Road tender closing in Bedok',
-  'BTO Prime Plus Standard resale premium 2026',
-  'Freehold vs 99-year leasehold: debunking the premium',
-  'Rent normalization 2026 and leveraged landlords',
+  { title: 'What the New Upper Changi Road tender closing tells a Bedok buyer',
+    slug: 'new-upper-changi-road-tender-closing-bedok' },
+  { title: 'The Legacy Premium: Why Pre-2024 Resale Flats Are Quietly Becoming Luxury Assets',
+    slug: 'bto-prime-plus-standard-resale-premium-2026' },
+  { title: 'En Bloc Fatigue: Why Mega Developments Are Becoming Strata Titled Prisons',
+    slug: 'en-bloc-fatigue-mega-developments-strata-prisons' },
+  { title: 'The Great Rent Normalization of 2026: Why Leveraged Landlords Are Bleeding Cash',
+    slug: 'rent-normalization-2026-leveraged-landlords' },
 ];
 
-test('three framings of one tender are recognised as one story', () => {
-  for (let i = 0; i < MARINA.length; i++) {
-    for (let j = i + 1; j < MARINA.length; j++) {
-      assert.ok(similarity(MARINA[i], MARINA[j]) >= 0.5,
-        `${MARINA[i]} vs ${MARINA[j]} scored below the threshold`);
+test('a title-only comparison misses at least one of these pairs entirely', () => {
+  /* The reason the check reads the slug. Not every pair is invisible to a
+     title comparison — "Two Prime GLS Sites Open…" and "Two Prime GLS Sites
+     Go Live…" share enough words to score 0.36 — but "What the Marina Gardens
+     Lane and Orchard Boulevard tenders tell you" shares NOTHING with either,
+     at 0.00, and would have been filed as a third copy. One hole is enough:
+     the pipeline picks the framing, and nothing makes it pick a similar one. */
+  const titleOnly = [];
+  for (let i = 0; i < SAME_STORY.length; i++)
+    for (let j = i + 1; j < SAME_STORY.length; j++)
+      titleOnly.push(similarity(SAME_STORY[i].title, SAME_STORY[j].title));
+  assert.ok(Math.min(...titleOnly) < 0.1,
+    'a title-only check would have caught all three; the slug comparison could be dropped');
+  assert.ok(titleOnly.some(s => s < DUPLICATE_AT),
+    'at least one same-story pair must be invisible to titles alone');
+});
+
+test('three framings of one tender are caught on title and slug', () => {
+  for (let i = 0; i < SAME_STORY.length; i++) {
+    for (let j = i + 1; j < SAME_STORY.length; j++) {
+      const s = similarity(subject(SAME_STORY[i]), subject(SAME_STORY[j]));
+      assert.ok(s >= DUPLICATE_AT,
+        `${SAME_STORY[i].slug} vs ${SAME_STORY[j].slug} scored ${s.toFixed(2)}`);
     }
   }
 });
 
-test('unrelated stories are nowhere near the threshold', () => {
-  const all = [...MARINA.slice(0, 1), ...OTHERS];
+test('unrelated stories stay far below the threshold', () => {
+  const all = [SAME_STORY[0], ...OTHERS];
   for (let i = 0; i < all.length; i++) {
     for (let j = i + 1; j < all.length; j++) {
-      const s = similarity(all[i], all[j]);
-      assert.ok(s < 0.3, `${all[i]} vs ${all[j]} scored ${s.toFixed(2)} — too close for comfort`);
+      const s = similarity(subject(all[i]), subject(all[j]));
+      assert.ok(s <= 0.15,
+        `${all[i].slug} vs ${all[j].slug} scored ${s.toFixed(2)} — too close to the threshold`);
     }
   }
+});
+
+test('the threshold sits in the gap, not on the edge of it', () => {
+  // Same-story pairs measured at 0.33-0.45, unrelated at most 0.07. If a
+  // change narrows that gap, this fails before anything reaches production.
+  let worstSame = 1, bestOther = 0;
+  for (let i = 0; i < SAME_STORY.length; i++)
+    for (let j = i + 1; j < SAME_STORY.length; j++)
+      worstSame = Math.min(worstSame, similarity(subject(SAME_STORY[i]), subject(SAME_STORY[j])));
+  const all = [SAME_STORY[0], ...OTHERS];
+  for (let i = 0; i < all.length; i++)
+    for (let j = i + 1; j < all.length; j++)
+      bestOther = Math.max(bestOther, similarity(subject(all[i]), subject(all[j])));
+  assert.ok(bestOther < DUPLICATE_AT && DUPLICATE_AT < worstSame,
+    `threshold ${DUPLICATE_AT} must sit between ${bestOther.toFixed(2)} and ${worstSame.toFixed(2)}`);
 });
 
 test('the duplicate check reports which story it repeats', () => {
-  const existing = MARINA.slice(0, 2).map((title, i) => ({ id: i, slug: `s${i}`, title, status: 'published' }));
-  const hit = duplicateOf(MARINA[2], existing);
+  const existing = SAME_STORY.slice(0, 2).map((a, i) => ({ ...a, id: i, status: 'published' }));
+  const hit = duplicateOf(SAME_STORY[2], existing);
   assert.ok(hit, 'the third framing was not caught');
-  assert.ok(hit.score >= 0.5);
+  assert.ok(hit.score >= DUPLICATE_AT);
   assert.ok(existing.some(e => e.slug === hit.slug));
   assert.equal(duplicateOf(OTHERS[0], existing), null, 'an unrelated story must pass');
-  assert.equal(duplicateOf('Anything', []), null, 'an empty queue duplicates nothing');
+  assert.equal(duplicateOf({ title: 'Anything', slug: 'anything' }, []), null);
+});
+
+test('a bare title still works, for callers that have no slug', () => {
+  const existing = [{ title: 'En Bloc Fatigue: Why Mega Developments Are Becoming Strata Titled Prisons',
+                      slug: 'en-bloc-fatigue-mega-developments-strata-prisons' }];
+  assert.ok(duplicateOf('En Bloc Fatigue: Why Mega Developments Are Becoming Strata Titled Prisons', existing));
 });
 
 test('a title of only stopwords matches nothing', () => {
-  // Otherwise two contentless titles would look identical and block each other.
   assert.equal(tokens('the a of in on').size, 0);
   assert.equal(similarity('the a of', 'in on at'), 0);
 });
