@@ -1909,7 +1909,14 @@ sup.cite a:hover{text-decoration:underline}
 .nstable td:last-child,.nstable th:last-child{padding-right:0}
 .nstable .r{text-align:right;font-variant-numeric:tabular-nums}
 .nstable a{color:var(--acc);font-weight:600}
+/* Only the project name wraps. A month broken across two lines as "2026-" and
+   "08", and a floor band as "06-" and "10", is unreadable at a glance and was
+   costing more vertical space than the nowrap costs horizontally — the table
+   still fits 375px because the name column absorbs what is left. */
+.nstable td:not(:first-child),.nstable th:not(:first-child){white-space:nowrap}
+.nstable td:first-child{min-width:5.5em}
 @media(max-width:640px){
   .nsstat{grid-template-columns:1fr}
   .nstable{font-size:12.5px}
+  .nstable td,.nstable th{padding-right:7px}
 }
