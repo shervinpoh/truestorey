@@ -321,7 +321,7 @@ export default function Ledger({ indices = {} }) {
 
       {r.renting && (
         <>
-          <div className="sh" style={{ marginTop: 26 }}><span>Against renting the same thing</span></div>
+          <h2 className="sh" style={{ marginTop: 26 }}><span>Against renting the same thing</span></h2>
           <div className="rentcmp">
             <div>
               <span className="lab">Gone for good, owning</span>
@@ -363,7 +363,7 @@ export default function Ledger({ indices = {} }) {
 
       <Scenarios indices={indices} r={r} price={p} propertyType={type} />
 
-      <div className="sh" style={{ marginTop: 26 }}><span>The ledger</span></div>
+      <h2 className="sh" style={{ marginTop: 26 }}><span>The ledger</span></h2>
 
       <div className="tablewrap">
         <table className="ledgertable">
@@ -437,7 +437,7 @@ export default function Ledger({ indices = {} }) {
         {' · '}nothing on this page is saved or sent anywhere.
       </p>
 
-      <div className="sh" style={{ marginTop: 26 }}><span>The rest of it</span></div>
+      <h2 className="sh" style={{ marginTop: 26 }}><span>The rest of it</span></h2>
       <ul className="idx">
         <li><Link href="/plan"><span className="n">Whether you clear the loan at all</span><span className="s">TDSR, MSR, the LTV ceiling and both stamp duties</span></Link></li>
         <li><Link href="/progressive"><span className="n">Paying for one still being built</span><span className="s">The statutory ladder, and what the instalment climbs to</span></Link></li>

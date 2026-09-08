@@ -166,7 +166,7 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
 function Fork({ price, planHref, href, hdb, hasFloor, hasNear }) {
   return (
     <div className="forkwrap">
-      <div className="sh"><span>Which of these are you</span></div>
+      <h2 className="sh"><span>Which of these are you</span></h2>
       <div className="fork">
         <div className="forkcol">
           <span className="lab">I&rsquo;m considering buying this</span>

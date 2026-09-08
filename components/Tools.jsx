@@ -110,10 +110,16 @@ function Sell() {
         ))}
       </div>
       <div className="fld">
-        <span className="lab" style={{ display: 'block', marginBottom: 6 }}>
-          {kind === 'HDB' ? 'Date you collected keys' : 'Date you bought it'}
-        </span>
-        <input type="date" value={date} onChange={e => setDate(e.target.value)} />
+        {/* A <label>, not a sibling <span>. The text was visible and read
+             like a label, but nothing associated it with the field, so a
+             screen reader announced a bare date picker. Wrapping is enough —
+             no id needed — and clicking the words now focuses the input. */}
+        <label>
+          <span className="lab" style={{ display: 'block', marginBottom: 6 }}>
+            {kind === 'HDB' ? 'Date you collected keys' : 'Date you bought it'}
+          </span>
+          <input type="date" value={date} onChange={e => setDate(e.target.value)} />
+        </label>
         {kind === 'HDB' && (
           <p className="hint" style={{ marginTop: 8 }}>
             MOP runs five years from key collection, not from the option date and not from completion.
@@ -123,8 +129,10 @@ function Sell() {
 
       {kind === 'PRIVATE' && (
         <div className="fld" style={{ marginTop: 14 }}>
-          <span className="lab" style={{ display: 'block', marginBottom: 6 }}>What you would sell for</span>
-          <input type="number" step="50000" value={price} onChange={e => setPrice(e.target.value)} />
+          <label>
+            <span className="lab" style={{ display: 'block', marginBottom: 6 }}>What you would sell for</span>
+            <input type="number" step="50000" value={price} onChange={e => setPrice(e.target.value)} />
+          </label>
           <p className="hint" style={{ marginTop: 8 }}>
             SSD is charged on the sale price, so the cost of going now depends on it.
           </p>
@@ -273,14 +281,14 @@ function Afford() {
           : 'TDSR only, over 30 years. MSR does not apply to private property.'}
       </p>
       <div className="f2">
-        <div><span className="lab">Fixed monthly income</span><input type="number" value={income}
-          onChange={e => setIncome(e.target.value)} min="0" step="500" /></div>
-        <div><span className="lab">Variable income</span><input type="number" value={variable}
-          onChange={e => setVariable(e.target.value)} min="0" step="500" /></div>
-        <div><span className="lab">Age</span><input type="number" value={age}
-          onChange={e => setAge(e.target.value)} min="21" max="70" /></div>
-        <div><span className="lab">Other monthly commitments</span><input type="number" value={debts}
-          onChange={e => setDebts(e.target.value)} min="0" step="100" /></div>
+        <label><span className="lab">Fixed monthly income</span><input type="number" value={income}
+          onChange={e => setIncome(e.target.value)} min="0" step="500" /></label>
+        <label><span className="lab">Variable income</span><input type="number" value={variable}
+          onChange={e => setVariable(e.target.value)} min="0" step="500" /></label>
+        <label><span className="lab">Age</span><input type="number" value={age}
+          onChange={e => setAge(e.target.value)} min="21" max="70" /></label>
+        <label><span className="lab">Other monthly commitments</span><input type="number" value={debts}
+          onChange={e => setDebts(e.target.value)} min="0" step="100" /></label>
       </div>
 
       <div className="figwrap" style={{ marginTop: 26 }}>
@@ -331,11 +339,13 @@ function Duty() {
   return (
     <>
       <div className="fld">
-        <span className="lab">Price, or market value if higher</span>
-        <input type="number" value={price} onChange={e => setPrice(e.target.value)} min="0" step="10000" />
+        <label>
+          <span className="lab">Price, or market value if higher</span>
+          <input type="number" value={price} onChange={e => setPrice(e.target.value)} min="0" step="10000" />
+        </label>
       </div>
 
-      <div className="sh" style={{ marginTop: 24 }}><span>Buying</span><span>BSD + ABSD</span></div>
+      <h2 className="sh" style={{ marginTop: 24 }}><span>Buying</span><span>BSD + ABSD</span></h2>
       <div className="seg" style={{ marginTop: 12 }}>
         {PROFILES.map(([k, label]) => (
           <button key={k} aria-pressed={profile === k} onClick={() => setProfile(k)}>{label}</button>
@@ -373,10 +383,12 @@ function Duty() {
           trusting this figure.</div>
       )}
 
-      <div className="sh" style={{ marginTop: 30 }}><span>Selling</span><span>SSD</span></div>
+      <h2 className="sh" style={{ marginTop: 30 }}><span>Selling</span><span>SSD</span></h2>
       <div className="fld">
-        <span className="lab">Date you bought it</span>
-        <input type="date" value={bought} onChange={e => setBought(e.target.value)} />
+        <label>
+          <span className="lab">Date you bought it</span>
+          <input type="date" value={bought} onChange={e => setBought(e.target.value)} />
+        </label>
       </div>
       {s && (
         <>
@@ -479,7 +491,7 @@ function Mortgage() {
             </div>
           )}
 
-          <div className="sh" style={{ marginTop: 24 }}><span>Year by year</span></div>
+          <h2 className="sh" style={{ marginTop: 24 }}><span>Year by year</span></h2>
           <table className="bandtable">
             <thead>
               <tr>

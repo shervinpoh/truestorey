@@ -66,9 +66,9 @@ export default function SinceThen({ site, rec, trend, label }) {
 
       {rows.length > 1 && (
         <>
-          <div className="sh" style={{ marginTop: 24 }}><span>
+          <h2 className="sh" style={{ marginTop: 24 }}><span>
             {trend.allSizes ? 'Year by year, every size at this address' : 'Year by year, for a median-sized unit'}
-          </span></div>
+          </span></h2>
           <div className="tablewrap">
             <table className="landtable trendtable">
               <caption className="prov">

@@ -90,8 +90,8 @@ export default function Home() {
           <p className="sub">What was actually paid, by block and by project — with the
             source and the period printed beside it. Free, and there is nothing to sign up to.</p>
           <div className="herosearch">
-            <div className="sh"><span>Look up any block or project</span>
-              <span>{urls.length ? num(urls.length) : ''} pages</span></div>
+            <h2 className="sh"><span>Look up any block or project</span>
+              <span>{urls.length ? num(urls.length) : ''} pages</span></h2>
             <div style={{ marginTop: 14 }}><Search /></div>
           </div>
           <dl className="proof">
@@ -162,8 +162,8 @@ export default function Home() {
       )}
 
       <section className="pane">
-        <div className="sh"><span>What people work out here</span>
-          <Link href="/tools">All {allTools.length} tools →</Link></div>
+        <h2 className="sh"><span>What people work out here</span>
+          <Link href="/tools">All {allTools.length} tools →</Link></h2>
         <div className="deck">
           {tools.map(t => (
             <Link className="deckcard" key={t.href} href={t.href}>
@@ -176,8 +176,8 @@ export default function Home() {
 
       {arch?.entries?.length > 0 && (
         <section className="pane">
-          <div className="sh"><span>Latest from the archive</span>
-            <Link href="/archive">All {arch.entries.length} →</Link></div>
+          <h2 className="sh"><span>Latest from the archive</span>
+            <Link href="/archive">All {arch.entries.length} →</Link></h2>
           <div className="arch">
             {arch.entries.slice(0, 5).map((e, i) => (
               <div className="arow" key={e.date + i}>
@@ -194,7 +194,7 @@ export default function Home() {
 
       {rest.length > 0 && (
         <section className="pane">
-          <div className="sh"><span>More writing</span><Link href="/insights">Everything →</Link></div>
+          <h2 className="sh"><span>More writing</span><Link href="/insights">Everything →</Link></h2>
           <ul className="feed">
             {rest.map(p => (
               <li key={p.slug} className={p.kind === 'deep' ? 'deep' : undefined}>

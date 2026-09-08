@@ -130,7 +130,7 @@ export default function Downside({ indices = {}, r, price, propertyType }) {
 
   return (
     <>
-      <div className="sh" style={{ marginTop: 26 }}><span>What it costs to be wrong</span></div>
+      <h2 className="sh" style={{ marginTop: 26 }}><span>What it costs to be wrong</span></h2>
 
       <p className="wrongintro">
         Everything above assumes the price does whatever it does. This is the other tail. It makes

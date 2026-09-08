@@ -89,9 +89,9 @@ export default function LeaseView({ observed = null }) {
         </aside>
       </div>
 
-      <div className="sh" style={{ marginTop: 26 }}>
+      <h2 className="sh" style={{ marginTop: 26 }}>
         <span>The table</span><span>99 years, as a share of freehold</span>
-      </div>
+      </h2>
       <Chart
         points={pts} format={n => n.toFixed(1)} unit="% of freehold" height={150}
         ariaLabel="Leasehold value as a percentage of freehold value, from 99 years remaining down to 1." />
@@ -121,10 +121,10 @@ export default function LeaseView({ observed = null }) {
 
       {observed?.bands?.length > 0 && (
         <>
-          <div className="sh" style={{ marginTop: 26 }}>
+          <h2 className="sh" style={{ marginTop: 26 }}>
             <span>What was actually paid</span>
             <span>{observed.n.toLocaleString('en-SG')} filed transactions</span>
-          </div>
+          </h2>
           <Chart
             points={observed.bands.map(b => ({ label: `${b.band} yrs left`, value: b.medianPsf }))}
             format={n => `$${Math.round(n).toLocaleString('en-SG')}`} unit=" psf" height={130}
@@ -155,7 +155,7 @@ export default function LeaseView({ observed = null }) {
         and rise with the term.
       </p>
 
-      <div className="sh" style={{ marginTop: 26 }}><span>The rest of it</span></div>
+      <h2 className="sh" style={{ marginTop: 26 }}><span>The rest of it</span></h2>
       <ul className="idx">
         <li><Link href="/mop"><span className="n">When flats can start selling</span><span className="s">Every block reaching its fifth year, named and mapped</span></Link></li>
         <li><Link href="/plan"><span className="n">Can I afford it</span><span className="s">TDSR, the LTV ceiling, and both stamp duties</span></Link></li>

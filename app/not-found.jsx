@@ -47,12 +47,12 @@ export default function NotFound() {
       />
 
       <section className="pane">
-        <div className="sh"><span>Look up any block or project</span></div>
+        <h2 className="sh"><span>Look up any block or project</span></h2>
         <div style={{ marginTop: 14 }}><Search autoFocus /></div>
       </section>
 
       <section className="pane">
-        <div className="sh"><span>Or browse</span></div>
+        <h2 className="sh"><span>Or browse</span></h2>
         <ul className="idx">
           <li><Link href="/map"><span className="n">The price map</span>
             <span className="s">Every block and project, plotted by median psf</span></Link></li>

@@ -57,7 +57,7 @@ export default async function Page({ params }) {
       <section className="pane">
         <p className="lede" style={{ maxWidth: '68ch' }}>{s.intro}</p>
 
-        <div className="sh" style={{ marginTop: 22 }}><span>Start here</span></div>
+        <h2 className="sh" style={{ marginTop: 22 }}><span>Start here</span></h2>
         <ul className="idx">
           {s.primaryItems.map(i => (
             <li key={i.href}>
@@ -74,7 +74,7 @@ export default async function Page({ params }) {
             {/* Open on a page dedicated to this situation. It was behind a
                 disclosure on the overview because three situations' tails at
                 once is a list again; here there is only one. */}
-            <div className="sh" style={{ marginTop: 26 }}><span>Also useful here</span></div>
+            <h2 className="sh" style={{ marginTop: 26 }}><span>Also useful here</span></h2>
             <ul className="idx">
               {s.moreItems.map(i => (
                 <li key={i.href}>
@@ -90,7 +90,7 @@ export default async function Page({ params }) {
       </section>
 
       <section className="pane">
-        <div className="sh"><span>Not what you are trying to work out?</span></div>
+        <h2 className="sh"><span>Not what you are trying to work out?</span></h2>
         <ul className="idx">
           {SITUATIONS.filter(o => o.id !== s.id).map(o => (
             <li key={o.id}>

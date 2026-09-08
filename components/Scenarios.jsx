@@ -93,7 +93,7 @@ export default function Scenarios({ indices = {}, r, price, propertyType }) {
 
   return (
     <>
-      <div className="sh" style={{ marginTop: 26 }}><span>Three you set yourself</span></div>
+      <h2 className="sh" style={{ marginTop: 26 }}><span>Three you set yourself</span></h2>
 
       <p className="wrongintro">
         The section above reads the record and chooses nothing. This one does the opposite: you

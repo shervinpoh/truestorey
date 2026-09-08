@@ -49,7 +49,7 @@ export default async function Page({ params }) {
       </section>
 
       <section className="pane">
-        <div className="sh"><span>Every block in {titleCase(t.name)}</span><span>{t.blocks.length}</span></div>
+        <h2 className="sh"><span>Every block in {titleCase(t.name)}</span><span>{t.blocks.length}</span></h2>
         <TownTiles placeholder="Filter by block number or street…"
           items={t.blocks.map(b => ({
             key: b.slug, href: b.href, n: `Blk ${b.block}`, value: b.medianPsf,
@@ -61,7 +61,7 @@ export default async function Page({ params }) {
 
       {posts.length > 0 && (
         <section className="pane">
-          <div className="sh"><span>Reading on {titleCase(t.name)}</span><span>{posts.length}</span></div>
+          <h2 className="sh"><span>Reading on {titleCase(t.name)}</span><span>{posts.length}</span></h2>
           <ul className="idx">
             {posts.map(p => (
               <li key={p.slug}>

@@ -71,7 +71,7 @@ export default function Page() {
           after the claim it made turned out to be stronger than the measurement behind it. Getting
           it wrong first is the ordinary way this list grows.
         </div>
-        <div className="sh" style={{ marginTop: 22 }}><span>What is there instead</span></div>
+        <h2 className="sh" style={{ marginTop: 22 }}><span>What is there instead</span></h2>
         <ul className="idx">
           <li><Link href="/blindspot"><span className="n">Six checks against filed records</span>
             <span className="s">Scored by a formula printed on the page, and it says so when a check could not run</span></Link></li>

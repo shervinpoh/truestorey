@@ -34,7 +34,7 @@ export default function Insight({ post }) {
         )}
         {post.sources?.length > 0 && (
           <div className="pane" style={{ marginTop: 8 }}>
-            <div className="sh"><span>What this was written from</span></div>
+            <h2 className="sh"><span>What this was written from</span></h2>
             <ul className="idx">
               {post.sources.map(u => (
                 <li key={u}>

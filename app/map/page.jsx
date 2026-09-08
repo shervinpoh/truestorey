@@ -67,7 +67,7 @@ export default function Page() {
       </section>
 
       <section className="pane">
-        <div className="sh"><span>The same data as a list</span></div>
+        <h2 className="sh"><span>The same data as a list</span></h2>
         <ul className="idx">
           <li><Link href="/hdb"><span className="n">HDB, by town</span>
             <span className="s">{(map.counts.hdb || 0).toLocaleString('en-SG')} blocks</span></Link></li>

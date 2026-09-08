@@ -129,10 +129,10 @@ export default function LandView({ data }) {
 
       {byYear.length > 1 && (
         <>
-          <div className="sh" style={{ marginTop: 22 }}>
+          <h2 className="sh" style={{ marginTop: 22 }}>
             <span>Median rate by year of award</span>
             <span>years with two or more sites</span>
-          </div>
+          </h2>
           <Chart points={byYear} format={n => `$${Math.round(n).toLocaleString('en-SG')}`} unit=" psm"
             height={140}
             ariaLabel={`Median land rate per square metre by year of award, ${byYear[0].label} to ${byYear.at(-1).label}.`} />
@@ -148,13 +148,13 @@ export default function LandView({ data }) {
         </>
       )}
 
-      <div className="sh" style={{ marginTop: 26 }}>
+      <h2 className="sh" style={{ marginTop: 26 }}>
         <span>Most recently awarded</span>
         <span>
           {Math.min(latest.length, sites.length).toLocaleString('en-SG')} of{' '}
           {sites.length.toLocaleString('en-SG')}
         </span>
-      </div>
+      </h2>
       <div className="tablewrap">
         <table className="anst landtable">
           <thead><tr>
@@ -291,7 +291,7 @@ export default function LandView({ data }) {
         </>}
       </p>
 
-      <div className="sh" style={{ marginTop: 26 }}><span>The rest of it</span></div>
+      <h2 className="sh" style={{ marginTop: 26 }}><span>The rest of it</span></h2>
       <ul className="idx">
         <li><Link href="/progressive"><span className="n">Paying for a home still being built</span><span className="s">The nine statutory stages, and what the instalment does</span></Link></li>
         <li><Link href="/blindspot"><span className="n">What is coming near a property</span><span className="s">Upcoming supply, checked against a published rubric</span></Link></li>

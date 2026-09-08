@@ -54,7 +54,7 @@ export default function Storey({ data, label }) {
 
   return (
     <section className="pane">
-      <div className="sh"><span>What the floor is worth</span></div>
+      <h2 className="sh"><span>What the floor is worth</span></h2>
 
       {types.length > 1 && (
         <div className="seg" role="group" aria-label="Flat type">

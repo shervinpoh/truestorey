@@ -52,6 +52,13 @@ export default function Page() {
         title="Rental yields"
         sub={`Gross yield for ${projects.length.toLocaleString('en-SG')} projects — filed rents over filed prices, matched on unit size.`} />
 
+      {/* These were only ever in the branch above — the one that renders when
+          the dataset is MISSING. So the page explaining what a gross yield is
+          and what it cannot tell you appeared only when there were no yields
+          to misread, and never when there were. */}
+      <ToolIntro href="/yield" />
+      <ToolUse id="yield" />
+
       <section className="pane">
         <YieldView
           projects={projects.map(p => ({ label: p.label, district: p.district, href: p.href, grossYield: p.grossYield, cohorts: p.cohorts }))}
@@ -60,7 +67,7 @@ export default function Page() {
       </section>
 
       <section className="pane">
-        <div className="sh"><span>By district</span></div>
+        <h2 className="sh"><span>By district</span></h2>
         <table className="bandtable">
           <thead><tr><th scope="col">District</th><th scope="col">Gross yield</th><th scope="col">Projects</th></tr></thead>
           <tbody>
@@ -95,7 +102,7 @@ export default function Page() {
       </section>
 
       <section className="pane">
-        <div className="sh"><span>Where this leads</span></div>
+        <h2 className="sh"><span>Where this leads</span></h2>
         <ul className="idx">
           <li><Link href="/guides/renting"><span className="n">What a landlord actually carries</span><span className="s">The costs between gross and net</span></Link></li>
           <li><Link href="/plan"><span className="n">What the purchase would cost</span><span className="s">Loan, downpayment, duties</span></Link></li>

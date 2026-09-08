@@ -28,7 +28,7 @@ export default function Page() {
       </section>
 
       <section className="pane">
-        <div className="sh"><span>The rubric</span></div>
+        <h2 className="sh"><span>The rubric</span></h2>
         <p className="hint">
           This is the whole formula. Nothing else contributes to the score, and a language model
           never assigns a point — it only writes the paragraph around figures that are already
@@ -85,7 +85,7 @@ export default function Page() {
       </section>
 
       <section className="pane">
-        <div className="sh"><span>The rest of the tools</span></div>
+        <h2 className="sh"><span>The rest of the tools</span></h2>
         <ul className="idx">
           <li><Link href="/plan"><span className="n">Can I afford it</span><span className="s">Loan, downpayment, the cash CPF cannot cover, both stamp duties</span></Link></li>
           <li><Link href="/floors"><span className="n">What a higher floor is worth</span><span className="s">Measured within a building, not across the country</span></Link></li>

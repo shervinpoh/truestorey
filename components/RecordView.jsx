@@ -152,8 +152,8 @@ export default function RecordView({ rec, attribution = [], onType, afterSummary
         const vals = srs.map(s => s.median);
         const mn = Math.min(...vals)*0.985, mx = Math.max(...vals)*1.005;
         return (<>
-          <div className="sh" id="history"><span>Median price by month</span>
-            <span>{srs.length} months with a sale</span></div>
+          <h2 className="sh" id="history"><span>Median price by month</span>
+            <span>{srs.length} months with a sale</span></h2>
           <Grow>
             <div className="bars">{srs.map((s,i)=>(
               <i key={s.month} className={i===srs.length-1?'last':''}
@@ -174,8 +174,8 @@ export default function RecordView({ rec, attribution = [], onType, afterSummary
       })()}
 
       {recent.length > 0 && (<>
-        <div className="sh" id="transactions"><span>The transactions behind those figures</span>
-          <span>{recent.length} of {rv.n}</span></div>
+        <h2 className="sh" id="transactions"><span>The transactions behind those figures</span>
+          <span>{recent.length} of {rv.n}</span></h2>
         <p className="hint" style={{marginTop:10}}>Nothing modelled — these are the filed sales.</p>
         {/* Eight, then the rest on request. A block with forty filed sales put
             forty rows between the chart and everything below it, and nobody

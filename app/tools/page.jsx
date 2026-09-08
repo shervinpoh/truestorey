@@ -111,7 +111,7 @@ export default function Page() {
             <span className="s">Filed rents over filed prices, matched on unit size. Gross, and clear about it</span></Link></li>
         </ul>
 
-        <div className="sh" style={{ marginTop: 22 }}><span>And the lookups behind them</span></div>
+        <h2 className="sh" style={{ marginTop: 22 }}><span>And the lookups behind them</span></h2>
         <ul className="idx">
           <li><Link href="/map"><span className="n">The price map</span>
             <span className="s">Every block and project in Singapore by psf, labelled by town</span></Link></li>

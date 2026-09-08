@@ -52,7 +52,7 @@ export default async function Page({ params }) {
       </section>
 
       <section className="pane">
-        <div className="sh"><span>The other guides</span></div>
+        <h2 className="sh"><span>The other guides</span></h2>
         <ul className="idx">
           {others.map(o => (
             <li key={o.slug}>

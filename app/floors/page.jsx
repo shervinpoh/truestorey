@@ -44,7 +44,7 @@ export default function Page() {
       </section>
 
       <section className="pane">
-        <div className="sh"><span>Why this is not the number you usually see</span></div>
+        <h2 className="sh"><span>Why this is not the number you usually see</span></h2>
         <div className="note">
           <b>Pooling the whole country says a high floor is worth about 91%.</b> That figure is
           almost entirely wrong. A 4-room flat on the 35th storey is at Pinnacle@Duxton or in
@@ -73,7 +73,7 @@ export default function Page() {
       </section>
 
       <section className="pane">
-        <div className="sh"><span>Your own block</span></div>
+        <h2 className="sh"><span>Your own block</span></h2>
         <p className="hint">
           Every block and project page carries this same comparison for that building specifically,
           where it has enough filed sales at both ends.

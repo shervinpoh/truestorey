@@ -34,8 +34,8 @@ export default function NearbySales({ data, label }) {
 
   return (
     <section className="pane" id="nearbysales">
-      <div className="sh"><span>What has sold nearby</span>
-        <span className="mono">{radius}m</span></div>
+      <h2 className="sh"><span>What has sold nearby</span>
+        <span className="mono">{radius}m</span></h2>
 
       <label className="nsrange">
         <span className="lab">Distance from {titleCase(label)}</span>

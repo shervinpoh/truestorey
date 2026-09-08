@@ -4,8 +4,8 @@ Rewritten 1 Sep 2026, at the handover to Codex. `CLAUDE.md` has the rules and
 the architecture — **read that first, it is not optional.** This file is only
 the ordered backlog.
 
-**State:** live at https://truestorey.vercel.app · **378 tests** · three npm
-dependencies · Blindspot scoring out of 10 with all four checks running · data
+**State:** live at https://truestorey.vercel.app · **421 tests** · three npm
+dependencies · Blindspot scoring out of 10 with all six checks running · data
 refreshing itself daily via `.github/workflows/refresh-data.yml`.
 
 **Nothing is unpushed.** A push to master IS a deploy — see the top of

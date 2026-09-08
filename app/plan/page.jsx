@@ -90,7 +90,7 @@ export default function Page() {
       </section>
 
       <section className="pane">
-        <div className="sh"><span>The rest of it</span></div>
+        <h2 className="sh"><span>The rest of it</span></h2>
         <ul className="idx">
           <li><Link href="/tools"><span className="n">When can I sell · what I would net</span><span className="s">SSD, the timeline, the proceeds waterfall</span></Link></li>
           <li><Link href="/guides/absd-tdsr-ssd"><span className="n">The guide behind these numbers</span><span className="s">What each rule is, and when it bites</span></Link></li>

@@ -157,9 +157,9 @@ export default function Progressive() {
         </aside>
       </div>
 
-      <div className="sh" style={{ marginTop: 26 }}>
+      <h2 className="sh" style={{ marginTop: 26 }}>
         <span>The ladder</span><span>{STAGES.length} stages · 100% of the price</span>
-      </div>
+      </h2>
 
       <ul className="ladder">
         {r.rows.map((x, i) => (
@@ -200,9 +200,9 @@ export default function Progressive() {
         ))}
       </ul>
 
-      <div className="sh" style={{ marginTop: 26 }}>
+      <h2 className="sh" style={{ marginTop: 26 }}>
         <span>Stamp duty</span><span>on top of the price, on its own clock</span>
-      </div>
+      </h2>
       <div className="plansteps">
         <Row label="Buyer's Stamp Duty" value={money(duty.bsd)} note="progressive, on the price" />
         <Row label="Additional Buyer's Stamp Duty" value={money(duty.absd)}
@@ -250,7 +250,7 @@ export default function Progressive() {
         financial advice.
       </p>
 
-      <div className="sh" style={{ marginTop: 26 }}><span>The rest of it</span></div>
+      <h2 className="sh" style={{ marginTop: 26 }}><span>The rest of it</span></h2>
       <ul className="idx">
         <li><Link href="/plan"><span className="n">Whether you clear the loan at all</span><span className="s">TDSR, MSR, the LTV ceiling and both stamp duties</span></Link></li>
         <li><Link href="/guides/absd-tdsr-ssd"><span className="n">The guide behind these numbers</span><span className="s">What each rule is, and when it bites</span></Link></li>

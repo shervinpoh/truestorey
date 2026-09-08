@@ -206,7 +206,7 @@ function Result({ report, boxRef }) {
 
   return (
     <div ref={boxRef} style={{ marginTop: 30, scrollMarginTop: 76 }}>
-      <div className="sh"><span>{titleCase(r.record.label)}</span></div>
+      <h2 className="sh"><span>{titleCase(r.record.label)}</span></h2>
 
       <div className="scorewrap">
         <div className="scorenum">
@@ -241,7 +241,7 @@ function Result({ report, boxRef }) {
         </div>
       )}
 
-      <div className="sh" style={{ marginTop: 26 }}><span>What each check found</span></div>
+      <h2 className="sh" style={{ marginTop: 26 }}><span>What each check found</span></h2>
       {r.checks.map(c => (
         <div key={c.key} className="checkrow">
           <div className="ch">
@@ -258,7 +258,7 @@ function Result({ report, boxRef }) {
 
       {r.skipped.length > 0 && (
         <>
-          <div className="sh" style={{ marginTop: 26 }}><span>What could not be checked</span></div>
+          <h2 className="sh" style={{ marginTop: 26 }}><span>What could not be checked</span></h2>
           {r.skipped.map(s => (
             <div key={s.key} className="checkrow off">
               <div className="ch"><b>{s.title}</b><span className="mono pts">not run</span></div>
@@ -319,7 +319,7 @@ function PriceEvidence({ price }) {
 
   return (
     <>
-      <div className="sh" style={{ marginTop: 26 }}><span>The evidence behind the price check</span></div>
+      <h2 className="sh" style={{ marginTop: 26 }}><span>The evidence behind the price check</span></h2>
 
       {observed && (
         <div className="priceevidence">
@@ -445,7 +445,7 @@ function SizeTrend({ t }) {
   const pc = v => (v == null ? '—' : `${v > 0 ? '+' : ''}${v}%`);
   return (
     <>
-      <div className="sh" style={{ marginTop: 26 }}><span>What this size has done here</span></div>
+      <h2 className="sh" style={{ marginTop: 26 }}><span>What this size has done here</span></h2>
       {t.diverges && (
         <p className="lede" style={{ maxWidth: '70ch', marginTop: 0 }}>
           Homes of about this size moved <b>{pc(t.sizedChange)}</b> between {t.from} and {t.to},

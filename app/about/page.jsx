@@ -77,7 +77,7 @@ export default function Page() {
           position, not an introductory offer.
         </p>
 
-        <div className="sh" style={{ marginTop: 22 }}><span>Three rules I hold this site to</span></div>
+        <h2 className="sh" style={{ marginTop: 22 }}><span>Three rules I hold this site to</span></h2>
         <div className="note"><b>If the source cannot be shown, it does not publish.</b> Every
           derived figure on the site prints the dataset and the period beside it. Where a check
           could not run, the page says so rather than scoring it as nothing to worry about.</div>
@@ -95,7 +95,7 @@ export default function Page() {
       </section>
 
       <section className="pane">
-        <div className="sh"><span>What the site is made of</span></div>
+        <h2 className="sh"><span>What the site is made of</span></h2>
         <div className="kpi3">
           <div><div className="v">{urls.length ? urls.length.toLocaleString('en-SG') : '13,269'}</div>
             <span className="lab">Pages</span></div>
@@ -105,7 +105,7 @@ export default function Page() {
       </section>
 
       <section className="pane">
-        <div className="sh"><span>Where the numbers come from</span></div>
+        <h2 className="sh"><span>Where the numbers come from</span></h2>
         <div className="row"><span>HDB resale transactions<small>Every filed resale, by block</small></span>
           <span className="mono">data.gov.sg</span></div>
         <div className="row"><span>Private transactions<small>Condos, apartments and landed, by project or street</small></span>
@@ -124,7 +124,7 @@ export default function Page() {
       </section>
 
       <section className="pane">
-        <div className="sh"><span>What this site will not do</span></div>
+        <h2 className="sh"><span>What this site will not do</span></h2>
         <div className="note"><b>It will never give you one valuation number.</b> Valuation tools
           routinely disagree by S$15,000 to S$80,000 on the same home, because none of them can see
           your floor, your facing, your renovation or your lease. Every page here shows the observed
@@ -143,7 +143,7 @@ export default function Page() {
       </section>
 
       <section className="pane">
-        <div className="sh"><span>Free, and free of the usual strings</span></div>
+        <h2 className="sh"><span>Free, and free of the usual strings</span></h2>
         <p className="sub" style={{ maxWidth: '64ch' }}>
           No account, no sign-up, nothing held back for subscribers. The site sets no cookies and the
           analytics record no IP address and no personal data — which is why there is no consent
@@ -153,7 +153,7 @@ export default function Page() {
       </section>
 
       <section className="pane">
-        <div className="sh"><span>Start somewhere</span></div>
+        <h2 className="sh"><span>Start somewhere</span></h2>
         <ul className="idx">
           <li><Link href="/insights"><span className="n">The latest writing</span>
             <span className="s">Short notes when something moves, longer pieces most weeks</span></Link></li>

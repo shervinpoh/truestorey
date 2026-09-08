@@ -78,7 +78,7 @@ export default async function Page({ params }) {
       <SinceThen site={s} rec={rec} trend={trend} label={label} />
 
       <section className="pane">
-        <div className="sh"><span>The rest of it</span></div>
+        <h2 className="sh"><span>The rest of it</span></h2>
         <ul className="idx">
           <li><Link href={s.record.href}><span className="n">Every filed transaction at {label}</span>
             <span className="s">The full record — price history, floor premium, what a sale would net</span></Link></li>

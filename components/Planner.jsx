@@ -155,10 +155,10 @@ function SizeWithin({ budget, cap, type }) {
 
   return (
     <div className="within">
-      <div className="sh">
+      <h2 className="sh">
         <span>And what size that reaches</span>
         <span>lower quartile of filed sales</span>
-      </div>
+      </h2>
       <ul className="sizewithin">
         {list.map(t => (
           <li key={t.type} className={t.within.length ? undefined : 'out'}>
@@ -214,10 +214,10 @@ function MarketWithin({ market, cap }) {
 
   return (
     <div className="within">
-      <div className="sh">
+      <h2 className="sh">
         <span>Where a median {unit} is inside {money(cap)}</span>
         <span>{within.length} of {items.length} {nouns}</span>
-      </div>
+      </h2>
 
       {within.length === 0 ? (
         <p className="hint" style={{ marginTop: 12 }}>

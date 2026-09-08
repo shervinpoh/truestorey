@@ -90,7 +90,12 @@
  /* Elevation instead of hairlines, used on surfaces that genuinely sit above
     the page. Warm-tinted rather than neutral black, or it greys the ground. */
  --lift:0 1px 2px rgba(17,20,20,.05), 0 12px 34px -18px rgba(17,20,20,.20);
-}
+  /* ── the height of the sticky masthead ───────────────────────────────────
+     .secnav sticks BELOW .gnav, and it did so at a hardcoded 56px while the
+     masthead measured 71 — so 15px of the section bar sat underneath the
+     header at every width, on every record page. The header had grown and the
+     offset had not. Stated once here so the two cannot drift apart again. */
+  --headh:71px}
 /* The site is WHITE. It used to follow the operating system, which meant
    anyone with dark mode on their Mac — most people — got a black site, and
    that is not what this is. Dark is still defined below but only applies when
@@ -314,8 +319,17 @@ header.mast{padding:30px 0 16px}
  .kpi2>div:last-child{border-bottom:0}}
 
 /* ── section heads ─────────────────────────────────────────────────────── */
+/* A SECTION HEADING, AND NOW AN <h2>. It was a <div> in 66 places and an <h2>
+   in 6, so /about, /cost, /map, /yield and every record page rendered one <h1>
+   and no headings at all beneath it — a screen reader saw one undivided page
+   with no way to jump between sections. The six that were already headings
+   also rendered bolder than the other sixty-six, which nobody had noticed
+   because they never sat side by side.
+   font-weight is now stated, so a <div> and an <h2> cannot look different
+   again; font-size and margin were always stated, which is what let the swap
+   be invisible everywhere else. */
 .sh{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.1em;
- text-transform:uppercase;color:var(--mute);border-bottom:1px solid var(--ink);
+ font-weight:500;text-transform:uppercase;color:var(--mute);border-bottom:1px solid var(--ink);
  padding-bottom:7px;margin:26px 0 4px;display:flex;justify-content:space-between;gap:12px}
 
 /* ── controls ──────────────────────────────────────────────────────────── */
@@ -539,7 +553,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--ink)
    These pages run to five or six thousand pixels and every part of that is
    worth having; none of it is worth scrolling past to reach the one part you
    came for. Pinned under the global nav, which is 57px, so this sits at 56. */
-.secnav{position:sticky;top:56px;z-index:30;background:var(--paper);
+.secnav{position:sticky;top:var(--headh);z-index:30;background:var(--paper);
  border-bottom:1px solid var(--line);margin-top:6px}
 .secnavin{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .secnavin::-webkit-scrollbar{display:none}
@@ -1046,7 +1060,7 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 .planfold summary:before{content:"+ ";font-family:"IBM Plex Mono",ui-monospace,monospace;color:var(--mute)}
 .planfold[open] summary:before{content:"− "}
 
-.plansummary{position:sticky;top:78px}
+.plansummary{position:sticky;top:calc(var(--headh) + 7px)}
 .plansumin{border:1px solid var(--ink);padding:15px 16px 16px}
 .plansumfig{margin-bottom:14px}
 .plansumfig .statnum,.plansumfig .big{display:block}

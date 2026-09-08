@@ -122,7 +122,7 @@ export default async function Page({ params }) {
           the next thing you want is usually the one either side in time. */}
       {(newer || older) && (
         <section className="pane">
-          <div className="sh"><span>Either side of this one</span></div>
+          <h2 className="sh"><span>Either side of this one</span></h2>
           <ul className="idx">
             {newer && (
               <li><Link href={newer.href}>
@@ -147,7 +147,7 @@ export default async function Page({ params }) {
 
       {others.length > 0 && (
         <section className="pane">
-          <div className="sh"><span>More</span><Link href="/insights">Everything →</Link></div>
+          <h2 className="sh"><span>More</span><Link href="/insights">Everything →</Link></h2>
           <ul className="feed">
             {others.map(p => (
               <li key={p.slug} className={p.kind === 'deep' ? 'deep' : undefined}>

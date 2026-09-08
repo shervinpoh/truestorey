@@ -83,7 +83,7 @@ export default function FloorplanUpload() {
 
           {result.layout?.length > 0 && (
             <>
-              <div className="sh" style={{ marginTop: 26 }}><span>The layout</span></div>
+              <h2 className="sh" style={{ marginTop: 26 }}><span>The layout</span></h2>
               {result.layout.map((l, i) => (
                 <div key={i} className="checkrow">
                   <div className="ch"><b>{l.observation}</b></div>
@@ -93,7 +93,7 @@ export default function FloorplanUpload() {
             </>
           )}
 
-          <div className="sh" style={{ marginTop: 26 }}><span>Walls to ask about — not walls you can remove</span></div>
+          <h2 className="sh" style={{ marginTop: 26 }}><span>Walls to ask about — not walls you can remove</span></h2>
           <div className="note">
             <b>A floor plan cannot tell you which walls are structural.</b> Nothing below is a
             determination. These are the questions to put to your interior designer and to a
@@ -112,7 +112,7 @@ export default function FloorplanUpload() {
 
           {result.renovationNotes?.length > 0 && (
             <>
-              <div className="sh" style={{ marginTop: 26 }}><span>Worth knowing</span></div>
+              <h2 className="sh" style={{ marginTop: 26 }}><span>Worth knowing</span></h2>
               <ul className="idx" style={{ listStyle: 'disc', paddingLeft: 20 }}>
                 {result.renovationNotes.map((n, i) => <li key={i} style={{ padding: '5px 0' }}>{n}</li>)}
               </ul>
@@ -121,7 +121,7 @@ export default function FloorplanUpload() {
 
           {result.cannotTell?.length > 0 && (
             <>
-              <div className="sh" style={{ marginTop: 26 }}><span>What this image does not show</span></div>
+              <h2 className="sh" style={{ marginTop: 26 }}><span>What this image does not show</span></h2>
               <ul className="idx" style={{ listStyle: 'disc', paddingLeft: 20 }}>
                 {result.cannotTell.map((n, i) => <li key={i} style={{ padding: '5px 0' }}>{n}</li>)}
               </ul>
