@@ -294,15 +294,19 @@ test('every localStorage call is wrapped, so a private window still works', () =
 
 test('the homepage does not promise a refresh cadence the data does not keep', () => {
   // It read "last refreshed · daily" beside a date that was five days old,
-  // because the DAILY thing is the check, not the data: sync.mjs refreshes
-  // each dataset on the cadence its source publishes at, and transactions are
-  // weekly. On a site whose whole argument is that every figure shows its
-  // source and period, the homepage is the worst place to be loose.
+  // because the DAILY thing is the check, not the data: each dataset refreshes
+  // on the cadence its source publishes at. Transactions were weekly then and
+  // are daily now — both feeds carry current-month rows, so a weekly pull was
+  // hiding about 370 filed HDB resales between runs. The claim still has to be
+  // about the CHECK rather than the data, because most datasets are not daily
+  // and never will be: the price indices are quarterly. On a site whose whole
+  // argument is that every figure shows its source and period, the homepage is
+  // the worst place to be loose.
   const src = readFileSync(new URL('../app/page.jsx', import.meta.url), 'utf8');
   const line = /<dt>\{refreshed[^<]*<\/dt><dd>([^<]*)<\/dd>/.exec(src);
   assert.ok(line, 'the refreshed figure moved — check this test still describes it');
   assert.doesNotMatch(line[1], /^last refreshed · daily$/,
-    'this claims the data is a day old; sync.mjs refreshes transactions weekly');
+    'this claims every figure is a day old; the price indices are quarterly');
   assert.match(line[1], /checked daily|weekly/i, 'say which cadence is being claimed');
 });
 

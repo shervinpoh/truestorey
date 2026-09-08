@@ -19,7 +19,13 @@ import { readFileSync } from 'node:fs';
  * The map below is what each raw file feeds. If a build script starts reading
  * a new source, add it here and the test will say which job has to rebuild it.
  */
-const sync = readFileSync(new URL('../scripts/sync.mjs', import.meta.url), 'utf8');
+/* The job list moved to lib/datasets.js so /methodology can publish the real
+   refresh schedule instead of a hand-written copy of it. scripts/sync.mjs is
+   top-level executable code with no main(), so a page importing it would run a
+   sync. This test reads whichever file holds the jobs, and both are named so a
+   move breaks it loudly rather than silently finding nothing. */
+const sync = readFileSync(new URL('../lib/datasets.js', import.meta.url), 'utf8')
+  + readFileSync(new URL('../scripts/sync.mjs', import.meta.url), 'utf8');
 const scripts = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).scripts;
 
 /** raw file the sync replaces -> npm scripts that must run after it */

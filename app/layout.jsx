@@ -2,6 +2,7 @@ import './globals.css';
 import Track from '../components/Track.jsx';
 import NavHere from '../components/NavHere.jsx';
 import SiteFooter from '../components/SiteFooter.jsx';
+import { agent } from '../lib/agent.js';
 
 export const metadata = {
   // See the note in app/sitemap.js: a fallback that does not resolve is worse
@@ -16,13 +17,7 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  const a = {
-    name: process.env.NEXT_PUBLIC_AGENT_NAME,
-    cea: process.env.NEXT_PUBLIC_CEA_REG,
-    agency: process.env.NEXT_PUBLIC_AGENCY,
-    lic: process.env.NEXT_PUBLIC_AGENCY_LICENCE,
-    phone: process.env.NEXT_PUBLIC_AGENT_PHONE,
-  };
+  const a = agent();
   return (
     <html lang="en">
       <head>
