@@ -92,11 +92,24 @@ export default function RecordView({ rec, attribution = [], onType, afterSummary
           <span className="lab">Median, per square foot</span>
           <div className="big">{Number(rv.medianPsf).toLocaleString('en-SG')}<small> psf</small></div>
         </div>
+        {/* ── one sale is not a range ───────────────────────────────────────
+            985 records carry exactly one filed transaction and 3,056 carry
+            fewer than four. A single sale rendered as "$527 — $527 psf",
+            "0% Spread, low to high" and "median price" — three statistics
+            that need a distribution, printed over a distribution of one, with
+            a note underneath calling it "the real one".
+
+            Nothing is hidden: the figure is the same figure. It is described
+            as what it is, which is the same rule the rest of the site follows
+            when a check cannot run. */}
         <div className="figside">
-          <span className="lab">Observed range</span>
+          <span className="lab">{rv.n === 1 ? 'The one filed sale' : 'Observed range'}</span>
           <div className="r">
-            ${Number(rv.minPsf).toLocaleString('en-SG')} — ${Number(rv.maxPsf).toLocaleString('en-SG')} psf<br />
-            {fk(rv.medianPrice)} median price
+            {rv.n === 1
+              ? <>${Number(rv.medianPsf).toLocaleString('en-SG')} psf<br />
+                  {fk(rv.medianPrice)}, once</>
+              : <>${Number(rv.minPsf).toLocaleString('en-SG')} — ${Number(rv.maxPsf).toLocaleString('en-SG')} psf<br />
+                  {fk(rv.medianPrice)} median price</>}
           </div>
         </div>
       </div>
@@ -135,10 +148,16 @@ export default function RecordView({ rec, attribution = [], onType, afterSummary
       )}
 
       <div className="kpi3">
-        <div><div className="v">{fk(rv.medianPrice)}</div><span className="lab">Median price</span></div>
-        <div><div className="v">{rv.n}</div><span className="lab">Filed transactions</span></div>
-        <div><div className="v">{Math.round(((rv.maxPsf - rv.minPsf) / rv.medianPsf) * 100)}%</div>
-          <span className="lab">Spread, low to high</span></div>
+        <div><div className="v">{fk(rv.medianPrice)}</div>
+          <span className="lab">{rv.n === 1 ? 'Filed price' : 'Median price'}</span></div>
+        <div><div className="v">{rv.n}</div>
+          <span className="lab">Filed transaction{rv.n === 1 ? '' : 's'}</span></div>
+        {/* A spread of 0% is not a narrow market, it is one sale. The cell
+            says so rather than printing a number that reads as a finding. */}
+        <div><div className="v">{rv.n === 1
+          ? <span className="kpinone">&mdash;</span>
+          : `${Math.round(((rv.maxPsf - rv.minPsf) / rv.medianPsf) * 100)}%`}</div>
+          <span className="lab">{rv.n === 1 ? 'No range from one sale' : 'Spread, low to high'}</span></div>
       </div>
 
       {rec.source && (
@@ -221,10 +240,19 @@ export default function RecordView({ rec, attribution = [], onType, afterSummary
         )}
       </>)}
 
-      <div className="note"><b>Why a range, not one number.</b> Valuation tools routinely disagree by
-        S$15,000–S$80,000 on the same home, because none can see your floor, facing, renovation or lease.
-        The spread above is the real one — the cheapest and dearest psf actually filed here over the period.
-        Where your unit sits inside it depends on the things the data cannot see.</div>
+      <div className="note">
+        {rv.n === 1 ? (<>
+          <b>One filed sale is not a range.</b> Everything above rests on a single transaction, so
+          there is no cheapest and dearest to report and no spread to read. It is what was filed
+          here, once, over the period shown — not a level this address trades at. The nearby sales
+          below are the wider evidence.
+        </>) : (<>
+          <b>Why a range, not one number.</b> Valuation tools routinely disagree by
+          S$15,000–S$80,000 on the same home, because none can see your floor, facing, renovation or
+          lease. The spread above is the real one — the cheapest and dearest psf actually filed here
+          over the period. Where your unit sits inside it depends on the things the data cannot see.
+        </>)}
+      </div>
 
       {attribution.length > 0 && (
         <div style={{marginTop:14,paddingTop:10,borderTop:'1px solid var(--line2)'}}>

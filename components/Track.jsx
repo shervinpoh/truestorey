@@ -63,7 +63,79 @@ export default function Track() {
     track(EVENTS.VIEW, { p: path, d: device(), r });
   }, [path]);
 
+  useVitals(path);
   return null;
+}
+
+/**
+ * Core Web Vitals, from real visits.
+ *
+ * ── WHY THIS EXISTS ────────────────────────────────────────────────────────
+ * LCP, CLS and INP have thresholds defined at the 75th percentile of REAL
+ * page loads — 2.5s, 0.1 and 200ms. That is a number no laptop can produce.
+ * Lighthouse gives a lab simulation on hardware nobody has; a browser pane
+ * on a developer's machine gives nothing at all when the tab is hidden,
+ * because paint timings do not fire in a background tab. This site has been
+ * shipping performance work — the map's aspect ratio, the three-dependency
+ * rule, hand-written SVG instead of a chart library — against no evidence
+ * about anybody's actual experience.
+ *
+ * ── WHY NO LIBRARY ─────────────────────────────────────────────────────────
+ * web-vitals is the usual answer and it is a fourth npm dependency. Everything
+ * needed is native: three PerformanceObservers, all with buffered:true so
+ * entries that fired before this component mounted are still counted.
+ *
+ * ── WHEN IT SENDS ──────────────────────────────────────────────────────────
+ * Once, when the page is hidden or being unloaded, because none of the three
+ * is final before then: LCP can be superseded by a later paint, CLS
+ * accumulates across the whole visit, and INP is the worst interaction so far.
+ * Sending on load would report a made-up early value for all three.
+ *
+ * visibilitychange rather than unload, which iOS Safari does not fire
+ * reliably. The latch stops a tab that is hidden and re-shown from sending
+ * twice.
+ */
+function useVitals(path) {
+  useEffect(() => {
+    if (typeof PerformanceObserver === 'undefined') return;
+    const v = { lcp: null, cls: 0, inp: 0 };
+    const obs = [];
+    const watch = (type, fn) => {
+      try {
+        const o = new PerformanceObserver(l => l.getEntries().forEach(fn));
+        o.observe({ type, buffered: true });
+        obs.push(o);
+      } catch { /* a browser without this entry type reports nothing, not zero */ }
+    };
+
+    watch('largest-contentful-paint', e => { v.lcp = Math.round(e.startTime); });
+    /* hadRecentInput excludes shifts a reader caused themselves by tapping —
+       expanding a disclosure is not layout instability. */
+    watch('layout-shift', e => { if (!e.hadRecentInput) v.cls += e.value; });
+    watch('event', e => { if (e.duration > v.inp) v.inp = Math.round(e.duration); });
+
+    let sent = false;
+    const send = () => {
+      if (sent || document.visibilityState !== 'hidden') return;
+      sent = true;
+      obs.forEach(o => { try { o.disconnect(); } catch {} });
+      /* Null when nothing was measured — a page nobody interacted with has no
+         INP, and reporting 0 would drag a percentile toward a number that
+         never happened. */
+      track(EVENTS.VITALS, {
+        p: path, d: device(),
+        lcp: v.lcp ?? undefined,
+        cls: v.cls > 0 ? Number(v.cls.toFixed(4)) : 0,
+        inp: v.inp > 0 ? v.inp : undefined,
+      });
+    };
+
+    document.addEventListener('visibilitychange', send);
+    return () => {
+      document.removeEventListener('visibilitychange', send);
+      obs.forEach(o => { try { o.disconnect(); } catch {} });
+    };
+  }, [path]);
 }
 
 /**

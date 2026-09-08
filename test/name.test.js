@@ -108,3 +108,49 @@ test('the homepage has no step up', () => {
     assert.equal(parentOf(''), null);
   });
 });
+
+/**
+ * An address pasted from somewhere else.
+ *
+ * People do not type an address into a property site; they paste one, from
+ * Google Maps, a listing portal or a message. Every one of those carries a
+ * tail the filed label does not have — "570 ANG MO KIO AVE 3, Singapore
+ * 560123" — and the search is a substring match over that label, so every
+ * pasted address matched NOTHING. The address was right, the block exists,
+ * and the box said "No matches."
+ *
+ * Only the tail is trimmed. "Singapore" is a real word inside project names —
+ * The Residences at W Singapore Sentosa Cove — so stripping it everywhere
+ * would break the searches it appears in legitimately.
+ */
+import { search as searchRecords } from '../lib/data/query.js';
+
+test('an address pasted with a country and postal code still finds the block', () => {
+  const plain = searchRecords('570 ANG MO KIO AVE 3', { limit: 1 })[0];
+  assert.ok(plain, 'the control query stopped working');
+
+  for (const pasted of [
+    '570 ANG MO KIO AVE 3, Singapore 560123',
+    '570 Ang Mo Kio Ave 3, Singapore',
+    '570 ANG MO KIO AVE 3 S560123',
+    '570 ANG MO KIO AVE 3, Republic of Singapore',
+  ]) {
+    const hit = searchRecords(pasted, { limit: 1 })[0];
+    assert.ok(hit, `"${pasted}" found nothing`);
+    assert.equal(hit.href, plain.href, `"${pasted}" resolved to the wrong record`);
+  }
+});
+
+test('a project whose own name contains Singapore is still findable', () => {
+  const hits = searchRecords('Singapore', { limit: 5 });
+  assert.ok(hits.length, 'trimming ate a legitimate one-word query');
+  assert.ok(hits.some(h => /SINGAPORE/i.test(h.label)),
+    'the tail-trim is stripping Singapore from the middle of names, not just the end');
+});
+
+test('trimming never turns a query into nothing', () => {
+  // A bare postal code cannot be answered — no record carries one — but it
+  // must fail as a search, not become an empty string that matches anything.
+  assert.deepEqual(searchRecords('560123', { limit: 3 }), []);
+  assert.deepEqual(searchRecords('zzzznotathing', { limit: 3 }), []);
+});

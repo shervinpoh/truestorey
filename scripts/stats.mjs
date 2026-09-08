@@ -198,6 +198,56 @@ async function main() {
     }
   }
 
+  /* ---- how fast it was for the people who were actually here ---- */
+  const vit = events.filter(e => e.e === EVENTS.VITALS);
+  if (vit.length) {
+    console.log('\n\nCORE WEB VITALS, AT THE 75TH PERCENTILE\n');
+    /* p75 because that is where the thresholds are DEFINED. A median hides the
+       quarter of visits having the worst time, and those are the ones on a
+       phone on mobile data — which is most of this audience. */
+    const p75 = xs => {
+      const a = xs.filter(Number.isFinite).sort((x, y) => x - y);
+      return a.length ? a[Math.min(a.length - 1, Math.ceil(a.length * 0.75) - 1)] : null;
+    };
+    const rows = [
+      ['LCP', 'lcp', 2500, 4000, v => `${(v / 1000).toFixed(2)}s`],
+      ['INP', 'inp', 200, 500, v => `${Math.round(v)}ms`],
+      ['CLS', 'cls', 0.1, 0.25, v => v.toFixed(3)],
+    ];
+    const band = (v, good, poor) => (v <= good ? 'good' : v <= poor ? 'needs work' : 'POOR');
+
+    for (const [label, key, good, poor, fmt] of rows) {
+      const all = vit.map(e => e[key]).filter(v => v != null);
+      if (!all.length) { console.log(`  ${rpad(label, 5)} no readings yet`); continue; }
+      const v = p75(all);
+      console.log(`  ${rpad(label, 5)} ${rpad(fmt(v), 9)} ${rpad(band(v, good, poor), 11)} ` +
+                  `target ${fmt(good)}   (${num(all.length)} readings)`);
+    }
+
+    /* Split by device, because a desktop median can hide a phone problem
+       entirely and the phone is where this audience is. */
+    for (const [code, name] of [['m', 'phone'], ['t', 'tablet'], ['d', 'desktop']]) {
+      const sub = vit.filter(e => e.d === code);
+      if (sub.length < 5) continue;
+      const l = p75(sub.map(e => e.lcp).filter(v => v != null));
+      const c = p75(sub.map(e => e.cls).filter(v => v != null));
+      console.log(`    ${rpad(name, 8)} LCP ${rpad(l == null ? '—' : (l / 1000).toFixed(2) + 's', 8)}` +
+                  `CLS ${c == null ? '—' : c.toFixed(3)}   (${num(sub.length)} visits)`);
+    }
+
+    const worst = [...tally(vit.filter(e => e.lcp > 2500), 'p')].slice(0, 5);
+    if (worst.length) {
+      console.log('\n  Slowest pages, by how often they came back over 2.5s:');
+      for (const [path, n] of worst) console.log(`    ${rpad(num(n), 4)}  ${path}`);
+    }
+    console.log('\n  Measured from real visits, not a lab run. A reading arrives when a tab');
+    console.log('  is hidden or closed, because none of the three is final before then.');
+  } else {
+    console.log('\n\nCORE WEB VITALS\n');
+    console.log('  No readings yet. They arrive as people close tabs, so give it a day of');
+    console.log('  real traffic. This is not the same as good performance.');
+  }
+
   console.log('\n');
 }
 
