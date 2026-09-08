@@ -11,7 +11,7 @@ export const metadata = {
     default: 'Truestorey — every block, in filed numbers',
     template: '%s',
   },
-  description: 'Every filed HDB resale and private transaction in Singapore, by block and by project. Observed price ranges, what a sale would net, and what is within walking reach. Free, no sign-up.',
+  description: 'Every filed HDB resale and private transaction in Singapore, by block and by project. Observed price ranges, what a sale would net, and what is nearby at straight-line distance. Free, no sign-up.',
   openGraph: { siteName: 'Truestorey', locale: 'en_SG', type: 'website' },
 };
 

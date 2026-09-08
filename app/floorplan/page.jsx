@@ -35,7 +35,7 @@ export default function Page() {
           account, no upload history and no sign-up on this site.
         </div>
         <ul className="idx" style={{ marginTop: 16 }}>
-          <li><Link href="/blindspot"><span className="n">The four checks on this property</span><span className="s">Price, supply, land nearby, what could be built</span></Link></li>
+          <li><Link href="/blindspot"><span className="n">The six checks on this property</span><span className="s">Price, lease, liquidity, supply, land nearby, what could be built</span></Link></li>
           <li><Link href="/plan"><span className="n">What the purchase would cost</span><span className="s">Loan, downpayment, both stamp duties</span></Link></li>
         </ul>
       </section>

@@ -228,7 +228,7 @@ function Result({ report, boxRef }) {
           {r.skipped.length > 0 && (
             <p className="hint" style={{ margin: '12px 0 0' }}>
               Out of {r.points + (r.max - r.points)} possible points across{' '}
-              <b>{r.checks.length} of 4 checks</b>. {r.skipped.length} could not run — listed below,
+              <b>{r.checks.length} of {r.checks.length + r.skipped.length} checks</b>. {r.skipped.length} could not run — listed below,
               and not counted either way.
             </p>
           )}

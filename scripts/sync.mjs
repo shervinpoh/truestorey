@@ -57,7 +57,17 @@ const JOBS = [
    * comparables, the size trend would stop at last month's year, and a budget
    * would be measured against prices that had moved. Silently, and passing
    * every test, because each file on its own is still valid. */
-  { key: 'transactions', file: 'index.json', every: 7,
+  /* WAS 7. Both feeds carry current-month rows — on 8 September the file held
+     14 URA contracts and 422 HDB resales already filed for September, about 53
+     HDB filings a day. A weekly pull therefore hid roughly 370 real
+     transactions between runs, on a site whose whole position is that every
+     figure carries its period. Daily is not theatre here: it moves the data.
+
+     It is the expensive job — the chain below rebuilds index, shards, storey,
+     map, comps, trend and budget — but the workflow commits only when data/
+     actually changed, so a day the sources did not move costs CI minutes and
+     nothing else. */
+  { key: 'transactions', file: 'index.json', every: 1,
     cmd: 'npm run ingest:hdb && npm run ingest:ura && npm run index'
        + ' && npm run build:storey && npm run build:map'
        + ' && npm run build:comps && npm run build:trend && npm run build:budget',
@@ -87,9 +97,17 @@ const JOBS = [
   // URA awards a handful of sites a month and the sheet is republished as they
   // close. Fortnightly is faster than the source moves and slow enough not to
   // hammer a static file host.
-  { key: 'gls-awards', file: 'gls-awards.json', every: 14, cmd: 'npm run ingest:gls-awards',
+  /* WAS 14. An award is an event, not a series: URA publishes a tender result
+     within days of the close, and a fortnight's delay means the site is silent
+     on the one thing an agent is asked about that week. Three days is short
+     enough to catch a result while it is still being discussed and long enough
+     not to re-download a spreadsheet for nothing. */
+  { key: 'gls-awards', file: 'gls-awards.json', every: 3, cmd: 'npm run ingest:gls-awards',
     why: 'URA republishes the past-sites sheet as each tender is awarded' },
-  { key: 'planning', file: 'planning.json', every: 30, cmd: 'npm run ingest:planning',
+  /* WAS 30. Also event-driven — a planning approval matters most in the weeks
+     after it is granted. Not daily: this one geocodes through OneMap and is
+     rate-limited, which is why the workflow allows 45 minutes. */
+  { key: 'planning', file: 'planning.json', every: 7, cmd: 'npm run ingest:planning',
     why: 'URA decides applications continuously and the current year grows all year' },
   { key: 'zoning', file: 'zoning.json', every: 365, cmd: 'npm run ingest:zoning',
     why: 'the Master Plan land use layer changes on the statutory review, not on a feed' },

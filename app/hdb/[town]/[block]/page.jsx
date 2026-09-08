@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { recordAt, getIndex, allUrls, nearby, nearbyManifest, storeyFor, town as townOf, boundaries, geoRecords } from '../../../../lib/data/query.js';
+import { recordAt, getIndex, allUrls, nearby, nearbyManifest, storeyFor, town as townOf, boundaries, geoRecords, nearbySalesFor } from '../../../../lib/data/query.js';
 import { simplify } from '../../../../lib/geojson.js';
 import { ogForRecord } from '../../../../lib/og.js';
 import { titleCase } from '../../../../lib/name.js';
@@ -35,7 +35,7 @@ export default async function Page({ params }) {
   const rec = recordAt('hdb', town, block);
   if (!rec) notFound();
   return (
-    <RecordPage canWatch={mailConfigured()} locator={locatorFor(rec)} rec={rec} storey={storeyFor(rec)} near={nearby(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []}
+    <RecordPage canWatch={mailConfigured()} locator={locatorFor(rec)} rec={rec} storey={storeyFor(rec)} near={nearby(rec)} sales={nearbySalesFor(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []}
       posts={[...insightsForBlock(rec.href), ...insightsForTown(town)]
         .filter((p, k, a) => a.findIndex(x => x.slug === p.slug) === k).slice(0, 4)}
       crumbs={[{ href: '/', label: 'Home' }, { href: '/hdb', label: 'HDB' },

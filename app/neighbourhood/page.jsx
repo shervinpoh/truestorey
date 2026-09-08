@@ -37,7 +37,7 @@ export default function Page() {
           has been <em>announced</em>; the tools below are for what has been <em>transacted</em>.
         </div>
         <ul className="idx" style={{ marginTop: 16 }}>
-          <li><Link href="/blindspot"><span className="n">Four checks on a specific property</span><span className="s">A published rubric over filed data</span></Link></li>
+          <li><Link href="/blindspot"><span className="n">Six checks on a specific property</span><span className="s">A published rubric over filed data</span></Link></li>
           <li><Link href="/archive"><span className="n">Policy and data archive</span><span className="s">Primary sources, indexed and linked</span></Link></li>
         </ul>
       </section>

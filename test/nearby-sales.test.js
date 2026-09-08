@@ -17,7 +17,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { nearbySales, BANDS, ROW_CAP, PER_PROJECT_CAP } from '../lib/comps/nearbySales.js';
+import { nearbySales, BANDS, ROW_CAP, ROWS_PER_BAND, PER_PROJECT_CAP } from '../lib/comps/nearbySales.js';
 
 const comps = JSON.parse(readFileSync(path.join(process.cwd(), 'data', 'comps.json'), 'utf8'));
 const anyCondo = Object.keys(comps.records).find(h => h.startsWith('/condo/')
@@ -60,6 +60,30 @@ test('only the same kind is counted', () => {
   for (const r of d.rows) {
     assert.equal(comps.records[r.href].kind, self.kind);
     assert.notEqual(r.href, anyCondo, 'the record must not appear among its own neighbours');
+  }
+});
+
+/**
+ * A global cap starves the tight radii.
+ *
+ * The first shape shipped the thirty most recent inside the WIDEST band and
+ * let the component filter them down. A landed record with 15 projects and 44
+ * filed sales within 300m then rendered a single row, because the thirty
+ * newest across a kilometre all belonged to busier projects further out. The
+ * count said 44 and the table showed one — which reads as a broken table, not
+ * as the caveat it technically was.
+ */
+test('every radius carries rows of its own, not the leftovers of a wider one', () => {
+  for (const pre of ['/condo/', '/hdb/', '/landed/']) {
+    const href = Object.keys(comps.records).filter(h => h.startsWith(pre))[3];
+    const d = nearbySales({ href }, comps);
+    if (!d) continue;
+    for (const b of d.counts) {
+      const shown = d.rows.filter(r => r.m <= b.radius).length;
+      if (b.indexed === 0) { assert.equal(shown, 0); continue; }
+      assert.ok(shown >= Math.min(ROWS_PER_BAND, b.indexed),
+        `${pre} at ${b.radius}m: ${b.indexed} filed sales but only ${shown} rows shipped`);
+    }
   }
 });
 

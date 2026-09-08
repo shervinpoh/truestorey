@@ -99,7 +99,7 @@ export default function Page() {
             <span className="s">Every Government Land Sales site awarded since 1993 — the winning tender, the rate, how many bid, and every losing bid where HDB published it</span></Link></li>
           <li><Link href="/compare"><span className="n">Compare</span>
             <span className="s">Two or three blocks side by side, in a link you can send</span></Link></li>
-          <li><Link href="/blindspot"><span className="n">Blindspot — four checks</span>
+          <li><Link href="/blindspot"><span className="n">Blindspot — six checks</span>
             <span className="s">Where the asking price sits, who else will be selling, what land is coming, what could be built next door. A published rubric, not an opinion</span></Link></li>
           <li><Link href="/floorplan"><span className="n">Read a floor plan</span>
             <span className="s">Layout efficiency, what the plan shows about light, and the wall questions for your ID and a QP. Nothing stored</span></Link></li>

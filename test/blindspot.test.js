@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
+import path from 'node:path';
 import { score, scoreCheck, CHECKS, BANDS, totalPossible } from '../lib/blindspot/rubric.js';
 import { pricePercentile, nearbyComps, leaseFinding, leaseYearsLeft, tenureKey, supplyInTown, mopCoverage } from '../lib/blindspot/measure.js';
 import { relativity, annualDecay } from '../lib/calc/lease.js';
@@ -343,15 +344,59 @@ test('nothing on the site claims a check count the rubric does not have', () => 
   // "Four checks" survived into user-facing copy across five files after the
   // fifth was added, and again after the sixth. A count in prose is a fact
   // about CHECKS, and it belongs in a test.
+  //
+  // THIS TEST DID NOT WORK, AND PASSED, WHICH IS WORSE THAN FAILING.
+  // The pattern was built with `\\\\b` inside a template literal. That is four
+  // backslashes in source, which is two characters in the string, which the
+  // RegExp constructor reads as an escaped literal backslash followed by "b"
+  // — not a word boundary. `/\\b(four) checks\\b/` cannot match "four checks",
+  // so the guard never fired once. A single `\\b` in a template literal is what
+  // reaches the constructor as `\b`.
+  //
+  // While it was silent the count went to six and five user-facing files still
+  // said four, including a report reading "6 of 4 checks". The file list is
+  // now derived rather than typed, because the previous one omitted three of
+  // the pages that were wrong.
   const WORD = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
   const n = Object.keys(CHECKS).length;
-  const stale = new RegExp(`\\\\b(${WORD.filter((_, i) => i !== n).join('|')}) checks\\\\b`, 'i');
-  for (const f of ['app/blindspot/page.jsx', 'lib/nav.js', 'lib/blindspot/analyse.js',
-                   'lib/blindspot/rubric.js', 'components/BlindspotReport.jsx']) {
-    const src = readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
-    const hit = stale.exec(src);
-    assert.equal(hit, null, `${f} says "${hit?.[0]}" but the rubric has ${n}`);
+  const stale = new RegExp(`\\b(${WORD.filter((_, i) => i !== n).join('|')}) checks\\b`, 'i');
+  assert.ok(stale.test('Blindspot — four checks'),
+    'the pattern cannot match the very string it exists to catch — check the escaping');
+
+  /* Every .jsx/.js under app/, components/ and lib/, so adding a page that
+     names the count cannot escape by not being on a list. */
+  const roots = ['app', 'components', 'lib'];
+  const walk = dir => readdirSync(dir, { withFileTypes: true }).flatMap(e => {
+    const full = path.join(dir, e.name);
+    if (e.isDirectory()) return walk(full);
+    return /\.(jsx?|mjs)$/.test(e.name) ? [full] : [];
+  });
+  const files = roots.flatMap(r => walk(path.join(process.cwd(), r)));
+  assert.ok(files.length > 50, 'the file sweep found suspiciously little');
+
+  /* Comments are stripped first. The rule is about what a READER is told, and
+     prose about the rubric legitimately counts other things — "calling it
+     6.7/10 would be inventing two checks that never happened" is correct and
+     was a false positive. Block comments and whole-line // are removed; a
+     "//" inside a string, such as a URL, is left alone by only stripping
+     lines whose first non-space characters are the marker. */
+  const stripComments = src => src
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .split('\n').filter(l => !/^\s*(\/\/|\*)/.test(l)).join('\n');
+
+  const wrong = [];
+  for (const f of files) {
+    const hit = stale.exec(stripComments(readFileSync(f, 'utf8')));
+    if (hit) wrong.push(`${path.relative(process.cwd(), f)}: "${hit[0]}"`);
   }
+  assert.deepEqual(wrong, [], `the rubric has ${n} checks; these say otherwise:\n  ${wrong.join('\n  ')}`);
+
+  /* A digit against a hardcoded total is the same bug wearing a number:
+     "{r.checks.length} of 4 checks" rendered "6 of 4". */
+  const report = readFileSync(new URL('../components/BlindspotReport.jsx', import.meta.url), 'utf8');
+  const hardcoded = /of \{?\s*\d+\s*\}? checks/.exec(report);
+  assert.equal(hardcoded, null,
+    `BlindspotReport hardcodes a denominator: "${hardcoded?.[0]}" — it must come from CHECKS`);
 });
 
 /* ── the floor a comparable was on ─────────────────────────────────────────── */
