@@ -15,6 +15,7 @@ node_modules/
 
 # Raw ingest downloads, kept only so a parse failure can be diagnosed
 data/.boundaries-raw.geojson
+data/.ura-raw.json
 data/.onemap-pace.json
 
 # Analytics sink. Real visitor session ids and paths — never versioned.

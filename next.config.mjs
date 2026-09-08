@@ -46,6 +46,10 @@ const nextConfig = {
       './data/records.json',      // superseded by the per-shard files in records/
       // Diagnostics and scratch. Kept so a parse failure can be read back.
       './data/.boundaries-raw.geojson',
+      // The four URA batches as they arrived. Added here in the same commit
+      // that created it, because the tracer reads the disk and not .gitignore
+      // — the note above this block records that being forgotten twice.
+      './data/.ura-raw.json',
       // 135MB. Gitignoring it does nothing here — the tracer reads the disk,
       // not the index — and leaving it out of this list took the blindspot
       // function from 75.6MB to 222.5MB against a 250MB ceiling.
