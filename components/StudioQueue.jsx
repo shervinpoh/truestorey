@@ -10,8 +10,9 @@ import { useState } from 'react';
  * the title. A queue that can be cleared without reading anything is a queue
  * that will be.
  */
-export default function StudioQueue({ drafts }) {
+export default function StudioQueue({ drafts, live = [] }) {
   const [items, setItems] = useState(drafts);
+  const [out, setOut] = useState(live);
   const [open, setOpen] = useState(null);
   const [busy, setBusy] = useState(null);
   const [err, setErr] = useState('');
@@ -35,22 +36,22 @@ export default function StudioQueue({ drafts }) {
       }
       if (!res.ok) throw new Error(j.error || 'That did not work.');
       setItems(list => list.filter(x => x.id !== id));
+      setOut(list => list.filter(x => x.id !== id));
     } catch (e) { setErr(e.message); }
     finally { setBusy(null); }
-  }
-
-  if (!items.length) {
-    return (
-      <div className="note">
-        <b>Nothing waiting.</b> Drafts filed by the pipeline appear here. Nothing reaches the site
-        until you publish it from this page.
-      </div>
-    );
   }
 
   return (
     <>
       {err && <div className="warn" style={{ marginBottom: 16 }}><p style={{ margin: 0 }}>{err}</p></div>}
+
+      {!items.length && (
+        <div className="note">
+          <b>Nothing waiting.</b> Drafts filed by the pipeline appear here. Nothing reaches the site
+          until you publish it from this page.
+        </div>
+      )}
+
       {items.map(a => (
         <article key={a.id} className="draft">
           <div className="dhead">
@@ -118,6 +119,48 @@ export default function StudioQueue({ drafts }) {
           </div>
         </article>
       ))}
+
+      {out.length > 0 && (<>
+        <h2 className="sh" style={{ marginTop: 30 }}><span>Already on the site</span>
+          <span className="mono">{out.length}</span></h2>
+        <p className="hint" style={{ marginBottom: 12 }}>
+          Each one run through the same rules that gate publishing. Unpublishing returns it to a
+          draft above &mdash; the text stays, it leaves the site, and the gate re-checks it if you
+          send it again. Nothing here is deleted.
+        </p>
+        {out.map(a => (
+          <article key={a.id} className={'draft' + (a.blockers?.length ? ' liveflag' : '')}>
+            <div className="dhead">
+              <div>
+                <span className="filtn">
+                  published {String(a.published_at || a.created_at).slice(0, 10)} · {a.words} words
+                </span>
+                <h2><a href={`/insights/${a.slug}`} target="_blank" rel="noopener noreferrer">{a.title}</a></h2>
+              </div>
+            </div>
+            {a.blockers?.length ? (
+              <div className="warn" style={{ margin: '10px 0 0' }}>
+                <p style={{ margin: '0 0 6px' }}>
+                  <b>This would be refused if it were submitted today.</b>
+                </p>
+                <ul className="bul">{a.blockers.map(b => <li key={b.id}>{b.why}</li>)}</ul>
+              </div>
+            ) : (
+              <p className="hint" style={{ marginTop: 8 }}>
+                Sources recorded, and nothing in it trips the published rules.
+              </p>
+            )}
+            <div className="dactions">
+              <button className="mapopt" disabled={busy === a.id} onClick={() => act(a.id, 'draft')}>
+                {busy === a.id ? 'Taking it down…' : 'Unpublish'}
+              </button>
+              <span className="hint" style={{ marginLeft: 'auto' }}>
+                It goes back to the queue above, not to the bin.
+              </span>
+            </div>
+          </article>
+        ))}
+      </>)}
     </>
   );
 }

@@ -1937,3 +1937,7 @@ sup.cite a:hover{text-decoration:underline}
   .nstable{font-size:12.5px}
   .nstable td,.nstable th{padding-right:7px}
 }
+
+/* A published piece the rules would now refuse. --warn, the "could not be
+   measured" colour, because it is a flag to look at rather than an error. */
+.draft.liveflag{border-left:2px solid var(--warn);padding-left:14px}

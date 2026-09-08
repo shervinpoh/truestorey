@@ -108,6 +108,9 @@ async function main() {
     'towns: []',
     'blocks: []',
     'tags: []',
+    '# Only for something published elsewhere. Figures written with a shortcode',
+    '# are credited automatically to the dataset they came from.',
+    'sources: []',
     '---',
     '',
     ...(f.length ? [

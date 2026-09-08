@@ -1,4 +1,5 @@
-import { draftArticles, configured } from '../../lib/supabase/rest.js';
+import { draftArticles, publishedArticles, configured } from '../../lib/supabase/rest.js';
+import { publishBlockers } from '../../lib/compliance.js';
 import { textOf } from '../../lib/sanitize.js';
 import Masthead from '../../components/Masthead.jsx';
 import StudioQueue from '../../components/StudioQueue.jsx';
@@ -22,12 +23,30 @@ export default async function Page() {
   const rows = await draftArticles();
   const drafts = rows.map(r => ({ ...r, words: textOf(r.content_html).split(/\s+/).filter(Boolean).length }));
 
+  /* ── what is already out ───────────────────────────────────────────────────
+     The queue listed drafts only, so the one thing this page could not do was
+     take something DOWN — and the publish gate arrived after fourteen articles
+     had already gone out, nine of them showing no sources to a reader. The
+     advice was "unpublish those", with no button to do it and the endpoint
+     already accepting it.
+
+     Each live piece is run through the same rules the gate applies, so the
+     list says WHY rather than leaving it to be rediscovered. Unpublishing
+     returns it to draft rather than archiving: the text stays, it leaves the
+     site, and it lands back in the queue above where the gate applies if it is
+     fixed and sent again. */
+  const live = (await publishedArticles({ limit: 100 })).map(r => ({
+    ...r,
+    words: textOf(r.content_html).split(/\s+/).filter(Boolean).length,
+    blockers: publishBlockers(r),
+  }));
+
   return (
     <main className="shell">
       <Masthead crumbs={[{ href: '/', label: 'Home' }]} title="Studio"
-        sub={`${drafts.length} draft${drafts.length === 1 ? '' : 's'} waiting. Nothing here is on the site.`} />
+        sub={`${drafts.length} draft${drafts.length === 1 ? '' : 's'} waiting, ${live.length} published.`} />
       <section className="pane">
-        <StudioQueue drafts={drafts} />
+        <StudioQueue drafts={drafts} live={live} />
       </section>
       <section className="pane">
         <div className="note">

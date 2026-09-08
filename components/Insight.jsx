@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { render } from '../lib/md.js';
 import { getIndex, hdbIndex, sora, mop, recordByHref, town as getTown } from '../lib/data/query.js';
+import { provenanceOf } from '../lib/provenance.js';
 
 const f  = n => 'S$' + Math.round(n).toLocaleString('en-SG');
 const num = n => Number(n).toLocaleString('en-SG');
@@ -32,30 +33,72 @@ export default function Insight({ post }) {
             {' '}on <a href={post.credit.unsplash} rel="noopener noreferrer" target="_blank">Unsplash</a>
           </p>
         )}
-        {post.sources?.length > 0 && (
-          <div className="pane" style={{ marginTop: 8 }}>
-            <h2 className="sh"><span>What this was written from</span></h2>
-            <ul className="idx">
-              {post.sources.map(u => (
-                <li key={u}>
-                  <a href={u} rel="noopener noreferrer nofollow" target="_blank">
-                    <span className="n">{hostOf(u)}</span>
-                    <span className="s mono">{u.length > 80 ? u.slice(0, 80) + '…' : u}</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-            <p className="hint">
-              Primary sources, linked rather than reproduced. Nothing on this site republishes
-              somebody else&apos;s reporting.
-            </p>
-          </div>
-        )}
+        <Provenance post={post} />
       </>
     );
   }
   const html = render(post.body, resolve);
-  return <div className="post" dangerouslySetInnerHTML={{ __html: html }} />;
+  return (
+    <>
+      <div className="post" dangerouslySetInnerHTML={{ __html: html }} />
+      <Provenance post={post} />
+    </>
+  );
+}
+
+/**
+ * What this was written from — for BOTH kinds of post.
+ *
+ * It rendered only for a pipeline article, because only a pipeline article had
+ * `source_urls`. A note Shervin writes carried nothing, so the audit that
+ * flags an unsourced article would have flagged every one of his, and been
+ * right to: the page showed no provenance.
+ *
+ * A note is not less sourced. It is sourced differently and better — a
+ * shortcode reads this site's own filed data at build time, so `{{index}}` is
+ * the current index with its quarter and its agency rather than a number
+ * somebody typed. Each embed already prints its own source line; what was
+ * missing was saying so at the level of the piece.
+ */
+function Provenance({ post }) {
+  const { urls, datasets, any } = provenanceOf(post);
+  if (!any) return null;
+  return (
+    <div className="pane" style={{ marginTop: 8 }}>
+      <h2 className="sh"><span>What this was written from</span></h2>
+
+      {datasets.length > 0 && (
+        <ul className="idx">
+          {datasets.map(d => (
+            <li key={d.source}>
+              <span className="n">{d.label}</span>
+              <span className="s mono">{d.source}{d.period ? ` · ${d.period}` : ''}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {urls.length > 0 && (
+        <ul className="idx">
+          {urls.map(u => (
+            <li key={u}>
+              <a href={u} rel="noopener noreferrer nofollow" target="_blank">
+                <span className="n">{hostOf(u)}</span>
+                <span className="s mono">{u.length > 80 ? u.slice(0, 80) + '…' : u}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <p className="hint">
+        {datasets.length > 0 && <>Figures here are read from the datasets above at build time, not
+          typed in &mdash; each one carries its own source and period where it appears. </>}
+        {urls.length > 0 && <>Primary sources, linked rather than reproduced. Nothing on this site
+          republishes somebody else&rsquo;s reporting.</>}
+      </p>
+    </div>
+  );
 }
 
 function hostOf(url) {
