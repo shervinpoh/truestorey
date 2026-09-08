@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { timingSafeEqual } from 'node:crypto';
 import { sanitizeHtml, textOf } from '../../../../lib/sanitize.js';
-import { insertArticle, slugTaken, configured } from '../../../../lib/supabase/rest.js';
+import { insertArticle, slugTaken, recentTitles, configured } from '../../../../lib/supabase/rest.js';
+import { duplicateOf } from '../../../../lib/compliance.js';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -87,6 +88,27 @@ export async function POST(req) {
   }
 
   const category = CATEGORIES.has(body.category) ? body.category : 'note';
+
+  /* ── the same story, filed again ──────────────────────────────────────────
+     One GLS tender arrived three times — "Marina Gardens Lane, Orchard
+     Boulevard GLS launch 2026", "…GLS tenders" and "URA … GLS 2H2026". Three
+     different slugs, so the collision check below saw nothing, and the feed
+     advertised its own automation more loudly than it reported the news.
+
+     Refused at intake rather than at publish, so the queue stays readable: a
+     person should not have to notice that three of the five drafts in front
+     of them are the same tender. 409 with the slug it duplicates, so the
+     pipeline can log which story it already had. */
+  const priorTitle = duplicateOf(title, await recentTitles());
+  if (priorTitle) {
+    return NextResponse.json({
+      error: 'That story has already been filed.',
+      duplicateOf: { slug: priorTitle.slug, title: priorTitle.title, status: priorTitle.status },
+      similarity: Number(priorTitle.score.toFixed(2)),
+      note: 'Titles sharing most of their significant words are the same story. '
+          + 'Archive the earlier one first if this is meant to replace it.',
+    }, { status: 409 });
+  }
 
   let slug = slugify(body.slug || title);
   if (!slug) slug = `article-${Date.now()}`;

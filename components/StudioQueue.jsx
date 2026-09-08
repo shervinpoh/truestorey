@@ -15,6 +15,7 @@ export default function StudioQueue({ drafts }) {
   const [open, setOpen] = useState(null);
   const [busy, setBusy] = useState(null);
   const [err, setErr] = useState('');
+  const [blocked, setBlocked] = useState({});
 
   async function act(id, status) {
     setBusy(id); setErr('');
@@ -25,6 +26,13 @@ export default function StudioQueue({ drafts }) {
         body: JSON.stringify({ id, status }),
       });
       const j = await res.json();
+      /* The server refused it on the published rules. Show them rather than
+         the generic message — a person needs to know WHICH rule, and the
+         endpoint has no override to offer them. */
+      if (res.status === 422 && Array.isArray(j.blockers)) {
+        setBlocked(b => ({ ...b, [id]: j.blockers }));
+        return;
+      }
       if (!res.ok) throw new Error(j.error || 'That did not work.');
       setItems(list => list.filter(x => x.id !== id));
     } catch (e) { setErr(e.message); }
@@ -63,7 +71,9 @@ export default function StudioQueue({ drafts }) {
               ))}
             </p>
           ) : (
-            <p className="hint"><b>No sources recorded.</b> Worth knowing before this goes out under your name.</p>
+            <p className="hint warnline"><b>No sources recorded, so this cannot be published.</b>{' '}
+              Nothing under a CEA registration number may rest on an unsourced claim
+              (PG 02-11 s3.1). Add sources in Supabase, or archive it.</p>
           )}
 
           {!a.header_image_url ? null : a.unsplash_photographer_name ? (
@@ -82,7 +92,20 @@ export default function StudioQueue({ drafts }) {
               dangerouslySetInnerHTML={{ __html: a.content_html }} />
           )}
 
+          {blocked[a.id] && (
+            <div className="warn" style={{ margin: '14px 0 0' }}>
+              <p style={{ margin: '0 0 6px' }}><b>Refused. This cannot go out as written.</b></p>
+              <ul className="bul">
+                {blocked[a.id].map(b => <li key={b.id}>{b.why}</li>)}
+              </ul>
+            </div>
+          )}
+
           <div className="dactions">
+            {/* Not disabled on the client. The gate is the endpoint, and a
+                button that greys itself out invites the question of how to
+                un-grey it; a button that is refused, with the rule quoted,
+                does not. */}
             <button className="mapopt" disabled={busy === a.id} onClick={() => act(a.id, 'published')}>
               {busy === a.id ? 'Publishing…' : 'Publish it'}
             </button>
