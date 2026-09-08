@@ -11,6 +11,7 @@ import Amenities from './Amenities.jsx';
 import LandTrail from './LandTrail.jsx';
 import Storey from './Storey.jsx';
 import SectionNav from './SectionNav.jsx';
+import NearbySales from './NearbySales.jsx';
 import { titleCase } from '../lib/name.js';
 import { track } from './Track.jsx';
 import { EVENTS } from '../lib/analytics.js';
@@ -48,7 +49,7 @@ import { EVENTS } from '../lib/analytics.js';
  * The proceeds waterfall re-anchors when the flat-type filter moves, so the
  * slider is never centred on a median that is no longer on screen.
  */
-export default function RecordPage({ rec, attribution, crumbs, posts = [], near = null, nearManifest = null, storey = null, canWatch = false, locator = null, land = null }) {
+export default function RecordPage({ rec, attribution, crumbs, posts = [], near = null, nearManifest = null, storey = null, canWatch = false, locator = null, land = null, sales = null }) {
   const [median, setMedian] = useState(rec.medianPrice);
 
   useEffect(() => { track(EVENTS.RECORD, { href: rec.href, kind: rec.kind }); }, [rec.href]);
@@ -60,12 +61,14 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
   // that scrolls nowhere is worse than one fewer option.
   const hasFloor = Boolean(storey);
   const hasNear = Boolean(near);
+  const hasSales = Boolean(sales);
   const sectionIds = [
     'overview',
     rec.series?.length > 1 && 'history',
     rec.recent?.length > 0 && 'transactions',
     hasFloor && 'floor',
     hasNear && 'nearby',
+    hasSales && 'nearbysales',
     land && 'land',
     'proceeds',
   ].filter(Boolean);
@@ -102,6 +105,11 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
       {/* Where the ground came from, after what is on it and around it.
           Only ever present for a development HDB tendered the land for and
           then named — see lib/land.js. Everything else renders nothing. */}
+      {/* After the amenities panel, which answers "what is around here",
+          and before the land trail. Same question, different noun: what has
+          CHANGED HANDS around here. */}
+      {hasSales && <NearbySales data={sales} label={rec.label} />}
+
       {land && <LandTrail land={land} label={titleCase(rec.label)} rec={rec} />}
 
       {/* HDB only: the digest is built on HDB's monthly resale register, and

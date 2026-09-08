@@ -1888,3 +1888,28 @@ sup.cite a:hover{text-decoration:underline}
 .scenkey li{display:flex;align-items:center;gap:6px}
 .scenkey i{width:11px;height:11px;border-radius:2px;display:inline-block;
   border:1px solid var(--line)}
+
+/* ── what has sold nearby ───────────────────────────────────────────────────
+   The radius control and the table under it. The distribution leads and the
+   rows follow, because three rows out of hundreds is a worse answer than the
+   middle half of the range — which is the whole reason this panel is not a
+   copy of the competitor's. */
+.nsrange{display:block;margin:0 0 16px;max-width:460px}
+.nsrange .lab{display:block;margin-bottom:2px}
+.nsrange .hint{display:block;margin-top:2px}
+.nsstat{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:var(--r2);overflow:hidden;margin:0 0 10px}
+.nsstat>div{background:var(--card);padding:12px 14px}
+.nsstat>div>b{display:block;font-size:19px;font-weight:600;letter-spacing:-.02em}
+.nsstat .lab{display:block;margin-top:3px}
+.nstable{width:100%;min-width:min(560px,100%);border-collapse:collapse;font-size:13.5px;margin:12px 0 8px}
+.nstable th{text-align:left;padding:0 10px 6px 0;font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--mute);font-weight:600;border-bottom:1px solid var(--line)}
+.nstable td{padding:8px 10px 8px 0;border-bottom:1px solid var(--line2);color:var(--ink2)}
+.nstable td:last-child,.nstable th:last-child{padding-right:0}
+.nstable .r{text-align:right;font-variant-numeric:tabular-nums}
+.nstable a{color:var(--acc);font-weight:600}
+@media(max-width:640px){
+  .nsstat{grid-template-columns:1fr}
+  .nstable{font-size:12.5px}
+}
