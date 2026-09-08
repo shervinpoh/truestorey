@@ -87,7 +87,13 @@ export default function MoneyInput({
         onChange={handle}
         {...rest}
       />
-      {slider && Number.isFinite(max) && (
+      {slider && Number.isFinite(max) && (() => {
+        /* A thumb pegged at the end of its track while the box reads higher is
+           a control lying about its own value. The box is the source of truth
+           — it takes any figure typed into it — so the track stretches to
+           reach the value instead of pretending the value is the maximum. */
+        const reach = Math.max(max, Number(value) || 0);
+        return (
         /* The slider writes the same state the box does, so dragging updates
            the text and typing moves the thumb. It is aria-hidden and not
            focusable: it duplicates a control that is already labelled, and a
@@ -97,12 +103,13 @@ export default function MoneyInput({
           aria-hidden="true"
           tabIndex={-1}
           min={min}
-          max={max}
+          max={reach}
           step={step}
-          value={Math.min(Math.max(Number(value) || 0, min), max)}
+          value={Math.min(Math.max(Number(value) || 0, min), reach)}
           onChange={e => onChange(Number(e.target.value))}
         />
-      )}
+        );
+      })()}
     </>
   );
 }

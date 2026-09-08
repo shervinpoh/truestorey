@@ -280,6 +280,13 @@ function MarketWithin({ market, cap }) {
  * same buyer, a different borrowing limit — so it is asked rather than assumed,
  * and the consequence is printed underneath rather than left in a footnote.
  */
+/* The top of the price slider for each kind of home. Not a legal ceiling —
+   the box still takes a typed figure above it — but the range a slider should
+   cover, and the value a switch of type clamps to. */
+function maxPriceFor(t) {
+  return t === 'HDB' ? 1_500_000 : t.startsWith('EC') ? 3_000_000 : 10_000_000;
+}
+
 function BuyingWhat({ type, setType, hdbLoan, setHdbLoan, price }) {
   const family = type === 'HDB' ? 'HDB' : type.startsWith('EC') ? 'EC' : 'PRIVATE';
   const bankCash = Math.ceil((Number(price) || 0) * 0.05);
@@ -373,7 +380,24 @@ export default function Planner({ markets = {}, budget = null }) {
   const cap = useMemo(() => maxPrice(input), [input]);
 
   const market = type === 'HDB' ? markets.HDB : type.startsWith('EC') ? markets.EC : markets.PRIVATE;
-  const priceMax = type === 'HDB' ? 1_500_000 : type.startsWith('EC') ? 3_000_000 : 10_000_000;
+  const priceMax = maxPriceFor(type);
+
+  /* ── switching what you are buying has to move the price with it ──────────
+     The cap is per type, and it was applied to the SLIDER only. Set a private
+     purchase to S$10,000,000, switch back to HDB resale, and the box still
+     said S$10,000,000 while the thumb sat pegged at S$1,500,000 — a control
+     misreporting its own value — and the panel went on to compute duty, MSR
+     and LTV on a ten-million-dollar HDB flat with a straight face.
+
+     Clamped rather than reset: choosing a different type is a statement about
+     the type, not about the budget, so the intent to look at the top of the
+     range survives the switch. Only downward — every cap is above the floor,
+     so nothing is ever pushed up. */
+  const chooseType = next => {
+    setType(next);
+    const cap = maxPriceFor(next);
+    setPrice(p => (Number(p) > cap ? cap : p));
+  };
 
   return (
     <>
@@ -407,7 +431,7 @@ export default function Planner({ markets = {}, budget = null }) {
         <div className="planinputs">
           <fieldset className="plangroup">
             <legend className="lab">What you are buying</legend>
-            <BuyingWhat type={type} setType={setType} hdbLoan={hdbLoan} setHdbLoan={setHdbLoan} price={price} />
+            <BuyingWhat type={type} setType={chooseType} hdbLoan={hdbLoan} setHdbLoan={setHdbLoan} price={price} />
             <div className="planform">
               {/* The slider's range follows the market. A single 100k–5m track
                   spends four fifths of its travel on prices no HDB flat has

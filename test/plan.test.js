@@ -180,3 +180,48 @@ test('a zero-rate loan divides evenly and costs no interest', () => {
   assert.equal(a.instalment, 1000);
   assert.equal(a.totalInterest, 0);
 });
+
+/**
+ * A price that outlives the property type it was set for.
+ *
+ * The slider's ceiling is per type — S$1.5m on an HDB resale, S$3m on an EC,
+ * S$10m on private — and it was enforced on the SLIDER alone. Set a private
+ * purchase to S$10,000,000, switch back to HDB resale, and the box still read
+ * S$10,000,000 while the thumb sat pegged at S$1,500,000. The panel then
+ * computed Buyer's Stamp Duty, MSR and the LTV ceiling on a ten-million-dollar
+ * HDB flat and reported the answers without comment.
+ *
+ * Asserted against the source for the reason given at the top of
+ * test/motion.test.js: Node does not strip JSX, and the failure someone can
+ * actually cause is wiring the raw setter straight back in.
+ */
+import { readFileSync as readPlanner } from 'node:fs';
+import pathForPlanner from 'node:path';
+
+const plannerSrc = readPlanner(pathForPlanner.join(process.cwd(), 'components', 'Planner.jsx'), 'utf8');
+
+test('changing the property type clamps the price to that type\'s ceiling', () => {
+  assert.match(plannerSrc, /function maxPriceFor\(/,
+    'the per-type ceiling is no longer named in one place');
+
+  const wired = /<BuyingWhat[^>]*setType=\{(\w+)\}/.exec(plannerSrc);
+  assert.ok(wired, 'BuyingWhat is no longer given a setType');
+  assert.notEqual(wired[1], 'setType',
+    'BuyingWhat is being handed the raw setter again — a price set for one ' +
+    'type will survive a switch to a type that cannot reach it');
+
+  const handler = new RegExp(`const ${wired[1]} = [\\s\\S]{0,600}?\\n  \\};`).exec(plannerSrc);
+  assert.ok(handler, `${wired[1]} is not defined as a statement-bodied handler`);
+  assert.match(handler[0], /maxPriceFor\(/, 'the handler does not consult the ceiling');
+  assert.match(handler[0], /setPrice\(/, 'the handler changes the type without moving the price');
+});
+
+test('every property type the planner offers has a ceiling above the floor', () => {
+  // 100000 is the slider's floor. A type whose ceiling fell below it would
+  // clamp every price to something the slider cannot represent.
+  const caps = [...plannerSrc.matchAll(/(\d[\d_]{5,})/g)]
+    .map(m => Number(m[1].replace(/_/g, '')))
+    .filter(n => n >= 1_000_000);
+  assert.ok(caps.length >= 3, 'expected the three per-type ceilings');
+  for (const c of caps) assert.ok(c > 100000, `ceiling ${c} is below the slider floor`);
+});
