@@ -30,6 +30,49 @@ export default function RecordView({ rec, attribution = [], onType, afterSummary
     ? (rec.recent || []).filter(t => (t.flatType || t.propertyType) === rtype)
     : (rec.recent || []);
 
+  /* ── sales that arrive identical, and are listed once ─────────────────────
+     Kew Drive showed the same terrace three times — 212.6 sqm, S$3,000,000,
+     2025-06 — then the same pair again twice more, nine rows for three
+     distinct sets of particulars. It reads as a bug in the page, and it is
+     not: URA's Data Service returns those three inside a single project
+     entry. Measured, not assumed — the raw batches were fetched and checked,
+     and cross-batch overlap accounts for 22 rows in the whole country while
+     8,341 arrive repeated within one entry.
+
+     So nothing is removed, because the two families behave differently and
+     one edit cannot be right for both. NON-LANDED repeats look real: 8.6% of
+     rows sit in a repeated group and the multiplicity has the long tail a
+     launch produces — x4:176, x5:50, x8:11 — concentrated in Parc Clematis,
+     Parktown Residence and Grand Dunman. Identical units in one launch really
+     do sell at one price in one month, and dropping them would understate
+     volume and drag every median.
+
+     LANDED does not look real: 33.1% of rows are in a repeated group and the
+     multiplicity stops dead at three — 944 pairs, 761 triples, then x4:1 and
+     x5:2. Real clustering has a tail; a cliff at three is a systems artifact.
+     Kew Drive is twenty rows, seven distinct, every one of them a multiple,
+     including a 1,335.6 sqm detached at S$16,300,000 three times in one
+     month.
+
+     That is strong evidence and not proof, and deleting a filed sale on a
+     hunch is worse than showing it. So the display groups and the data is
+     left alone: the particulars appear once, the count appears beside them,
+     the page says it cannot tell the two cases apart, and every figure
+     elsewhere still counts all of them.
+
+     HDB's feed does not need this — 62 rows in 79,032 — but it costs nothing
+     there and the same page renders both. */
+  const filed = (() => {
+    const by = new Map();
+    for (const t of recent) {
+      const k = [t.areaSqm, t.storey, t.floor, t.price, t.month, t.saleType,
+                 t.flatType, t.propertyType, t.model].join('|');
+      if (by.has(k)) by.get(k).n += 1;
+      else by.set(k, { ...t, n: 1 });
+    }
+    return [...by.values()];
+  })();
+
   /* Wrapped, because changing flat type rewrites the median, the range, the
      spread, the chart and every transaction row in the same frame. Unwrapped
      that reads as a flicker; inside a transition it reads as the figures
@@ -138,7 +181,7 @@ export default function RecordView({ rec, attribution = [], onType, afterSummary
             forty rows between the chart and everything below it, and nobody
             reads the twenty-ninth. They are all still here, and still in the
             page for anyone who wants them — one click, not a fetch. */}
-        {recent.slice(0, showAll ? recent.length : 8).map((t,i)=>(
+        {filed.slice(0, showAll ? filed.length : 8).map((t,i)=>(
           <div className="txn" key={i}>
             <div>
               <b>{[
@@ -149,13 +192,32 @@ export default function RecordView({ rec, attribution = [], onType, afterSummary
                 !rtype && (t.flatType || t.propertyType), t.model, t.saleType, t.month,
               ].filter(Boolean).join(' · ')}</span>
             </div>
-            <div className="r"><b>{f(t.price)}</b><br /><span className="lab">${Math.round(t.psf)} psf</span></div>
+            <div className="r">
+              {/* Inside the <b>, because `.txn b` is display:block and a
+                  sibling span would drop to its own line — the count belongs
+                  beside the price it counts. */}
+              <b>{f(t.price)}{t.n > 1 && <span className="txnrep" title={
+                `${t.n} sales filed with these particulars. Listed once; counted ${t.n} times in every figure on this page.`
+              }>&times;{t.n}</span>}</b>
+              <span className="lab">${Math.round(t.psf)} psf</span></div>
           </div>
         ))}
-        {recent.length > 8 && (
+        {filed.length > 8 && (
           <button type="button" className="ghost" onClick={() => setShowAll(v => !v)}>
-            {showAll ? 'Show the most recent eight' : `Show all ${recent.length} filed sales`}
+            {showAll ? 'Show the most recent eight' : `Show all ${filed.length} rows`}
           </button>
+        )}
+        {filed.length < recent.length && (
+          <p className="hint" style={{ marginTop: 10 }}>
+            {recent.length - filed.length === 1
+              ? 'One row arrives'
+              : `${recent.length - filed.length} rows arrive`} from the source with particulars
+            identical to another &mdash; same size, price, month and type &mdash; and{' '}
+            {recent.length - filed.length === 1 ? 'is' : 'are'} listed once here with a count.
+            Whether those are separate sales or one sale filed more than once is not something the
+            feed distinguishes, so nothing has been removed and every figure above still counts
+            them all.
+          </p>
         )}
       </>)}
 

@@ -507,6 +507,11 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--ink)
 .txn{display:flex;justify-content:space-between;gap:12px;padding:8px 0;
  border-bottom:1px solid var(--line2);font-size:13.5px;line-height:1.3}
 .txn b{font-weight:600;display:block;font-size:14px;letter-spacing:-.015em;line-height:1.3}
+/* The count of identical filed sales. --mute on a hairline, not an accent:
+   it is a fact about the filing, not live or selected data. */
+.txn .txnrep{display:inline-block;margin-left:7px;padding:0 5px;border:1px solid var(--line);
+  border-radius:var(--r1);font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:11px;color:var(--mute);vertical-align:2px}
 .txn .r{text-align:right;white-space:nowrap}
 
 /* ── the fork ───────────────────────────────────────────────────────────────

@@ -133,3 +133,47 @@ test('a rate is per square metre and per square foot of the same GFA', () => {
 test('a maximum GFA is flagged, because the rate is then a floor', () => {
   assert.equal(landRate({ price: 1e6, gfaSqm: 1000, gfaIsCeiling: true }).ceiling, true);
 });
+
+/**
+ * Nine rows for three sales.
+ *
+ * A landed record on Kew Drive listed the same terrace three times — 212.6
+ * sqm, S$3,000,000, 2025-06 — then the next pair three times, and the next.
+ * It reads as a duplication bug in the page and it is not one: URA's Data
+ * Service returns those three inside a single project entry. The raw batches
+ * were fetched and checked rather than reasoned about; cross-batch overlap
+ * accounts for 22 rows nationally against 8,341 that arrive repeated within a
+ * single entry.
+ *
+ * The list therefore GROUPS and never dedupes. Two identical units in one
+ * launch really do sell at one price in one month — the excess concentrates
+ * in Parc Clematis, Parktown Residence and Grand Dunman — so dropping rows
+ * would understate volume and drag every median on the page. Replacing
+ * `filed` with `recent` in the list is the edit that brings the nine rows
+ * back, and it looks like removing a needless indirection.
+ */
+import { readFileSync as readRecordView } from 'node:fs';
+import pathForRecordView from 'node:path';
+
+const recordViewSrc = readRecordView(
+  pathForRecordView.join(process.cwd(), 'components', 'RecordView.jsx'), 'utf8');
+
+test('identical filed sales are grouped for display, never deduped', () => {
+  assert.match(recordViewSrc, /const filed = \(\(\) => \{/,
+    'the grouping pass over the filed sales is gone');
+
+  // The list renders groups...
+  assert.match(recordViewSrc, /\{filed\.slice\(0, showAll \? filed\.length : 8\)/,
+    'the transaction list is iterating raw rows again — the duplicates are back');
+
+  // ...and every group states how many sales it stands for.
+  assert.match(recordViewSrc, /t\.n > 1 &&/, 'a grouped row no longer shows its count');
+
+  // Nothing may be dropped: the group carries a count rather than a filter.
+  assert.doesNotMatch(recordViewSrc, /recent\.filter\([^)]*(?:unique|dedup|distinct)/i,
+    'sales are being filtered out rather than grouped');
+
+  // The header still counts SALES, not rows, or the page understates volume.
+  assert.match(recordViewSrc, /\{recent\.length\} of \{rv\.n\}/,
+    'the transaction count header must stay in filed sales, not grouped rows');
+});
