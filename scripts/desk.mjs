@@ -92,6 +92,54 @@ function chartFor(f) {
   return `${SITE}/chart?${p.toString()}`;
 }
 
+/**
+ * A photograph for the top of the piece.
+ *
+ * ── WHY IT IS ATMOSPHERE AND NOTHING MORE ──────────────────────────────────
+ * A stock photograph cannot show the block the article is about, and one that
+ * looks like it might is worse than none. So the search terms are deliberately
+ * general — Singapore, housing, the skyline — and never the subject's name. A
+ * reader should read it as a picture of the city, because that is what it is.
+ * The chart carries the substance; this carries the page.
+ *
+ * ── WHAT UNSPLASH REQUIRES, AND WHERE IT IS HONOURED ───────────────────────
+ * The API terms want the photographer credited with a link, and a ping to the
+ * photo's download endpoint when it is used. The webhook does both — and drops
+ * the image entirely if no photographer name arrives with it, so a broken
+ * credit cannot publish. This only has to pass the fields through.
+ *
+ * No key means no photograph and a piece that still files. An article is not
+ * worth losing over its illustration.
+ */
+async function photograph() {
+  const key = process.env.UNSPLASH_ACCESS_KEY;
+  if (!key) return null;
+  const terms = ['singapore public housing', 'singapore skyline', 'singapore hdb',
+                 'singapore architecture', 'singapore city'];
+  const query = terms[Math.floor(Math.random() * terms.length)];
+  try {
+    const res = await fetch(
+      `https://api.unsplash.com/photos/random?query=${encodeURIComponent(query)}&orientation=landscape&content_filter=high`,
+      { headers: { Authorization: `Client-ID ${key}` }, signal: AbortSignal.timeout(12000) });
+    if (!res.ok) { console.warn(`  no photograph: Unsplash ${res.status}`); return null; }
+    const p = await res.json();
+    if (!p?.urls?.regular || !p?.user?.name) return null;
+    return {
+      header_image_url: p.urls.regular,
+      unsplash_photographer_name: p.user.name,
+      unsplash_photographer_profile_url: p.user.links?.html || null,
+      /* The webhook pings this. Unsplash requires it on every use and it is
+         the one term people forget, which is why it travels as a field rather
+         than being left to whoever calls the API. */
+      unsplash_download_location: p.links?.download_location || null,
+      alt: p.alt_description || query,
+    };
+  } catch (e) {
+    console.warn(`  no photograph: ${e.name}`);
+    return null;
+  }
+}
+
 const finding = topFinding();
 if (!finding) {
   console.log('\nNothing scored high enough to write about today. Filing nothing.\n');
@@ -138,8 +186,17 @@ art.content_html = String(art.content_html).includes('{{CHART}}')
   ? art.content_html.replace('{{CHART}}', figure)
   : art.content_html + figure;
 
+const photo = await photograph();
+if (photo) console.log(`  photograph by ${photo.unsplash_photographer_name}`);
+
 const row = {
   ...art,
+  ...(photo ? {
+    header_image_url: photo.header_image_url,
+    unsplash_photographer_name: photo.unsplash_photographer_name,
+    unsplash_photographer_profile_url: photo.unsplash_photographer_profile_url,
+    unsplash_download_location: photo.unsplash_download_location,
+  } : {}),
   category: 'note',
   tags: [finding.kind, String(finding.subject).toLowerCase()].slice(0, 4),
   /* The finding's own subject page is the source: it is where every figure in
@@ -149,6 +206,7 @@ const row = {
 
 if (DRY) {
   console.log(`\n── ${row.title}\n${row.excerpt}\n`);
+  console.log('photograph:', row.header_image_url || 'none', '\n');
   console.log(row.content_html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').slice(0, 900) + '…\n');
   console.log('chart:', chart, '\n');
   process.exit(0);

@@ -116,3 +116,41 @@ test('the chart reserves room for the value at the end of the longest bar', () =
   assert.ok(W - longestBarEnds >= 60,
     `only ${W - longestBarEnds}px left after the longest bar — a value label needs more`);
 });
+
+/**
+ * The photograph is atmosphere, and must never look like evidence.
+ *
+ * A stock image cannot show the block an article is about, and one that looks
+ * like it might is worse than none. The search terms are general on purpose —
+ * the city, not the subject.
+ */
+test('the photograph is searched by the city, never by the subject', () => {
+  const fn = /async function photograph\(\)[\s\S]*?\n\}/.exec(src);
+  assert.ok(fn, 'photograph() moved — check this test still describes it');
+  assert.doesNotMatch(fn[0], /finding\.|subject|\$\{f\./,
+    'the photo query is built from the article subject; a stock image must not imply it shows the place');
+  assert.match(fn[0], /singapore/i);
+});
+
+test('a missing key costs the photograph, not the article', () => {
+  const fn = /async function photograph\(\)[\s\S]*?\n\}/.exec(src)[0];
+  assert.match(fn, /if \(!key\) return null/, 'no key now throws instead of filing without a picture');
+  assert.match(fn, /catch/, 'an Unsplash outage would take the whole run down');
+});
+
+test("Unsplash's two terms travel with the photo", () => {
+  // Credit with a link, and a ping to the download endpoint on every use.
+  // The webhook honours both and drops the image if the credit is missing —
+  // this only has to pass the fields through, and forgetting one silently
+  // breaks the licence rather than the build.
+  for (const field of ['unsplash_photographer_name', 'unsplash_photographer_profile_url',
+                       'unsplash_download_location']) {
+    assert.ok(src.includes(field), `${field} is not being sent; the licence terms are not met`);
+  }
+});
+
+test('the desk workflow passes the key through', () => {
+  const wf = readFileSync(path.join(process.cwd(), '.github', 'workflows', 'desk.yml'), 'utf8');
+  assert.match(wf, /UNSPLASH_ACCESS_KEY:\s+\$\{\{ secrets\.UNSPLASH_ACCESS_KEY \}\}/,
+    'the scheduled run has no key, so every piece it files will be unillustrated');
+});
