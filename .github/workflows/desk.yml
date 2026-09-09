@@ -1,0 +1,49 @@
+# The daily desk piece, written from the filed data.
+#
+# WHY IT IS NOT PART OF refresh-data.yml. That job's business is the data, and
+# it must go green or red on whether the data refreshed. Folding an article
+# writer into it would mean a model having a bad morning turns the data
+# pipeline red, and a fortnight of that is how the SORA signal was lost.
+#
+# WHY IT RUNS AFTER THE REFRESH. The finding is computed from data/, so it has
+# to read the data that was committed an hour earlier, not yesterday's. 22:00
+# UTC is 06:00 SGT, one hour behind the refresh.
+#
+# IT FILES A DRAFT AND NOTHING ELSE. Publishing is a person reading the piece
+# and pressing a button in /studio — that is the whole reason drafts exist,
+# and it does not change because the writer is on a schedule now.
+name: Desk piece
+
+on:
+  schedule:
+    - cron: '0 22 * * *'
+  workflow_dispatch:
+    inputs:
+      dry:
+        description: 'Write it and print it, but file nothing'
+        type: boolean
+        default: false
+
+concurrency:
+  group: desk
+  cancel-in-progress: false
+
+jobs:
+  write:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+
+      # Nothing scored high enough is a normal morning and exits 0. A failure
+      # here means the writer or the webhook broke, which is worth an email.
+      - name: Write today's piece
+        env:
+          ANTHROPIC_API_KEY:      ${{ secrets.ANTHROPIC_API_KEY }}
+          ARTICLE_WEBHOOK_SECRET: ${{ secrets.ARTICLE_WEBHOOK_SECRET }}
+          NEXT_PUBLIC_SITE_URL:   ${{ vars.NEXT_PUBLIC_SITE_URL }}
+        run: npm run desk ${{ inputs.dry && '-- --dry' || '' }}

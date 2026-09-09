@@ -67,9 +67,23 @@ export default async function Page({ params }) {
         kicker={post.kind === 'deep' ? `Deep dive · ${post.date}` : `Note · ${post.date}`}
         title={post.title} sub={post.summary || undefined} />
       <section className="pane">
+        {/* ── the byline tells the truth about who wrote it ───────────────
+            Every page said "Written by Shervin Poh", including the ones a
+            pipeline drafted from an agency release. He publishes them — his
+            registration is on the page and nothing reaches the site without
+            him pressing the button — but he did not write the prose, and
+            claiming he did devalues the pieces he actually writes.
+
+            Derived from the source rather than a database column: a file in
+            content/insights is something a person sat down and wrote, and a
+            row is something a pipeline filed. That distinction already exists
+            and needs no schema to carry it. */}
         <p className="prov" style={{marginTop:0}}>
           {post.kind === 'deep' ? `${post.minutes} min read · ` : ''}
-          Written by Shervin Poh. Figures are read live from the filed data, so nothing here
+          {post.source === 'file'
+            ? 'Written by Shervin Poh.'
+            : 'Written by the Truestorey desk from the filed data, and published by Shervin Poh.'}
+          {' '}Figures are read live from the filed data, so nothing here
           goes stale without the number going with it.
         </p>
         {post.image && (

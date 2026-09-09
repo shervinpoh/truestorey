@@ -49,7 +49,8 @@
     "build:rents": "node scripts/build-rents.mjs",
     "build:trend": "node scripts/build-trend.mjs",
     "build:budget": "node scripts/build-budget.mjs",
-    "audit:articles": "node scripts/audit-articles.mjs"
+    "audit:articles": "node scripts/audit-articles.mjs",
+    "desk": "node --env-file-if-exists=.env.local scripts/desk.mjs"
   },
   "dependencies": {
     "next": "^15.0.0",
