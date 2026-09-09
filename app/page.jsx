@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { catalogue, hdbIndex, allUrls, archive, allTowns, projects, boundaries, getIndex } from '../lib/data/query.js';
-import { allInsights } from '../lib/insights.js';
+import { feed } from '../lib/articles.js';
 import { NAV } from '../lib/nav.js';
 import { ogForHome } from '../lib/og.js';
 import Search from '../components/Search.jsx';
@@ -43,9 +43,17 @@ export function generateMetadata() {
  * The island is server-rendered SVG rather than the real map: /map ships about
  * a megabyte of points and the homepage must not be the slowest page.
  */
-export default function Home() {
+export default async function Home() {
   const cat = catalogue();
-  const posts = allInsights();
+  /* feed(), not allInsights(). The homepage read file-based notes only, so
+     every article the pipeline filed — and every desk piece from now on —
+     existed on /insights and nowhere a first-time visitor would see it. With
+     both file notes currently drafts, the editorial slot was simply empty on
+     the most important page of the site.
+
+     feed() merges both and falls back to files alone if the database is down,
+     so a Supabase outage costs the writing, not the homepage. */
+  const posts = await feed();
   const idx = hdbIndex();
   const arch = archive();
   const urls = allUrls().urls || [];
@@ -134,7 +142,9 @@ export default function Home() {
             <h2 className="ledetitle"><Link href={lead.href}>{lead.title}</Link></h2>
             {lead.summary && <p className="sub">{lead.summary}</p>}
             <p className="prov" style={{ marginBottom: 0 }}>
-              {process.env.NEXT_PUBLIC_AGENT_NAME || 'Shervin Poh'} · {lead.date}
+              {lead.source === 'file'
+                ? (process.env.NEXT_PUBLIC_AGENT_NAME || 'Shervin Poh')
+                : 'Truestorey desk'} · {lead.date}
               {lead.kind === 'deep' ? ` · ${lead.minutes} min` : ''} · built on filed transactions
             </p>
           </div>
@@ -207,18 +217,30 @@ export default function Home() {
       {rest.length > 0 && (
         <section className="pane">
           <h2 className="sh"><span>More writing</span><Link href="/insights">Everything →</Link></h2>
-          <ul className="feed">
-            {rest.map(p => (
-              <li key={p.slug} className={p.kind === 'deep' ? 'deep' : undefined}>
+          {/* The same card as /insights, including the typographic tile when
+              there is no photograph. Two pages showing the same articles in
+              two different treatments is how a site stops looking like one
+              site. */}
+          <ul className="feedgrid">
+            {rest.map((p, i) => (
+              <li key={p.slug} className={p.kind === 'deep' ? 'fcard deep' : 'fcard'}>
                 <Link href={p.href}>
-                  {p.image && <img className="fimg" src={p.image} alt={p.imageAlt} loading="lazy" width="1200" height="675" />}
-                  <div className="fmeta">
-                    <span className={'kind' + (p.kind === 'deep' ? ' deep' : '')}>
-                      {p.kind === 'deep' ? 'Deep dive' : 'Note'}</span>
-                    <span className="fdate">{p.date}</span>
+                  {p.image ? (
+                    <img className="fimg" src={p.image} alt={p.imageAlt} loading="lazy" width="1200" height="675" />
+                  ) : (
+                    <span className={'ftile t' + ((i * 2 + 1) % 3)} aria-hidden="true">
+                      <span>{p.kind === 'deep' ? 'Deep dive' : 'Note'}</span>
+                    </span>
+                  )}
+                  <div className="fbody">
+                    <div className="fmeta">
+                      <span className={'kind' + (p.kind === 'deep' ? ' deep' : '')}>
+                        {p.kind === 'deep' ? 'Deep dive' : 'Note'}</span>
+                      <span className="fdate">{p.date}</span>
+                    </div>
+                    <p className="ftitle">{p.title}</p>
+                    {p.summary && <p className="fsum">{p.summary}</p>}
                   </div>
-                  <p className="ftitle">{p.title}</p>
-                  {p.summary && <p className="fsum">{p.summary}</p>}
                 </Link>
               </li>
             ))}
