@@ -44,6 +44,13 @@ export default function Facing({ byMonth = [] }) {
   });
   const best = facing === null ? null
     : rows.reduce((a, b) => (b.off != null && (a.off == null || b.off < a.off) ? b : a), rows[0]);
+  const worst = facing === null ? null
+    : rows.reduce((a, b) => (b.off != null && (a.off == null || b.off > a.off) ? b : a), rows[0]);
+  /* How much the year actually varies. A due-west window spans 2° to 23° and
+     is barely seasonal; a WSW one spans 0° to 46° and is a December problem
+     that disappears by June. Twelve near-identical squares are a finding, not
+     a rendering fault, and saying so is the difference. */
+  const spread = best && worst ? Math.round(worst.off - best.off) : null;
 
   return (
     <div className="facing">
@@ -77,12 +84,21 @@ export default function Facing({ byMonth = [] }) {
         <p className="hint">
           A window facing <b className="mono">{compass(facing)} ({facing}&deg;)</b> takes the
           setting sun most squarely in <b>{best.name}</b>, at{' '}
-          <b className="mono">{Math.round(best.off)}&deg;</b> off &mdash; {best.band.label}.
-          {' '}Zero would be dead-on; past 90&deg; the sun is behind the wall and the window sees
-          none of it directly, whatever the month.
+          <b className="mono">{Math.round(best.off)}&deg;</b> off &mdash; {best.band.label} &mdash;
+          and least squarely in <b>{worst.name}</b>, at{' '}
+          <b className="mono">{Math.round(worst.off)}&deg;</b>.
+          {spread != null && spread < 25 ? (
+            <> That is a swing of only <b className="mono">{spread}&deg;</b> across the whole year:
+              this facing takes the setting sun in every month, and the season barely changes it.
+              A facing 20&ndash;25&deg; either side of due west varies far more.</>
+          ) : (
+            <> A swing of <b className="mono">{spread}&deg;</b> across the year &mdash; the season
+              changes this window a great deal.</>
+          )}
         </p>
         <ul className="facingkey">
-          <li><i className="square" />under 25&deg; &mdash; straight in</li>
+          <li><i className="dead" />under 10&deg; &mdash; dead-on</li>
+          <li><i className="square" />10&ndash;25&deg; &mdash; straight in</li>
           <li><i className="oblique" />25&ndash;55&deg; &mdash; at an angle</li>
           <li><i className="grazing" />55&ndash;90&deg; &mdash; grazing the edge</li>
           <li><i className="none" />over 90&deg; &mdash; behind the wall</li>

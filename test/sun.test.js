@@ -143,7 +143,37 @@ test('a facing away from the sunset never reads as sunlit', () => {
     assert.ok(offsetFrom(180, m.azimuth) > 55);
   }
   assert.equal(directness(offsetFrom(90, by[0].azimuth)).id, 'none');
-  assert.equal(directness(2).id, 'square');
+  assert.equal(directness(2).id, 'dead');
+});
+
+/**
+ * The bands began at 25 / 55 / 90 — sensible divisions of a half-circle and
+ * useless here. The sunset arc is only 47° wide, so a due-west window never
+ * sits more than 23° off in any month: every square landed in one band and the
+ * year rendered as twelve identical blocks. It looked like a bug, and it was
+ * worse than one — a chart with nothing in it.
+ *
+ * The discrimination that matters is at the bottom of the range. This asserts
+ * the bands still resolve it, because widening them back is a one-line edit
+ * that looks like simplification.
+ */
+test('a year of one facing does not collapse into a single band', () => {
+  const by = sunsetByMonth(1.3521, 103.8198, 2026);
+  for (const facing of [270, 247, 293, 225]) {
+    const bands = new Set(by.map(m => directness(offsetFrom(facing, m.azimuth)).id));
+    assert.ok(bands.size >= 2,
+      `a ${facing}° facing renders twelve identical squares — the bands are too coarse for a 47° arc`);
+  }
+});
+
+test('the band boundaries are where the arc actually needs them', () => {
+  // Due west spans 2°-23°, entirely inside the old first band.
+  assert.equal(directness(2).id, 'dead');
+  assert.equal(directness(9).id, 'dead');
+  assert.equal(directness(10).id, 'square');
+  assert.equal(directness(23).id, 'square');
+  assert.ok(DIRECTNESS[0].upTo <= 10,
+    'the first band must be finer than the 47° sunset arc or a west facing is one colour');
 });
 
 test('the bands are stated once and cover every angle', () => {

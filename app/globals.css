@@ -2068,6 +2068,8 @@ sup.cite a:hover{text-decoration:underline}
   border-radius:var(--r1);background:var(--sunk)}
 .fmn{font-size:10px;color:var(--mute);letter-spacing:.02em}
 .fmo{font-size:12px;font-weight:600}
+.fm.dead{background:#0E3A3C;color:var(--on-acc)}
+.fm.dead .fmn{color:rgba(255,255,255,.72)}
 .fm.square{background:#164F52;color:var(--on-acc)}
 .fm.square .fmn{color:rgba(255,255,255,.72)}
 .fm.oblique{background:#4E7E80;color:var(--on-acc)}
@@ -2078,6 +2080,7 @@ sup.cite a:hover{text-decoration:underline}
   font-size:11px;color:var(--mute)}
 .facingkey li{display:flex;align-items:center;gap:6px}
 .facingkey i{width:11px;height:11px;border-radius:2px;display:inline-block}
+.facingkey i.dead{background:#0E3A3C}
 .facingkey i.square{background:#164F52}
 .facingkey i.oblique{background:#4E7E80}
 .facingkey i.grazing{background:#9CB6B7}
