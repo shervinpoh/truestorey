@@ -29,6 +29,8 @@ export default function Feed({ posts = [], topics = [] }) {
     deep: posts.filter(p => p.kind === 'deep').length,
   }), [posts]);
 
+  const tint = tints(shown);
+
   return (
     <>
       <div className="seg" role="group" aria-label="Filter by kind">
@@ -55,24 +57,43 @@ export default function Feed({ posts = [], topics = [] }) {
         </div>
       )}
 
+      {/* One pass over the rendered list, so a tint can see the card above it. */}
       {shown.length === 0 ? (
         <p className="hint" style={{ marginTop: 20 }}>Nothing under that filter yet.</p>
       ) : (
-        <ul className="feed" style={{ marginTop: 18 }}>
-          {shown.map(p => (
-            <li key={p.slug} className={p.kind === 'deep' ? 'deep' : undefined}>
+        <ul className="feedgrid" style={{ marginTop: 18 }}>
+          {shown.map((p, i) => (
+            <li key={p.slug} className={p.kind === 'deep' ? 'fcard deep' : 'fcard'}>
               <Link href={p.href}>
-                {p.image && (
+                {/* ── every card gets a visual, and most have no photograph ──
+                    None of the articles filed so far carries one, and the ones
+                    already published never will — an image is fetched when a
+                    piece is written, not backfilled. A grid built around
+                    photographs would therefore be a grid of empty rectangles,
+                    which reads as broken rather than as unillustrated.
+
+                    So the fallback is typographic: the kind set large on a
+                    ground tinted by category. It fills the slot, carries the
+                    one thing a reader sorts by, and looks like a decision. It
+                    also gives the river rhythm without a single image — three
+                    tints alternating down the page. */}
+                {p.image ? (
                   <img className="fimg" src={p.image} alt={p.imageAlt} loading="lazy" width="1200" height="675" />
-                )}
-                <div className="fmeta">
-                  <span className={'kind' + (p.kind === 'deep' ? ' deep' : '')}>
-                    {p.kind === 'deep' ? 'Deep dive' : 'Note'}
+                ) : (
+                  <span className={'ftile t' + tint[i]} aria-hidden="true">
+                    <span>{p.kind === 'deep' ? 'Deep dive' : 'Note'}</span>
                   </span>
-                  <span className="fdate">{p.date}{p.kind === 'deep' ? ` · ${p.minutes} min` : ''}</span>
+                )}
+                <div className="fbody">
+                  <div className="fmeta">
+                    <span className={'kind' + (p.kind === 'deep' ? ' deep' : '')}>
+                      {p.kind === 'deep' ? 'Deep dive' : 'Note'}
+                    </span>
+                    <span className="fdate">{p.date}{p.kind === 'deep' ? ` · ${p.minutes} min` : ''}</span>
+                  </div>
+                  <p className="ftitle">{p.title}</p>
+                  {p.summary && <p className="fsum">{p.summary}</p>}
                 </div>
-                <p className="ftitle">{p.title}</p>
-                {p.summary && <p className="fsum">{p.summary}</p>}
               </Link>
             </li>
           ))}
@@ -80,4 +101,33 @@ export default function Feed({ posts = [], topics = [] }) {
       )}
     </>
   );
+}
+
+/**
+ * Which of the three tints each card gets.
+ *
+ * From the SLUG rather than the position, so a card keeps its colour when the
+ * filter changes — a tile that shifts shade because something above it was
+ * filtered out reads as a bug.
+ *
+ * But only mostly. Over eight slugs the hash spreads 2/3/3, which is fine; over
+ * the two currently in the river it put both on the same tint, and two adjacent
+ * identical tiles read as a mistake whatever the arithmetic says. So a card
+ * that matches the one before it is nudged to the next tint. Stable where it
+ * can be, alternating where it has to be — and the nudge only ever depends on
+ * the card above, so a list keeps its colours as it grows.
+ */
+function tints(posts) {
+  const hash = slug => {
+    let h = 0;
+    for (const c of String(slug)) h = (h * 31 + c.charCodeAt(0)) % 3;
+    return h;
+  };
+  const out = [];
+  for (let i = 0; i < posts.length; i++) {
+    let t = hash(posts[i].slug);
+    if (i > 0 && t === out[i - 1]) t = (t + 1) % 3;
+    out.push(t);
+  }
+  return out;
 }
