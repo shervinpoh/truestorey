@@ -12,6 +12,7 @@ import LandTrail from './LandTrail.jsx';
 import Storey from './Storey.jsx';
 import SectionNav from './SectionNav.jsx';
 import NearbySales from './NearbySales.jsx';
+import SunPath from './SunPath.jsx';
 import { titleCase } from '../lib/name.js';
 import { track } from './Track.jsx';
 import { EVENTS } from '../lib/analytics.js';
@@ -49,7 +50,7 @@ import { EVENTS } from '../lib/analytics.js';
  * The proceeds waterfall re-anchors when the flat-type filter moves, so the
  * slider is never centred on a median that is no longer on screen.
  */
-export default function RecordPage({ rec, attribution, crumbs, posts = [], near = null, nearManifest = null, storey = null, canWatch = false, locator = null, land = null, sales = null }) {
+export default function RecordPage({ rec, attribution, crumbs, posts = [], near = null, nearManifest = null, storey = null, canWatch = false, locator = null, land = null, sales = null, sun = null, sunApprovals = null }) {
   const [median, setMedian] = useState(rec.medianPrice);
 
   useEffect(() => { track(EVENTS.RECORD, { href: rec.href, kind: rec.kind }); }, [rec.href]);
@@ -62,6 +63,7 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
   const hasFloor = Boolean(storey);
   const hasNear = Boolean(near);
   const hasSales = Boolean(sales);
+  const hasSun = Boolean(sun);
   const sectionIds = [
     'overview',
     rec.series?.length > 1 && 'history',
@@ -69,6 +71,7 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
     hasFloor && 'floor',
     hasNear && 'nearby',
     hasSales && 'nearbysales',
+    hasSun && 'sun',
     land && 'land',
     'proceeds',
   ].filter(Boolean);
@@ -109,6 +112,10 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
           and before the land trail. Same question, different noun: what has
           CHANGED HANDS around here. */}
       {hasSales && <NearbySales data={sales} label={rec.label} />}
+
+      {/* After what has sold nearby: same neighbourhood, different question —
+          not what it costs but what it will be like to sit in at six o'clock. */}
+      {hasSun && <SunPath sun={sun} approvals={sunApprovals} label={titleCase(rec.label)} />}
 
       {land && <LandTrail land={land} label={titleCase(rec.label)} rec={rec} />}
 

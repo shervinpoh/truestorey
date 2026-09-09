@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { recordAt, getIndex, allUrls, nearby, nearbyManifest, storeyFor, landForRecord, nearbySalesFor } from '../../../lib/data/query.js';
+import { recordAt, getIndex, allUrls, nearby, nearbyManifest, storeyFor, landForRecord, nearbySalesFor, sunFor, approvalsOnBearing} from '../../../lib/data/query.js';
 import { ogForRecord } from '../../../lib/og.js';
 import { titleCase } from '../../../lib/name.js';
 import RecordPage from '../../../components/RecordPage.jsx';
@@ -31,8 +31,16 @@ export default async function Page({ params }) {
   const { slug } = await params;
   const rec = recordAt('landed', slug);
   if (!rec) notFound();
+
+  /* Astronomy from the record's own coordinate, and what URA has permitted
+     along the bearings it produces. Both at build time; neither needs a
+     request. */
+  const sun = sunFor(rec);
+  const sunApprovals = sun
+    ? approvalsOnBearing(rec, { from: sun.arc.from, to: sun.arc.to, within: 400 })
+    : null;
   return (
-    <RecordPage rec={rec} land={landForRecord(rec.href)} storey={storeyFor(rec)} near={nearby(rec)} sales={nearbySalesFor(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []} posts={insightsForBlock(rec.href)}
+    <RecordPage sun={sun} sunApprovals={sunApprovals} rec={rec} land={landForRecord(rec.href)} storey={storeyFor(rec)} near={nearby(rec)} sales={nearbySalesFor(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []} posts={insightsForBlock(rec.href)}
       crumbs={[{ href: '/', label: 'Home' },
         { href: '/landed', label: 'Landed' },
         /* The district, which is a real destination now that ?d= opens one.

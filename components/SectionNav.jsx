@@ -31,6 +31,7 @@ const ITEMS = [
   { id: 'floor', label: 'Floor premium' },
   { id: 'nearby', label: 'Nearby' },
   { id: 'nearbysales', label: 'Sold nearby' },
+  { id: 'sun', label: 'Afternoon sun' },
   { id: 'land', label: 'The land' },
   { id: 'proceeds', label: 'Sale proceeds' },
 ];

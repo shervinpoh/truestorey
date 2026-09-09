@@ -2032,3 +2032,20 @@ sup.cite a:hover{text-decoration:underline}
   .edseconds{grid-template-rows:auto auto}
   .edlead h2{font-size:24px}
 }
+
+/* ── the afternoon sun ──────────────────────────────────────────────────────
+   A dial of bearings and distances, both computed from coordinates this site
+   holds. No outlines, no heights, no footprints: a mark sits at its bearing
+   and its distance and claims nothing about its shape, because nothing about
+   its shape is known. The tool everybody shares draws shadows; it licenses a
+   3D model of the city and this does not. */
+.sunwrap{display:grid;grid-template-columns:264px 1fr;gap:22px;align-items:start;margin:6px 0 16px}
+.sundial{width:264px;height:264px;max-width:100%}
+.sunc{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;fill:var(--mute)}
+.sunfacts p{margin:0 0 10px;max-width:62ch}
+.sunfacts .hint{line-height:1.6}
+.sunwhat{color:var(--ink2);white-space:normal;min-width:20em}
+@media(max-width:760px){
+  .sunwrap{grid-template-columns:1fr;justify-items:center}
+  .sunfacts{justify-self:stretch}
+}

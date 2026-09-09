@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { recordAt, getIndex, allUrls, nearby, nearbyManifest, storeyFor, town as townOf, boundaries, geoRecords, nearbySalesFor } from '../../../../lib/data/query.js';
+import { recordAt, getIndex, allUrls, nearby, nearbyManifest, storeyFor, town as townOf, boundaries, geoRecords, nearbySalesFor, sunFor, approvalsOnBearing} from '../../../../lib/data/query.js';
 import { simplify } from '../../../../lib/geojson.js';
 import { ogForRecord } from '../../../../lib/og.js';
 import { titleCase } from '../../../../lib/name.js';
@@ -34,8 +34,16 @@ export default async function Page({ params }) {
   const { town, block } = await params;
   const rec = recordAt('hdb', town, block);
   if (!rec) notFound();
+
+  /* Astronomy from the record's own coordinate, and what URA has permitted
+     along the bearings it produces. Both at build time; neither needs a
+     request. */
+  const sun = sunFor(rec);
+  const sunApprovals = sun
+    ? approvalsOnBearing(rec, { from: sun.arc.from, to: sun.arc.to, within: 400 })
+    : null;
   return (
-    <RecordPage canWatch={mailConfigured()} locator={locatorFor(rec)} rec={rec} storey={storeyFor(rec)} near={nearby(rec)} sales={nearbySalesFor(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []}
+    <RecordPage sun={sun} sunApprovals={sunApprovals} canWatch={mailConfigured()} locator={locatorFor(rec)} rec={rec} storey={storeyFor(rec)} near={nearby(rec)} sales={nearbySalesFor(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []}
       posts={[...insightsForBlock(rec.href), ...insightsForTown(town)]
         .filter((p, k, a) => a.findIndex(x => x.slug === p.slug) === k).slice(0, 4)}
       crumbs={[{ href: '/', label: 'Home' }, { href: '/hdb', label: 'HDB' },
