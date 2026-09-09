@@ -5,6 +5,7 @@ import Masthead from '../../components/Masthead.jsx';
 import ToolIntro from '../../components/ToolIntro.jsx';
 import ToolUse from '../../components/ToolUse.jsx';
 import ComparePicker from '../../components/ComparePicker.jsx';
+import FromBack from '../../components/FromBack.jsx';
 
 export const metadata = {
   title: 'Compare — two or three blocks side by side | Truestorey',
@@ -71,6 +72,7 @@ export default async function Page({ searchParams }) {
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
         title="Compare"
         sub="Put two or three blocks or projects next to each other. Every figure here is the same filed figure its own page shows — nothing is scored, ranked or recommended." />
+      <FromBack label="the property" />
       <ToolIntro href="/compare" />
       <ToolUse id="compare" />
 

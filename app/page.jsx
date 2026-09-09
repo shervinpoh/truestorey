@@ -2,11 +2,23 @@ import Link from 'next/link';
 import { catalogue, hdbIndex, allUrls, archive, allTowns, projects, boundaries, getIndex } from '../lib/data/query.js';
 import { allInsights } from '../lib/insights.js';
 import { NAV } from '../lib/nav.js';
+import { ogForHome } from '../lib/og.js';
 import Search from '../components/Search.jsx';
 import WhoBuilt from '../components/WhoBuilt.jsx';
 import IslandMap from '../components/IslandMap.jsx';
 
-export const metadata = { alternates: { canonical: '/' } };
+/* The homepage had no og:image, so the link people actually paste into a chat
+   shared as a grey rectangle while every block page had a generated card with
+   real figures on it. generateMetadata rather than a static object, because
+   the card carries the page count and the current index. */
+export function generateMetadata() {
+  const image = ogForHome({ pages: (allUrls().urls || []).length, index: hdbIndex() });
+  return {
+    alternates: { canonical: '/' },
+    openGraph: { images: [{ url: image, width: 1200, height: 630 }] },
+    twitter: { card: 'summary_large_image', images: [image] },
+  };
+}
 
 /**
  * The homepage.

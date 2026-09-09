@@ -33,6 +33,13 @@ export default async function Page({ params }) {
   if (!rec) notFound();
   return (
     <RecordPage rec={rec} land={landForRecord(rec.href)} storey={storeyFor(rec)} near={nearby(rec)} sales={nearbySalesFor(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []} posts={insightsForBlock(rec.href)}
-      crumbs={[{ href: '/', label: 'Home' }, { href: '/landed', label: 'landed' === 'condo' ? 'Condos' : 'Landed' }]} />
+      crumbs={[{ href: '/', label: 'Home' },
+        { href: '/landed', label: 'Landed' },
+        /* The district, which is a real destination now that ?d= opens one.
+           It read Home / Condos, so the only step up from a project was all
+           twenty-eight districts — the same journey the planner's tiles were
+           making people repeat. */
+        ...(rec.district ? [{ href: `/landed?d=${rec.district}`, label: `District ${rec.district}` }] : []),
+      ]} />
   );
 }

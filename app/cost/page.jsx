@@ -3,6 +3,7 @@ import ToolIntro from '../../components/ToolIntro.jsx';
 import ToolUse from '../../components/ToolUse.jsx';
 import Ledger from '../../components/Ledger.jsx';
 import { priceIndices } from '../../lib/data/query.js';
+import FromBack from '../../components/FromBack.jsx';
 
 export const metadata = {
   title: 'What owning it actually costs — the ledger before the property does anything | Truestorey',
@@ -16,6 +17,7 @@ export default function Page() {
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
         title="What owning it actually costs"
         sub="Every price conversation is about what a home is worth. This one is about what it costs to hold, whatever it turns out to be worth." />
+      <FromBack label="the property" />
       <ToolIntro href="/cost" example="figures" />
       <ToolUse id="cost" />
       <section className="pane">

@@ -1941,3 +1941,30 @@ sup.cite a:hover{text-decoration:underline}
 /* A published piece the rules would now refuse. --warn, the "could not be
    measured" colour, because it is a flag to look at rather than an error. */
 .draft.liveflag{border-left:2px solid var(--warn);padding-left:14px}
+
+/* The no-data swatch in the island key. The same 45° hatch the map paints, so
+   the distinction that matters most — data against no data — can be read by
+   pattern and not only by hue. */
+.islandnone{display:flex;align-items:center;gap:7px;margin:8px 0 0;
+  font-size:11px;color:var(--mute)}
+.islandnone .sw{width:14px;height:14px;border:1px solid var(--line);border-radius:2px;
+  background:repeating-linear-gradient(45deg,
+    var(--line) 0 2px, var(--paper) 2px 4px)}
+
+/* ── a note that explains, against a note that warns ────────────────────────
+   There are 91 .note blocks and they were doing five different jobs in one
+   visual treatment — warning, method, privacy, regulatory boundary, ordinary
+   explanation. Two reviews arrived at that from opposite directions.
+
+   The answer is NOT to move them. Almost every one is a caveat that changes a
+   decision and belongs against the figure it qualifies: "this is a gross yield
+   and it is not what you keep", "a check that cannot run scores nothing". What
+   was wrong is that a note about HOW a figure is derived looked exactly as
+   urgent as a note about what it cannot tell you, so neither read as either.
+
+   .method is the quieter one: no left rule, mute text, for the craft notes.
+   The default keeps its weight, which is the whole point of separating them. */
+.note.method{border-left:0;background:none;padding-left:0;color:var(--mute);
+  font-size:12.5px;max-width:74ch}
+.note.method b{color:var(--ink2);font-weight:600}
+.note.method a{color:var(--ink2);text-decoration:underline;text-underline-offset:2px}

@@ -106,6 +106,22 @@ export default function IslandMap({ areas, towns, plotted, source, compact = fal
             above this, already focusable, and the finished colours are the
             CSS end state, so a reader who never sees the animation, or has
             asked not to, sees the completed map. */}
+        {/* ── no-data land is hatched, not only grey ───────────────────────
+            "Grey areas have no filed HDB resale" encoded the single most
+            important distinction on the map — data against no data — in hue
+            alone, which is exactly what a reader with a colour vision
+            deficiency cannot use. The lightest shaded band and the empty grey
+            sit close enough in lightness that a greyscale print loses it too.
+
+            A hatch carries it without a second colour, at a spacing coarse
+            enough to survive the island being 320px wide on a phone. */}
+        <defs>
+          <pattern id="nodata" width="6" height="6" patternUnits="userSpaceOnUse"
+            patternTransform="rotate(45)">
+            <rect width="6" height="6" fill="var(--line)" />
+            <line x1="0" y1="0" x2="0" y2="6" stroke="var(--paper)" strokeWidth="2" />
+          </pattern>
+        </defs>
         {areas
           .map(a => ({ a, v: psf.get(a.slug) }))
           .sort((p, q) => (p.a.rings[0]?.[0]?.[0] ?? 0) - (q.a.rings[0]?.[0]?.[0] ?? 0))
@@ -117,7 +133,7 @@ export default function IslandMap({ areas, towns, plotted, source, compact = fal
             <path key={a.slug} d={pathOf(a)} fillRule="evenodd"
               className={v == null ? 'iarea' : 'iarea lit'}
               style={{ '--d': `${((idx / Math.max(1, all.length - 1)) * 900).toFixed(0)}ms` }}
-              fill={v == null ? 'var(--line)' : RAMP[bandOf(v)]}
+              fill={v == null ? 'url(#nodata)' : RAMP[bandOf(v)]}
               stroke="var(--paper)" strokeWidth="1.1" strokeLinejoin="round" />
           ))}
       </svg>
@@ -132,6 +148,13 @@ export default function IslandMap({ areas, towns, plotted, source, compact = fal
               into each other, and a legend you have to decipher is worse than
               one that says less. The bands themselves are on /map. */}
           <div className="rampends"><span>${lo}</span><span>${hi}</span></div>
+          {/* Named in the key, not only in the prose underneath it. The swatch
+              carries the same hatch the map does, so the legend and the land
+              can be matched by pattern rather than by hue. */}
+          <p className="islandnone">
+            <span className="sw" aria-hidden="true" />
+            No filed HDB resale
+          </p>
         </div>
         {!compact && (
           <Link href="/map" className="islandgo">

@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 
 /**
@@ -35,6 +35,34 @@ export default function ProjectBrowse({ items = [], base, noun = 'projects', uni
   const [district, setDistrict] = useState(null);
   const [q, setQ] = useState('');
   const term = q.trim().toLowerCase();
+
+  /* ── the district lives in the URL ────────────────────────────────────────
+     It was React state and nothing else, so there was no address that opened
+     District 2. /plan's "where a median home is inside your budget" tiles
+     therefore linked every district to /condo — the reader clicked District 2,
+     landed on all twenty-eight, and had to find it again. A district view was
+     also unshareable, which is its own answer to whether the state belonged
+     in the URL.
+
+     Read on mount and written with replaceState rather than through the
+     router: /condo and /landed are static pages, and useSearchParams would
+     drag them into dynamic rendering for a value only the browser needs.
+     replaceState, not pushState — picking a district is a filter, not a
+     destination, and back should leave the page rather than walk the reader
+     through every district they tried. */
+  useEffect(() => {
+    const d = new URLSearchParams(window.location.search).get('d');
+    if (d && items.some(p => p[P.DISTRICT] === d)) setDistrict(d);
+  }, [items]);
+
+  const chooseDistrict = d => {
+    setDistrict(d);
+    try {
+      const url = new URL(window.location.href);
+      if (d) url.searchParams.set('d', d); else url.searchParams.delete('d');
+      window.history.replaceState(null, '', url);
+    } catch { /* a URL this browser will not parse is not worth a broken filter */ }
+  };
 
   const districts = useMemo(() => {
     const m = new Map();
@@ -74,7 +102,7 @@ export default function ProjectBrowse({ items = [], base, noun = 'projects', uni
       <div className="filt">
         <input type="search" value={q} placeholder={`Search all ${items.length.toLocaleString('en-SG')} ${noun}…`}
           aria-label={`Search ${noun}`} autoComplete="off" spellCheck="false"
-          onChange={e => { setQ(e.target.value); if (e.target.value.trim()) setDistrict(null); }} />
+          onChange={e => { setQ(e.target.value); if (e.target.value.trim()) chooseDistrict(null); }} />
       </div>
 
       {term ? (
@@ -92,7 +120,7 @@ export default function ProjectBrowse({ items = [], base, noun = 'projects', uni
       ) : district ? (
         <>
           <div className="crumbs" style={{ margin: '14px 0 0' }}>
-            <button className="linkish" onClick={() => setDistrict(null)}>← All districts</button>
+            <button className="linkish" onClick={() => chooseDistrict(null)}>← All districts</button>
             <span aria-hidden="true"> / </span>District {district}
           </div>
           <span className="filtn">{shown.length.toLocaleString('en-SG')} {noun} in District {district}</span>
@@ -104,7 +132,7 @@ export default function ProjectBrowse({ items = [], base, noun = 'projects', uni
           <div className="tiles">
             {districts.map(d => (
               <button key={d.d} className="tile" style={{ '--heat': heat(d.median, dRange), textAlign: 'left',
-                border: 0, font: 'inherit', cursor: 'pointer' }} onClick={() => setDistrict(d.d)}>
+                border: 0, font: 'inherit', cursor: 'pointer' }} onClick={() => chooseDistrict(d.d)}>
                 <span className="n">District {d.d}</span>
                 <span className="v mono">{d.median ? `$${d.median.toLocaleString('en-SG')} ${unit}` : '—'}</span>
                 <span className="b mono">{d.n.toLocaleString('en-SG')} {noun} · {d.segment}</span>

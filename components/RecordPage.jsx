@@ -183,7 +183,7 @@ function Fork({ price, planHref, href, hdb, hasFloor, hasNear }) {
             {hasNear && <li><a href="#nearby">
               <b>What is within reach of it</b>
               <span>Schools, stations and shops, at straight-line distance</span></a></li>}
-            <li><a href={`/compare?a=${encodeURIComponent(href)}`}>
+            <li><a href={`/compare?a=${encodeURIComponent(href)}&from=${encodeURIComponent(href)}`}>
               <b>Put it beside another block</b>
               <span>Two or three side by side, in a link you can send to whoever else is deciding</span></a></li>
           </ul>
@@ -197,7 +197,7 @@ function Fork({ price, planHref, href, hdb, hasFloor, hasNear }) {
             <li><a href="/guides/absd-tdsr-ssd">
               <b>What selling early costs</b>
               <span>Seller&rsquo;s Stamp Duty by year held, and the rules behind it</span></a></li>
-            {hdb && <li><a href="/mop">
+            {hdb && <li><a href={`/mop?from=${encodeURIComponent(href)}`}>
               <b>Which flats can start selling, and when</b>
               <span>Blocks reaching their fifth year, by town and year</span></a></li>}
           </ul>

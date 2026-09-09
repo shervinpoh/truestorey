@@ -89,13 +89,13 @@ export default function Page() {
           empty all come out of it. Every one of those is in the renting guide with a figure beside
           it. None of them is in this data, so none of them is guessed at here.
         </div>
-        <div className="note">
+        <div className="note method">
           <b>Rents are matched to sales of the same size only.</b> URA publishes rent against an
           area range and price against an exact area. A three-bedroom&rsquo;s rent over a
           one-bedroom&rsquo;s price is not a yield, so a rent is only ever compared with sales that
           fall inside its own published band, and a project with no overlap produces nothing.
         </div>
-        <div className="note">
+        <div className="note method">
           <b>Rent psf is carried as a range.</b> The published area is a band, so a single rent per
           square foot would be an invention. Where it appears it appears as two ends.
         </div>

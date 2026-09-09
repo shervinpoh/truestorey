@@ -142,3 +142,35 @@ test("the guide's stress rate matches the calculators", has, () => {
   assert.match(md, new RegExp(`\\*\\*Stress test ${(STRESS_TEST_RATE * 100).toFixed(1)}% p\\.a\\.\\*\\*`),
     'the stress rate in the guide and in lib/calc/constants.js disagree');
 });
+
+/**
+ * A comment marker that outlived its comment.
+ *
+ * `npm run note` scaffolds a <!-- WHAT MOVED --> block of the day's figures
+ * and tells the writer to delete it. The first real note deleted the opening
+ * marker and the contents, left the closing one, and shipped a bare "-->"
+ * onto the live page above the first paragraph.
+ *
+ * It will happen again — it is the sort of thing that happens at speed. The
+ * renderer forgives it now, and the one case it must NOT forgive is an arrow
+ * inside a sentence, which is prose and has to survive.
+ */
+import { render as renderMd } from '../lib/md.js';
+
+test('a half-deleted scaffold comment does not reach the page', () => {
+  for (const [what, md] of [
+    ['an orphan closing marker', 'Before\n\n-->\n\nAfter'],
+    ['a whole comment', 'Before\n\n<!-- notes\n  · a figure\n-->\n\nAfter'],
+    ['an orphan opening marker', 'Before\n\n<!-- half a thought\n\nAfter'],
+  ]) {
+    const html = renderMd(md);
+    assert.doesNotMatch(html, /--&gt;|<!--/, `${what} leaked into the page`);
+    assert.match(html, /Before/, `${what} ate the text before it`);
+    assert.match(html, /After/, `${what} ate the text after it`);
+  }
+});
+
+test('an arrow inside a sentence is prose and survives', () => {
+  const html = renderMd('Prices fell 5% --> then recovered.');
+  assert.match(html, /--&gt;/, 'stripping is eating writing, not scaffolding');
+});

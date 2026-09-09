@@ -38,7 +38,7 @@ export default function Page() {
       </section>
 
       <section className="pane">
-        <div className="note"><b>There is still no map service underneath this.</b> No tiles, no
+        <div className="note method"><b>There is still no map service underneath this.</b> No tiles, no
           basemap host, no mapping library — nothing is fetched from anyone else when this page
           loads. {map.land
             ? <>The land is {map.land.source}, downloaded once, simplified to about fifteen metres and
@@ -55,7 +55,7 @@ export default function Page() {
           coordinate for every station exit and says nothing about which line a station sits on. Drawing
           the lines would mean supplying the network from memory, and a rail line in the wrong place over
           real transactions is worse than no rail line at all.</div>
-        <div className="note"><b>A town name sits where its housing is.</b> Each label is drawn at the
+        <div className="note method"><b>A town name sits where its housing is.</b> Each label is drawn at the
           median coordinate of that town's own plotted blocks, not at the centre of a boundary — there is
           no boundary file here, and drawing one from memory would be the same mistake as drawing the rail
           lines. Names that would overlap are dropped rather than overprinted, so the map thins out instead

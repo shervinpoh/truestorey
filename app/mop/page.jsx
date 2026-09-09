@@ -4,6 +4,7 @@ import Masthead from '../../components/Masthead.jsx';
 import MopView from '../../components/MopView.jsx';
 import { titleCase, slug, hdbHref } from '../../lib/name.js';
 import { simplify } from '../../lib/geojson.js';
+import FromBack from '../../components/FromBack.jsx';
 
 export const metadata = {
   title: 'HDB MOP tracker — which blocks reach their fifth year, by town | Truestorey',
@@ -34,6 +35,7 @@ export default function Page() {
         sub={m
           ? `${m.totals.upcomingBlocks.toLocaleString()} blocks reach their fifth year between ${m.generatedForYear} and ${m.generatedForYear + 4} — ${m.totals.upcomingUnits.toLocaleString()} units that could come to market.`
           : 'Blocks approaching the end of their Minimum Occupation Period, by town and by year.'} />
+      <FromBack label="the property" />
       <section className="pane">
         {view ? <MopView {...view} /> : (
           <div className="warn">

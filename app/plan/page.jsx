@@ -39,7 +39,7 @@ export default function Page() {
       source: i.private?.source, period: i.private?.period,
       note: 'Executive condominiums only — resale and subsale filed with URA. Ten districts have them; the rest were never built with any.',
       items: allDistricts('Executive Condominium').map(d => ({
-        key: d.district, href: '/condo', name: d.name,
+        key: d.district, href: `/condo?d=${d.district}`, name: d.name,
         medianPrice: d.medianPrice, medianPsf: d.medianPsf,
       })),
     },
@@ -47,8 +47,11 @@ export default function Page() {
       label: 'district', plural: 'districts', unit: 'home',
       source: i.private?.source, period: i.private?.period,
       note: 'All private residential types together, landed included — a district median is a wide thing.',
+      /* ?d= opens that district directly. It linked to /condo flat, so a
+         reader who clicked District 2 landed on all twenty-eight and had to
+         find it again. */
       items: allDistricts().map(d => ({
-        key: d.district, href: '/condo', name: d.name,
+        key: d.district, href: `/condo?d=${d.district}`, name: d.name,
         medianPrice: d.medianPrice, medianPsf: d.medianPsf,
       })),
     },
