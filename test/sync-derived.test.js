@@ -65,3 +65,41 @@ test('the derived builds are in the build pipeline too', () => {
   for (const s of ['build:comps', 'build:rents', 'build:trend', 'build:budget'])
     assert.match(scripts.data, new RegExp(s), `npm run data does not run ${s}`);
 });
+
+/**
+ * A signal that fires every night is not a signal.
+ *
+ * The workflow failed deliberately whenever any source failed, so "a source
+ * being down is loud rather than silent". MAS went down on 28 August and the
+ * nightly run went red on 14 of the next 15 mornings — for a fault outside
+ * this repo that nobody here can fix. A genuinely broken ingest would have
+ * arrived as the fifteenth identical red X.
+ *
+ * So an outage now carries a duration. Inside the grace period it is a warning
+ * and the run stays green; past it the run fails and keeps failing, because a
+ * fortnight is not an outage, it is an endpoint that moved.
+ */
+test('a source outage is measured in days, not treated as a state', () => {
+  const src = readFileSync(new URL('../scripts/sync.mjs', import.meta.url), 'utf8');
+  assert.match(src, /GRACE_DAYS\s*=\s*(\d+)/, 'the grace period is gone; every outage fails the run again');
+  const grace = Number(/GRACE_DAYS\s*=\s*(\d+)/.exec(src)[1]);
+  assert.ok(grace >= 2 && grace <= 21, `a grace of ${grace} days is not a grace period`);
+  assert.match(src, /failingSince/, 'nothing records WHEN a source started failing');
+  assert.match(src, /process\.exit\(overdue\.length \? 1 : 0\)/,
+    'the exit code is back to failing on any outage rather than a prolonged one');
+});
+
+/**
+ * ageOf reads a DATE stamp, so the age is how many WHOLE days ago the file was
+ * written. It used Math.round, which turned a file saved at 16:31 UTC into one
+ * day old the moment it was saved — so on a daily interval every fresh pull
+ * reported itself as having failed to refresh. Found by running the sync and
+ * reading what it said, not by any test.
+ */
+test('a file written today is zero days old, whatever the hour', () => {
+  const src = readFileSync(new URL('../scripts/sync.mjs', import.meta.url), 'utf8');
+  const fn = /const ageOf = f => \{[\s\S]*?\n\};/.exec(src);
+  assert.ok(fn, 'ageOf moved — check this test still describes it');
+  assert.match(fn[0], /Math\.floor\(/, 'ageOf rounds again: a fresh file will read as a day stale');
+  assert.doesNotMatch(fn[0], /Math\.round\(/, 'rounding a partial day up makes every afternoon refresh look failed');
+});
