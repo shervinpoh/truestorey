@@ -14,6 +14,7 @@
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { findings, topFinding, MIN_SCORE } from '../lib/findings.js';
 
 const all = findings();
@@ -98,4 +99,63 @@ test('the MOP caveat travels with the figure, because that one is always misread
   if (!mop) return;
   assert.match(mop.caveat, /not an intention to sell/i);
   assert.doesNotMatch(mop.claim, /supply/i, 'MOP eligibility is not incoming supply');
+});
+
+/**
+ * Two candidates that each looked right and were not.
+ *
+ * The sun-approval candidate found a 63-storey approval and would have written
+ * that a 63-storey tower was coming. The decision was "PROPOSED REGULARISATION
+ * OF GFA AND AMENDMENT TO THE APPROVED CONDOMINIUM HOUSING DEVELOPMENT" —
+ * paperwork on a permission already granted, possibly for a building already
+ * standing. An amendment carries the same storey count in its text as the
+ * erection it amends, so a height filter cannot tell them apart. URA's own
+ * applType can.
+ */
+test('only a new erection counts as a building arriving', () => {
+  const src = readFileSync(new URL('../lib/findings.js', import.meta.url), 'utf8');
+  assert.match(src, /\^New Erection\$/,
+    'amendments and extensions are back in: a re-papered permission will be written as a new tower');
+});
+
+/**
+ * And it took the single TALLEST approval, returning nothing when that one had
+ * no addresses in its arc — so a 30-storey block with no western neighbours
+ * silenced a 22-storey one with thirty. Nine approvals qualified; it looked at
+ * one.
+ */
+test('every qualifying approval is scored, not just the tallest', () => {
+  const src = readFileSync(new URL('../lib/findings.js', import.meta.url), 'utf8');
+  const fn = /function approvalInTheSun[\s\S]*?\n\}/.exec(src)[0];
+  assert.match(fn, /candidates\.push/, 'back to keeping only one candidate');
+  assert.match(fn, /for \(const d of candidates\)/, 'the candidates are no longer all scored');
+});
+
+/**
+ * Thirty storeys is only news if it stands in front of somebody. Height plus a
+ * little reach scored a 30-storey block with ONE address 494m away at 0.83 —
+ * enough to lead the morning on nothing.
+ */
+test('a tall approval with nobody in front of it does not score', () => {
+  const src = readFileSync(new URL('../lib/findings.js', import.meta.url), 'utf8');
+  const fn = /function approvalInTheSun[\s\S]*?\n\}/.exec(src)[0];
+  assert.match(fn, /hit\.length < 3 \? 0/,
+    'a single distant address can carry a finding again');
+  assert.match(fn, /\* 0\.5/, 'reach no longer counts for half the score');
+});
+
+/**
+ * A candidate reading a field that does not exist returns null forever and the
+ * day just looks quiet. Both new candidates are checked against the shape of
+ * the data actually in this build.
+ */
+test('the new candidates read fields that exist', () => {
+  const storey = JSON.parse(readFileSync(new URL('../data/storey.json', import.meta.url), 'utf8'));
+  assert.ok(storey?.hdb?.national?.['4 ROOM']?.within?.p50,
+    'floorPremium reads hdb.national["4 ROOM"].within.p50 — it is gone');
+  assert.ok(storey?.hdb?.groups, 'floorPremium reads hdb.groups — it is gone');
+
+  const planning = JSON.parse(readFileSync(new URL('../data/planning.json', import.meta.url), 'utf8'));
+  assert.ok(planning.decisions.some(d => d.applType === 'New Erection'),
+    'no decision carries applType "New Erection" — the filter would silence the candidate forever');
 });
