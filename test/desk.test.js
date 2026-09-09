@@ -154,3 +154,32 @@ test('the desk workflow passes the key through', () => {
   assert.match(wf, /UNSPLASH_ACCESS_KEY:\s+\$\{\{ secrets\.UNSPLASH_ACCESS_KEY \}\}/,
     'the scheduled run has no key, so every piece it files will be unillustrated');
 });
+
+/**
+ * A search for "singapore hdb" returns apartment blocks, and plenty of them
+ * are in Hong Kong, Kuala Lumpur or Seoul. On a site whose whole claim is that
+ * its figures come from Singapore's own agencies, a photograph of somewhere
+ * else is a small lie at the top of the page — and one a reader who knows the
+ * city spots immediately.
+ */
+test('a photograph must be confirmable as Singapore, or there is none', () => {
+  const fn = /async function photograph\(\)[\s\S]*?\n\}/.exec(src)[0];
+  assert.match(fn, /\/search\/photos/,
+    'back to /photos/random, which returns one loosely-matched photo with no way to check it');
+  assert.match(fn, /location\?\.country/, 'the location field is no longer checked');
+  assert.match(fn, /could be confirmed as Singapore/,
+    'an unconfirmable result is being used instead of dropped');
+
+  // The fallback is no photograph, never a photograph of somewhere else.
+  const noneBranch = fn.slice(fn.indexOf('if (!singaporean.length)'));
+  assert.match(noneBranch.slice(0, 200), /return null/,
+    'it falls through to a non-Singapore photo when nothing qualifies');
+});
+
+test('the search terms are all Singapore and all plain ASCII', () => {
+  const terms = /const terms = \[[\s\S]*?\];/.exec(src)[0];
+  assert.doesNotMatch(terms, /[^\x00-\x7F]/, 'a stray non-ASCII character got into a search term');
+  const each = terms.match(/'([^']+)'/g) || [];
+  assert.ok(each.length >= 4, 'the term list has shrunk');
+  for (const t of each) assert.match(t, /singapore/i, `${t} does not name the city`);
+});
