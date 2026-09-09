@@ -1968,3 +1968,67 @@ sup.cite a:hover{text-decoration:underline}
   font-size:12.5px;max-width:74ch}
 .note.method b{color:var(--ink2);font-weight:600}
 .note.method a{color:var(--ink2);text-decoration:underline;text-underline-offset:2px}
+
+/* ── the editorial desk ─────────────────────────────────────────────────────
+   /insights was a masthead, a filter and one chronological list. A flat river
+   gives every piece the same weight, so nothing leads and a reader arriving
+   cold cannot tell what kind of publication this is until they have read
+   something.
+
+   A finance paper settles that in the first two inches — the FT opens on
+   markets, Bloomberg on tickers — and it is not decoration, it is the register
+   being set before any prose. A property blog cannot do it because it has no
+   market of its own. This one has four published indices with their periods,
+   so they lead.
+
+   No serif here either. Stacked Homes owns cream-and-serif in this market and
+   the answer to "make it look like a newspaper" is hierarchy and density, not
+   a Georgia stack. */
+.edmast{max-width:70ch;margin:0 0 18px}
+.edkicker{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin:0 0 8px}
+.edmast h1{font-size:clamp(30px,5vw,46px);line-height:1.04;letter-spacing:-.03em;margin:0 0 10px}
+.edsub{color:var(--ink2);max-width:62ch;margin:0}
+
+/* The strip. Quarterly indices and a monthly register, so nothing animates —
+   a ticker would imply a liveness the data does not have. */
+.mstrip{border-top:1px solid var(--ink);border-bottom:1px solid var(--line);
+  padding:11px 0 10px;margin:0 0 26px}
+.mstriprow{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 22px}
+.mstripday{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.mfig{display:flex;align-items:baseline;gap:6px;white-space:nowrap}
+.mfig .lab{font-size:11px;color:var(--mute)}
+.mfig b{font-size:15px;font-weight:600;letter-spacing:-.01em}
+/* Green and red are reserved for a price that moved. This is exactly that,
+   which is why they are allowed here and nowhere else on the page. */
+.mmove{font-style:normal;font-size:11px}
+.mmove.up{color:var(--up)}
+.mmove.dn{color:var(--dn)}
+.mfig .mper{font-size:10.5px;color:var(--mute)}
+.mstripsub{display:flex;flex-wrap:wrap;gap:4px 20px;margin-top:9px;
+  font-size:12px;color:var(--ink2)}
+.mstripsub a{color:var(--acc);font-weight:600}
+.mstripsub .mmiss{color:var(--warn)}
+
+/* Lead and two seconds. An editor choosing what leads is the difference
+   between a publication and an archive; here the data chooses — newest long
+   piece — so there is no field to forget to set. */
+.edtop{display:grid;grid-template-columns:1.55fr 1fr;gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:var(--r2);overflow:hidden;margin:0 0 26px}
+.edlead,.edseconds>article{background:var(--card)}
+.edlead a,.edseconds a{display:block;padding:20px 22px;text-decoration:none;color:inherit}
+.edlead a:hover,.edseconds a:hover{background:var(--sunk)}
+.edleadimg{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;
+  border-radius:var(--r1);margin:0 0 14px;display:block}
+.edlead h2{font-size:clamp(23px,3.2vw,32px);line-height:1.1;letter-spacing:-.025em;margin:9px 0 8px}
+.edseconds{display:grid;grid-template-rows:1fr 1fr;gap:1px;background:var(--line)}
+.edseconds h3{font-size:17px;line-height:1.2;letter-spacing:-.018em;margin:8px 0 6px}
+.edsum{color:var(--ink2);font-size:14px;line-height:1.5;margin:0 0 10px;max-width:56ch}
+.edseconds .edsum{font-size:13px;-webkit-line-clamp:3;line-clamp:3;display:-webkit-box;
+  -webkit-box-orient:vertical;overflow:hidden}
+.edmeta{font-size:11px;color:var(--mute);margin:0}
+
+@media(max-width:860px){
+  .edtop{grid-template-columns:1fr}
+  .edseconds{grid-template-rows:auto auto}
+  .edlead h2{font-size:24px}
+}
