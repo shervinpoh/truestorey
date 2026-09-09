@@ -26,6 +26,11 @@ const esc = s => String(s ?? '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 const W = 720, PAD = 18, ROW = 30, LABEL = 168;
+/* Room for the value that sits at the END of a bar. Without it the longest bar
+   runs to the canvas edge and its own label falls off — "907 psf" rendered as
+   "9(" on the first live chart. The longest bar is by definition the one the
+   chart is about, so the clipped label was always the one that mattered. */
+const VALUE = 92;
 
 export async function GET(req) {
   const q = new URL(req.url).searchParams;
@@ -53,7 +58,7 @@ export async function GET(req) {
      magnitude, because a fall of 3% and a rise of 3% are not the same fact. */
   const max = Math.max(...rows.map(r => Math.abs(r.value)));
   const anyNeg = rows.some(r => r.value < 0);
-  const track = W - PAD * 2 - LABEL;
+  const track = W - PAD * 2 - LABEL - VALUE;
   const zero = PAD + LABEL + (anyNeg ? track / 2 : 0);
   const scale = (anyNeg ? track / 2 : track) / (max || 1);
 

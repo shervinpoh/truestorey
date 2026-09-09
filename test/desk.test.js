@@ -91,3 +91,28 @@ test('the schedule files a draft and cannot publish', () => {
   assert.doesNotMatch(wf, /studio\/publish|status.*published/i,
     'the scheduled job can publish; a person pressing a button is the whole point of drafts');
 });
+
+/**
+ * The longest bar ran to the canvas edge and its own value label fell off —
+ * "907 psf" rendered as "9(" on the first chart anybody looked at. The longest
+ * bar is by definition the one the chart exists to show, so the clipped label
+ * was always the one that mattered.
+ */
+test('the chart reserves room for the value at the end of the longest bar', () => {
+  const chart = readFileSync(path.join(process.cwd(), 'app', 'chart', 'route.js'), 'utf8');
+  assert.match(chart, /const VALUE = \d+/, 'no space is reserved for the value labels');
+  assert.match(chart, /const track = W - PAD \* 2 - LABEL - VALUE/,
+    'the track is back to filling the canvas, so the longest label clips again');
+
+  // The geometry, checked rather than trusted.
+  /* No RegExp constructor. `\\d` inside a template literal reaches it as an
+     escaped backslash rather than a digit class — the same double-escaping
+     that made test/blindspot.test.js pass while matching nothing, found this
+     morning and reproduced here within the hour. A literal cannot do it. */
+  const nums = Object.fromEntries([...chart.matchAll(/\b([A-Z]+) = (\d+)/g)].map(m => [m[1], Number(m[2])]));
+  const num = n => { assert.ok(nums[n] !== undefined, `${n} is no longer a plain constant`); return nums[n]; };
+  const W = num('W'), PAD = num('PAD'), LABEL = num('LABEL'), VALUE = num('VALUE');
+  const longestBarEnds = PAD + LABEL + (W - PAD * 2 - LABEL - VALUE);
+  assert.ok(W - longestBarEnds >= 60,
+    `only ${W - longestBarEnds}px left after the longest bar — a value label needs more`);
+});
