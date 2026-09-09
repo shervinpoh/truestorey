@@ -2049,3 +2049,39 @@ sup.cite a:hover{text-decoration:underline}
   .sunwrap{grid-template-columns:1fr;justify-items:center}
   .sunfacts{justify-self:stretch}
 }
+
+/* ── which way the unit faces ───────────────────────────────────────────────
+   No dataset carries a unit's orientation, so the reader gives it — the way
+   they give a price to the calculators. The twelve months are banded by how
+   squarely the setting sun meets that facing, because "does it get west sun"
+   is yes for half the compass and answers nothing.
+
+   The ramp is the interface teal deepening, not green-to-red: a west-facing
+   living room is a fault to one buyer and a sunset to another, and this site
+   has no view on which. */
+.facing{margin:18px 0 16px;padding-top:14px;border-top:1px solid var(--line2)}
+.facinglab{display:block;max-width:320px;margin:0 0 10px}
+.facinglab .lab{display:block;margin-bottom:5px}
+.facingyear{list-style:none;display:grid;grid-template-columns:repeat(12,1fr);
+  gap:3px;margin:12px 0 10px;padding:0}
+.fm{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 2px;
+  border-radius:var(--r1);background:var(--sunk)}
+.fmn{font-size:10px;color:var(--mute);letter-spacing:.02em}
+.fmo{font-size:12px;font-weight:600}
+.fm.square{background:#164F52;color:var(--on-acc)}
+.fm.square .fmn{color:rgba(255,255,255,.72)}
+.fm.oblique{background:#4E7E80;color:var(--on-acc)}
+.fm.oblique .fmn{color:rgba(255,255,255,.72)}
+.fm.grazing{background:#9CB6B7}
+.fm.none{background:var(--sunk);color:var(--mute)}
+.facingkey{list-style:none;display:flex;flex-wrap:wrap;gap:6px 16px;margin:0 0 10px;padding:0;
+  font-size:11px;color:var(--mute)}
+.facingkey li{display:flex;align-items:center;gap:6px}
+.facingkey i{width:11px;height:11px;border-radius:2px;display:inline-block}
+.facingkey i.square{background:#164F52}
+.facingkey i.oblique{background:#4E7E80}
+.facingkey i.grazing{background:#9CB6B7}
+.facingkey i.none{background:var(--sunk);border:1px solid var(--line)}
+@media(max-width:640px){
+  .facingyear{grid-template-columns:repeat(6,1fr)}
+}

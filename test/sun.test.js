@@ -13,8 +13,8 @@
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { solarPosition, sunsetAzimuth, sunsetArc, lowSunWindow, bearingTo, compass, LOW_SUN_DEG }
-  from '../lib/sun.js';
+import { solarPosition, sunsetAzimuth, sunsetArc, lowSunWindow, bearingTo, compass,
+         sunsetByMonth, offsetFrom, directness, DIRECTNESS, LOW_SUN_DEG } from '../lib/sun.js';
 import { storeysIn } from '../lib/blindspot/measure.js';
 
 const LAT = 1.3521, LON = 103.8198;              // Singapore
@@ -91,4 +91,63 @@ test('a storey count is read from URA wording, and a misparse is refused', () =>
   assert.equal(storeysIn('PROPOSED ADDITIONS AT 340 CLEMENTI AVENUE'), null, 'an address is not a height');
   assert.equal(storeysIn(''), null);
   assert.equal(storeysIn(null), null);
+});
+
+/**
+ * "Does this unit get west sun" is yes for half the compass.
+ *
+ * A window takes direct sun whenever the sun is anywhere in front of it, so a
+ * yes/no test answers nobody. What varies — and what people mean — is how
+ * squarely it arrives. The offset is the figure; the bands are named in
+ * lib/sun.js so a component cannot invent others.
+ *
+ * The site cannot know a unit's facing. No public dataset carries one: URA
+ * publishes a floor band, not a unit, and nothing publishes which way a
+ * bedroom points. The reader supplies it, the way they supply a price.
+ */
+test('the offset is symmetric, bounded, and zero when the sun is dead on', () => {
+  assert.equal(offsetFrom(270, 270), 0);
+  assert.equal(offsetFrom(270, 280), 10);
+  assert.equal(offsetFrom(270, 260), 10);
+  // Wrapping past north must not produce 350°.
+  assert.equal(offsetFrom(350, 10), 20);
+  assert.equal(offsetFrom(10, 350), 20);
+  assert.ok(offsetFrom(0, 181) <= 180);
+  assert.equal(offsetFrom(null, 270), null);
+});
+
+test('a facing gets its most direct sun in the month the arc reaches it', () => {
+  const by = sunsetByMonth(1.3521, 103.8198, 2026);
+  const most = facing => {
+    let best = null;
+    by.forEach((m, i) => {
+      const o = offsetFrom(facing, m.azimuth);
+      if (best === null || o < best.o) best = { o, month: i + 1 };
+    });
+    return best;
+  };
+  // Due west lines up at the equinoxes, when the sun sets due west.
+  assert.ok([3, 9].includes(most(270).month), `due west peaked in month ${most(270).month}`);
+  // WSW is a December problem; WNW is a June one. That asymmetry is the
+  // whole reason the panel shows twelve months instead of one number.
+  assert.ok([12, 1].includes(most(247).month));
+  assert.ok([6, 7].includes(most(293).month));
+});
+
+test('a facing away from the sunset never reads as sunlit', () => {
+  const by = sunsetByMonth(1.3521, 103.8198, 2026);
+  for (const m of by) {
+    // Due east: the afternoon sun is behind the wall in every month.
+    assert.ok(offsetFrom(90, m.azimuth) > 90, 'an east window cannot take the setting sun');
+    // Due south never gets closer than grazing at this latitude.
+    assert.ok(offsetFrom(180, m.azimuth) > 55);
+  }
+  assert.equal(directness(offsetFrom(90, by[0].azimuth)).id, 'none');
+  assert.equal(directness(2).id, 'square');
+});
+
+test('the bands are stated once and cover every angle', () => {
+  const covered = [0, 24, 25, 54, 55, 89, 90, 180].map(d => directness(d));
+  assert.ok(covered.every(Boolean), 'an angle fell through the bands');
+  assert.equal(DIRECTNESS[DIRECTNESS.length - 1].upTo, 181, 'the last band must catch 180°');
 });

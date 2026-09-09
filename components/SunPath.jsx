@@ -1,4 +1,5 @@
 import { compass, sgTime } from '../lib/sun.js';
+import Facing from './Facing.jsx';
 
 /**
  * Where the afternoon sun comes from, and what has permission to stand in it.
@@ -99,6 +100,10 @@ export default function SunPath({ sun, approvals, label }) {
           )}
         </div>
       </div>
+
+      {/* The arc is about the building. This is about the unit — the one fact
+          the reader has and the datasets do not. */}
+      <Facing byMonth={sun.byMonth || []} />
 
       {approvals && (
         approvals.total === 0 ? (
