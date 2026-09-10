@@ -248,10 +248,21 @@ if (DRY) {
   process.exit(0);
 }
 
+/* ── THE SECRET IS A HEADER, NOT A FIELD ──────────────────────────────────
+   This sent it in the body and the first scheduled run came back 401. The
+   shape was copied from the Make blueprint's notify call, which posts
+   {"secret": …} to a DIFFERENT endpoint — /api/webhook/article reads
+   Authorization: Bearer, and reads nothing from the body but the article.
+
+   Had it been accepted it would have been worse: a body field is stored, so
+   the secret would have been written onto the article row. */
 const res = await fetch(`${SITE}/api/webhook/article`, {
   method: 'POST',
-  headers: { 'content-type': 'application/json' },
-  body: JSON.stringify({ secret: process.env.ARTICLE_WEBHOOK_SECRET, ...row }),
+  headers: {
+    'content-type': 'application/json',
+    authorization: `Bearer ${process.env.ARTICLE_WEBHOOK_SECRET || ''}`,
+  },
+  body: JSON.stringify(row),
 });
 const out = await res.json().catch(() => ({}));
 if (!res.ok) {

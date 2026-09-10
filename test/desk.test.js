@@ -183,3 +183,27 @@ test('the search terms are all Singapore and all plain ASCII', () => {
   assert.ok(each.length >= 4, 'the term list has shrunk');
   for (const t of each) assert.match(t, /singapore/i, `${t} does not name the city`);
 });
+
+/**
+ * The first scheduled run came back 401.
+ *
+ * The secret was being sent as a body field, a shape copied from the Make
+ * blueprint's notify call — which posts {"secret": …} to a different endpoint.
+ * /api/webhook/article reads Authorization: Bearer and takes nothing from the
+ * body but the article.
+ *
+ * Had it been accepted it would have been worse than a 401: body fields are
+ * stored, so the secret would have been written onto the article row.
+ */
+test('the webhook secret travels as a header and never in the body', () => {
+  assert.match(src, /authorization: `Bearer \$\{process\.env\.ARTICLE_WEBHOOK_SECRET/,
+    'the secret is not being sent as a bearer token; the webhook will refuse it');
+  /* Comments stripped: the note above the fix quotes {"secret": …} to explain
+     what was wrong, and an unfiltered search finds the explanation. Fourth
+     source-reading test today to match its own prose. */
+  const code = src.replace(/\/\*[\s\S]*?\*\//g, '').split('\n')
+    .filter(l => !/^\s*(\/\/|\*)/.test(l)).join('\n');
+  assert.doesNotMatch(code, /secret: process\.env|"secret":/,
+    'the secret is in the request body again — it would be stored on the row');
+  assert.match(src, /body: JSON\.stringify\(row\)/, 'the body should carry the article and nothing else');
+});
