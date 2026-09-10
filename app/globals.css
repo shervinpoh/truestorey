@@ -2015,10 +2015,20 @@ sup.cite a:hover{text-decoration:underline}
 .edtop{display:grid;grid-template-columns:1.55fr 1fr;gap:1px;background:var(--line);
   border:1px solid var(--line);border-radius:var(--r2);overflow:hidden;margin:0 0 26px}
 .edlead,.edseconds>article{background:var(--card)}
-.edlead a,.edseconds a{display:block;padding:20px 22px;text-decoration:none;color:inherit}
+.edlead a,.edseconds a{padding:20px 22px;text-decoration:none;color:inherit}
+.edlead a{display:block}
+/* The seconds carry a thumbnail, not a full-bleed image. Stacking a 16:9
+   photograph on top of both of these cards makes this column ~200px taller
+   than the lead beside it, and a grid row stretches to the tallest, so the
+   lead would end in dead space. A thumb keeps the two columns level and the
+   photograph still arrives. No flex-basis media query: the clamp does it. */
+.edseconds a{display:flex;gap:14px;align-items:flex-start}
+.edsectxt{min-width:0}
+.edsecimg{flex:0 0 auto;width:clamp(96px,24vw,120px);aspect-ratio:4/3;
+  object-fit:cover;border-radius:var(--r1);display:block;background:var(--sunk)}
 .edlead a:hover,.edseconds a:hover{background:var(--sunk)}
 .edleadimg{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;
-  border-radius:var(--r1);margin:0 0 14px;display:block}
+  border-radius:var(--r1);margin:0 0 14px;display:block;background:var(--sunk)}
 .edlead h2{font-size:clamp(23px,3.2vw,32px);line-height:1.1;letter-spacing:-.025em;margin:9px 0 8px}
 .edseconds{display:grid;grid-template-rows:1fr 1fr;gap:1px;background:var(--line)}
 .edseconds h3{font-size:17px;line-height:1.2;letter-spacing:-.018em;margin:8px 0 6px}

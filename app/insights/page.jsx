@@ -108,14 +108,20 @@ export default async function Page() {
                 {seconds.map(p => (
                   <article key={p.slug}>
                     <Link href={p.href}>
-                      <span className={'kind' + (p.kind === 'deep' ? ' deep' : '')}>
-                        {p.kind === 'deep' ? 'Deep dive' : 'Note'}
-                      </span>
-                      <h3>{p.title}</h3>
-                      {p.summary && <p className="edsum">{p.summary}</p>}
-                      <p className="edmeta mono">
-                        {p.date}{p.minutes ? ` · ${p.minutes} min` : ''}
-                      </p>
+                      {p.image && (
+                        <img className="edsecimg" src={p.image} alt={p.imageAlt || ''}
+                          loading="lazy" width="480" height="360" />
+                      )}
+                      <div className="edsectxt">
+                        <span className={'kind' + (p.kind === 'deep' ? ' deep' : '')}>
+                          {p.kind === 'deep' ? 'Deep dive' : 'Note'}
+                        </span>
+                        <h3>{p.title}</h3>
+                        {p.summary && <p className="edsum">{p.summary}</p>}
+                        <p className="edmeta mono">
+                          {p.date}{p.minutes ? ` · ${p.minutes} min` : ''}
+                        </p>
+                      </div>
                     </Link>
                   </article>
                 ))}
