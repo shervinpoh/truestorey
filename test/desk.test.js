@@ -127,16 +127,35 @@ test('the chart reserves room for the value at the end of the longest bar', () =
  * like it might is worse than none. The search terms are general on purpose —
  * the city, not the subject.
  */
-test('the photograph is searched by the city, never by the subject', () => {
-  const fn = /export async function photograph\(\)[\s\S]*?\n\}/.exec(photoSrc);
+/*
+ * This used to read "searched by the city, never by the subject", and the
+ * second half is the one that matters. A stock photograph cannot show the
+ * block, plot or project a piece is about, so the article's own words must
+ * never reach Unsplash — search "Marina Gardens Lane" and whatever comes back
+ * gets read as a picture of Marina Gardens Lane.
+ *
+ * The first half was over-correction. Searching nothing but the city meant a
+ * lease piece, a tender piece and a stamp duty piece drew from one pool of
+ * five terms, and the editorial page filled with Marina Bay. The query now
+ * comes from a fixed table keyed by subject, so it is still never built from
+ * the article text. photo-subject.test.js proves that against a stubbed
+ * search; this proves the query cannot be built from an argument at all.
+ */
+test('the query comes from the table, never from the article', () => {
+  const fn = /export async function photograph\([\s\S]*?\n\}/.exec(photoSrc);
   assert.ok(fn, 'photograph() moved — check this test still describes it');
-  assert.doesNotMatch(fn[0], /finding\.|subject|\$\{f\./,
-    'the photo query is built from the article subject; a stock image must not imply it shows the place');
-  assert.match(fn[0], /singapore/i);
+  const body = fn[0].replace(/\/\*[\s\S]*?\*\//g, '').split('\n')
+    .filter(l => !/^\s*(\/\/|\*)/.test(l)).join('\n');
+  assert.doesNotMatch(body, /encodeURIComponent\(\s*(about|also)\b/,
+    'the article text is being encoded into the search URL');
+  assert.match(body, /subjectFor\(about, also\)/,
+    'the subject is no longer resolved from the table');
+  assert.match(body, /pick\(\s*subject\.queries\s*\)/,
+    'the query is no longer taken from the subject table');
 });
 
 test('a missing key costs the photograph, not the article', () => {
-  const fn = /export async function photograph\(\)[\s\S]*?\n\}/.exec(photoSrc)[0];
+  const fn = /export async function photograph\([\s\S]*?\n\}/.exec(photoSrc)[0];
   assert.match(fn, /if \(!key\) return null/, 'no key now throws instead of filing without a picture');
   assert.match(fn, /catch/, 'an Unsplash outage would take the whole run down');
 });
@@ -165,27 +184,38 @@ test('the desk workflow passes the key through', () => {
  * its figures come from Singapore's own agencies, a photograph of somewhere
  * else is a small lie at the top of the page — and one a reader who knows the
  * city spots immediately.
+ *
+ * That rule now has two halves, because the picture is chosen by subject: a
+ * photograph of a PLACE must be Singapore, and a photograph of a THING must
+ * name nowhere else. test/photo-subject.test.js exercises both against a
+ * stubbed search. These two only check that the machinery is still there,
+ * because it is reachable from here and cheap to lose in a refactor.
  */
-test('a photograph must be confirmable as Singapore, or there is none', () => {
-  const fn = /export async function photograph\(\)[\s\S]*?\n\}/.exec(photoSrc)[0];
-  assert.match(fn, /\/search\/photos/,
+test('both halves of the country rule are still in the file', () => {
+  const code = photoSrc.replace(/\/\*[\s\S]*?\*\//g, '').split('\n')
+    .filter(l => !/^\s*(\/\/|\*)/.test(l)).join('\n');
+  assert.match(code, /\/search\/photos/,
     'back to /photos/random, which returns one loosely-matched photo with no way to check it');
-  assert.match(fn, /location\?\.country/, 'the location field is no longer checked');
-  assert.match(fn, /could be confirmed as Singapore/,
-    'an unconfirmable result is being used instead of dropped');
-
-  // The fallback is no photograph, never a photograph of somewhere else.
-  const noneBranch = fn.slice(fn.indexOf('if (!singaporean.length)'));
-  assert.match(noneBranch.slice(0, 200), /return null/,
-    'it falls through to a non-Singapore photo when nothing qualifies');
+  assert.match(code, /location\?\.country/, 'the location field is no longer checked');
+  assert.match(code, /ELSEWHERE/,
+    'the thing lane no longer rejects photographs that name another city');
+  assert.match(code, /lane === 'place'[\s\S]{0,120}isSingapore/,
+    'the place lane no longer requires Singapore');
 });
 
-test('the search terms are all Singapore and all plain ASCII', () => {
-  const terms = /const terms = \[[\s\S]*?\];/.exec(photoSrc)[0];
-  assert.doesNotMatch(terms, /[^\x00-\x7F]/, 'a stray non-ASCII character got into a search term');
-  const each = terms.match(/'([^']+)'/g) || [];
-  assert.ok(each.length >= 4, 'the term list has shrunk');
-  for (const t of each) assert.match(t, /singapore/i, `${t} does not name the city`);
+/*
+ * The place-lane terms still all name the city; the thing-lane terms
+ * deliberately name nowhere, and photo-subject.test.js is what pins that.
+ * This is only here for the stray non-ASCII character, which encodes into
+ * the query string and quietly returns nothing.
+ */
+test('every search term is plain ASCII', () => {
+  const block = /export const SUBJECTS = \[[\s\S]*?\n\];/.exec(photoSrc);
+  assert.ok(block, 'the SUBJECTS table is gone; the picture is fixed again');
+  const each = block[0].match(/'([^']+)'/g) || [];
+  assert.ok(each.length >= 12, `only ${each.length} strings in the subject table; it has collapsed`);
+  for (const t of each) assert.doesNotMatch(t, /[^\x00-\x7F]/,
+    `${t} has a non-ASCII character in it; it will encode into the query and match nothing`);
 });
 
 /**

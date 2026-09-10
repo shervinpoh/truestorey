@@ -11,6 +11,10 @@ refreshing itself daily via `.github/workflows/refresh-data.yml`.
 **Nothing is unpushed.** A push to master IS a deploy — see the top of
 `AGENTS.md`.
 
+**The priority is §8, lead capture.** Everything above it is about being worth
+reading; §8 is what happens after somebody reads it. It starts blocked — §0
+items 2 and 3 — and nothing in it should be built before those are done.
+
 ---
 
 ## Read this before you touch the design
@@ -484,6 +488,210 @@ before a feature becomes a published claim.
 The pipeline works end to end. `npm run note` scaffolds a dated entry prefilled
 with what moved in the data. `/studio` is where volume arrives once Make.com is
 running — **the approval step is the feature; do not add a way to skip it.**
+
+---
+
+## 8 · Lead capture
+
+Added 10 Sep 2026. Everything above this line is about being worth reading.
+This section is about what happens **after** somebody reads it, and it is the
+only part of the backlog with revenue on the other end of it.
+
+**The leak, stated plainly.** Eleven tools, and `Gate` renders on exactly two
+kinds of page — the record pages, at `components/RecordPage.jsx:144`, and
+`/insights/[slug]`, which holds one entry. `/blindspot`, `/cost`, `/plan`,
+`/mop`, `/market`, `/yield`, `/compare`, `/land`, `/lease`, `/progressive` and
+`/neighbourhood` each end with a figure and no way to stay in touch. A reader
+who has just worked out that their sale leaves them S$197,747 short has had the
+most consequential moment this site can give anybody, and then the page ends.
+
+**This does not change the position.** Free with no sign-up is the strategic
+argument against the paid competitor, not a launch offer, and nothing below
+gates a figure. The distinction the whole section rests on: *free with no
+sign-up* and *no way to keep in touch* are different things, and only the first
+one was ever the promise.
+
+### 8.1 Switch on what is already built — BLOCKED ON SHERVIN
+
+Section 0 items 2 and 3 are not restated here. What this section adds is the
+ordering consequence: five of the eight items below end in an email
+subscription, and `lib/watch.js` refuses every subscription while
+`RESEND_API_KEY` and `DIGEST_FROM` are absent from **GitHub Actions**. Building
+capture surfaces that feed a sender which cannot send is the same mistake as a
+consent tick that promised an update with nothing behind it.
+
+`NEXT_PUBLIC_WA_CHANNEL` is the cheap half. It is set locally and not in
+Vercel, so `components/Follow.jsx` returns null on every production page: the
+channel link has been invisible to every reader the site has ever had.
+
+### 8.2 "Email me this report" — /blindspot and /cost
+
+`lib/consent.js` has read "Email me the full report and monthly updates on my
+block" since 24 Aug 2026. The digest half of that sentence was built on 1 Sep.
+**The report half has never existed.** It is the same shape of failure as the
+one already recorded in `CLAUDE.md`, caught this time before a reader found it,
+and that is why it is first in the build order.
+
+Why these two pages and not all eleven: they are the only two producing
+something long enough to be worth keeping. A Blindspot report runs a screen and
+a half. The `/cost` downside counts break-even failures across 186 windows.
+Both are things a reader wants to show a spouse, and both are re-derivable
+today only by retyping every input.
+
+Constraints, none negotiable:
+
+- **The report renders in full on screen first.** The email is a copy, never
+  the unlock. A reader who closes the tab without giving an address has lost
+  nothing.
+- **It may say what `lib/digest.js` may say and not one word more.** Read the
+  vocabulary note at the top of that file first. Filed transactions, the month
+  registered, the source, the period. No valuation (rule 2), no direction
+  without a period (rule 6), none of the seven forbidden words (rule 7).
+- **Inline styles, no stylesheet, no web font, no image** — the same email
+  discipline, for the same reason it is written down there.
+- **It writes to the Property CRM sheet by the same path `/api/lead` uses**,
+  logging `CONSENT_COPY_VERSION`, timestamp and IP, with `DNC Checked` blank. A
+  second consent-writing path that does its own thing is exactly how the
+  Consent Basis column ends up recording wording nobody was shown.
+
+Decide before building: a new `/api/report` route, or a `kind` on the existing
+lead route. The throttle, the honeypot and the body cap in
+`app/api/lead/route.js` are worth inheriting either way.
+
+### 8.3 The fourth line every tool is missing
+
+"What that pass did NOT finish" item 2 already says every tool should end with
+the answer · what changed it · what public data cannot know · **the next useful
+action.** Several tools do the first three and none does the fourth, and the
+fourth *is* the capture surface. This is not new scope. It is an acceptance
+criterion written down on 2 Sep and not met.
+
+What it is **not**: a form on every page. Eleven identical email boxes is a
+newsletter widget, and a newsletter widget is what a site with nothing
+particular to say does. Each tool offers **the one thing that follows from what
+the reader just worked out** — a block watch after a record, the report after
+Blindspot, the MOP date after `/mop`. Where nothing specific follows, it offers
+nothing. An offer that fits is the entire difference between this and a popup.
+
+### 8.4 The MOP date belongs on the block page
+
+**This is smaller than it first looks, and that is the finding.**
+`app/hdb/[town]/[block]/page.jsx` exists for every block already, and already
+carries both `WatchBlock` and `Gate`. So this is not 749 new pages. It is a
+dated fact and one comparison, added to a page that is already built, already
+indexed and already able to ask.
+
+Why it is worth doing: `data/mop.json` is a list of households that become able
+to sell, with the month attached. Nothing else in the repo identifies intent
+that specifically, and all of it is public. The geocoding bug fixed on 24 Aug
+is what makes it usable — `mopCoverage()` in `lib/blindspot/measure.js`
+measures that coverage precisely so a regression cannot go quiet again.
+
+What the page may say: this block reaches MOP in a named month, and here is
+what filed at this block and in this town after the previous wave, with source
+and period on every figure. What it may **not** say, and this is the one place
+the feature turns bad: nothing about whether the owner should sell, and no
+figure for what their own flat is worth. Rules 2 and 7. A page reading "your
+five-year wait is up and prices are strong" is an advertisement with a dataset
+stapled to it, which is the thing this site exists as the alternative to.
+
+### 8.5 Watch triggers beyond an HDB block
+
+`lib/watch.js` already sends a factual, recurring, indefinite email off one
+trigger. Every further trigger is another page with a reason to ask, on
+machinery that is already paid for. Candidates, roughly by how much of the data
+is already held:
+
+| Trigger | Source already in the repo |
+|---|---|
+| A project files a new sale | `data/records/` |
+| A parcel near a watched place is awarded | `lib/land.js`, `/land/[site]` |
+| A planning decision is approved nearby | `npm run ingest:planning` |
+| A lease crosses 60 or 40 years | `data/sources/leasehold-table.json` |
+
+**Do not copy the HDB watermark into any of these.** The reasoning at the top
+of `lib/watch.js` is specific to a rolling 36-month window, published monthly,
+by a source that registers late. URA's data has a different shape and a
+different lag, and a planning decision is an event with a date and no window at
+all. Each trigger derives its own mark and gets a test describing the way it
+would silently report nothing.
+
+### 8.6 A report worth forwarding
+
+`app/og/route.jsx` renders PNG through the renderer inside `next/og`, so the
+share card costs no dependency and is already on the live palette. What is
+missing is the affordance and the reason to use it.
+
+The reason is structural rather than promotional. Because this site never
+publishes a valuation, its output is the one thing in this market that is safe
+to forward: a reader can send a Blindspot report to a spouse, a parent or a
+sibling without it reading as a pitch, and that is precisely why it travels.
+Each forward arrives as an anonymous visitor with a warm referral behind it,
+and costs nothing.
+
+### 8.7 One URL per placement — A DECISION, NOT A TASK
+
+The brochure, the channel, each social post and each physical drop have to be
+separable, or there is no way to rank them against each other and the funnel is
+a matter of opinion.
+
+The obvious mechanism is a campaign parameter read into the existing event
+sink. **It is not a free call.** `lib/analytics.js` runs a closed allowlist and
+carries a written instruction to ask, of any new field, whether it identifies
+someone. A brochure id almost certainly does not — it describes a piece of
+paper, and it is coarser than the path already stored. But that file asks the
+question deliberately, and the answer belongs in a comment beside the reasoning
+about why there is no cookie banner. Answer it there, then add the field.
+
+The lead form's `source` is manual today, which means it is whatever a reader
+types, or nothing.
+
+### 8.8 What must not be built
+
+Each of these is something a reasonable person will suggest, with the rule that
+forbids it.
+
+- **A gated figure, an email wall, or a "download the full report" that holds
+  back the short one.** Free with no sign-up is the position, and
+  `components/Follow.jsx` already explains in its own comment why it is an
+  offer at the end rather than a gate.
+- **An email carrying what a reader's home is worth.** Rule 2, without
+  exception. It does not become acceptable for being private.
+- **A bought, scraped or imported list.** An inbound message is not consent
+  (rule 4), and neither is a list somebody else collected.
+- **"Just sold", or any same-day alert.** HDB registers by month, with a lag —
+  the timeliness note in `lib/digest.js` sets out what may be claimed. A rival
+  promising same-day movement on this data is promising something the source
+  does not carry.
+- **Any WhatsApp or SMS off a web form.** Consent has been email-only since
+  24 Aug 2026, and section 0 item 5 is the decision that would change that.
+  Until it exists, a phone field is not a UI question.
+- **Treating the WhatsApp channel as a lead source.** Followers cannot be
+  exported and a channel is one-way. It is reach. The lead is the page they
+  arrive on, which is why 8.3 comes before any content plan.
+- **Any of it without the CEA registration number.** Rule 8 covers the site;
+  the channel, the brochure and every social post are marketing communications
+  and carry it too.
+
+### 8.9 The arithmetic, and the one number that would fix it
+
+These are **assumptions**, written down so they can be replaced by
+measurements. None is sourced, and none goes anywhere a reader can see it.
+
+| Step | Assumed |
+|---|---|
+| Tool sessions per email captured | 50–150 |
+| Emails captured per real conversation | 5–10 |
+| Conversations per transaction | 8–12 |
+
+That puts one transaction somewhere between 2,000 and 18,000 tool sessions,
+which is too wide a range to plan against. **The first job here that produces a
+number rather than a feature is reading the real `tool_run` and `view` counts
+out of the Supabase events table.** `data/events.jsonl` is the local
+development fallback — 193 lines, last written 28 Aug — and it is not the
+traffic figure. Until the real one exists, "more traffic or better capture" is
+a matter of taste, and 8.1 to 8.3 are worth doing at any volume because capture
+is currently near zero.
 
 ---
 

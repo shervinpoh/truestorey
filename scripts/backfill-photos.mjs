@@ -1,8 +1,10 @@
 /**
  * A photograph for the pieces that were filed before there was one.
  *
- *   npm run backfill:photos          add one to every published article without
- *   npm run backfill:photos -- --dry say what it would do, change nothing
+ *   npm run backfill:photos             add one to every article without
+ *   npm run backfill:photos -- --dry    say what it would do, change nothing
+ *   npm run backfill:photos -- --replace re-pick for every article, including
+ *                                       ones that already have a photograph
  *
  * ── WHY IT IS A ONE-OFF AND NOT A JOB ──────────────────────────────────────
  * Every article the desk files from now on arrives with a picture. The five
@@ -10,15 +12,24 @@
  * their own, because an image is fetched when a piece is written. This closes
  * the gap once; running it again finds nothing and says so.
  *
- * ── IT ONLY EVER ADDS ──────────────────────────────────────────────────────
- * An article that already has a photograph is skipped, never replaced. The
- * point is to fill holes, and quietly swapping somebody's chosen image would
- * be a different and much worse tool.
+ * ── IT ONLY EVER ADDS, UNLESS TOLD OTHERWISE ───────────────────────────────
+ * An article that already has a photograph is skipped. The point is to fill
+ * holes, and quietly swapping somebody's chosen image would be a different
+ * and much worse tool.
+ *
+ * --replace is that other tool, and it is a flag rather than the default for
+ * exactly that reason. It exists because the SELECTION RULE can change: every
+ * photograph here was picked by five fixed searches for the city, so fourteen
+ * articles on leases, tenders and stamp duty were all illustrated with the
+ * skyline. Re-picking those is not overriding an editor, because no editor
+ * chose them. Once somebody sets an image by hand, this flag is the wrong
+ * tool and the right answer is to pass the slugs you mean.
  */
 import { photograph } from '../lib/photo.js';
 import { configured } from '../lib/supabase/rest.js';
 
 const DRY = process.argv.includes('--dry');
+const REPLACE = process.argv.includes('--replace');
 
 if (!configured()) {
   console.error('\nSupabase is not configured here — set SUPABASE_URL and SUPABASE_SECRET_KEY.\n');
@@ -44,7 +55,7 @@ const auth = { apikey: key, Authorization: `Bearer ${key}`, 'content-type': 'app
 /* Published and draft only. An archived piece is one somebody decided against
    and giving it a photograph is work nobody asked for. */
 const res = await fetch(
-  `${url}?select=id,slug,status,header_image_url&status=in.(published,draft)&limit=200`,
+  `${url}?select=id,slug,title,tags,status,header_image_url&status=in.(published,draft)&limit=200`,
   { headers: auth });
 if (!res.ok) {
   console.error(`\nSupabase refused the read — HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
@@ -52,16 +63,23 @@ if (!res.ok) {
   process.exit(1);
 }
 const all = await res.json();
-const missing = all.filter(a => !a.header_image_url);
+const without = all.filter(a => !a.header_image_url);
+const todo = REPLACE ? all : without;
 
-console.log(`\n${all.length} articles, ${missing.length} without a photograph.\n`);
-if (!missing.length) process.exit(0);
+console.log(`\n${all.length} articles, ${without.length} without a photograph.`);
+console.log(REPLACE
+  ? `--replace: re-picking for all ${todo.length}.\n`
+  : `Adding to ${todo.length}.\n`);
+if (!todo.length) process.exit(0);
 
 let done = 0, skipped = 0;
 
-for (const a of missing) {
-  const photo = await photograph();
-  if (!photo) { skipped++; console.log(`  — ${a.slug}: no Singapore photograph found, left as it was`); continue; }
+for (const a of todo) {
+  /* Title, slug and tags: whatever says what the piece is about. The slug
+     carries the subject when a title is stylish enough to hide it. */
+  const photo = await photograph([a.title, a.slug].filter(Boolean).join(' '),
+                                 (a.tags || []).join(' '));
+  if (!photo) { skipped++; console.log(`  — ${a.slug}: nothing qualified, left as it was`); continue; }
 
   if (DRY) {
     console.log(`  would set ${a.slug} → ${photo.unsplash_photographer_name}`);

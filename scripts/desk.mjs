@@ -140,7 +140,9 @@ art.content_html = String(art.content_html).includes('{{CHART}}')
   ? art.content_html.replace('{{CHART}}', figure)
   : art.content_html + figure;
 
-const photo = await photograph();
+/* The title and the finding, never the subject's name. photo.js only ever
+   matches against this text; the proper noun in it is not searched for. */
+const photo = await photograph(art.title, `${finding.kind} ${finding.claim || ''}`);
 
 const row = {
   ...art,

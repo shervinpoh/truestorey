@@ -27,6 +27,10 @@ on:
         description: 'Instead of writing: add a photograph to older articles that have none'
         type: boolean
         default: false
+      replace:
+        description: 'With backfill: re-pick a photograph even for articles that have one'
+        type: boolean
+        default: false
 
 concurrency:
   group: desk
@@ -56,7 +60,7 @@ jobs:
           UNSPLASH_ACCESS_KEY:    ${{ secrets.UNSPLASH_ACCESS_KEY }}
         run: |
           if [ "${{ inputs.backfill }}" = "true" ]; then
-            npm run backfill:photos
+            npm run backfill:photos ${{ inputs.replace && '-- --replace' || '' }}
           else
             npm run desk ${{ inputs.dry && '-- --dry' || '' }}
           fi
