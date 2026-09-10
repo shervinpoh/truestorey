@@ -108,6 +108,7 @@ jobs:
       # refresh. The script exits non-zero on any failed send and leaves those
       # watermarks alone, so tomorrow's run retries the same news.
       - name: Send block digests
+        id: digest
         if: steps.commit.outputs.changed == 'true'
         continue-on-error: true
         env:
@@ -117,6 +118,18 @@ jobs:
           DIGEST_FROM:         ${{ secrets.DIGEST_FROM }}
           NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
         run: node scripts/send-digest.mjs
+
+      # continue-on-error is right — a failed send must not fail the refresh —
+      # but it also reports the step as a green tick, and that hid a real
+      # failure for a month. SUPABASE_URL was stored malformed, send-digest
+      # exited 1 on 5 and 8 September, and the workflow went green both times.
+      # The send still must not fail the job, so this annotates instead of
+      # exiting. Watermarks are left alone on a failure, so nothing is lost:
+      # the next run that moves data retries the same news.
+      - name: Say so if the digest did not send
+        if: steps.digest.outcome == 'failure'
+        run: |
+          echo "::warning title=Block digests did not send::send-digest.mjs exited non-zero. No watermark moved, so the next run retries the same news. The reason is in the 'Send block digests' step."
 
       # Last, so a source being down is loud rather than silent, but only after
       # everything that could still be refreshed has been.

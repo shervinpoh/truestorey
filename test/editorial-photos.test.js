@@ -74,5 +74,10 @@ test('the seconds thumbnail has the layout it needs', () => {
     '.edseconds a is not a flex row; the thumbnail will sit above the text and unbalance the grid');
   assert.match(css, /\.edsectxt\{/, '.edsectxt is gone — the card body will lay out in a line');
   assert.match(css, /\.edsecimg\{/, '.edsecimg is gone — the thumbnail has no size');
+  /* The img tag carries width/height attributes to reserve its box, and a used
+     height from an attribute beats aspect-ratio. Drop height:auto and the thumb
+     renders 120 wide by 360 tall. The build does not mind in the slightest. */
+  assert.match(css, /\.edsecimg\{[^}]*height:auto/,
+    '.edsecimg lost height:auto; the height attribute will win and the thumb becomes a sliver');
   assert.match(page, /className="edsectxt"/, 'the card body lost its flex wrapper');
 });

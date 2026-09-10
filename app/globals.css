@@ -2024,7 +2024,12 @@ sup.cite a:hover{text-decoration:underline}
    photograph still arrives. No flex-basis media query: the clamp does it. */
 .edseconds a{display:flex;gap:14px;align-items:flex-start}
 .edsectxt{min-width:0}
-.edsecimg{flex:0 0 auto;width:clamp(96px,24vw,120px);aspect-ratio:4/3;
+/* height:auto is load-bearing. The tag carries width/height attributes so the
+   browser can reserve the box before the photograph arrives, and a used height
+   from an attribute beats aspect-ratio — without this the thumb renders 120
+   wide by 360 tall, a vertical sliver. Caught by looking at it, not by the
+   build, which was perfectly happy. */
+.edsecimg{flex:0 0 auto;width:clamp(96px,24vw,120px);height:auto;aspect-ratio:4/3;
   object-fit:cover;border-radius:var(--r1);display:block;background:var(--sunk)}
 .edlead a:hover,.edseconds a:hover{background:var(--sunk)}
 .edleadimg{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;
