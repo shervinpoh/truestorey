@@ -16,7 +16,7 @@
  * be a different and much worse tool.
  */
 import { photograph } from '../lib/photo.js';
-import { publishedArticles, draftArticles, configured } from '../lib/supabase/rest.js';
+import { configured } from '../lib/supabase/rest.js';
 
 const DRY = process.argv.includes('--dry');
 
@@ -29,16 +29,34 @@ if (!process.env.UNSPLASH_ACCESS_KEY) {
   process.exit(1);
 }
 
-/* Drafts too: a piece waiting in the queue is one somebody is about to look
-   at, and looking at it without its picture is what started this. */
-const all = [...await publishedArticles({ limit: 100 }), ...await draftArticles({ limit: 100 })];
+const url = `${process.env.SUPABASE_URL.replace(/\/$/, '')}/rest/v1/articles`;
+const key = process.env.SUPABASE_SECRET_KEY;
+const auth = { apikey: key, Authorization: `Bearer ${key}`, 'content-type': 'application/json' };
+
+/* ── THE READ REPORTS ITS OWN FAILURE ─────────────────────────────────────
+   This first used publishedArticles(), which returns [] on any error. In CI
+   it printed "0 articles" while the same call found 5 published and 10 drafts
+   on a laptop, and there was nothing in the output to say why — a swallowed
+   error reads exactly like an empty table.
+
+   Drafts are included: a piece waiting in the queue is one somebody is about
+   to look at, and looking at it without its picture is what started this. */
+/* Published and draft only. An archived piece is one somebody decided against
+   and giving it a photograph is work nobody asked for. */
+const res = await fetch(
+  `${url}?select=id,slug,status,header_image_url&status=in.(published,draft)&limit=200`,
+  { headers: auth });
+if (!res.ok) {
+  console.error(`\nSupabase refused the read — HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  console.error('The key or the URL in this environment is not the one that works.\n');
+  process.exit(1);
+}
+const all = await res.json();
 const missing = all.filter(a => !a.header_image_url);
 
 console.log(`\n${all.length} articles, ${missing.length} without a photograph.\n`);
 if (!missing.length) process.exit(0);
 
-const url = `${process.env.SUPABASE_URL.replace(/\/$/, '')}/rest/v1/articles`;
-const key = process.env.SUPABASE_SECRET_KEY;
 let done = 0, skipped = 0;
 
 for (const a of missing) {
@@ -53,10 +71,7 @@ for (const a of missing) {
 
   const res = await fetch(`${url}?id=eq.${encodeURIComponent(a.id)}`, {
     method: 'PATCH',
-    headers: {
-      apikey: key, Authorization: `Bearer ${key}`,
-      'content-type': 'application/json', Prefer: 'return=minimal',
-    },
+    headers: { ...auth, Prefer: 'return=minimal' },
     body: JSON.stringify({
       header_image_url: photo.header_image_url,
       unsplash_photographer_name: photo.unsplash_photographer_name,
