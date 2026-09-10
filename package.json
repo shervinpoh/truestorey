@@ -50,7 +50,8 @@
     "build:trend": "node scripts/build-trend.mjs",
     "build:budget": "node scripts/build-budget.mjs",
     "audit:articles": "node scripts/audit-articles.mjs",
-    "desk": "node --env-file-if-exists=.env.local scripts/desk.mjs"
+    "desk": "node --env-file-if-exists=.env.local scripts/desk.mjs",
+    "backfill:photos": "node --env-file-if-exists=.env.local scripts/backfill-photos.mjs"
   },
   "dependencies": {
     "next": "^15.0.0",

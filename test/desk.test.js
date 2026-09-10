@@ -12,6 +12,9 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
 const src = readFileSync(path.join(process.cwd(), 'scripts', 'desk.mjs'), 'utf8');
+/* photograph() lives in lib/ so the backfill can reuse it — one fetch, one
+   Singapore check, one place to get the licence terms right. */
+const photoSrc = readFileSync(path.join(process.cwd(), 'lib', 'photo.js'), 'utf8');
 
 test('the model is told the figures are fixed and may not add to them', () => {
   assert.match(src, /THE FIGURES ARE FIXED/, 'the constraint that keeps a model from assigning a number is gone');
@@ -125,7 +128,7 @@ test('the chart reserves room for the value at the end of the longest bar', () =
  * the city, not the subject.
  */
 test('the photograph is searched by the city, never by the subject', () => {
-  const fn = /async function photograph\(\)[\s\S]*?\n\}/.exec(src);
+  const fn = /export async function photograph\(\)[\s\S]*?\n\}/.exec(photoSrc);
   assert.ok(fn, 'photograph() moved — check this test still describes it');
   assert.doesNotMatch(fn[0], /finding\.|subject|\$\{f\./,
     'the photo query is built from the article subject; a stock image must not imply it shows the place');
@@ -133,7 +136,7 @@ test('the photograph is searched by the city, never by the subject', () => {
 });
 
 test('a missing key costs the photograph, not the article', () => {
-  const fn = /async function photograph\(\)[\s\S]*?\n\}/.exec(src)[0];
+  const fn = /export async function photograph\(\)[\s\S]*?\n\}/.exec(photoSrc)[0];
   assert.match(fn, /if \(!key\) return null/, 'no key now throws instead of filing without a picture');
   assert.match(fn, /catch/, 'an Unsplash outage would take the whole run down');
 });
@@ -145,7 +148,8 @@ test("Unsplash's two terms travel with the photo", () => {
   // breaks the licence rather than the build.
   for (const field of ['unsplash_photographer_name', 'unsplash_photographer_profile_url',
                        'unsplash_download_location']) {
-    assert.ok(src.includes(field), `${field} is not being sent; the licence terms are not met`);
+    assert.ok(src.includes(field) || photoSrc.includes(field),
+      `${field} is not being sent; the licence terms are not met`);
   }
 });
 
@@ -163,7 +167,7 @@ test('the desk workflow passes the key through', () => {
  * city spots immediately.
  */
 test('a photograph must be confirmable as Singapore, or there is none', () => {
-  const fn = /async function photograph\(\)[\s\S]*?\n\}/.exec(src)[0];
+  const fn = /export async function photograph\(\)[\s\S]*?\n\}/.exec(photoSrc)[0];
   assert.match(fn, /\/search\/photos/,
     'back to /photos/random, which returns one loosely-matched photo with no way to check it');
   assert.match(fn, /location\?\.country/, 'the location field is no longer checked');
@@ -177,7 +181,7 @@ test('a photograph must be confirmable as Singapore, or there is none', () => {
 });
 
 test('the search terms are all Singapore and all plain ASCII', () => {
-  const terms = /const terms = \[[\s\S]*?\];/.exec(src)[0];
+  const terms = /const terms = \[[\s\S]*?\];/.exec(photoSrc)[0];
   assert.doesNotMatch(terms, /[^\x00-\x7F]/, 'a stray non-ASCII character got into a search term');
   const each = terms.match(/'([^']+)'/g) || [];
   assert.ok(each.length >= 4, 'the term list has shrunk');

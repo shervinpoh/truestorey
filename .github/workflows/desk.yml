@@ -23,6 +23,10 @@ on:
         description: 'Write it and print it, but file nothing'
         type: boolean
         default: false
+      backfill:
+        description: 'Instead of writing: add a photograph to older articles that have none'
+        type: boolean
+        default: false
 
 concurrency:
   group: desk
@@ -44,8 +48,15 @@ jobs:
       - name: Write today's piece
         env:
           ANTHROPIC_API_KEY:      ${{ secrets.ANTHROPIC_API_KEY }}
+          SUPABASE_URL:           ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY:    ${{ secrets.SUPABASE_SECRET_KEY }}
           ARTICLE_WEBHOOK_SECRET: ${{ secrets.ARTICLE_WEBHOOK_SECRET }}
           NEXT_PUBLIC_SITE_URL:   ${{ vars.NEXT_PUBLIC_SITE_URL }}
           # No key means no photograph and a piece that still files.
           UNSPLASH_ACCESS_KEY:    ${{ secrets.UNSPLASH_ACCESS_KEY }}
-        run: npm run desk ${{ inputs.dry && '-- --dry' || '' }}
+        run: |
+          if [ "${{ inputs.backfill }}" = "true" ]; then
+            npm run backfill:photos
+          else
+            npm run desk ${{ inputs.dry && '-- --dry' || '' }}
+          fi
