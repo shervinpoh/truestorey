@@ -77,8 +77,25 @@ export default function StudioQueue({ drafts, live = [] }) {
               (PG 02-11 s3.1). Add sources in Supabase, or archive it.</p>
           )}
 
+          {/* ── show the picture, not a note about it ────────────────────────
+              This printed "Image credited to Mike Enerio" and rendered nothing,
+              so the first piece to arrive with a photograph looked like a piece
+              with no photograph. A review queue whose whole job is deciding
+              whether to publish something has to show what is being published:
+              a wrong or unsuitable image is exactly the sort of thing a person
+              catches in a second and a rule never will. */}
           {!a.header_image_url ? null : a.unsplash_photographer_name ? (
-            <p className="hint">Image credited to {a.unsplash_photographer_name}.</p>
+            <figure className="draftimg">
+              <img src={a.header_image_url} alt="" loading="lazy" />
+              <figcaption className="hint">
+                Photograph by{' '}
+                {a.unsplash_photographer_profile_url
+                  ? <a href={a.unsplash_photographer_profile_url} target="_blank" rel="noopener noreferrer">
+                      {a.unsplash_photographer_name}</a>
+                  : a.unsplash_photographer_name}
+                {' '}on Unsplash. It is atmosphere, not evidence &mdash; it does not show this place.
+              </figcaption>
+            </figure>
           ) : (
             <p className="hint"><b>An image with no photographer credit was dropped</b> — publishing it would breach the licence.</p>
           )}

@@ -2128,3 +2128,12 @@ sup.cite a:hover{text-decoration:underline}
 .fcard:hover{border-color:var(--edge);box-shadow:var(--lift)}
 @media(prefers-reduced-motion:reduce){ .fcard{transition:none} }
 @media(max-width:520px){ .feedgrid{grid-template-columns:1fr;gap:14px} }
+
+/* The photograph in the review queue. It printed a credit line and rendered
+   nothing, so the first draft to arrive with a picture looked like one
+   without. A queue for deciding whether to publish has to show what is being
+   published. */
+.draftimg{margin:12px 0 0}
+.draftimg img{display:block;width:100%;max-width:520px;aspect-ratio:16/9;object-fit:cover;
+  border-radius:var(--r1);border:1px solid var(--line)}
+.draftimg figcaption{margin-top:6px;max-width:520px}
