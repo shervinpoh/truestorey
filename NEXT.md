@@ -4,7 +4,7 @@ Rewritten 1 Sep 2026, at the handover to Codex. `CLAUDE.md` has the rules and
 the architecture — **read that first, it is not optional.** This file is only
 the ordered backlog.
 
-**State:** live at https://truestorey.vercel.app · **505 tests** · three npm
+**State:** live at https://truestorey.vercel.app · **510 tests** · three npm
 dependencies · Blindspot scoring out of 10 with all six checks running · data
 refreshing itself daily via `.github/workflows/refresh-data.yml`.
 
@@ -707,7 +707,7 @@ is currently near zero.
 
 ## How to work in this repo
 
-- `npm test` before and after. **505 passing.** A red test is a real finding.
+- `npm test` before and after. **510 passing.** A red test is a real finding.
 - `npm run preflight` before assuming a key works. It makes a real call to each
   provider and only a 200 counts.
 - **Never run `next build` while a dev or production server is up.** They share

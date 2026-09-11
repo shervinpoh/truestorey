@@ -24,14 +24,34 @@ function doPost(e) {
     }
     body.row['Contact ID'] = nextId;
 
-    // Duplicate guard on mobile.
-    const mobCol = headers.indexOf('Mobile') + 1;
-    if (mobCol > 0 && sheet.getLastRow() > 1) {
-      const existing = sheet.getRange(2, mobCol, sheet.getLastRow() - 1, 1).getValues().flat().map(String);
-      if (existing.indexOf(String(body.row['Mobile'])) !== -1) {
-        return json({ ok: true, duplicate: true });
-      }
-    }
+    /*
+     * Duplicate guard.
+     *
+     * ── WHY IT IS NOT ON MOBILE ANY MORE, AND WHAT THAT COST ───────────────
+     * It was, and mobile stopped being required on 24 Aug 2026 when consent
+     * went email-only. So most rows arrive with Mobile blank, blank matched
+     * the blank already in the sheet, and every lead after the first one
+     * without a number was discarded as a duplicate of it — while this
+     * returned ok:true and the site thanked the reader. A silent success over
+     * a write that did not happen is the worst failure this file can have.
+     *
+     * Email is the required field now, so email is the key. A blank value is
+     * never a duplicate of another blank: an absent identifier identifies
+     * nobody, and matching on it drops real people.
+     */
+    const keyOf = function (name) {
+      const col = headers.indexOf(name) + 1;
+      if (col < 1) return null;
+      const want = String(body.row[name] || '').trim().toLowerCase();
+      if (!want) return null;                      // nothing to match on
+      if (sheet.getLastRow() < 2) return null;     // nothing to match against
+      const seen = sheet.getRange(2, col, sheet.getLastRow() - 1, 1).getValues()
+        .flat().map(function (v) { return String(v || '').trim().toLowerCase(); })
+        .filter(String);
+      return seen.indexOf(want) !== -1 ? name : null;
+    };
+    const dupOn = keyOf('Email') || keyOf('Mobile');
+    if (dupOn) return json({ ok: true, duplicate: true, on: dupOn });
 
     sheet.appendRow(headers.map(h => body.row[h] !== undefined ? body.row[h] : ''));
     return json({ ok: true, id: nextId });

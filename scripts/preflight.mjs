@@ -290,9 +290,70 @@ function secrets() {
   }
 }
 
+/* ── the CRM ─────────────────────────────────────────────────────────────── */
+/**
+ * Every lead the site captures goes through one Apps Script webhook, and until
+ * now nothing here asked whether it answers. That is the gap this script exists
+ * to close: /api/lead returns a 503 telling the reader to WhatsApp instead when
+ * these are absent, which looks like a working form right up to the moment
+ * somebody uses it.
+ *
+ * ── THE PROBE WRITES NOTHING, AND THAT IS LOAD-BEARING ────────────────────
+ * It posts a DELIBERATELY WRONG secret. scripts/crm-webhook.gs checks the
+ * secret before it touches the sheet and answers {error:'unauthorised'}, so a
+ * rejection is the success case here: it proves the deployment is live AND
+ * that the secret is actually being checked. A live call with the real secret
+ * would append a junk row to a real CRM, and "nothing here writes" is the
+ * promise at the top of this file.
+ *
+ * What it cannot prove is that the secret is the RIGHT one. It says so rather
+ * than implying otherwise — a probe that overstates what it checked is worse
+ * than no probe.
+ */
+async function crm() {
+  const url = val('CRM_WEBHOOK_URL');
+  const secret = val('CRM_WEBHOOK_SECRET');
+
+  if (!url && !secret) {
+    return add(MISS, 'Property CRM', 'CRM_WEBHOOK_URL and CRM_WEBHOOK_SECRET not set here — '
+      + '/api/lead answers 503 and every lead is refused. Set both in Vercel and in .env.local.');
+  }
+  if (!url || !secret) {
+    return add(BAD, 'Property CRM',
+      `${url ? 'CRM_WEBHOOK_SECRET' : 'CRM_WEBHOOK_URL'} is missing — the other is set, so this `
+      + 'reads as configured and is not. Every lead is refused with a 503.');
+  }
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      // No `row`. Even if a future deployment stopped checking the secret,
+      // there would be nothing here for it to append.
+      body: JSON.stringify({ secret: 'preflight-probe-not-the-real-secret' }),
+      redirect: 'follow',
+      signal: AbortSignal.timeout(15000),
+    });
+    const body = await res.text().catch(() => '');
+    if (!res.ok) {
+      return add(BAD, 'Property CRM', `the webhook answered HTTP ${res.status} — ${brief(body)}`);
+    }
+    if (/unauthoris|unauthoriz/i.test(body)) {
+      return add(OK, 'Property CRM', `${mask(secret)} · webhook live and checking its secret `
+        + '(this proves it answers, not that your secret matches)');
+    }
+    add(BAD, 'Property CRM', 'the webhook accepted a WRONG secret — anyone who finds the URL can '
+      + `write to the Contacts tab. Set SECRET in the Apps Script. It answered: ${brief(body)}`);
+  } catch (e) {
+    add(BAD, 'Property CRM', e.name === 'TimeoutError'
+      ? 'the webhook did not answer within 15s'
+      : `the webhook is unreachable — ${e.message}`);
+  }
+}
+
 /* ── report ──────────────────────────────────────────────────────────────── */
 const run = async () => {
-  await Promise.all([supabase(), models()]);
+  await Promise.all([supabase(), models(), crm()]);
   secrets();
 
   const width = Math.max(...rows.map(r => r.name.length));
