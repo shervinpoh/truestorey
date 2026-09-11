@@ -5,6 +5,7 @@ import { ogForRecord } from '../../../../lib/og.js';
 import { titleCase } from '../../../../lib/name.js';
 import RecordPage from '../../../../components/RecordPage.jsx';
 import { configured as mailConfigured } from '../../../../lib/email.js';
+import { configured as crmConfigured } from '../../../../lib/crm.js';
 import { insightsForBlock, insightsForTown } from '../../../../lib/insights.js';
 
 export const dynamicParams = true;   // the tail renders on demand and is then cached
@@ -43,7 +44,7 @@ export default async function Page({ params }) {
     ? approvalsOnBearing(rec, { from: sun.arc.from, to: sun.arc.to, within: 400 })
     : null;
   return (
-    <RecordPage sun={sun} sunApprovals={sunApprovals} canWatch={mailConfigured()} locator={locatorFor(rec)} rec={rec} storey={storeyFor(rec)} near={nearby(rec)} sales={nearbySalesFor(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []}
+    <RecordPage sun={sun} sunApprovals={sunApprovals} canWatch={mailConfigured()} canCapture={crmConfigured()} locator={locatorFor(rec)} rec={rec} storey={storeyFor(rec)} near={nearby(rec)} sales={nearbySalesFor(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []}
       posts={[...insightsForBlock(rec.href), ...insightsForTown(town)]
         .filter((p, k, a) => a.findIndex(x => x.slug === p.slug) === k).slice(0, 4)}
       crumbs={[{ href: '/', label: 'Home' }, { href: '/hdb', label: 'HDB' },

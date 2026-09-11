@@ -14,7 +14,12 @@
  *  - 'DNC Checked' is written blank, always. It reflects a real check or nothing.
  */
 import { NextResponse } from 'next/server';
-import { CONSENT_COPY_VERSION, consentBasis, normaliseMobile } from '../../../lib/consent.js';
+import { CONSENT_COPY_VERSION, normaliseMobile } from '../../../lib/consent.js';
+/* The transport and the four PDPA columns live in lib/crm.js so that the
+   report route in §8.2 cannot grow a second copy of them. See the note at the
+   top of that file: two consent-writing paths is how the Consent Basis column
+   ends up recording wording nobody was shown. */
+import { configured as crmConfigured, consentFields, writeContact } from '../../../lib/crm.js';
 
 export { CONSENT_COPY_VERSION };
 export const dynamic = 'force-dynamic';
@@ -106,14 +111,16 @@ export async function POST(req) {
   // address is still not a tick.
   const emailOptIn = Boolean(consentEmail) && Boolean(cleanEmail);
 
-  if (!process.env.CRM_WEBHOOK_URL || !process.env.CRM_WEBHOOK_SECRET) {
+  /* The form is hidden when this is false, so reaching here means a direct
+     POST rather than a reader. It still answers honestly rather than
+     pretending to have saved anything. */
+  if (!crmConfigured()) {
     console.error('CRM_WEBHOOK_URL / CRM_WEBHOOK_SECRET not set — lead not saved:', cleanName, cleanMobile);
     return NextResponse.json({ error: 'Could not save. Please WhatsApp instead.' }, { status: 503 });
   }
 
   const now = new Date().toISOString();
   const cap = (s, n) => String(s || '').trim().slice(0, n);
-  const anyConsent = emailOptIn || Boolean(consentPhone);
 
   // Column order matches the Contacts tab of Property CRM.
   const row = {
@@ -131,30 +138,14 @@ export async function POST(req) {
     'Owner Notes': cap(computed.summary, 500),
     'Next Action': 'First contact',
     'Next Action Date': now.slice(0, 10),
-    'PDPA Consent': anyConsent ? 'Yes' : 'No',
-    'Consent Date': anyConsent ? now : '',
-    'Consent Basis': consentBasis({ email: emailOptIn, phone: Boolean(consentPhone), ip }),
-    'DNC Checked': '',        // deliberately blank — never assume
-    'DNC Check Date': '',
+    ...consentFields({ email: emailOptIn, phone: Boolean(consentPhone), ip }),
     'Created Date': now,
   };
 
-  try {
-    const res = await fetch(process.env.CRM_WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret: process.env.CRM_WEBHOOK_SECRET, row }),
-      signal: AbortSignal.timeout(10000),
-    });
-    if (!res.ok) {
-      console.error('CRM write failed', res.status, await res.text().catch(()=>''));
-      return NextResponse.json({ error: 'Could not save. Please WhatsApp instead.' }, { status: 502 });
-    }
-  } catch (e) {
-    // Never lose the lead silently — the log is the fallback record.
-    console.error('CRM unreachable', e.message, '| lead:', JSON.stringify(row));
-    return NextResponse.json({ error: 'Could not save. Please WhatsApp instead.' }, { status: 502 });
+  const saved = await writeContact(row);
+  if (saved.error) {
+    return NextResponse.json({ error: 'Could not save. Please WhatsApp instead.' },
+      { status: saved.status || 502 });
   }
-
   return NextResponse.json({ ok: true });
 }

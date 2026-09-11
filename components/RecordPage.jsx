@@ -50,7 +50,7 @@ import { EVENTS } from '../lib/analytics.js';
  * The proceeds waterfall re-anchors when the flat-type filter moves, so the
  * slider is never centred on a median that is no longer on screen.
  */
-export default function RecordPage({ rec, attribution, crumbs, posts = [], near = null, nearManifest = null, storey = null, canWatch = false, locator = null, land = null, sales = null, sun = null, sunApprovals = null }) {
+export default function RecordPage({ rec, attribution, crumbs, posts = [], near = null, nearManifest = null, storey = null, canWatch = false, canCapture = false, locator = null, land = null, sales = null, sun = null, sunApprovals = null }) {
   const [median, setMedian] = useState(rec.medianPrice);
 
   useEffect(() => { track(EVENTS.RECORD, { href: rec.href, kind: rec.kind }); }, [rec.href]);
@@ -140,9 +140,19 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
         <Proceeds median={median} onEngage={() => track(EVENTS.PROCEEDS, { href: rec.href })} />
       </section>
 
-      <section className="pane">
-        <Gate context={rec} />
-      </section>
+      {/*
+          Gated for the reason written ten lines above about WatchBlock, which
+          this form did not follow. It rendered on every record page whether or
+          not a CRM existed to write to, took a reader's name and address, and
+          answered with a 503 telling them to WhatsApp instead. The address had
+          already been collected by then — the same objection that deleted the
+          mobile field. CRM_WEBHOOK_URL and CRM_WEBHOOK_SECRET were never set
+          in production, so that is what every reader who used it got. */}
+      {canCapture && (
+        <section className="pane">
+          <Gate context={rec} />
+        </section>
+      )}
 
       {posts.length > 0 && (
         <section className="pane">

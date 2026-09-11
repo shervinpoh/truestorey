@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { recordAt, getIndex, allUrls, nearby, nearbyManifest, storeyFor, landForRecord, nearbySalesFor, sunFor, approvalsOnBearing} from '../../../lib/data/query.js';
+import { configured as crmConfigured } from '../../../lib/crm.js';
 import { ogForRecord } from '../../../lib/og.js';
 import { titleCase } from '../../../lib/name.js';
 import RecordPage from '../../../components/RecordPage.jsx';
@@ -40,7 +41,7 @@ export default async function Page({ params }) {
     ? approvalsOnBearing(rec, { from: sun.arc.from, to: sun.arc.to, within: 400 })
     : null;
   return (
-    <RecordPage sun={sun} sunApprovals={sunApprovals} rec={rec} land={landForRecord(rec.href)} storey={storeyFor(rec)} near={nearby(rec)} sales={nearbySalesFor(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []} posts={insightsForBlock(rec.href)}
+    <RecordPage sun={sun} sunApprovals={sunApprovals} canCapture={crmConfigured()} rec={rec} land={landForRecord(rec.href)} storey={storeyFor(rec)} near={nearby(rec)} sales={nearbySalesFor(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []} posts={insightsForBlock(rec.href)}
       crumbs={[{ href: '/', label: 'Home' },
         { href: '/landed', label: 'Landed' },
         /* The district, which is a real destination now that ?d= opens one.

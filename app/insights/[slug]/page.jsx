@@ -7,6 +7,7 @@ import { slugify } from '../../../lib/slug.js';
 import Masthead from '../../../components/Masthead.jsx';
 import Insight from '../../../components/Insight.jsx';
 import Gate from '../../../components/Gate.jsx';
+import { configured as crmConfigured } from '../../../lib/crm.js';
 import Follow from '../../../components/Follow.jsx';
 import { ogForPost } from '../../../lib/og.js';
 
@@ -156,7 +157,9 @@ export default async function Page({ params }) {
 
       <section className="pane">
         <Follow />
-        <Gate />
+        {/* Same reason as the record page: a form that cannot store an address
+            must not ask for one. Follow.jsx above it already works this way. */}
+        {crmConfigured() && <Gate />}
       </section>
 
       {others.length > 0 && (
