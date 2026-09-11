@@ -26,7 +26,7 @@
    passes --env-file-if-exists=.env.local, the way every other ingest does. */
 import { findings } from '../lib/findings.js';
 import { claude, firstJson } from '../lib/ai/providers.js';
-import { photograph } from '../lib/photo.js';
+import { photograph, photoId } from '../lib/photo.js';
 
 const DRY = process.argv.includes('--dry');
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL || 'https://truestorey.vercel.app').replace(/\/$/, '');
@@ -111,14 +111,18 @@ function chartFor(f) {
    twice, much more and a town that genuinely moved again goes unreported. */
 const COVER_DAYS = 45;
 
-async function coveredHrefs() {
+/* One read, two answers: what has been written about, and which photographs
+   are already on the site. A second round trip for the second question would
+   be the same rows again. */
+async function recentlyFiled() {
   const base = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
   const key = process.env.SUPABASE_SECRET_KEY;
   if (!base || !key) return null;
   const since = new Date(Date.now() - COVER_DAYS * 864e5).toISOString();
   try {
     const r = await fetch(
-      `${base}/rest/v1/articles?select=title,source_urls,created_at&created_at=gte.${since}&limit=200`,
+      `${base}/rest/v1/articles?select=title,source_urls,header_image_url,created_at`
+      + `&created_at=gte.${since}&limit=200`,
       { headers: { apikey: key, authorization: `Bearer ${key}` } });
     /* A failed read must not read as an empty table. Returning null says "not
        known", and the caller writes the top finding anyway — the webhook's own
@@ -129,13 +133,16 @@ async function coveredHrefs() {
       return null;
     }
     const rows = await r.json();
-    const seen = new Map();
+    const covered = new Map();
+    const photos = new Set();
     for (const a of rows) {
       for (const u of a.source_urls || []) {
-        try { seen.set(new URL(u).pathname, a.title); } catch { /* not a URL */ }
+        try { covered.set(new URL(u).pathname, a.title); } catch { /* not a URL */ }
       }
+      const id = photoId(a.header_image_url);
+      if (id) photos.add(id);
     }
-    return seen;
+    return { covered, photos };
   } catch (e) {
     console.warn(`  could not check what has been filed — ${e.name}`);
     return null;
@@ -148,7 +155,8 @@ if (!ranked.length) {
   process.exit(0);
 }
 
-const covered = await coveredHrefs();
+const filed = await recentlyFiled();
+const covered = filed?.covered || null;
 const fresh = covered ? ranked.filter(f => !covered.has(f.href)) : ranked;
 
 for (const f of ranked) {
@@ -207,7 +215,8 @@ art.content_html = String(art.content_html).includes('{{CHART}}')
 
 /* The title and the finding, never the subject's name. photo.js only ever
    matches against this text; the proper noun in it is not searched for. */
-const photo = await photograph(art.title, `${finding.kind} ${finding.claim || ''}`);
+const photo = await photograph(art.title, `${finding.kind} ${finding.claim || ''}`,
+                               filed?.photos || new Set());
 
 const row = {
   ...art,

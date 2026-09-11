@@ -280,8 +280,8 @@ test('the desk walks the ranked findings instead of taking the head', () => {
  * the top finding anyway with the webhook's own duplicate check as backstop.
  */
 test('a Supabase outage does not look like an empty archive', () => {
-  const fn = /async function coveredHrefs\(\)[\s\S]*?\n\}/.exec(src);
-  assert.ok(fn, 'coveredHrefs moved — check this test still describes it');
+  const fn = /async function recentlyFiled\(\)[\s\S]*?\n\}/.exec(src);
+  assert.ok(fn, 'recentlyFiled moved — check this test still describes it');
   const body = fn[0].replace(/\/\*[\s\S]*?\*\//g, '').split('\n')
     .filter(l => !/^\s*(\/\/|\*)/.test(l)).join('\n');
   assert.match(body, /if \(!r\.ok\)[\s\S]{0,160}return null/,

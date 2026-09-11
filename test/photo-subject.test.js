@@ -161,3 +161,46 @@ test('no subject searches for a place that is not Singapore', () => {
     }
   }
 });
+
+/**
+ * Two articles carried the same photograph, and a duplicate check said there
+ * were fifteen distinct images.
+ *
+ * The check compared header_image_url as a string. Unsplash varies the query
+ * on every request — ixid is different each time — so one photograph behind
+ * two URLs does not match itself. Both new-launch pieces drew the same floor
+ * plan and nothing noticed.
+ *
+ * It is the photo id or it is nothing.
+ */
+test('a photograph is identified by its id, not the URL it arrived on', async () => {
+  const { photoId } = await import('../lib/photo.js');
+  const a = 'https://images.unsplash.com/photo-1721244654210-a505a99661e9?crop=entropy&ixid=AAA&w=1080';
+  const b = 'https://images.unsplash.com/photo-1721244654210-a505a99661e9?fit=max&ixid=ZZZ&q=80';
+  assert.notStrictEqual(a, b, 'the fixture is wrong: these must differ as strings');
+  assert.strictEqual(photoId(a), photoId(b),
+    'two URLs for one photograph no longer resolve to the same id');
+  assert.strictEqual(photoId(null), null, 'a missing image should be no id, not a crash');
+});
+
+test('a photograph already in use is not handed out again', async () => {
+  process.env.UNSPLASH_ACCESS_KEY = 'test-key';
+  const url = n => `https://images.unsplash.com/photo-${n}?ixid=x`;
+  const one = {
+    urls: { regular: url('aaa111') }, user: { name: 'P', links: {} }, links: {},
+    alt_description: 'a set of house keys', tags: [],
+  };
+  const real = globalThis.fetch;
+  globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({ results: [one] }) });
+  try {
+    const { photograph, photoId } = await import('../lib/photo.js');
+    const free = await photograph('a 99-year leasehold');
+    assert.strictEqual(photoId(free.header_image_url), 'aaa111');
+
+    /* The only qualifying result is spoken for, and both the subject query and
+       the general fallback return it, so the honest answer is none. */
+    const taken = await photograph('a 99-year leasehold', '', new Set(['aaa111']));
+    assert.strictEqual(taken, null,
+      'a photograph already on another article was handed out a second time');
+  } finally { globalThis.fetch = real; }
+});

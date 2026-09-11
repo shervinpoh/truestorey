@@ -26,7 +26,7 @@
  * chose them. Once somebody sets an image by hand, this flag is the wrong
  * tool and the right answer is to pass the slugs you mean.
  */
-import { photograph } from '../lib/photo.js';
+import { photograph, photoId } from '../lib/photo.js';
 import { configured } from '../lib/supabase/rest.js';
 
 const DRY = process.argv.includes('--dry');
@@ -86,14 +86,32 @@ if (ONLY.length) {
 }
 if (!todo.length) process.exit(0);
 
+/* ── NO TWO ARTICLES SHARE A PHOTOGRAPH ───────────────────────────────────
+   A subject offers three queries and a query returns thirty results, which
+   sounds like plenty until two pieces on the same subject run minutes apart:
+   both new-launch articles drew the same floor plan, and a duplicate check
+   that compared URLs saw fifteen distinct images because Unsplash varies the
+   query string on every request. It is the photo id or it is nothing.
+
+   Seeded from the articles this run is NOT touching, so a re-pick cannot
+   collide with something already on the site, and added to as it goes. */
+const inUse = new Set(
+  all.filter(a => !todo.some(t => t.id === a.id))
+     .map(a => photoId(a.header_image_url))
+     .filter(Boolean));
+
 let done = 0, skipped = 0;
 
 for (const a of todo) {
   /* Title, slug and tags: whatever says what the piece is about. The slug
      carries the subject when a title is stylish enough to hide it. */
   const photo = await photograph([a.title, a.slug].filter(Boolean).join(' '),
-                                 (a.tags || []).join(' '));
+                                 (a.tags || []).join(' '), inUse);
   if (!photo) { skipped++; console.log(`  — ${a.slug}: nothing qualified, left as it was`); continue; }
+  /* Claimed before the write, so a failed PATCH does not free it for the next
+     article and produce the duplicate this is here to prevent. */
+  const id = photoId(photo.header_image_url);
+  if (id) inUse.add(id);
 
   if (DRY) {
     console.log(`  would set ${a.slug} → ${photo.unsplash_photographer_name}`);
