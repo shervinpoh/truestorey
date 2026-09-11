@@ -50,9 +50,19 @@ Nothing below can be finished by an agent. Ordered by what unblocks the most.
    The form renders on production block pages and `/api/watch` gets past its
    own 503 gate — probed with a deliberately invalid address, which returns
    the validation error and creates nothing.
-   **GitHub Actions secrets: unconfirmed.** Without them the form collects
-   subscribers and no digest ever sends, and because that step is
-   `continue-on-error` the daily run stays GREEN while it happens.
+   **GitHub Actions secrets: CONFIRMED PRESENT 11 Sep.** `gh secret list`
+   shows both, set 3 Sep — same day as Vercel. This item had read
+   "unconfirmed" for eight days and was blocking §8.1 for no reason.
+   **The digest still never sent, for a different reason.** `SUPABASE_URL`
+   was stored malformed in Actions, so `send-digest.mjs` exited 1 on every
+   run where the data moved — 5 and 8 September — with
+   `Failed to parse URL from ***/rest/v1/block_watch`. `continue-on-error`
+   reported those as a green tick, exactly as this note warned, and the
+   failure was invisible for a month. The secret was corrected 10 Sep and the
+   step now posts a warning annotation when it exits non-zero. Nothing was
+   lost: no watermark moves on a failure, and the one confirmed subscriber is
+   owed no backlog, because a new watch sets its mark and reports from then
+   on. A dry run on 11 Sep renders and sends nothing, which is correct.
    **Verify with `curl … | grep watchbox`, not by looking for an email
    field** — the lead form has one too, and its consent checkbox uses the same
    wording from `lib/consent.js`. Commit 5946fa8's message claimed the form was
