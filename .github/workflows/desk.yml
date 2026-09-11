@@ -31,6 +31,10 @@ on:
         description: 'With backfill: re-pick a photograph even for articles that have one'
         type: boolean
         default: false
+      only:
+        description: 'With backfill: comma-separated slugs to re-pick, instead of all of them'
+        type: string
+        default: ''
 
 concurrency:
   group: desk
@@ -60,7 +64,11 @@ jobs:
           UNSPLASH_ACCESS_KEY:    ${{ secrets.UNSPLASH_ACCESS_KEY }}
         run: |
           if [ "${{ inputs.backfill }}" = "true" ]; then
-            npm run backfill:photos ${{ inputs.replace && '-- --replace' || '' }}
+            if [ -n "${{ inputs.only }}" ]; then
+              npm run backfill:photos -- --only='${{ inputs.only }}'
+            else
+              npm run backfill:photos ${{ inputs.replace && '-- --replace' || '' }}
+            fi
           else
             npm run desk ${{ inputs.dry && '-- --dry' || '' }}
           fi

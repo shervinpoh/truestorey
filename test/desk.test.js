@@ -214,7 +214,14 @@ test('both halves of the country rule are still in the file', () => {
 test('every search term is plain ASCII', () => {
   const block = /export const SUBJECTS = \[[\s\S]*?\n\];/.exec(photoSrc);
   assert.ok(block, 'the SUBJECTS table is gone; the picture is fixed again');
-  const each = block[0].match(/'([^']+)'/g) || [];
+  /* Comments stripped first. The notes in that table explain why a query was
+     dropped and quote the query as prose, so a naive scan for quoted strings
+     pairs the closing quote of one query with the opening quote of the next
+     and reads a paragraph of em-dashed English as a search term. Fifth
+     source-reading test in this repo to match its own explanation. */
+  const code = block[0].replace(/\/\*[\s\S]*?\*\//g, '').split('\n')
+    .filter(l => !/^\s*(\/\/|\*)/.test(l)).join('\n');
+  const each = code.match(/'([^']+)'/g) || [];
   assert.ok(each.length >= 12, `only ${each.length} strings in the subject table; it has collapsed`);
   for (const t of each) assert.doesNotMatch(t, /[^\x00-\x7F]/,
     `${t} has a non-ASCII character in it; it will encode into the query and match nothing`);

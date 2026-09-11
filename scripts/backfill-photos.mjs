@@ -5,6 +5,7 @@
  *   npm run backfill:photos -- --dry    say what it would do, change nothing
  *   npm run backfill:photos -- --replace re-pick for every article, including
  *                                       ones that already have a photograph
+ *   npm run backfill:photos -- --only=a-slug,b-slug   just those, replaced
  *
  * ── WHY IT IS A ONE-OFF AND NOT A JOB ──────────────────────────────────────
  * Every article the desk files from now on arrives with a picture. The five
@@ -29,7 +30,11 @@ import { photograph } from '../lib/photo.js';
 import { configured } from '../lib/supabase/rest.js';
 
 const DRY = process.argv.includes('--dry');
-const REPLACE = process.argv.includes('--replace');
+/* --only implies --replace: naming a slug that already has a photograph and
+   having it silently skipped would be the opposite of what was asked. */
+const ONLY = (process.argv.find(a => a.startsWith('--only=')) || '')
+  .slice(7).split(',').map(s => s.trim()).filter(Boolean);
+const REPLACE = process.argv.includes('--replace') || ONLY.length > 0;
 
 if (!configured()) {
   console.error('\nSupabase is not configured here — set SUPABASE_URL and SUPABASE_SECRET_KEY.\n');
@@ -64,12 +69,21 @@ if (!res.ok) {
 }
 const all = await res.json();
 const without = all.filter(a => !a.header_image_url);
-const todo = REPLACE ? all : without;
+const pool = ONLY.length ? all.filter(a => ONLY.includes(a.slug)) : all;
+const todo = REPLACE ? pool : without;
 
 console.log(`\n${all.length} articles, ${without.length} without a photograph.`);
-console.log(REPLACE
-  ? `--replace: re-picking for all ${todo.length}.\n`
-  : `Adding to ${todo.length}.\n`);
+if (ONLY.length) {
+  /* A slug that matched nothing is a typo, and reporting it as "0 to do" reads
+     as "already fine". */
+  const missing = ONLY.filter(s => !all.some(a => a.slug === s));
+  if (missing.length) console.warn(`  no such article: ${missing.join(', ')}`);
+  console.log(`--only: re-picking for ${todo.length}.\n`);
+} else {
+  console.log(REPLACE
+    ? `--replace: re-picking for all ${todo.length}.\n`
+    : `Adding to ${todo.length}.\n`);
+}
 if (!todo.length) process.exit(0);
 
 let done = 0, skipped = 0;
