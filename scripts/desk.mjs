@@ -24,7 +24,7 @@
  */
 /* No dotenv: three npm dependencies is the architecture. The npm script
    passes --env-file-if-exists=.env.local, the way every other ingest does. */
-import { topFinding } from '../lib/findings.js';
+import { findings } from '../lib/findings.js';
 import { claude, firstJson } from '../lib/ai/providers.js';
 import { photograph } from '../lib/photo.js';
 
@@ -94,9 +94,74 @@ function chartFor(f) {
 }
 
 
-const finding = topFinding();
-if (!finding) {
+/* ── IT WALKS THE LIST, IT DOES NOT TAKE THE HEAD ─────────────────────────
+   On 11 September the desk wrote about CENTRAL AREA for the second time. The
+   webhook refused it — HTTP 409, the duplicate check doing exactly its job —
+   and the run failed having filed nothing. Nobody was told, because the
+   Apps Script bot messages when a draft ARRIVES, so a morning with no draft
+   is indistinguishable from a morning nobody looked at.
+
+   The cause is that the top finding does not change. CENTRAL AREA scored 1.00
+   off a quarterly figure, and a quarterly figure is still there in December.
+   Ranked second at 0.57, PUNGGOL had never been written about at all.
+
+   So a finding whose subject page is already the source of a recent article
+   is skipped and the next one is written instead. COVER_DAYS is 45 because
+   the figures here are quarterly: less and the same quarter gets written
+   twice, much more and a town that genuinely moved again goes unreported. */
+const COVER_DAYS = 45;
+
+async function coveredHrefs() {
+  const base = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
+  const key = process.env.SUPABASE_SECRET_KEY;
+  if (!base || !key) return null;
+  const since = new Date(Date.now() - COVER_DAYS * 864e5).toISOString();
+  try {
+    const r = await fetch(
+      `${base}/rest/v1/articles?select=title,source_urls,created_at&created_at=gte.${since}&limit=200`,
+      { headers: { apikey: key, authorization: `Bearer ${key}` } });
+    /* A failed read must not read as an empty table. Returning null says "not
+       known", and the caller writes the top finding anyway — the webhook's own
+       duplicate check is still there as the backstop. Returning an empty set
+       would claim nothing has ever been filed and re-file all of it. */
+    if (!r.ok) {
+      console.warn(`  could not check what has been filed — HTTP ${r.status}`);
+      return null;
+    }
+    const rows = await r.json();
+    const seen = new Map();
+    for (const a of rows) {
+      for (const u of a.source_urls || []) {
+        try { seen.set(new URL(u).pathname, a.title); } catch { /* not a URL */ }
+      }
+    }
+    return seen;
+  } catch (e) {
+    console.warn(`  could not check what has been filed — ${e.name}`);
+    return null;
+  }
+}
+
+const ranked = findings();
+if (!ranked.length) {
   console.log('\nNothing scored high enough to write about today. Filing nothing.\n');
+  process.exit(0);
+}
+
+const covered = await coveredHrefs();
+const fresh = covered ? ranked.filter(f => !covered.has(f.href)) : ranked;
+
+for (const f of ranked) {
+  if (covered?.has(f.href)) {
+    console.log(`  skipping [${f.score.toFixed(2)}] ${f.kind} — ${f.subject}: `
+      + `already written up as "${covered.get(f.href)}"`);
+  }
+}
+
+const finding = fresh[0];
+if (!finding) {
+  console.log(`\nAll ${ranked.length} findings above the threshold have been written about`
+    + ` in the last ${COVER_DAYS} days. Filing nothing.\n`);
   process.exit(0);
 }
 
@@ -187,6 +252,10 @@ const out = await res.json().catch(() => ({}));
 if (!res.ok) {
   console.error(`\nThe webhook refused it — HTTP ${res.status}: ${out.error || ''}`);
   if (out.duplicateOf) console.error(`It repeats "${out.duplicateOf.title}".`);
-  process.exit(1);
+  /* 409 is the duplicate check, and a repeated story is a normal morning
+     rather than a breakage — the run above has already skipped everything it
+     knew was covered, so this is the title check catching something the
+     subject page could not. Every other refusal is a real failure. */
+  process.exit(res.status === 409 ? 0 : 1);
 }
 console.log(`\nFiled as a draft: ${row.title}\nRead it at ${SITE}/studio\n`);

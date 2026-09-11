@@ -19,7 +19,9 @@ const photoSrc = readFileSync(path.join(process.cwd(), 'lib', 'photo.js'), 'utf8
 test('the model is told the figures are fixed and may not add to them', () => {
   assert.match(src, /THE FIGURES ARE FIXED/, 'the constraint that keeps a model from assigning a number is gone');
   assert.match(src, /may not add, estimate/i);
-  assert.match(src, /topFinding\(\)/, 'the story is no longer chosen by arithmetic');
+  /* Was topFinding(). Still arithmetic, still not the model — it walks the
+     ranked list now so a story that stays top cannot block every other one. */
+  assert.match(src, /const ranked = findings\(\)/, 'the story is no longer chosen by arithmetic');
 });
 
 test('the caveat is not optional', () => {
@@ -240,4 +242,54 @@ test('the webhook secret travels as a header and never in the body', () => {
   assert.doesNotMatch(code, /secret: process\.env|"secret":/,
     'the secret is in the request body again — it would be stored on the row');
   assert.match(src, /body: JSON\.stringify\(row\)/, 'the body should carry the article and nothing else');
+});
+
+/**
+ * The desk filed nothing for two mornings and nobody was told.
+ *
+ * It took findings()[0] and wrote it. CENTRAL AREA scored 1.00 off a
+ * quarterly figure, so it was the top finding on the 9th, the 10th and the
+ * 11th; the webhook refused the repeat with a 409, the run went red, and
+ * PUNGGOL at 0.57 — never written about — was never reached.
+ *
+ * The silence was the worse half. The Apps Script bot messages when a draft
+ * ARRIVES, so a morning that files nothing looks exactly like a morning
+ * nobody looked at.
+ */
+test('the desk walks the ranked findings instead of taking the head', () => {
+  const code = src.replace(/\/\*[\s\S]*?\*\//g, '').split('\n')
+    .filter(l => !/^\s*(\/\/|\*)/.test(l)).join('\n');
+  assert.doesNotMatch(code, /\btopFinding\b/,
+    'back to the single top finding; a story that stays top blocks every other one');
+  assert.match(code, /import \{ findings \} from/, 'the ranked list is no longer imported');
+  assert.match(code, /ranked\.filter\(f => !covered\.has\(f\.href\)\)/,
+    'findings already written up are no longer skipped');
+});
+
+/*
+ * A failed read must not read as an empty table — the backfill learned this
+ * the expensive way. An empty set here would claim nothing has ever been
+ * filed and re-file all of it; null says "not known", and the caller writes
+ * the top finding anyway with the webhook's own duplicate check as backstop.
+ */
+test('a Supabase outage does not look like an empty archive', () => {
+  const fn = /async function coveredHrefs\(\)[\s\S]*?\n\}/.exec(src);
+  assert.ok(fn, 'coveredHrefs moved — check this test still describes it');
+  const body = fn[0].replace(/\/\*[\s\S]*?\*\//g, '').split('\n')
+    .filter(l => !/^\s*(\/\/|\*)/.test(l)).join('\n');
+  assert.match(body, /if \(!r\.ok\)[\s\S]{0,160}return null/,
+    'a non-200 no longer returns null, so an outage will re-file everything');
+  assert.match(body, /catch[\s\S]{0,160}return null/, 'a thrown request no longer returns null');
+  assert.doesNotMatch(body, /return new Set\(\)|return \[\]/,
+    'it returns an empty collection on failure, which reads as "nothing was ever filed"');
+});
+
+/*
+ * 409 is the duplicate check working. A repeated story is a normal morning,
+ * not a breakage, and a red run every day trains everyone to ignore it — the
+ * same way a fortnight of red hid the SORA signal.
+ */
+test('a duplicate is a quiet morning, every other refusal is red', () => {
+  assert.match(src, /process\.exit\(res\.status === 409 \? 0 : 1\)/,
+    'a duplicate fails the workflow again, or every refusal now passes it');
 });
