@@ -203,3 +203,34 @@ test('only lib/crm.js builds the consent columns', () => {
   assert.doesNotMatch(lead, /fetch\(process\.env\.CRM_WEBHOOK_URL/,
     'the lead route has its own copy of the CRM transport again');
 });
+
+/*
+ * The header of crm-webhook.gs used to say "Paste into your Property CRM
+ * sheet: Extensions → Apps Script". On 12 Sep that was followed as far as
+ * opening the editor with the file on the clipboard, over a project of eleven
+ * files whose 00_Core.gs every other one depends on.
+ *
+ * The instruction was written when the sheet was empty. It stopped being true
+ * and nothing said so, which is the same shape as a stale comment describing
+ * a control that no longer works.
+ */
+test('the webhook template warns rather than instructing a paste', () => {
+  /* Not "the phrase is absent": the warning QUOTES the old instruction in
+     order to explain it, so a search for the phrase finds the explanation.
+     Stripping comments does not help either — the whole header is a comment
+     and the comment is the thing under test. Sixth source-reading test in
+     this repo to match its own prose; the fix here is order, not absence.
+     The warning must come first, and anything that reads as an instruction
+     must sit after it as a quotation. */
+  const warn = src.indexOf('DO NOT PASTE THIS OVER');
+  assert.notStrictEqual(warn, -1, 'the warning is gone from scripts/crm-webhook.gs');
+  assert.ok(warn < 400,
+    `the warning is ${warn} chars in; it has to be the first thing anyone reads`);
+  const instruct = src.indexOf('Paste into your Property CRM sheet');
+  if (instruct !== -1) {
+    assert.ok(instruct > warn,
+      'the paste instruction is back above the warning that exists to stop it');
+  }
+  assert.match(src, /ONE doPost PER PROJECT/,
+    'the reason it cannot simply be added as a new file is no longer recorded');
+});

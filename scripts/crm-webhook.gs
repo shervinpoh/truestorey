@@ -1,7 +1,36 @@
 /**
- * Paste into your Property CRM sheet: Extensions → Apps Script.
- * Deploy → New deployment → Web app → Execute as ME, access ANYONE.
- * Put the resulting /exec URL in .env.local as CRM_WEBHOOK_URL.
+ * ⚠ DO NOT PASTE THIS OVER THE PROPERTY CRM APPS SCRIPT PROJECT.
+ *
+ * The header here used to read "Paste into your Property CRM sheet:
+ * Extensions → Apps Script", and on 12 Sep that instruction was followed as
+ * far as opening the editor with the whole file on the clipboard. The project
+ * it was about to replace has eleven files — 00_Core.gs through 09_Intake.gs
+ * plus the article bot in 10–12 — and 00_Core.gs is the shared plumbing every
+ * one of them calls: the tab list, the column resolver that looks columns up
+ * BY NAME, the date and phone helpers, and the C-0001 ID generator. Pasting
+ * over it would have destroyed the CRM.
+ *
+ * Two harder reasons it is the wrong artefact even as a new file:
+ *
+ *   · APPS SCRIPT ALLOWS ONE doPost PER PROJECT, and that project already has
+ *     one, in 07_Bot.gs. It is the WhatsApp webhook, it is open to anyone
+ *     because Meta requires that, it is guarded by a ?k=WA_WEBHOOK_KEY in the
+ *     URL, and it dispatches on p.action — there is already an 'addContacts'
+ *     branch. A second doPost is a duplicate function declaration.
+ *
+ *   · IT REIMPLEMENTS 00_Core.gs BADLY. The ID generation below is a second
+ *     copy of one that already exists, and the header lookup is a second copy
+ *     of cols(). Two implementations of one thing is the failure this repo
+ *     records against lib/calc/proceeds.js.
+ *
+ * KEPT, NOT DELETED, because the duplicate-guard fix in it is real and the
+ * reasoning is worth reading before writing the equivalent inside 09_Intake.gs
+ * or 07_Bot.gs. Treat it as a reference implementation for a sheet that has
+ * nothing else in it, which the Property CRM has not been for a long time.
+ *
+ * The right integration is a `kind` on the EXISTING doPost, in the same shape
+ * as the articles hook documented at the bottom of scripts/10_Articles.gs, and
+ * CRM_WEBHOOK_URL pointing at the deployment that already exists.
  */
 const SECRET = 'CHANGE_ME_TO_A_LONG_RANDOM_STRING';
 const TAB = 'Contacts';
