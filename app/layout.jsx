@@ -4,6 +4,7 @@ import NavHere from '../components/NavHere.jsx';
 import SiteFooter from '../components/SiteFooter.jsx';
 import { agent } from '../lib/agent.js';
 import { ldJson, organisation } from '../lib/schema.js';
+import Theme from '../components/Theme.jsx';
 
 export const metadata = {
   // See the note in app/sitemap.js: a fallback that does not resolve is worse
@@ -22,6 +23,14 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
+        {/* Before the body paints, or the reader who chose dark gets a white
+            flash on every navigation — which is the one thing choosing dark is
+            meant to avoid. It reads only what this site wrote: no
+            prefers-color-scheme, because following the operating system is the
+            behaviour that was deliberately removed. See components/Theme.jsx. */}
+        <script dangerouslySetInnerHTML={{ __html:
+          `try{if(localStorage.getItem('truestorey-theme')==='dark')`
+          + `document.documentElement.setAttribute('data-theme','dark')}catch(e){}` }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         {/* Archivo carries a width axis, so semi-condensed headlines are a
@@ -39,6 +48,9 @@ export default function RootLayout({ children }) {
         <NavHere />
         {children}
         <SiteFooter name={a.name} cea={a.cea} agency={a.agency} lic={a.lic} phone={a.phone} />
+        {/* A preference, so it sits with the particulars rather than competing
+            with navigation that was measured to fit four choices. */}
+        <div className="themebar"><Theme /></div>
       </body>
     </html>
   );

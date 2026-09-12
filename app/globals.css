@@ -1182,6 +1182,30 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 
    FLOOR: 11.5px. There was 8px text on the page — the kind badge — and 8px
    is below any readable floor for something people are meant to scan. */
+/* ── THE THEME TOGGLE ──────────────────────────────────────────────────────
+   A preference, sitting under the compliance particulars rather than in the
+   navigation, which was measured to fit four choices and has no room for a
+   fifth. Quiet until it is looked for, which is what a preference should be.
+
+   44px tall: WCAG 2.2 AA asks 24 CSS px of a pointer target, and this one is
+   a lone control at the very bottom of a long page, where a miss means
+   scrolling back. The dot carries the state without relying on colour alone —
+   the label changes too. */
+.themebar{display:flex;justify-content:center;padding:0 0 34px;background:var(--paper)}
+.themetog{display:inline-flex;align-items:center;gap:9px;
+  min-height:44px;padding:0 16px;
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--t-micro);
+  letter-spacing:.09em;text-transform:uppercase;
+  color:var(--mute);background:none;border:1px solid var(--edge);border-radius:var(--r1);
+  cursor:pointer}
+.themetog:hover{color:var(--ink);border-color:var(--ink)}
+.themetog:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.themedot{width:11px;height:11px;border-radius:50%;
+  border:1px solid currentColor;background:linear-gradient(to right,currentColor 50%,transparent 50%)}
+@media(prefers-reduced-motion:no-preference){
+  .themetog{transition:color var(--t1) var(--ease),border-color var(--t1) var(--ease)}
+}
+
 /* ── ONE MOMENT THAT BREAKS THE COLUMN ────────────────────────────────────
    Every section of a record page was a left-aligned block in a 760px column
    at the same rhythm, for 7,766px, so the page read as one undifferentiated

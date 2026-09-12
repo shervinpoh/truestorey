@@ -132,7 +132,7 @@ SSR and no-JS readers get the number.
 
 ```
 npm run dev            localhost:3000
-npm test               524 tests, node:test, no framework
+npm test               528 tests, node:test, no framework
 npm run build          data build + next build. NOT the deploy command —
                        vercel.json pins that to `next build`, because this runs
                        three live data.gov.sg ingests first.
@@ -323,6 +323,19 @@ promise. Read the watermark note in `lib/watch.js` before touching it: a count
 fails because hdb.json is a rolling window, and a latest-month fails because
 HDB registers late, so it is both.
 
+**A theme was written in full and nothing could reach it.** The dark palette
+has sat in `globals.css` behind `:root[data-theme="dark"]` with a note ending
+"Nothing does today", so it had never been measured and never been seen. The
+decision it records is narrow and still stands: the site does NOT follow
+`prefers-color-scheme`, because that gave a black site to everyone with dark
+mode on their Mac. `components/Theme.jsx` is the something that sets the
+attribute — a choice the reader makes and the site remembers, two states not
+three, because a "System" option would reinstate the removed behaviour wearing
+a label. The attribute is set by a blocking script in `<head>`, or the reader
+who chose dark gets a white flash on every navigation. `test/contrast.test.js`
+now measures both grounds; it read only the first `:root` before, which is
+always the light one.
+
 ## Layout
 
 ```
@@ -346,7 +359,7 @@ content/
   insights/     hand-written notes (markdown)
   guides/       GENERATED — edit the build pack, not these
   source/       the deck research base
-test/           node:test. 524 passing.
+test/           node:test. 528 passing.
 ```
 
 ---

@@ -100,3 +100,57 @@ test('a checkbox is exempted from the global appearance:none', () => {
   assert.match(rule[1], /accent-color:\s*var\(--acc\)/,
     'a control is --acc; --acc-lit is live data only');
 });
+
+/* ── the dark theme, which is now reachable ────────────────────────────────
+ *
+ * It was written in full and gated behind an attribute nothing ever set, so
+ * it had never been measured and never been seen. Shipping a theme a reader
+ * can actually switch to without measuring it would be the same mistake this
+ * file exists to catch, one ground over.
+ *
+ * The dark tokens live in `:root[data-theme="dark"]`, and token() above reads
+ * the FIRST match in the file, which is always the light one. This reads
+ * inside that block or it would silently check the light palette twice and
+ * pass for the wrong reason.
+ */
+const darkBlock = (() => {
+  const m = /:root\[data-theme="dark"\]\{([\s\S]*?)\}/.exec(css);
+  assert.ok(m, 'the dark palette is gone from globals.css');
+  return m[1];
+})();
+
+function darkToken(name) {
+  const m = new RegExp(`--${name}\\s*:\\s*(#[0-9A-Fa-f]{6})`).exec(darkBlock);
+  assert.ok(m, `--${name} is not defined in the dark palette`);
+  return m[1];
+}
+const darkAtLeast = (need, fg, bg, what) => {
+  const r = ratio(darkToken(fg), darkToken(bg));
+  assert.ok(r >= need, `dark ${what}: --${fg} on --${bg} is ${r.toFixed(2)}:1, needs ${need}:1`);
+};
+
+test('body text is readable on the dark ground', () => {
+  darkAtLeast(4.5, 'ink', 'paper', 'body text');
+  darkAtLeast(4.5, 'ink', 'card', 'body text on a panel');
+  darkAtLeast(4.5, 'ink2', 'paper', 'secondary prose');
+});
+
+/* The provenance line is the source and period under every figure. It is the
+ * smallest text on the site and it is the part that substantiates the claim,
+ * so it does not get to be decorative on either ground. */
+test('the dark provenance line clears AA', () => {
+  darkAtLeast(4.5, 'mute', 'paper', 'source and period');
+  darkAtLeast(4.5, 'mute', 'sunk', 'source and period on the bleed');
+});
+
+test('a dark control edge is visible, and a focus ring with it', () => {
+  darkAtLeast(3, 'acc', 'paper', 'focus ring and interface colour');
+  darkAtLeast(3, 'acc', 'card', 'focus ring on a panel');
+});
+
+/* Green and red mean a price that moved. Reserved on both grounds — rule 4 of
+ * the styling notes — so they have to survive the flip, not merely exist. */
+test('a price that moved is readable in the dark', () => {
+  darkAtLeast(4.5, 'up', 'paper', 'a price that rose');
+  darkAtLeast(4.5, 'dn', 'paper', 'a price that fell');
+});
