@@ -1182,6 +1182,41 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 
    FLOOR: 11.5px. There was 8px text on the page — the kind badge — and 8px
    is below any readable floor for something people are meant to scan. */
+/* ── THE AFTERNOON SUN ON AN UPLOADED PLAN ────────────────────────────────
+   Twelve cells, one per month, shaded by how squarely the setting sun meets
+   the facing. The bands come from DIRECTNESS in lib/sun.js and the key prints
+   them, because a colour without a key is decoration.
+
+   NOT the two teals and NOT green or red: those are spoken for — live data,
+   a price that moved, a dataset that could not be measured. This is a fifth
+   thing, so it gets the neutral ramp with warmth carried by opacity rather
+   than by a new hue. It reads on both grounds because the ramp inverts with
+   the theme. */
+.sunyear{display:grid;grid-template-columns:repeat(12,1fr);gap:2px;margin:14px 0 0}
+@media(max-width:620px){ .sunyear{grid-template-columns:repeat(6,1fr)} }
+.suncell{display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:11px 2px 9px;border-radius:var(--r1);background:var(--sunk)}
+.sunmon{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--t-micro);
+  letter-spacing:.04em;color:var(--mute)}
+.sunoff{font-size:var(--t-small);font-weight:600;color:var(--ink)}
+.suncell.b-dead{background:var(--w1)}    .suncell.b-dead .sunoff,
+.suncell.b-dead .sunmon{color:var(--paper)}
+.suncell.b-square{background:var(--w2)}  .suncell.b-square .sunoff,
+.suncell.b-square .sunmon{color:var(--paper)}
+.suncell.b-oblique{background:var(--w3)} .suncell.b-oblique .sunoff,
+.suncell.b-oblique .sunmon{color:var(--paper)}
+.suncell.b-grazing{background:var(--w4)}
+.suncell.b-none{background:var(--w5)}
+
+.sunkey{list-style:none;display:flex;flex-wrap:wrap;gap:8px 16px;margin:12px 0 0;padding:0;
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--t-micro);
+  letter-spacing:.04em;color:var(--mute)}
+.sunkey li{display:flex;align-items:center;gap:6px}
+.sunkey i{width:11px;height:11px;border-radius:2px;display:block}
+.sunkey .b-dead{background:var(--w1)}   .sunkey .b-square{background:var(--w2)}
+.sunkey .b-oblique{background:var(--w3)} .sunkey .b-grazing{background:var(--w4)}
+.sunkey .b-none{background:var(--w5)}
+
 /* ── THE THEME TOGGLE ──────────────────────────────────────────────────────
    A preference, sitting under the compliance particulars rather than in the
    navigation, which was measured to fit four choices and has no room for a

@@ -132,7 +132,7 @@ SSR and no-JS readers get the number.
 
 ```
 npm run dev            localhost:3000
-npm test               528 tests, node:test, no framework
+npm test               542 tests, node:test, no framework
 npm run build          data build + next build. NOT the deploy command —
                        vercel.json pins that to `next build`, because this runs
                        three live data.gov.sg ingests first.
@@ -359,7 +359,7 @@ content/
   insights/     hand-written notes (markdown)
   guides/       GENERATED — edit the build pack, not these
   source/       the deck research base
-test/           node:test. 528 passing.
+test/           node:test. 542 passing.
 ```
 
 ---

@@ -12,6 +12,8 @@ import { useRef, useState } from 'react';
  *
  * The image is sent, read and discarded. Nothing is stored.
  */
+import FacingSun from './FacingSun.jsx';
+
 export default function FloorplanUpload() {
   const [preview, setPreview] = useState(null);
   const [state, setState] = useState('idle');
@@ -80,6 +82,10 @@ export default function FloorplanUpload() {
               </div>
             </div>
           )}
+
+          {/* Astronomy from the compass reading above. It refuses when the
+              plan carries no north arrow, which is about half of them. */}
+          <FacingSun facing={result.facing} />
 
           {result.layout?.length > 0 && (
             <>
