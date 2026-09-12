@@ -78,10 +78,15 @@ function locatorFor(rec) {
   for (const b of t?.blocks || []) {
     if (b.href === rec.href) continue;
     const g = geo[b.href];
-    if (g) points.push({ href: b.href, lat: +g.lat.toFixed(5), lon: +g.lon.toFixed(5) });
+    /* psf travels with the dot so the town can be shaded by what was filed in
+       it. One number per block, already published on that block's own page —
+       this asserts nothing new, it just stops the map being monochrome. */
+    if (g) points.push({ href: b.href, lat: +g.lat.toFixed(5), lon: +g.lon.toFixed(5),
+                         psf: Number.isFinite(b.medianPsf) ? b.medianPsf : null });
   }
   return {
-    here: { lat: +here.lat.toFixed(5), lon: +here.lon.toFixed(5) },
+    here: { lat: +here.lat.toFixed(5), lon: +here.lon.toFixed(5),
+            psf: Number.isFinite(rec.medianPsf) ? Math.round(rec.medianPsf) : null },
     points,
     area: area ? { rings: area.rings.map(r => simplify(r, 0.0004).map(([lo, la]) => [+lo.toFixed(5), +la.toFixed(5)])) } : null,
   };

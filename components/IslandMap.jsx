@@ -28,21 +28,10 @@ import { simplify } from '../lib/geojson.js';
  * an unexplained gap reads as missing data, and this is not missing.
  */
 
-/* The ramp from PriceMap.jsx. One accent, six steps of it. */
-/* Sequential, one hue, running from the palette's data mist to its deep
-   teal — so the darkest step on the map is the same colour as the
-   interface, and the map reads as part of the site rather than beside it. */
-const RAMP = ['#CDE9E9', '#9BD6D9', '#6FC4CA', '#3D9AA1', '#256E73', '#164F52'];
-
-/** Six equal-sized groups, not six equal price steps — the same choice /map
- *  makes, and for the same reason: on a min-max ramp a handful of expensive
- *  towns flatten every other one into a single shade. */
-function quantileBreaks(values, bands = 6) {
-  const v = [...values].sort((a, b) => a - b);
-  const out = [];
-  for (let i = 1; i < bands; i++) out.push(v[Math.floor((i / bands) * v.length)]);
-  return out;
-}
+/* Both live in lib/ramp.js now. A record page shades its town by the same
+   ramp, and a second copy of either would let the island and the locator
+   colour one price two ways without anything going red. */
+import { RAMP, quantileBreaks } from '../lib/ramp.js';
 
 export default function IslandMap({ areas, towns, plotted, source, compact = false }) {
   if (!areas?.length) return null;

@@ -2276,6 +2276,24 @@ sup.cite a:hover{text-decoration:underline}
   border-radius:var(--r1);border:1px solid var(--line)}
 .draftimg figcaption{margin-top:6px;max-width:520px}
 
+/* ── THE LOCATOR'S KEY ────────────────────────────────────────────────────
+   The record page's map now shades its town by filed median psf, so it needs
+   the same key the island has. A colour carrying a figure without a key is
+   decoration, and this one is carrying money.
+
+   The swatches are inline-styled from lib/ramp.js rather than restated here.
+   That is deliberate: the ramp is one array, and a CSS copy of it is the
+   second implementation that lets the island and this map colour one price
+   two different ways with nothing going red. */
+.locakey{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 0;
+  font-size:var(--t-micro);color:var(--mute)}
+.locaramp{display:flex;flex:0 0 auto}
+.locaramp i{width:26px;height:9px;display:block}
+.locaramp i:first-child{border-radius:var(--r1) 0 0 var(--r1)}
+.locaramp i:last-child{border-radius:0 var(--r1) var(--r1) 0}
+.locakeylab{flex:1 1 100%;color:var(--mute);letter-spacing:.04em}
+@media(min-width:560px){ .locakeylab{flex:0 1 auto;margin-left:4px} }
+
 /* ── THE FIGURE A PAGE OPENS WITH ─────────────────────────────────────────
    The record page's headline treatment, made available to the pages that had
    no compact block for .bleed to anchor on. Same order as there: the label
