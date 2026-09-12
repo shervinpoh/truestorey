@@ -2300,6 +2300,23 @@ sup.cite a:hover{text-decoration:underline}
   border-radius:var(--r1);border:1px solid var(--line)}
 .draftimg figcaption{margin-top:6px;max-width:520px}
 
+/* ── TWO INDICES, ONE SCALE ───────────────────────────────────────────────
+   The page is called "how the market actually sits" and showed one of the two
+   markets. Both figures lead now, side by side, because neither is the
+   headline and the other the footnote.
+
+   The line is --ink, not a teal. Both teals are spoken for — the interface and
+   live data — and a second series is neither. Ink against the teal bars is the
+   strongest separation available without borrowing a meaning. */
+.idxpair{display:flex;flex-wrap:wrap;gap:26px 40px;align-items:flex-end;margin:2px 0 0}
+.idxpair .big{margin:0}
+.idxpair .meta{margin:2px 0 0}
+.chartline{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.bars{position:relative}
+.chartcmp{display:inline-flex;align-items:center;gap:6px;margin-left:12px;color:var(--ink2)}
+.chartcmp i{width:14px;height:0;border-top:1.6px solid var(--ink);display:block}
+@media(max-width:520px){ .idxpair{gap:18px 26px} }
+
 /* ── THE MAP, TAKEN SERIOUSLY ─────────────────────────────────────────────
    It used to be a 546px figure wedged into another component's slot between a
    summary and the fork, which is how it came to read as a diagram

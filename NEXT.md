@@ -4,7 +4,7 @@ Rewritten 1 Sep 2026, at the handover to Codex. `CLAUDE.md` has the rules and
 the architecture — **read that first, it is not optional.** This file is only
 the ordered backlog.
 
-**State:** live at https://truestorey.vercel.app · **554 tests** · three npm
+**State:** live at https://truestorey.vercel.app · **560 tests** · three npm
 dependencies · Blindspot scoring out of 10 with all six checks running · data
 refreshing itself daily via `.github/workflows/refresh-data.yml`.
 
@@ -279,7 +279,7 @@ Three remain, all buildable from data already held.
 |---|---|---|
 | ~~5~~ | ~~**Price history and realised returns**~~ | **REFUSED 2 Sep — it cannot be built from this data, and the attempt is the record.** Pairing filed sales needs a unit identifier and neither HDB nor URA publishes one, deliberately: unit-level purchase prices are the REALIS-shaped data rule 1 forbids outright. The closest available match is address + floor area + floor band, and it is NOT a unit — Blk 362C Sembawang Crescent filed fifteen 4-room 93 sqm sales on storeys 7–9 inside seventeen months, two in the same month. A first build of it paired those and produced a confident median holding period out of fifteen different families' homes. **What shipped instead** is `sizeTrend` in `lib/blindspot/measure.js` over `data/trend.json`: median psf by year in 10 sqm bands, beside the same figure for every size at that address. A headline year-on-year figure is a median over whatever happened to sell, so it moves when the MIX moves — The Sail's 60–70 sqm homes fell 4.1% while the address rose 7.2%. That gap is the finding, and it is true. |
 | 6 | **Quantum by year** | What buyers actually paid, by region, size and year. A pivot over data already held. |
-| 8 | **URA Private Residential Property Index** | **The DATA is in — 4 Sep. The PAGE is not.** `npm run ingest:ppi` writes `data/ppi.json`: three series (all, landed, non-landed), 206 quarters, 1975-Q1 to date, base 1Q2009 = 100 — the SAME base as HDB's, which is what lets the two sit beside each other without either being rebased here. It is **not on data.gov.sg**; that was established by looking, not by one failed guess — its dataset search ignores the query string entirely and returns the same six unrelated datasets for every term. SingStat Table Builder carries it as table M212261 and names URA as the datasource in the response, which is the attribution stored and rendered. `/cost` uses it already. **What is left is `/market`**, which still shows HDB's index alone, and that is the leaving-the-site problem this row was written about. |
+| 8 | **URA Private Residential Property Index** | **The DATA is in — 4 Sep. The PAGE is not.** `npm run ingest:ppi` writes `data/ppi.json`: three series (all, landed, non-landed), 206 quarters, 1975-Q1 to date, base 1Q2009 = 100 — the SAME base as HDB's, which is what lets the two sit beside each other without either being rebased here. It is **not on data.gov.sg**; that was established by looking, not by one failed guess — its dataset search ignores the query string entirely and returns the same six unrelated datasets for every term. SingStat Table Builder carries it as table M212261 and names URA as the datasource in the response, which is the attribution stored and rendered. `/cost` uses it already. ~~**What is left is `/market`**~~ **DONE 13 Sep.** Both indices lead the page, HDB's as bars and URA's as a line on one shared scale, neither rebased — which is the whole reason the SingStat route was worth taking. Each carries its own source line, and the compare tool now names the index it compares, because putting a second figure beside the first took away the context that used to make it unambiguous. |
 
 Refuse regardless, unchanged: Valuation, Project Scorecard, Commercial,
 Watchlist.
@@ -707,7 +707,7 @@ is currently near zero.
 
 ## How to work in this repo
 
-- `npm test` before and after. **554 passing.** A red test is a real finding.
+- `npm test` before and after. **560 passing.** A red test is a real finding.
 - `npm run preflight` before assuming a key works. It makes a real call to each
   provider and only a 200 counts.
 - **Never run `next build` while a dev or production server is up.** They share

@@ -31,6 +31,19 @@ import { useRef, useState } from 'react';
  */
 export default function Chart({
   points,                      // [{ label, value }]
+  /* ── A SECOND SERIES, ON THE SAME SCALE ─────────────────────────────────
+     Optional, aligned index-for-index with `points`, and drawn as a line over
+     the bars rather than as a second set of bars — two interleaved bar series
+     at 146 quarters is a comb nobody can read.
+
+     THE SHARED SCALE IS THE POINT. HDB's resale index and URA's private index
+     are both on 1Q2009 = 100, which is the entire reason ingest:ppi went to
+     SingStat for it rather than rebasing something here. Giving the line its
+     own axis would throw that away and invent a visual relationship the
+     numbers do not have. A null in the series is a gap in the line, not a
+     zero. */
+  compare = null,              // [{ label, value|null }] — same length as points
+  compareLabel = '',
   format = v => String(v),
   unit = '',
   height = 118,
@@ -43,10 +56,15 @@ export default function Chart({
 
   if (!points?.length) return null;
   const n = points.length;
-  const vals = points.map(p => p.value);
+  const cmpVals = (compare || []).map(c => c?.value).filter(Number.isFinite);
+  const vals = points.map(p => p.value).concat(cmpVals);
   const mn = Math.min(...vals) * 0.985;
   const mx = Math.max(...vals) * 1.005;
   const span = mx - mn || 1;
+  /* The bars sit in a box 8%–96% tall; the line has to use the same mapping or
+     the two series would be drawn against different rulers on one picture. */
+  const yOf = v => 100 - (8 + ((v - mn) / span) * 88);
+  const cmpAt = i => (compare && Number.isFinite(compare[i]?.value) ? compare[i].value : null);
 
   // Falls back to the latest bar so the readout is never empty.
   const cur = at == null ? n - 1 : at;
@@ -77,6 +95,11 @@ export default function Chart({
       <p className="chartread" aria-live="polite">
         <b>{format(p.value)}{unit}</b>
         <span>{p.label}</span>
+        {compare && cmpAt(cur) != null && (
+          <span className="chartcmp">
+            <i aria-hidden="true" />{compareLabel} <b>{format(cmpAt(cur))}{unit}</b>
+          </span>
+        )}
         {at == null && <em>latest — point at the chart to read any bar</em>}
       </p>
 
@@ -103,6 +126,31 @@ export default function Chart({
             style={{ height: (8 + ((q.value - mn) / span) * 88) + '%' }}
           />
         ))}
+
+        {/* preserveAspectRatio="none" so the line stretches with the box the
+            bars already fill, and pointer-events off so it never steals the
+            hover the bars are reading. */}
+        {compare && (
+          <svg className="chartline" viewBox={`0 0 ${n} 100`} preserveAspectRatio="none"
+            aria-hidden="true" focusable="false">
+            {/* Broken into runs, so a quarter the series does not cover is a
+                gap rather than a straight line drawn across missing data. */}
+            {(() => {
+              const runs = []; let run = [];
+              for (let i = 0; i < n; i++) {
+                const v = cmpAt(i);
+                if (v == null) { if (run.length > 1) runs.push(run); run = []; continue; }
+                run.push(`${i + 0.5},${yOf(v).toFixed(2)}`);
+              }
+              if (run.length > 1) runs.push(run);
+              return runs.map((r, k) => (
+                <polyline key={k} points={r.join(' ')} fill="none"
+                  stroke="var(--ink)" strokeWidth="1.4" vectorEffect="non-scaling-stroke"
+                  strokeLinejoin="round" strokeLinecap="round" />
+              ));
+            })()}
+          </svg>
+        )}
       </div>
 
       <div className="axis">

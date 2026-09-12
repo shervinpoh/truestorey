@@ -13,7 +13,7 @@ const qLabel = q => q.replace('-Q', ' Q');
  * The "how's the market" answer. Two series, both government-sourced, both
  * carrying the date they were taken — no figure appears without its provenance.
  */
-export default function MarketView({ idx, rates, mop }) {
+export default function MarketView({ idx, rates, mop, priv = null, privMeta = null }) {
   const [span, setSpan] = useState(20);   // quarters shown
 
   // A rate is only "live" if it was actually fetched recently. MAS goes down for
@@ -25,7 +25,7 @@ export default function MarketView({ idx, rates, mop }) {
 
   return (
     <>
-      {idx && <IndexPanel idx={idx} />}
+      {idx && <IndexPanel idx={idx} priv={priv} privMeta={privMeta} />}
 
       {rates && (() => {
         const pts = rates.points.slice(-180);
@@ -112,7 +112,7 @@ function Move({ v, label }) {
  *
  * Still an index, never a price — the note below the chart stays.
  */
-function IndexPanel({ idx }) {
+function IndexPanel({ idx, priv, privMeta }) {
   const pts = idx.points;
   const [from, setFrom] = useState(Math.max(0, pts.length - 21));
   const [to, setTo] = useState(pts.length - 1);
@@ -136,13 +136,34 @@ function IndexPanel({ idx }) {
 
   return (
     <>
-      <span className="lab">HDB resale price index · {idx.base}</span>
-      <div className="big">{idx.latest.index.toFixed(1)}</div>
-      <p className="meta">{qLabel(idx.latest.quarter)} · index, not a price</p>
+      <span className="lab">Price indices · {idx.base}</span>
+      <div className="idxpair">
+        <div>
+          <div className="big">{idx.latest.index.toFixed(1)}</div>
+          <p className="meta">HDB resale · {qLabel(idx.latest.quarter)}</p>
+        </div>
+        {privMeta && (
+          <div>
+            <div className="big">{privMeta.latest.index.toFixed(1)}</div>
+            <p className="meta">URA private · {qLabel(privMeta.latest.quarter)}</p>
+          </div>
+        )}
+      </div>
+      <p className="meta">Index, not a price. Both on {idx.base}, neither rebased here.</p>
       <div style={{display:'flex',gap:8,flexWrap:'wrap',margin:'8px 0 0'}}>
         <Move v={idx.yoy} label="vs a year ago" />
         <Move v={idx.qoq} label="on the quarter" />
       </div>
+
+      {/* ── IT SAYS WHICH INDEX, BECAUSE THERE ARE TWO NOW ─────────────────
+          The panel used to be headed "HDB resale price index", so the compare
+          tool below it needed no label. Putting URA's index beside it took
+          that context away and left "+38.5%, 2021 Q2 to 2026 Q2" sitting under
+          two figures without saying which one moved. A figure that does not
+          say what it measures is the thing this site exists not to publish. */}
+      <h3 className="sh" style={{ marginTop: 22 }}>
+        <span>Compare two quarters of the HDB resale index</span>
+      </h3>
 
       <div className="cmpbar">
         <label><span className="filtn">Compare from</span>
@@ -161,7 +182,7 @@ function IndexPanel({ idx }) {
         <div className="kpi3 cmpout">
           <div>
             <div className="v">{cmp.change >= 0 ? '+' : '−'}{Math.abs(cmp.change).toFixed(1)}%</div>
-            <span className="lab">{qLabel(a.quarter)} to {qLabel(b.quarter)}</span>
+            <span className="lab">HDB resale, {qLabel(a.quarter)} to {qLabel(b.quarter)}</span>
           </div>
           <div>
             <div className="v">{cmp.annual == null ? '—' : `${cmp.annual >= 0 ? '+' : '−'}${Math.abs(cmp.annual).toFixed(1)}%`}</div>
@@ -176,11 +197,30 @@ function IndexPanel({ idx }) {
 
       <Chart
         points={pts.map(p => ({ label: qLabel(p.quarter), value: p.index }))}
+        compare={priv ? priv.map(p => ({ label: qLabel(p.quarter), value: p.index })) : null}
+        compareLabel="URA private"
         format={v => v.toFixed(1)}
         markFrom={lo} markTo={hi}
-        ariaLabel={`HDB resale price index, ${pts.length} quarters from ${qLabel(pts[0].quarter)} to ${qLabel(idx.latest.quarter)}. Comparing ${qLabel(a.quarter)} with ${qLabel(b.quarter)}.`} />
+        ariaLabel={`HDB resale price index in bars, ${pts.length} quarters from ${qLabel(pts[0].quarter)} to ${qLabel(idx.latest.quarter)}`
+          + `${priv ? ', with URA\'s private residential index as a line on the same 1Q2009 base' : ''}`
+          + `. Comparing ${qLabel(a.quarter)} with ${qLabel(b.quarter)}.`} />
 
+      {/* Rule 6 twice over: two series, two agencies, two provenance lines.
+          One line naming both would leave a reader unable to check either. */}
       <p className="prov">{idx.source} · {idx.points[0].quarter} to {idx.latest.quarter} · accessed {idx.accessedAt.slice(0,10)}</p>
+      {privMeta && (
+        <p className="prov">{privMeta.source} · datasource {privMeta.datasource} · to {privMeta.latest.quarter} · accessed {String(privMeta.accessedAt).slice(0,10)}</p>
+      )}
+
+      {privMeta && (
+        <div className="note" style={{marginTop:4}}>
+          <b>The two are comparable because neither was rebased.</b> HDB publishes its resale index
+          on 1Q2009 = 100 and URA publishes its private residential index on the same base, so the
+          bars and the line can share one scale. That is the only reason this chart is honest —
+          rebasing either one here would have produced a picture of arithmetic rather than of two
+          markets. URA&apos;s series runs back to 1975; only the quarters HDB also covers are drawn.
+        </div>
+      )}
 
       <div className="note" style={{marginTop:4}}>
         <b>An index is not a price.</b> It tracks the whole country&apos;s resale market against 1Q2009.
