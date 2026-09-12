@@ -85,7 +85,8 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
 
       <SectionNav ids={sectionIds} />
 
-      <section className="pane" id="overview">
+      {/* The one section on this page that changes ground. See .bleed. */}
+      <section className="pane bleed" id="overview">
         <RecordView rec={rec} attribution={attribution}
           onType={(t, rv) => setMedian(rv.medianPrice)}
           afterSummary={<>

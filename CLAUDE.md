@@ -95,7 +95,20 @@ reinstate them by reflex.
 4. **Green and red stay reserved** for a price that moved and a school on the
    MOE 1km line. `--warn` is a third thing again — a dataset that could not be
    measured. Neither teal may encroach on any of them.
-5. **Motion reveals information or it does not ship.** The island filling with
+5. **Five type steps, one value each.** `--t-micro 11.5px` (mono only:
+   labels, provenance, dates, badges) · `--t-small 14px` (captions, hints,
+   dense cells) · `--t-body 16.5px` (reading) · `--t-lead 20px` (card titles,
+   sub-heads) · `--t-display clamp(30px,4.5vw,44px)`. The big figures keep
+   their own clamps and are not on this ladder — a record's median psf is the
+   signature of the site.
+
+   There were **48 distinct font sizes across 265 declarations**, sixteen of
+   them inside an 8px band, and 8px text on the page. Nobody perceives 13px
+   against 13.5px as a level, so those were not a hierarchy, they were drift,
+   and every page read flat because of it. A step is a ROLE. If a new size
+   seems necessary, the question is which of the five roles the text is in.
+   11.5px is the floor.
+6. **Motion reveals information or it does not ship.** The island filling with
    data teaches what the map is built from. A spinner does not. Nothing may
    delay interaction: the homepage search is focusable in the first frame while
    the island is still animating, and every animation's *finished* state is the
