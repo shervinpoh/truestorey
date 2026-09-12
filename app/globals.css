@@ -2275,3 +2275,32 @@ sup.cite a:hover{text-decoration:underline}
 .draftimg img{display:block;width:100%;max-width:520px;aspect-ratio:16/9;object-fit:cover;
   border-radius:var(--r1);border:1px solid var(--line)}
 .draftimg figcaption{margin-top:6px;max-width:520px}
+
+/* ── KEYBOARD PARITY ───────────────────────────────────────────────────────
+   Every link and button already takes a focus ring from the global rule near
+   the top, so this is not an accessibility gap — it is a parity one. 39
+   selectors changed appearance on :hover and 8 did on :focus-visible, so a
+   mouse user got a card that lifted and a keyboard user got a 2px outline and
+   nothing else. The states are the same states; only the input differed.
+
+   :focus-within where the hover is on a container holding the link, and
+   :focus-visible where the selector IS the interactive element. Using
+   :focus-within on an <a> would fire on the element itself and be a slower
+   way of writing :focus.
+
+   Declarations are mirrored from the hover rules rather than restated, so the
+   two cannot drift. Appended at the end: equal specificity, later wins. */
+.fcard:focus-within{border-color:var(--edge);box-shadow:var(--lift)}
+.deckcard:focus-within{background:var(--acc)}
+.deckcard:focus-within .n{color:var(--on-acc)}
+.deckcard:focus-within .b{color:var(--on-acc)}
+.feed a:focus-visible{background:var(--sunk)}
+.cta:focus-visible{background:var(--paper);color:var(--ink);border-color:var(--ink)}
+.edlead a:focus-visible{background:var(--sunk)}
+.edseconds a:focus-visible{background:var(--sunk)}
+.blocklist a:focus-visible{background:var(--sunk);color:var(--ink)}
+.fromback:focus-visible{background:var(--acc);color:var(--on-acc)}
+.backup:focus-visible{color:var(--ink)}
+.ghost:focus-visible{border-color:var(--ink);color:var(--ink)}
+.gnav a.n:focus-visible{color:var(--ink)}
+.mapopt:focus-visible{background:var(--sunk);color:var(--ink)}
