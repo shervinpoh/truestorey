@@ -1,4 +1,5 @@
 import './globals.css';
+import './atlas.css';
 import Track from '../components/Track.jsx';
 import NavHere from '../components/NavHere.jsx';
 import SiteFooter from '../components/SiteFooter.jsx';

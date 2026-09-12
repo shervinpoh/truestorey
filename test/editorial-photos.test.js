@@ -37,12 +37,12 @@ const between = (from, to) => {
 test('every card on /insights has somewhere to put a photograph', () => {
   const lead = between('className="edlead"', 'edseconds');
   assert.match(lead, /lead\.image/, 'the lead article stopped rendering its photograph');
-  assert.match(lead, /<img/, 'the lead has no image element');
+  assert.match(lead, /<EditorialImage\s+post=\{lead\}/, 'the lead has no image renderer');
 
   const seconds = between('className="edseconds"', '</section>');
   assert.match(seconds, /\bp\.image\b/,
     'the two seconds are back to rendering a headline with no photograph');
-  assert.match(seconds, /<img/, 'the seconds have no image element');
+  assert.match(seconds, /<EditorialImage\s+post=\{p\}/, 'the seconds have no image renderer');
 
   const feed = strip('components/Feed.jsx');
   assert.match(feed, /\bp\.image\b/, 'the river stopped rendering photographs');
@@ -55,6 +55,11 @@ test('every card on /insights has somewhere to put a photograph', () => {
  * that no longer exists rather than one that happens to be empty.
  */
 test('every photograph on /insights carries alt text', () => {
+  const image = strip('components/EditorialImage.jsx');
+  assert.match(image, /<img[\s\S]*?alt=\{post\.imageAlt/,
+    'the shared image renderer dropped the article alt text');
+  assert.match(image, /width="1600" height="900"/,
+    'the shared image renderer must reserve space before an image loads');
   for (const tag of page.match(/<img[\s\S]*?\/>/g) || []) {
     assert.match(tag, /alt=/, `an image on /insights has no alt attribute:\n${tag}`);
   }

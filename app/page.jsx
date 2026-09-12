@@ -1,7 +1,9 @@
+import EditorialImage from '../components/EditorialImage.jsx';
+import { editorialAsset } from '../lib/editorial-assets.js';
 import Link from 'next/link';
 import { catalogue, hdbIndex, allUrls, archive, allTowns, projects, boundaries, getIndex } from '../lib/data/query.js';
 import { feed } from '../lib/articles.js';
-import { NAV } from '../lib/nav.js';
+import { NAV, SITUATIONS } from '../lib/nav.js';
 import { ogForHome } from '../lib/og.js';
 import Search from '../components/Search.jsx';
 import WhoBuilt from '../components/WhoBuilt.jsx';
@@ -99,159 +101,138 @@ export default async function Home() {
   const num = n => n.toLocaleString('en-SG');
 
   return (
-    <main className="shell wide">
-      {/* Asymmetric: the claim and the search on the left, the island filling
-          with data on the right. The map is the signature and the search is
-          the job, so neither waits for the other — the input is focusable from
-          the first frame while the shading is still crossing the country. */}
+    <main className="shell wide home-atlas">
+      <div className="home-edition">
+        <span>Singapore property, openly</span>
+        <span>Free to use. No account needed.</span>
+      </div>
       <section className="hero">
         <div className="herosay">
-          <h1>Every block in Singapore, in filed numbers</h1>
-          <p className="sub">What was actually paid, by block and by project — with the
-            source and the period printed beside it. Free, and there is nothing to sign up to.</p>
+          <h1>A clearer view of <span>Singapore property.</span></h1>
+          <p className="sub">Start with what was actually paid. Explore the transactions,
+            understand the costs, and see the source behind every figure.</p>
           <div className="herosearch">
-            <h2 className="sh"><span>Look up any block or project</span>
-              <span>{urls.length ? num(urls.length) : ''} pages</span></h2>
-            <div style={{ marginTop: 14 }}><Search /></div>
+            <h2 className="sh"><span>Find a block or project</span></h2>
+            <Search />
+            <div className="home-browse">
+              <span className="lab">Or explore</span>
+              <Link href="/hdb">HDB towns ↗</Link>
+              <Link href="/condo">Condominiums ↗</Link>
+              <Link href="/landed">Landed homes ↗</Link>
+            </div>
           </div>
-          <dl className="proof">
-            <div><dt>{num(blocks)}</dt><dd>HDB blocks with a filed resale</dd></div>
-            <div><dt>{num(hdbSales + privateSales)}</dt><dd>filed transactions behind them</dd></div>
-            {/* "daily" was the check, not the data, and printing it beside a
-                date five days old said the opposite. The workflow runs every
-                morning; each dataset refreshes on the cadence its SOURCE
-                publishes at — SORA daily, transactions weekly, the resale
-                index quarterly. Re-pulling a quarterly index every night
-                would be noise, and claiming it was fresh would be worse. */}
-            <div><dt>{refreshed || '—'}</dt><dd>transactions · checked daily</dd></div>
-          </dl>
         </div>
         <div className="heromap">
+          <div className="atlas-heading"><span className="lab">The property atlas</span>
+            <Link href="/map" aria-label="Explore the full property map">Explore map ↗</Link></div>
           <IslandMap areas={boundaries().areas} towns={towns}
-            plotted={urls.length} source={cat.hdbSource} compact />
-          <Link href="/map" className="islandgo">Open the full map →</Link>
+            plotted={urls.length} source={`${cat.hdbSource} · ${cat.hdbPeriod?.from}–${cat.hdbPeriod?.to}`} compact />
         </div>
       </section>
 
-      <WhoBuilt />
+      <div className="home-evidence">
+        <div className="evidence-intro"><span className="lab">Public records.</span><b>Open to everyone.</b>
+          <Link href="/methodology">Where the numbers come from ↗</Link></div>
+        <dl className="proof">
+          <div><dt>{num(blocks)}</dt><dd>HDB blocks with a filed resale</dd></div>
+          <div><dt>{num(hdbSales + privateSales)}</dt><dd>filed transactions</dd></div>
+          <div><dt>{refreshed || '—'}</dt><dd>HDB data · checked daily</dd></div>
+        </dl>
+        <p className="prov evidence-source">{cat.hdbSource} · {cat.hdbPeriod?.from}–{cat.hdbPeriod?.to}
+          {' / '}{cat.privateSource} · {cat.privatePeriod?.from}–{cat.privatePeriod?.to}</p>
+      </div>
 
-      {lead && (
-        <section className="lede">
-          <div className="ledemain">
-            <span className="kind deep">{lead.kind === 'deep' ? 'Deep dive' : 'Note'}</span>
-            <h2 className="ledetitle"><Link href={lead.href}>{lead.title}</Link></h2>
-            {lead.summary && <p className="sub">{lead.summary}</p>}
-            <p className="prov" style={{ marginBottom: 0 }}>
-              {lead.source === 'file'
-                ? (process.env.NEXT_PUBLIC_AGENT_NAME || 'Shervin Poh')
-                : 'Truestorey desk'} · {lead.date}
-              {lead.kind === 'deep' ? ` · ${lead.minutes} min` : ''} · built on filed transactions
-            </p>
-          </div>
-          <div className="ledeside">
-            {pts.length > 1 && (
-              <div className="statcard">
-                <span className="lab">HDB Resale Price Index</span>
-                <div className="bars" style={{ height: 84, marginTop: 10 }}>
-                  {pts.map((p, i) => (
-                    <i key={p.quarter} className={i === pts.length - 1 ? 'last' : ''}
-                      style={{ height: (10 + (((p.index ?? p.value) - lo) / (hi - lo)) * 86) + '%' }}
-                      title={`${p.quarter} · ${p.index ?? p.value}`} />
-                  ))}
-                </div>
-                {/* Both ends labelled. Sixteen bars with no scale said only
-                    "it went up", which the reader could already see. */}
-                <div className="axis">
-                  <span className="lab">{pts[0].quarter} · {pts[0].index ?? pts[0].value}</span>
-                  <span className="lab">{latest?.quarter} · {latest?.index ?? latest?.value}</span>
-                </div>
-                <div className="statrow">
-                  <span className="statnum">{latest?.index ?? latest?.value}</span>
-                  {qoq != null && (
-                    <span className={'pill ' + (qoq >= 0 ? 'u' : 'd')}>
-                      {qoq >= 0 ? '▲' : '▼'} {Math.abs(qoq).toFixed(1)}% QoQ
-                    </span>
-                  )}
-                </div>
-                <p className="prov" style={{ margin: '8px 0 0' }}>
-                  {latest?.quarter} · {idx.points.length} quarters since {idx.points[0]?.quarter}<br />
-                  {idx.source}
-                </p>
-              </div>
-            )}
-          </div>
-        </section>
-      )}
-
-      <section className="pane">
-        <h2 className="sh"><span>What people work out here</span>
-          <Link href="/tools">All {allTools.length} tools →</Link></h2>
-        <div className="deck">
-          {tools.map(t => (
-            <Link className="deckcard" key={t.href} href={t.href}>
-              <span className="n">{t.label}</span>
-              <span className="b">{t.blurb}</span>
+      <section className="home-section home-decisions">
+        <div className="home-section-heading"><div><p className="lab">Your next move</p>
+          <h2>Start with your question.</h2></div><Link href="/tools">All {allTools.length} tools ↗</Link></div>
+        <div className="decision-grid">
+          {SITUATIONS.map((s, i) => (
+            <Link href={s.href} className="decision-link" key={s.id}>
+              <span className="decision-symbol" aria-hidden="true">{['↗', '⇄', '⌕'][i]}</span>
+              <h3>{s.label}</h3><p>{s.sub}</p><span className="decision-go">See where to start <span aria-hidden="true">→</span></span>
             </Link>
           ))}
         </div>
       </section>
 
-      {arch?.entries?.length > 0 && (
-        <section className="pane">
-          <h2 className="sh"><span>Latest from the archive</span>
-            <Link href="/archive">All {arch.entries.length} →</Link></h2>
-          <div className="arch">
-            {arch.entries.slice(0, 5).map((e, i) => (
-              <div className="arow" key={e.date + i}>
-                <span className="d mono">{e.date}</span>
-                <div><div className="t">{e.url
-                  ? <a href={e.url} target="_blank" rel="noopener noreferrer">{e.title}</a> : e.title}</div>
-                  {e.summary && <div className="s">{e.summary}</div>}</div>
-                <span className="src">{e.source}</span>
-              </div>
-            ))}
+      <section className="home-section home-perspectives">
+        <div className="home-section-heading"><div><p className="lab">Look a little closer</p>
+          <h2>There’s more to a home than its price.</h2></div><Link href="/guides">Explore the guides ↗</Link></div>
+        <div className="perspective-grid">
+          {[
+            { subject: 'sun', label: 'Light & orientation', title: 'The part a price can’t show.',
+              text: 'See what a floor plan shows about light, orientation and layout—and what it leaves out.', href: '/floorplan', cta: 'Read a floor plan' },
+            { subject: 'lease', label: 'Time & tenure', title: 'The years that come with the keys.',
+              text: 'Explore how remaining tenure changes the published leasehold relativity.', href: '/lease', cta: 'Explore the lease table' },
+            { subject: 'land', label: 'Land & supply', title: 'Before a home, there was a tender.',
+              text: 'Trace government land awards back to the bids that were actually filed.', href: '/land', cta: 'See the land awards' },
+          ].map(p => (
+            <article className="perspective" key={p.subject}>
+              <Link href={p.href}>
+                <EditorialImage post={editorialAsset(p.subject)} className="perspective-image" />
+                <div className="perspective-copy"><p className="lab">{p.label}</p><h3>{p.title}</h3>
+                  <p>{p.text}</p><span className="perspective-go">{p.cta} <span aria-hidden="true">↗</span></span></div>
+              </Link>
+            </article>
+          ))}
+        </div>
+        <p className="prov illustration-caption">Truestorey editorial illustrations · conceptual scenes, not actual properties or sites.</p>
+      </section>
+
+      {lead && (
+        <section className="home-section home-editorial">
+          <div className="home-section-heading"><div><p className="lab">From the desk</p>
+            <h2>Read beyond the headline.</h2></div><Link href="/insights">All notes & deep dives ↗</Link></div>
+          <div className="home-editorial-grid">
+            <article className="home-lead">
+              <Link href={lead.href}>
+                {lead.image && <EditorialImage post={lead} className="home-lead-image" />}
+                <div className="fmeta"><span className="kind deep">{lead.kind === 'deep' ? 'Deep dive' : 'Note'}</span><span className="fdate">{lead.date}</span></div>
+                <h3>{lead.title}</h3>{lead.summary && <p className="sub">{lead.summary}</p>}
+                <span className="home-read">Read the story ↗</span>
+              </Link>
+            </article>
+            <div className="home-news-side">
+              {pts.length > 1 && <Link className="home-index" href="/market">
+                <span className="lab">HDB Resale Price Index</span>
+                <div className="statrow"><span className="statnum">{latest?.index ?? latest?.value}</span>
+                  {qoq != null && <span className={'pill ' + (qoq >= 0 ? 'u' : 'd')}>
+                    {qoq >= 0 ? '▲' : '▼'} {Math.abs(qoq).toFixed(1)}% QoQ</span>}</div>
+                <div className="bars" style={{ height: 66 }}>
+                  {pts.map((p, i) => <i key={p.quarter} className={i === pts.length - 1 ? 'last' : ''}
+                    style={{ height: (10 + (((p.index ?? p.value) - lo) / (hi - lo)) * 86) + '%' }}
+                    title={`${p.quarter} · ${p.index ?? p.value}`} />)}
+                </div>
+                <div className="axis"><span className="lab">{pts[0].quarter} · {pts[0].index ?? pts[0].value}</span>
+                  <span className="lab">{latest?.quarter} · {latest?.index ?? latest?.value}</span></div>
+                <p className="prov">{idx.source} · {pts[0].quarter}–{latest?.quarter}<br />Open the market overview ↗</p>
+              </Link>}
+              {rest.map(p => <article className="home-news-item" key={p.slug}><Link href={p.href}>
+                <span className="lab">{p.kind === 'deep' ? 'Deep dive' : 'Note'} · {p.date}</span><h3>{p.title}</h3>
+              </Link></article>)}
+            </div>
           </div>
         </section>
       )}
 
-      {rest.length > 0 && (
-        <section className="pane">
-          <h2 className="sh"><span>More writing</span><Link href="/insights">Everything →</Link></h2>
-          {/* The same card as /insights, including the typographic tile when
-              there is no photograph. Two pages showing the same articles in
-              two different treatments is how a site stops looking like one
-              site. */}
-          <ul className="feedgrid">
-            {rest.map((p, i) => (
-              <li key={p.slug} className={p.kind === 'deep' ? 'fcard deep' : 'fcard'}>
-                <Link href={p.href}>
-                  {p.image ? (
-                    <img className="fimg" src={p.image} alt={p.imageAlt} loading="lazy" width="1200" height="675" />
-                  ) : (
-                    <span className={'ftile t' + ((i * 2 + 1) % 3)} aria-hidden="true">
-                      <span>{p.kind === 'deep' ? 'Deep dive' : 'Note'}</span>
-                    </span>
-                  )}
-                  <div className="fbody">
-                    <div className="fmeta">
-                      <span className={'kind' + (p.kind === 'deep' ? ' deep' : '')}>
-                        {p.kind === 'deep' ? 'Deep dive' : 'Note'}</span>
-                      <span className="fdate">{p.date}</span>
-                    </div>
-                    <p className="ftitle">{p.title}</p>
-                    {p.summary && <p className="fsum">{p.summary}</p>}
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      <section className="home-section home-toolbox">
+        <div className="home-section-heading"><div><p className="lab">The working tools</p>
+          <h2>Make the numbers make sense.</h2></div><Link href="/tools">Browse every tool ↗</Link></div>
+        <div className="deck">{tools.map(t => <Link className="deckcard" key={t.href} href={t.href}>
+          <span className="n">{t.label}<span aria-hidden="true">↗</span></span><span className="b">{t.blurb}</span>
+        </Link>)}</div>
+      </section>
 
-      <p className="prov">
-        {cat.hdbSource} · {cat.hdbPeriod?.from} to {cat.hdbPeriod?.to}<br />
-        {cat.privateSource} · {cat.privatePeriod?.from} to {cat.privatePeriod?.to}
-      </p>
+      {arch?.entries?.length > 0 && <section className="home-section home-archive">
+        <div className="home-section-heading"><div><p className="lab">Policy & data</p><h2>Go straight to the source.</h2></div>
+          <Link href="/archive">The full archive ↗</Link></div>
+        <div className="arch">{arch.entries.slice(0,3).map((e,i) => <div className="arow" key={e.date+i}>
+          <span className="d mono">{e.date}</span><div><div className="t">{e.url
+            ? <a href={e.url} target="_blank" rel="noopener noreferrer">{e.title} ↗</a> : e.title}</div>
+            {e.summary && <div className="s">{e.summary}</div>}</div><span className="src">{e.source}</span>
+        </div>)}</div>
+      </section>}
+      <WhoBuilt />
     </main>
   );
 }

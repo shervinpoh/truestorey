@@ -1,3 +1,4 @@
+import EditorialImage from '../../components/EditorialImage.jsx';
 import Link from 'next/link';
 import { topics } from '../../lib/insights.js';
 import { feed } from '../../lib/articles.js';
@@ -88,8 +89,7 @@ export default async function Page() {
               <article className="edlead">
                 <Link href={lead.href}>
                   {lead.image && (
-                    <img className="edleadimg" src={lead.image} alt={lead.imageAlt || ''}
-                      width="1200" height="675" />
+                    <EditorialImage post={lead} className="edleadimg" eager />
                   )}
                   <span className={'kind' + (lead.kind === 'deep' ? ' deep' : '')}>
                     {lead.kind === 'deep' ? 'Deep dive' : 'Note'}
@@ -109,8 +109,7 @@ export default async function Page() {
                   <article key={p.slug}>
                     <Link href={p.href}>
                       {p.image && (
-                        <img className="edsecimg" src={p.image} alt={p.imageAlt || ''}
-                          loading="lazy" width="480" height="360" />
+                        <EditorialImage post={p} className="edsecimg" />
                       )}
                       <div className="edsectxt">
                         <span className={'kind' + (p.kind === 'deep' ? ' deep' : '')}>

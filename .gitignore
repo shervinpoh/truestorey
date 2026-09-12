@@ -44,3 +44,7 @@ photos-in/
 # Raw ingest download. Must ALSO be in outputFileTracingExcludes — the tracer
 # reads the disk, not the index.
 data/.gls-awards-raw.xlsx
+
+# Blender's rolling local backups. Editable scene masters stay versioned.
+design/assets/scenes/*.blend1
+design/assets/__pycache__/

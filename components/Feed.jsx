@@ -1,6 +1,7 @@
 'use client';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import EditorialImage from './EditorialImage.jsx';
 
 /**
  * The editorial feed.
@@ -78,7 +79,7 @@ export default function Feed({ posts = [], topics = [] }) {
                     also gives the river rhythm without a single image — three
                     tints alternating down the page. */}
                 {p.image ? (
-                  <img className="fimg" src={p.image} alt={p.imageAlt} loading="lazy" width="1200" height="675" />
+                  <EditorialImage post={p} className="fimg" />
                 ) : (
                   <span className={'ftile t' + tint[i]} aria-hidden="true">
                     <span>{p.kind === 'deep' ? 'Deep dive' : 'Note'}</span>

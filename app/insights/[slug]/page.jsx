@@ -1,3 +1,5 @@
+import EditorialImage from '../../../components/EditorialImage.jsx';
+import { withEditorialAsset } from '../../../lib/editorial-assets.js';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { allInsights, insight, around } from '../../../lib/insights.js';
@@ -39,7 +41,7 @@ export default async function Page({ params }) {
   // A file first, then the pipeline. generateStaticParams only knows about the
   // files, so a pipeline piece renders on demand and is cached from then on —
   // which is also what lets a freshly published article appear without a build.
-  const post = insight(slug) || await piece(slug);
+  const post = withEditorialAsset(insight(slug) || await piece(slug));
   if (!post) notFound();
 
   // A town with no filed resale has no page — and that absence is itself the
@@ -89,7 +91,7 @@ export default async function Page({ params }) {
         </p>
         {post.image && (
           <figure className="posthero">
-            <img src={post.image} alt={post.imageAlt} width="1200" height="675" />
+            <EditorialImage post={post} eager />
             {post.imageCredit && <figcaption>{post.imageCredit}</figcaption>}
           </figure>
         )}

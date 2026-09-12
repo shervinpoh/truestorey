@@ -1,0 +1,14 @@
+{
+  "seed": 2718,
+  "samples": 48,
+  "width": 2400,
+  "height": 1350,
+  "colours": {
+    "stone": "#7B837F",
+    "chalk": "#B6BAB6",
+    "metal": "#B6BAB6",
+    "darkMetal": "#5A625F",
+    "soil": "#77736A",
+    "soilDark": "#57574F"
+  }
+}
