@@ -26,6 +26,7 @@ import { still } from './Motion.jsx';
  */
 const ITEMS = [
   { id: 'overview', label: 'Overview' },
+  { id: 'place', label: 'Where it sits' },
   { id: 'history', label: 'Price history' },
   { id: 'transactions', label: 'Transactions' },
   { id: 'floor', label: 'Floor premium' },

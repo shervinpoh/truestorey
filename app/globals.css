@@ -557,7 +557,25 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--ink)
 .forkcol a:hover span{color:var(--ink)}
 @media(max-width:640px){.fork{grid-template-columns:1fr}}
 /* Two sticky bars above these now, so an anchor has to clear both. */
-#overview,#history,#transactions,#floor,#nearby,#proceeds{scroll-margin-top:120px}
+/* ── EVERY SECTION, NOT A HAND-KEPT LIST ─────────────────────────────────
+   This was six ids typed out, and a record page has ten sections. #nearbysales,
+   #sun and #land were missing from it and had been landing under the sticky
+   bar since they were built — clicking them in the nav put their heading at
+   51px behind bars 120px tall. #place would have been the fourth.
+
+   A list somebody has to remember to extend is the same failure as the secnav
+   offset hardcoded at 56px while the masthead measured 71. Stated once, and
+   derived from --headh so the two cannot drift.
+
+   Scoped to a section the nav can actually target, rather than [id], which
+   would give a scroll margin to every labelled input on the site. */
+:root{--navstack:calc(var(--headh) + 49px)}
+main section[id],
+main div[id],
+/* #history and #transactions are headings nested inside RecordView rather
+   than sections under main, so a child combinator would have silently dropped
+   the two that DID work before this. */
+main h2[id]{scroll-margin-top:var(--navstack)}
 
 /* ── a record page's own contents ───────────────────────────────────────────
    These pages run to five or six thousand pixels and every part of that is
@@ -1553,7 +1571,13 @@ sup.cite a:hover{text-decoration:underline}
 .locator{margin:20px 0 0;padding:0}
 .locator svg{width:100%;height:auto;display:block;background:var(--paper);
  border:1px solid var(--line);border-radius:var(--r2)}
+/* The 28% is for the UNSHADED case only — grey dots that should not compete
+   with the lit block. A shaded dot carries a price in its fill, and element
+   opacity multiplies everything including the stroke, so leaving it on drew
+   all 219 bands at just over a quarter strength and the ramp read as mush.
+   fill-opacity does not override it; only opacity does. */
 .locator .near{fill:var(--acc);opacity:.28}
+.locator .near.banded{opacity:1}
 /* --acc-lit is data that is live or selected. This block, on its own page, is
    the most selected thing on the site. */
 .locator .here{fill:var(--acc-lit);stroke:var(--acc-ink);stroke-width:1.4}
@@ -2275,6 +2299,35 @@ sup.cite a:hover{text-decoration:underline}
 .draftimg img{display:block;width:100%;max-width:520px;aspect-ratio:16/9;object-fit:cover;
   border-radius:var(--r1);border:1px solid var(--line)}
 .draftimg figcaption{margin-top:6px;max-width:520px}
+
+/* ── THE MAP, TAKEN SERIOUSLY ─────────────────────────────────────────────
+   It used to be a 546px figure wedged into another component's slot between a
+   summary and the fork, which is how it came to read as a diagram
+   illustrating text. It has its own section now, so it gets the height to be
+   looked at rather than glanced past. */
+.locator svg{min-height:min(62vh,520px)}
+
+/* Each dot is an anchor. The hover lifts it out of the field rather than
+   recolouring it, because the colour is carrying a price and must not also
+   carry a mouse state. */
+.locator a circle{transition:none}
+.locator a:hover circle{stroke:var(--ink);strokeWidth:1.4}
+.locator a:focus-visible{outline:none}
+.locator a:focus-visible circle{stroke:var(--ink);stroke-width:2.4}
+@media(prefers-reduced-motion:no-preference){
+  .locator a circle{transition:stroke var(--t1) var(--ease),stroke-width var(--t1) var(--ease)}
+}
+
+/* The sentence the map cannot say on its own. */
+.locarank{font-size:var(--t-body);color:var(--ink2);margin:10px 0 14px;max-width:62ch}
+.locarank b{color:var(--ink);font-weight:600}
+
+/* Off-screen until a keyboard reaches it. 219 dots is 219 tab stops and a map
+   nobody can get past is worse than a map nobody can use. */
+.skipmap{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.skipmap:focus-visible{position:static;width:auto;height:auto;display:inline-block;
+  margin:0 0 8px;padding:7px 12px;background:var(--acc);color:var(--on-acc);
+  border-radius:var(--r1);font-size:var(--t-small);text-decoration:none}
 
 /* ── THE LOCATOR'S KEY ────────────────────────────────────────────────────
    The record page's map now shades its town by filed median psf, so it needs

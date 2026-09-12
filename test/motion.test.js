@@ -198,3 +198,46 @@ test('the record section bar exists before hydration', () => {
   assert.doesNotMatch(nav, /\[items,\s*setItems\]/,
     'SectionNav is discovering its whole contents after paint again');
 });
+
+/**
+ * Three sections landed under the sticky bar and nobody noticed.
+ *
+ * scroll-margin-top was a hand-typed list of six ids — #overview, #history,
+ * #transactions, #floor, #nearby, #proceeds — and a record page has ten
+ * sections. Clicking "Sold nearby" or "Afternoon sun" in the section nav put
+ * the heading at 0px behind bars 115px tall, so the reader arrived at the
+ * middle of a section with no idea which one.
+ *
+ * A list somebody has to remember to extend is the same failure as the secnav
+ * offset hardcoded at 56px while the masthead measured 71, which is already
+ * written down in CLAUDE.md. This one was found by adding a seventh section
+ * and checking where the nav actually landed.
+ */
+test('every section the nav can reach clears the sticky bars', () => {
+  const css = readFileSync(new URL('../app/globals.css', import.meta.url), 'utf8');
+  const code = css.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  assert.doesNotMatch(code, /#overview\s*,\s*#history[^{]*\{\s*scroll-margin-top/,
+    'back to a hand-typed list of ids; the next section added will land under the bar');
+  assert.match(code, /main section\[id\][\s\S]{0,80}scroll-margin-top:var\(--navstack\)/,
+    'sections no longer get a scroll margin generically');
+  assert.match(code, /main h2\[id\]/,
+    '#history and #transactions are headings nested in RecordView, not sections under main');
+  assert.match(code, /--navstack:calc\(var\(--headh\)/,
+    'the offset is a literal again, so it can drift from the masthead it has to clear');
+});
+
+/* Every id the section nav offers has to exist somewhere, or the nav renders a
+   link that scrolls nowhere. */
+test('the section nav does not offer a destination that was never built', () => {
+  const nav = readFileSync(new URL('../components/SectionNav.jsx', import.meta.url), 'utf8');
+  const ids = [...nav.matchAll(/\{ id: '([a-z]+)'/g)].map(m => m[1]);
+  assert.ok(ids.includes('place'), 'the map section is not in the nav');
+  const sources = ['RecordPage', 'RecordView', 'LandTrail', 'NearbySales', 'SunPath', 'Storey']
+    .map(f => { try { return readFileSync(new URL(`../components/${f}.jsx`, import.meta.url), 'utf8'); }
+                catch { return ''; } }).join('\n');
+  for (const id of ids) {
+    assert.match(sources, new RegExp(`id="${id}"`),
+      `the nav offers "${id}" and nothing on a record page carries that id`);
+  }
+});

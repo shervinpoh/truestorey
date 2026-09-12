@@ -81,7 +81,12 @@ function locatorFor(rec) {
     /* psf travels with the dot so the town can be shaded by what was filed in
        it. One number per block, already published on that block's own page —
        this asserts nothing new, it just stops the map being monochrome. */
+    /* label travels too, so a dot can say what it is before you follow it.
+       Block and street only — 219 of these is about 6KB, which buys a
+       navigable map. The whole town object is what /mop shipped by accident
+       and it was 2.7MB. */
     if (g) points.push({ href: b.href, lat: +g.lat.toFixed(5), lon: +g.lon.toFixed(5),
+                         label: `${b.block} ${b.street}`,
                          psf: Number.isFinite(b.medianPsf) ? b.medianPsf : null });
   }
   return {

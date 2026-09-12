@@ -66,6 +66,7 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
   const hasSun = Boolean(sun);
   const sectionIds = [
     'overview',
+    locator && 'place',
     rec.series?.length > 1 && 'history',
     rec.recent?.length > 0 && 'transactions',
     hasFloor && 'floor',
@@ -89,16 +90,25 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
       <section className="pane bleed" id="overview">
         <RecordView rec={rec} attribution={attribution}
           onType={(t, rv) => setMedian(rv.medianPrice)}
-          afterSummary={<>
-            {/* Where it is, before what it costs over time. Codex's note was
-                that a record opens with a figure and becomes a ledger without
-                ever saying where — and the fork below is the other half of
-                that: what you can DO from here. */}
-            {locator && <Locator {...locator} label={titleCase(rec.label)} />}
+          afterSummary={
             <Fork price={price} planHref={planHref} href={rec.href}
               hdb={hdb} hasFloor={hasFloor} hasNear={hasNear} />
-          </>} />
+          } />
       </section>
+
+      {/* ── THE MAP GETS ITS OWN SECTION ──────────────────────────────────
+          It was a slot inside RecordView's afterSummary, wedged between a
+          summary and the fork, and it read as a diagram illustrating the text
+          rather than as the thing it is: this block's place in its town's
+          price landscape, which is the question a reader on this page has
+          after "what did it go for".
+
+          Its own section, in the nav, at full width. */}
+      {locator && (
+        <section className="pane" id="place">
+          <Locator {...locator} label={titleCase(rec.label)} town={titleCase(rec.town)} />
+        </section>
+      )}
 
       {hasFloor && <div id="floor"><Storey data={storey} label={titleCase(rec.label)} /></div>}
 

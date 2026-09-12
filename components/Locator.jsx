@@ -28,7 +28,7 @@
  */
 import { RAMP, quantileBreaks, bandOf, MIN_TO_BAND } from '../lib/ramp.js';
 
-export default function Locator({ area, points = [], here, label }) {
+export default function Locator({ area, points = [], here, label, town }) {
   if (!here || !Number.isFinite(here.lat) || !Number.isFinite(here.lon)) return null;
 
   // Frame on the town, not the island — a dot inside Singapore locates nothing.
@@ -69,12 +69,51 @@ export default function Locator({ area, points = [], here, label }) {
   const lo = shaded ? Math.round(Math.min(...priced)) : null;
   const hi = shaded ? Math.round(Math.max(...priced)) : null;
 
+  /* ── WHERE THIS BLOCK SITS, IN WORDS ───────────────────────────────────
+     A shaded dot shows a band. It does not say which band, or how many
+     blocks filed lower, and those are the two things a reader is actually
+     working out by squinting at the colours. Counting is free and it is not
+     a valuation: it is a rank among filed medians, each of which is
+     published on its own page.
+
+     Stated only when this block HAS a filed median. A block with none gets
+     the map and no sentence, rather than a rank invented from nothing. */
+  const mine = Number.isFinite(here.psf) ? here.psf : null;
+  const lower = mine == null ? null : priced.filter(v => v < mine).length;
+  const band = mine == null || !shaded ? null : bandOf(mine, breaks);
+
   const path = (area?.rings || [])
     .map(r => 'M' + r.map(([lon, lat]) => `${x(lon)},${y(lat)}`).join('L') + 'Z')
     .join('');
 
+  const afterId = 'place-after';
+
   return (
     <figure className="locator">
+      <h2 className="sh">
+        <span>Where it sits{town ? ` in ${town}` : ''}</span>
+        <span className="mono">{points.length.toLocaleString('en-SG')} blocks</span>
+      </h2>
+
+      {/* ── THE RANK, IN WORDS ───────────────────────────────────────────
+          A shaded dot shows a band. It does not say WHICH band or how many
+          blocks filed lower, and those are the two things a reader is working
+          out by squinting at the colours. This is a rank among filed medians,
+          each published on its own page — it is not a valuation and it says
+          nothing about what this home is worth. */}
+      {band !== null && (
+        <p className="locarank">
+          <b>S${Math.round(mine).toLocaleString('en-SG')} psf</b> puts this block in band{' '}
+          <b>{band + 1} of {RAMP.length}</b> for {town || 'this town'} —{' '}
+          {lower.toLocaleString('en-SG')} of {priced.length.toLocaleString('en-SG')} blocks
+          with a filed median went for less.
+        </p>
+      )}
+
+      {/* 219 dots are 219 tab stops, and a map nobody can get past is worse
+          than a map nobody can use. Visible only when focused. */}
+      <a className="skipmap" href={`#${afterId}`}>Skip the map</a>
+
       <svg viewBox={`0 0 ${W} ${H}`} role="img"
         aria-label={`${label} shown among ${points.length} other blocks in the same town.`}>
         {path && <path d={path} fill="var(--line2)" stroke="var(--line)" strokeWidth="1.2"
@@ -94,12 +133,20 @@ export default function Locator({ area, points = [], here, label }) {
              It gives each dot a boundary whatever its band, and the fill is
              then free to carry the value rather than also having to carry
              visibility. */
-          <circle key={p.href} cx={x(p.lon)} cy={y(p.lat)} r={shaded ? 4 : 2.4}
-            className="near"
-            {...(shaded && bandOf(p.psf, breaks) !== null
-              ? { fill: RAMP[bandOf(p.psf, breaks)], fillOpacity: 1,
-                  stroke: 'var(--edge)', strokeWidth: 0.7 }
-              : {})} />
+          /* An anchor, not a circle with a click handler. This stays a server
+             component and works with no JavaScript at all: the browser gives
+             the title as a tooltip, the link as a destination and the focus
+             ring for free. A map you can walk block to block is the whole
+             point of calling the thing an atlas. */
+          <a key={p.href} href={p.href}>
+            <title>{p.label}{Number.isFinite(p.psf) ? ` — S$${Math.round(p.psf)} psf` : ' — no filed median'}</title>
+            <circle cx={x(p.lon)} cy={y(p.lat)} r={shaded ? 4 : 2.4}
+              className={shaded && bandOf(p.psf, breaks) !== null ? 'near banded' : 'near'}
+              {...(shaded && bandOf(p.psf, breaks) !== null
+                ? { fill: RAMP[bandOf(p.psf, breaks)], fillOpacity: 1,
+                    stroke: 'var(--edge)', strokeWidth: 0.7 }
+                : {})} />
+          </a>
         ))}
         {/* Drawn last so it is never painted under a neighbour. */}
         <circle cx={x(here.lon)} cy={y(here.lat)} r="6" className="here" />
@@ -135,6 +182,7 @@ export default function Locator({ area, points = [], here, label }) {
           ? ' Shading is each block’s own median psf from its filed resales, in six equal-sized groups of this town.'
           : ` Too few blocks here carry a filed median to band into six groups, so nothing is shaded — ${priced.length} of ${points.length}.`}
       </figcaption>
+      <span id={afterId} tabIndex={-1} />
     </figure>
   );
 }
