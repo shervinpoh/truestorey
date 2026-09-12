@@ -88,29 +88,71 @@ pushed for mood, no aspirational lifestyle staging, no pool decks. Restrained,
 material, slightly cool. The site's whole position is that it is the sober
 alternative to the portals.
 
+## The site has two grounds, and this is the hardest constraint
+
+As of 12 September the reader chooses light or dark and the site remembers it.
+Both are real, both are in use, and **every asset has to work on both without
+being rendered twice.**
+
+That rules out the obvious approach. A subject floating on a pale background
+looks correct on the light theme and blazes like a lightbox on the dark one.
+Two variants per subject doubles the work and doubles the drift.
+
+So the rule is:
+
+**Fill the frame, edge to edge, like a photograph.** No floating object on a
+backdrop that has to match the page. If the image is an opaque rectangle, the
+page's ground never shows through it and the theme becomes irrelevant.
+
+**Hold the value in the middle.** No blown whites, no crushed blacks. Target
+roughly 25–70% luminance across the frame. A light-key render sits badly on
+`#0B0D0F` and a dark-key one disappears into it; a mid-key render is at home on
+either. This is the single art-direction decision that makes the set work.
+
+**Do not colour-match the page.** Trying to blend the asset into `#F6F5F2`
+guarantees it clashes with `#0B0D0F`. Let it read as an image sitting on a
+page, not as part of the page.
+
 ## The palette
 
-Build from these. They are the live tokens.
+Light ground — the default:
 
 ```
---paper   #F6F5F2   warm off-white ground
+--paper   #F6F5F2   warm off-white
 --sunk    #EFEEE9   a recessed surface
 --card    #FFFFFF
 --line    #E2E0D9   hairlines
 --ink     #111414   near-black
 --ink2    #48514F
 --mute    #666E6A
---acc     #164F52   deep teal — the interface colour, use sparingly
+--acc     #164F52   deep teal — the interface colour, used sparingly
 ```
 
-Neutral ramp for materials: `#111414 #5A625F #7B837F #B6BAB6 #DAD8D2`
+Dark ground — the reader's other choice:
 
-**Do not use `#58BCC3`.** That light teal is reserved on this site for data
-that is live or selected, and using it decoratively would break the one rule
-that keeps the accent meaningful.
+```
+--paper   #0B0D0F
+--sunk    #15181B
+--card    #121517
+--line    #232830
+--ink     #ECEEF0
+--ink2    #AFB6BD
+--mute    #79828B
+--acc     #22D3DD   the accent SHIFTS between themes — it is not one colour
+```
 
-Reserved and off-limits in these images: green `#1E7A5F` and red `#AE4736`.
-They mean a price that moved and a dataset that could not be measured.
+Build materials from the neutral ramp rather than from either ground:
+`#111414 #5A625F #7B837F #B6BAB6 #DAD8D2`. Those mid values are what survive
+the flip.
+
+**Do not use `#58BCC3` or `#22D3DD` decoratively.** Both are reserved on this
+site for data that is live or selected, and spending them on an illustration
+breaks the one rule that keeps the accent meaningful. A trace of teal as a
+material colour is fine; teal as the subject is not.
+
+Reserved and off-limits in these images on both grounds: green (`#1E7A5F`
+light, `#4BBD8D` dark) and red (`#AE4736` light, `#E8836A` dark). They mean a
+price that moved and a dataset that could not be measured.
 
 ## Technical output
 
@@ -121,6 +163,9 @@ They mean a price that moved and a dataset that could not be measured.
   the same file is used as a 120 px thumbnail. Keep the subject centred and
   away from the edges.
 - Naming: `subject-<id>-<variant>.avif` / `.webp`, e.g. `subject-lease-a.avif`.
+- **Check every render on both `#F6F5F2` and `#0B0D0F` before calling it done.**
+  Drop it on each ground at 1600px and at 120px. If it only works on one, it is
+  not finished, and the fix is the value key rather than a second render.
 
 ## The render script — this matters as much as the images
 
@@ -147,6 +192,7 @@ the palette changes or when I add a subject.
 
 Start with `lease` and `land`. Between them they cover the two extremes: a
 close-up object on a plain ground, and something with depth and environment.
+Show me each one sitting on both page grounds, not just the render.
 
 ## A note on GPT Image
 
