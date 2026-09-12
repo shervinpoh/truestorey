@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { mop, getIndex, boundaries, geoRecords } from '../../lib/data/query.js';
+import PageFigure from '../../components/PageFigure.jsx';
 import Masthead from '../../components/Masthead.jsx';
 import MopView from '../../components/MopView.jsx';
 import { titleCase, slug, hdbHref } from '../../lib/name.js';
@@ -32,10 +33,21 @@ export default function Page() {
   return (
     <main className="shell wide">
       <Masthead crumbs={[{ href: '/', label: 'Home' }]} title="When flats can start selling"
-        sub={m
-          ? `${m.totals.upcomingBlocks.toLocaleString()} blocks reach their fifth year between ${m.generatedForYear} and ${m.generatedForYear + 4} — ${m.totals.upcomingUnits.toLocaleString()} units that could come to market.`
-          : 'Blocks approaching the end of their Minimum Occupation Period, by town and by year.'} />
+        /* The count moved to the figure below. It was in this subhead at 14px
+           and in the view again underneath, which is the redundancy a page
+           gets when nothing is allowed to be the headline. */
+        sub="Blocks approaching the end of their Minimum Occupation Period, by town and by year." />
       <FromBack label="the property" />
+
+      {m && (
+        <PageFigure
+          label={`Flats reaching their fifth year, ${m.generatedForYear} to ${m.generatedForYear + 4}`}
+          value={m.totals.upcomingUnits.toLocaleString('en-SG')}
+          unit="units"
+          support={`Across ${m.totals.upcomingBlocks.toLocaleString('en-SG')} blocks. Every one of them is a household that becomes able to sell for the first time, with the month attached.`}
+          note="Eligibility to sell is not an intention to sell, and it is not incoming supply. It is the month a door opens, not a count of anyone walking through it."
+          source={`${m.source} · accessed ${String(m.accessedAt).slice(0, 10)}`} />
+      )}
       <section className="pane">
         {view ? <MopView {...view} /> : (
           <div className="warn">

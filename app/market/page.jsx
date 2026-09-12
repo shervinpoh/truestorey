@@ -15,6 +15,15 @@ export default function Page() {
     <main className="shell">
       <Masthead crumbs={[{ href: '/', label: 'Home' }]} title="How the market actually sits"
         sub="Two numbers move everything else: what resale prices are doing, and what borrowing costs. Both here, both sourced, both dated." />
+      {/* NO PageFigure HERE, and that is the finding rather than an omission.
+          MarketView already opens with 202.8 under its own label, so adding
+          the block above it printed the same number twice within 200px —
+          exactly the redundancy this pass exists to remove, created by the
+          pass itself. Caught by looking at the page, not by the build.
+
+          What /market actually needs is its EXISTING headline wrapped in the
+          bleed, which lives inside MarketView rather than out here. That is a
+          change to the component, not a block added to the route. */}
       <section className="pane">
         {/* Four numbers, not the register. This passed `m` whole — 2.6MB of
             HTML, every block back to 1986 serialised twice, so that the supply

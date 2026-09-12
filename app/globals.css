@@ -2276,6 +2276,32 @@ sup.cite a:hover{text-decoration:underline}
   border-radius:var(--r1);border:1px solid var(--line)}
 .draftimg figcaption{margin-top:6px;max-width:520px}
 
+/* ── THE FIGURE A PAGE OPENS WITH ─────────────────────────────────────────
+   The record page's headline treatment, made available to the pages that had
+   no compact block for .bleed to anchor on. Same order as there: the label
+   above in mono, the figure large, what it does not say underneath, and the
+   source line last.
+
+   The figure is NOT on the five-step text ladder. A record's median psf has
+   its own clamp and so does this, for the same reason — it is the signature
+   of the page rather than a heading in a document, and putting it on the
+   ladder would cap it at --t-display and flatten the one moment the page has.
+
+   No colour on the number. Green and red mean a price that moved, and the two
+   teals mean live data; a figure that is simply large does not need to borrow
+   a meaning that belongs to something else. */
+.pagefig{padding-top:30px;padding-bottom:26px}
+.pagefiglab{display:block;font-size:var(--t-micro);letter-spacing:.1em;
+  text-transform:uppercase;color:var(--mute);margin:0 0 6px}
+.pagefignum{font-family:Archivo,system-ui,sans-serif;font-variation-settings:"wdth" 88;
+  font-size:clamp(46px,8vw,88px);line-height:.92;letter-spacing:-.035em;
+  font-weight:700;color:var(--ink);margin:0}
+.pagefignum em{font-style:normal;font-size:.3em;font-weight:600;letter-spacing:-.01em;
+  color:var(--mute);margin-left:.14em}
+.pagefigsup{font-size:var(--t-body);color:var(--ink2);margin:12px 0 0;max-width:58ch}
+.pagefignote{font-size:var(--t-small);color:var(--mute);margin:8px 0 0;max-width:58ch}
+.pagefig .prov{margin:14px 0 0}
+
 /* ── KEYBOARD PARITY ───────────────────────────────────────────────────────
    Every link and button already takes a focus ring from the global rule near
    the top, so this is not an accessibility gap — it is a parity one. 39

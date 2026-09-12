@@ -3,6 +3,7 @@ import ToolIntro from '../../components/ToolIntro.jsx';
 import ToolUse from '../../components/ToolUse.jsx';
 import LandView from '../../components/LandView.jsx';
 import { glsAwards, hdbSitesLinked } from '../../lib/data/query.js';
+import PageFigure from '../../components/PageFigure.jsx';
 
 export const metadata = {
   title: 'What developers paid for the land — every awarded GLS site since 1993 | Truestorey',
@@ -21,6 +22,17 @@ export default function Page() {
         sub="Every Government Land Sales site URA has awarded since 1993 — the winning tender, the rate, and how many wanted it." />
       <ToolIntro href="/land" />
       <ToolUse id="land" />
+
+      {(ura?.sites?.length || hdb?.sites?.length) && (
+        <PageFigure
+          label="Government land sale sites awarded"
+          value={((ura?.sites?.length || 0) + (hdb?.sites?.length || 0)).toLocaleString('en-SG')}
+          unit="sites"
+          support={`${(ura?.sites?.length || 0).toLocaleString('en-SG')} from URA and ${(hdb?.sites?.length || 0).toLocaleString('en-SG')} from HDB, with the winning tender, the rate, and every losing bid the agency published.`}
+          note="What a developer paid for land is not what anything built on it is worth. The two are separated by years, a construction cost and a market nobody has seen yet."
+          source={`${ura?.source || 'URA Government Land Sales'} · accessed ${String(ura?.accessedAt || '').slice(0, 10)}`} />
+      )}
+
       <section className="pane">
         {d ? <LandView data={d} /> : (
           <div className="warn">
