@@ -300,3 +300,60 @@ test('a duplicate is a quiet morning, every other refusal is red', () => {
   assert.match(src, /process\.exit\(res\.status === 409 \? 0 : 1\)/,
     'a duplicate fails the workflow again, or every refusal now passes it');
 });
+
+/**
+ * The desk filed drafts on 10 and 11 September and nobody was told about
+ * either. Both runs were green, because filing is what they were asked to do.
+ *
+ * The notification was only ever wired for the other supply. Make.com posts
+ * kind:'articles' to the Apps Script, which appends to the Articles tab and
+ * WhatsApps the title. The desk posts to this site's webhook, which stores the
+ * row in Supabase and makes one outbound call, to Unsplash, for the licence
+ * ping. The bot reads a Google Sheet and had no way of knowing a desk article
+ * existed — which is also why /drafts in WhatsApp would have shown nothing.
+ */
+test('the desk tells the bot, in the shape the bot already understands', () => {
+  const code = src.replace(/\/\*[\s\S]*?\*\//g, '').split('\n')
+    .filter(l => !/^\s*(\/\/|\*)/.test(l)).join('\n');
+  assert.match(code, /async function notifyBot/, 'nothing announces a filed draft again');
+  assert.match(code, /await notifyBot\(/, 'notifyBot is defined and never called');
+  assert.match(code, /kind: 'articles'/,
+    'the payload no longer matches artFromMake_, so the Apps Script will ignore it');
+  assert.match(code, /k=\$\{encodeURIComponent\(k\)\}/,
+    'the URL key is gone; verifyRequest_ will reject the post and doPost returns OK doing nothing');
+});
+
+/*
+ * A notification is not worth losing a filed article over. But a SILENT
+ * failure to notify is the exact bug this was written to fix, so the quiet
+ * path has to be loud.
+ */
+test('a failure to notify is loud and never fails the run', () => {
+  const fn = /async function notifyBot[\s\S]*?\n\}/.exec(src);
+  assert.ok(fn, 'notifyBot moved — check this test still describes it');
+  const body = fn[0];
+  assert.doesNotMatch(body, /process\.exit/, 'a failed notification now kills the run');
+  assert.doesNotMatch(body, /throw /, 'a failed notification now throws');
+  assert.match(body, /NOT NOTIFIED/, 'the failure is silent again');
+  assert.match(body, /catch/, 'an unreachable Apps Script would take the run down');
+});
+
+/*
+ * Apps Script answers 200 with ok_() whatever happens, including when
+ * verifyRequest_ rejects the URL key. A 200 is not evidence a message was
+ * sent, and reporting one as a send is how a fortnight of silence looks green.
+ */
+test('a 200 from Apps Script is not reported as a delivered message', () => {
+  const fn = /async function notifyBot[\s\S]*?\n\}/.exec(src)[0];
+  assert.doesNotMatch(fn, /Bot notified\s*['"`]/, 'a 200 is being claimed as a delivery');
+  assert.match(fn, /did not match WA_WEBHOOK_KEY/,
+    'the one failure a 200 hides is no longer explained');
+});
+
+test('the workflow passes all three, or the desk cannot notify', () => {
+  const wf = readFileSync(path.join(process.cwd(), '.github', 'workflows', 'desk.yml'), 'utf8');
+  for (const k of ['APPS_SCRIPT_URL', 'WA_WEBHOOK_KEY', 'MAKE_SECRET']) {
+    assert.match(wf, new RegExp(`${k}:\\s+\\$\\{\\{ secrets\\.${k} \\}\\}`),
+      `${k} is not passed to the scheduled run`);
+  }
+});

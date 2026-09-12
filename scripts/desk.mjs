@@ -268,3 +268,69 @@ if (!res.ok) {
   process.exit(res.status === 409 ? 0 : 1);
 }
 console.log(`\nFiled as a draft: ${row.title}\nRead it at ${SITE}/studio\n`);
+
+/* ── AND THEN TELL SOMEBODY ────────────────────────────────────────────────
+   The desk filed drafts on 10 and 11 September and nobody was told about
+   either. Both runs were green, because filing is what they were asked to do
+   and filing is what they did.
+
+   The notification was only ever wired for the OTHER supply. Make.com posts
+   kind:'articles' straight to the Apps Script, which appends a row to the
+   Articles tab and WhatsApps the title — see artFromMake_ in
+   scripts/10_Articles.gs. The desk posts to this site's webhook instead,
+   which stores the row in Supabase and makes exactly one outbound call, to
+   Unsplash, for the licence ping. The bot reads a Google Sheet. It has never
+   had any way of knowing a desk article exists.
+
+   Which is also why /drafts in WhatsApp would have shown nothing: it reads
+   the same sheet.
+
+   So this posts the same shape Make posts, to the same endpoint, and
+   artFromMake_ does the rest — the row lands on the Articles tab, the message
+   goes out, and /pub N and /skip N work on a desk piece exactly as they work
+   on a pipeline one. No Apps Script change.
+
+   IT NEVER FAILS THE RUN. The article is filed by the time this is called and
+   a notification is not worth losing it over. But it is LOUD when it cannot
+   send, because a quiet notification failure is the bug this exists to fix. */
+async function notifyBot(filed) {
+  /* The same /exec as CRM_WEBHOOK_URL — one Apps Script deployment serves
+     both. Set them to the same value. */
+  const url = process.env.APPS_SCRIPT_URL;
+  const k = process.env.WA_WEBHOOK_KEY;
+  const secret = process.env.MAKE_SECRET;
+  if (!url || !k || !secret) {
+    console.warn('  NOT NOTIFIED. '
+      + [!url && 'APPS_SCRIPT_URL', !k && 'WA_WEBHOOK_KEY', !secret && 'MAKE_SECRET']
+        .filter(Boolean).join(', ')
+      + ' is not set, so the article is filed and nothing will say so.\n');
+    return;
+  }
+  try {
+    const res = await fetch(`${url}${url.includes('?') ? '&' : '?'}k=${encodeURIComponent(k)}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        kind: 'articles',
+        secret,
+        items: [{
+          id: filed.id || '', slug: filed.slug || row.slug, title: row.title,
+          category: row.category, excerpt: row.excerpt,
+          sources: row.source_urls || [],
+        }],
+      }),
+      signal: AbortSignal.timeout(15000),
+    });
+    /* Apps Script answers 200 with ok_() whatever happens, including when
+       verifyRequest_ rejects the URL key — so a 200 is not evidence a message
+       was sent, and this must not claim it was. The only honest thing to
+       report is that the endpoint answered. */
+    console.log(res.ok
+      ? `  Bot notified — the Apps Script answered ${res.status}. If no message arrives,\n`
+        + '  the ?k= key did not match WA_WEBHOOK_KEY: doPost returns OK and does nothing.'
+      : `  NOT NOTIFIED. The Apps Script answered ${res.status}.`);
+  } catch (e) {
+    console.warn(`  NOT NOTIFIED. ${e.name === 'TimeoutError' ? 'The Apps Script timed out' : e.message}.`);
+  }
+}
+await notifyBot(out);

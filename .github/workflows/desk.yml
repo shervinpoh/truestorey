@@ -62,6 +62,12 @@ jobs:
           NEXT_PUBLIC_SITE_URL:   ${{ vars.NEXT_PUBLIC_SITE_URL }}
           # No key means no photograph and a piece that still files.
           UNSPLASH_ACCESS_KEY:    ${{ secrets.UNSPLASH_ACCESS_KEY }}
+          # Telling the bot. Without all three the piece still files and the
+          # run still says so, loudly — which is the whole point, because two
+          # drafts sat unannounced for two mornings and both runs were green.
+          APPS_SCRIPT_URL:        ${{ secrets.APPS_SCRIPT_URL }}
+          WA_WEBHOOK_KEY:         ${{ secrets.WA_WEBHOOK_KEY }}
+          MAKE_SECRET:            ${{ secrets.MAKE_SECRET }}
         run: |
           if [ "${{ inputs.backfill }}" = "true" ]; then
             if [ -n "${{ inputs.only }}" ]; then
