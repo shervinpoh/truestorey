@@ -3,6 +3,7 @@ import Track from '../components/Track.jsx';
 import NavHere from '../components/NavHere.jsx';
 import SiteFooter from '../components/SiteFooter.jsx';
 import { agent } from '../lib/agent.js';
+import { ldJson, organisation } from '../lib/schema.js';
 
 export const metadata = {
   // See the note in app/sitemap.js: a fallback that does not resolve is worse
@@ -29,6 +30,11 @@ export default function RootLayout({ children }) {
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,400..800&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;500;600;700&display=swap" />
       </head>
       <body>
+        {/* Who publishes this and under what registration. The CEA number goes
+            in as an identifier with its issuer named, because it is the one
+            authority signal on this site a reader can independently check. */}
+        <script type="application/ld+json"
+          dangerouslySetInnerHTML={ldJson(organisation(a))} />
         <Track />
         <NavHere />
         {children}
