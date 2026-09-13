@@ -103,6 +103,12 @@ const meta = {
   psfSource: out.psfSource,
   period: out.period,
   accessedAt: out.accessedAt,
+  /* The ramp and its breaks, because a map without a key is a decoration.
+     The relief's legend is built from these and is the same strip /map's own
+     legend below it uses, so the two read as one scale rather than as two
+     pictures that happen to share a palette. */
+  ramp: out.ramp,
+  breaks: out.breaks,
   lo: out.lo,
   hi: out.hi,
   pricedAreas: out.pricedAreas,

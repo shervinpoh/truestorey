@@ -46,7 +46,10 @@ export default function Page() {
 
       <IslandRelief meta={relief} />
 
-      <section className="pane">
+      {/* The relief above links here by id. The generic rule in globals.css
+          gives every main section[id] a scroll-margin clearing the sticky nav
+          stack, so this needs nothing of its own. */}
+      <section className="pane" id="map">
         <PriceMap map={map} />
       </section>
 

@@ -2420,15 +2420,23 @@ sup.cite a:hover{text-decoration:underline}
   text-transform:uppercase;color:var(--mute);margin:0 0 8px}
 .reliefsup{font-size:var(--t-body);color:var(--ink2);margin:0;max-width:62ch}
 .reliefnote{font-size:var(--t-small);color:var(--mute);margin:10px 0 0;max-width:62ch}
+.reliefkey{margin-top:14px}
+.reliefkey .lab{display:block}
+.reliefcap .reliefsup + .reliefsup{margin-top:12px}
 .relief .prov{margin:14px 0 0}
 
 /* Two columns once there is room for the text to sit beside the picture
    without either getting thin. Below it, one column — a 2:1 render and a
    paragraph side by side on a phone gives 20 characters a line. */
 @media(min-width:900px){
-  .reliefig{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,1fr);
-    gap:26px;align-items:start}
-  .reliefcap{margin:0}
+  .reliefig{display:grid;
+    grid-template-columns:minmax(0,1.55fr) minmax(300px,1fr);
+    grid-template-areas:"pic cap" "key cap";
+    grid-template-rows:auto 1fr;
+    gap:16px 26px;align-items:start}
+  .reliefig > picture{grid-area:pic}
+  .reliefig > .reliefkey{grid-area:key}
+  .reliefcap{grid-area:cap;margin:0}
 }
 
 /* ── KEYBOARD PARITY ───────────────────────────────────────────────────────

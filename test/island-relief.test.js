@@ -98,6 +98,37 @@ test('the caption carries its sources and refuses a valuation', () => {
 });
 
 /* ── 5 ────────────────────────────────────────────────────────────────────
+   IT SHIPPED WITHOUT A KEY. The first version carried a caption naming
+   Queenstown as the dearest town and Choa Chu Kang as the cheapest, above a
+   picture in which neither could be found — no legend, no town names, no
+   scale. Six colours and a range of heights, and nothing saying what either
+   one meant. PriceMap's own header says the relief for its two palest bands
+   IS the legend carrying each band's psf. A map without a key is decoration,
+   and decoration is what the Blender work was redirected away from. */
+test('the relief carries a key, and it is the map\'s own key', () => {
+  const meta = JSON.parse(read('data', 'render', 'island-meta.json'));
+  assert.ok(Array.isArray(meta.ramp) && meta.ramp.length === 6,
+    'island-meta.json lost the ramp, so the legend cannot be built');
+  assert.ok(Array.isArray(meta.breaks) && meta.breaks.length === 5,
+    'island-meta.json lost the breaks, so the legend has no figures');
+
+  const jsx = stripComments(read('components', 'IslandRelief.jsx'));
+  assert.match(jsx, /className="maplegend/,
+    'the relief legend no longer reuses .maplegend — two keys imply two scales');
+  assert.match(jsx, /Median psf/, 'the key lost its label');
+  assert.ok(/breaks\[/.test(jsx),
+    'the key no longer prints the break figures, so a colour means nothing');
+
+  /* The picture cannot name a town. Saying so, and pointing at the thing that
+     can, is the difference between an overview and a dead end. */
+  assert.match(jsx, /No town is named here/,
+    'the relief stopped telling the reader that no town is labelled');
+  const page = stripComments(read('app', 'map', 'page.jsx'));
+  assert.match(page, /id="map"/,
+    'the map section lost id="map" and the relief now links to nothing');
+});
+
+/* ── 6 ────────────────────────────────────────────────────────────────────
    Degrade, never break. A checkout without the render, or before the export
    has run, must not 500 /map — and if the assets ARE committed they must be
    the small ones, because the whole delivery argument was that Blender writes
