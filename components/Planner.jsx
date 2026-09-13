@@ -1,6 +1,5 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { plan, maxPrice } from '../lib/calc/plan.js';
 import { SOURCES, RATES_REVIEWED, LTV_REVIEWED, PROPERTY_TYPES } from '../lib/calc/constants.js';
@@ -345,11 +344,34 @@ function BuyingWhat({ type, setType, hdbLoan, setHdbLoan, price }) {
 }
 
 
-export default function Planner({ markets = {}, budget = null }) {
-  const q = useSearchParams();
-  const [price, setPrice] = useState(Number(q.get('price')) || 650000);
+/**
+ * @param initial  price, type and from, read from the query string ON THE
+ *   SERVER and handed down.
+ *
+ * ── WHY NOT useSearchParams ────────────────────────────────────────────────
+ * Because reading it here made this whole calculator client-only. A client
+ * component calling useSearchParams on a statically-rendered route has to sit
+ * inside a Suspense boundary, and what the server sends is the FALLBACK — so
+ * /plan's server HTML contained the word "Loading…" and nothing else. No
+ * calculator, no figures, no method. That is what a reader with JavaScript off
+ * got, and what every crawler that does not execute JavaScript still gets,
+ * which matters more than it did a week ago: the structured data and llms.txt
+ * added since exist to be read by engines that mostly do not run JS.
+ *
+ * Reading the three params on the server fixes it without a flash. The
+ * alternative — keeping the page static and applying params in an effect —
+ * would render 650,000 first and then correct itself in front of anyone
+ * arriving from a record page with a real price in the URL, which is the
+ * failure mode Motion.jsx already has a note about.
+ *
+ * The cost is that the route is dynamic now rather than prerendered. For a
+ * calculator whose whole job is to answer a question about numbers somebody
+ * just typed, that is the right side of the trade.
+ */
+export default function Planner({ markets = {}, budget = null, initial = {} }) {
+  const [price, setPrice] = useState(Number(initial.price) || 650000);
   // Record pages hand over HDB or PRIVATE; the EC branches are chosen here.
-  const [type, setType] = useState(PROPERTY_TYPES.includes(q.get('type')) ? q.get('type') : 'HDB');
+  const [type, setType] = useState(PROPERTY_TYPES.includes(initial.type) ? initial.type : 'HDB');
   const [hdbLoan, setHdbLoan] = useState(true);
   const [a1, setA1] = useState(6000); const [g1, setG1] = useState(34);
   const [a2, setA2] = useState(5000); const [g2, setG2] = useState(32);
@@ -359,7 +381,7 @@ export default function Planner({ markets = {}, budget = null }) {
   const [profile, setProfile] = useState('SC');
   const [owned, setOwned] = useState(1);
   const [loans, setLoans] = useState(0);
-  const from = q.get('from');
+  const from = initial.from || null;
 
   const input = useMemo(() => ({
     applicants: [

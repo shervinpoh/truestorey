@@ -103,10 +103,58 @@ test('a quick calculator resolves to its own words, not to the tools index', () 
   // Without this, "When can I sell?" would open /tools and describe itself as
   // "Everything below, in one place".
   const sell = itemFor('/tools?calc=sell');
-  assert.equal(sell.href, '/tools?calc=sell');
   assert.match(sell.label, /when can i sell/i);
   assert.doesNotMatch(sell.get, /everything below/i);
   for (const q of QUICK) assert.ok(itemFor(`/tools?calc=${q.id}`).get, `${q.id} has no get:`);
+});
+
+/**
+ * The link has to land ON the calculator.
+ *
+ * "When can I sell?" pointed at /tools?calc=sell, which dropped the reader at
+ * the TOP of /tools — in front of "What are you trying to work out?" and the
+ * three situation cards, one of which is /tools/owning, the page they had just
+ * clicked from. It read as being sent back where they started, and that is
+ * exactly how it was reported.
+ */
+test('a quick calculator link lands on the calculator, not the top of /tools', () => {
+  for (const q of QUICK) {
+    const href = itemFor(`/tools?calc=${q.id}`).href;
+    assert.match(href, /#quick$/,
+      `${q.id} drops the reader at the top of /tools, above the situation cards`);
+    assert.match(href, new RegExp(`calc=${q.id}`), `${q.id} lost its tab`);
+  }
+  const page = readFileSync(new URL('../app/tools/page.jsx', import.meta.url), 'utf8');
+  assert.match(page, /<section className="pane" id="quick">/,
+    'the anchor the links point at does not exist, so they land at the top anyway');
+});
+
+/**
+ * /tools?calc=duty and /tools?calc=sell were byte-identical to /tools before
+ * hydration, because the tab was read with useSearchParams inside a Suspense
+ * boundary whose fallback WAS the server HTML. The page's own prose promises
+ * you can "send someone straight to the stamp duty answer rather than to this
+ * page"; for anyone whose JavaScript had not run, and for every crawler that
+ * does not run it, that promise was not kept.
+ */
+test('the asked tab is resolved on the server', () => {
+  const raw = readFileSync(new URL('../components/Tools.jsx', import.meta.url), 'utf8');
+  /* Comments stripped: the note explaining the removal names the hook it
+     removed, and an unfiltered search finds the explanation. Seventh
+     source-reading test in this repo to match its own prose. */
+  const view = raw.replace(/\/\*[\s\S]*?\*\//g, '').split('\n')
+    .filter(l => !/^\s*(\/\/|\*)/.test(l)).join('\n');
+  assert.doesNotMatch(view, /useSearchParams/,
+    'Tools reads the URL itself again, which makes the whole section client-only');
+  assert.match(raw, /function Tools\(\{ ratesReviewed, asked/,
+    'Tools no longer takes the tab as a prop');
+  const rawPage = readFileSync(new URL('../app/tools/page.jsx', import.meta.url), 'utf8');
+  assert.match(rawPage, /await searchParams/, '/tools does not read calc on the server');
+  /* Stripped for the same reason: the note above the route explains what a
+     Suspense fallback did to this page, and naming it is how it explains. */
+  const page = rawPage.replace(/\/\*[\s\S]*?\*\//g, '').split('\n')
+    .filter(l => !/^\s*(\/\/|\*)/.test(l)).join('\n');
+  assert.doesNotMatch(page, /Suspense/, 'the Suspense fallback is the server HTML again');
 });
 
 test('every quick calculator id is one the tools page actually renders', () => {

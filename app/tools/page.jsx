@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { Suspense } from 'react';
 import Masthead from '../../components/Masthead.jsx';
 import Tools from '../../components/Tools.jsx';
 import { RATES_REVIEWED } from '../../lib/calc/constants.js';
@@ -36,7 +35,11 @@ export const metadata = {
  * agree with. Nothing here is deleted on taste: NEXT.md §6 says tool use gets
  * measured before any specialist tool is judged, and that has not happened.
  */
-export default function Page() {
+/* Dynamic because it reads searchParams — see the note in components/Tools.jsx.
+   The alternative was a Suspense fallback that WAS this page's server HTML. */
+export default async function Page({ searchParams }) {
+  const sp = (await searchParams) || {};
+  const asked = Array.isArray(sp.calc) ? sp.calc[0] : (sp.calc ?? null);
   return (
     <main className="shell">
       <Masthead crumbs={[{ href: '/', label: 'Home' }]} title="Tools"
@@ -70,15 +73,17 @@ export default function Page() {
         </div>
       </section>
 
-      <section className="pane">
+      {/* id so a link can land ON the calculator. "When can I sell?" pointed at
+          /tools?calc=sell and dropped the reader at the top of this page, in
+          front of the three situation cards — one of which is the page they had
+          just come from. It read as being sent back where they started. */}
+      <section className="pane" id="quick">
         <h2 className="sh"><span>Quick answers</span></h2>
         <p className="lede">
           Four short ones that need a figure and nothing else. Each has its own link, so you can
           send someone straight to the stamp duty answer rather than to this page.
         </p>
-        <Suspense fallback={<p className="hint">Loading…</p>}>
-          <Tools ratesReviewed={RATES_REVIEWED} />
-        </Suspense>
+        <Tools ratesReviewed={RATES_REVIEWED} asked={asked} />
       </section>
 
       <section className="pane">

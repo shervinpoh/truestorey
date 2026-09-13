@@ -6,7 +6,6 @@ import { sellTimeline } from '../lib/calc/timeline.js';
 import { amortise, extraPaymentSaving } from '../lib/calc/amortise.js';
 import { SOURCES, TDSR_LIMIT, MSR_LIMIT, STRESS_TEST_RATE, VARIABLE_INCOME_HAIRCUT } from '../lib/calc/constants.js';
 import { f } from './fmt.js';
-import { useSearchParams } from 'next/navigation';
 import { QUICK } from '../lib/nav.js';
 import { toolRun } from './Track.jsx';
 
@@ -27,7 +26,7 @@ import { toolRun } from './Track.jsx';
 const money = n => (Number.isFinite(n) ? f(Math.round(n)) : '—');
 const pc = n => `${(n * 100).toFixed(n * 100 % 1 ? 1 : 0)}%`;
 
-export default function Tools({ ratesReviewed }) {
+export default function Tools({ ratesReviewed, asked = null }) {
   /* The tab is in the URL so one of these can be LINKED. Before this, every
      route into the quick calculators opened "When can I sell" and left the
      reader to find the one they were sent for — which meant a situation card,
@@ -35,8 +34,13 @@ export default function Tools({ ratesReviewed }) {
      all. Read once for the initial tab; written with replaceState afterwards
      so switching tabs does not push a history entry the back button then has
      to walk through. */
-  const params = useSearchParams();
-  const asked = params.get('calc');
+  /* ── THE TAB COMES FROM THE SERVER ─────────────────────────────────────
+     It was read here with useSearchParams, which on a static route forces a
+     Suspense boundary and makes the FALLBACK the server HTML. /tools?calc=duty
+     and /tools?calc=sell were byte-identical to /tools before hydration, so
+     the promise a few lines above — "send someone straight to the stamp duty
+     answer rather than to this page" — was not kept for anyone whose
+     JavaScript had not run, nor for a crawler that does not run it at all. */
   const [tab, setTab] = useState(QUICK.some(q => q.id === asked) ? asked : 'sell');
 
   const choose = id => {

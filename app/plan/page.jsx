@@ -1,4 +1,3 @@
-import { Suspense } from 'react';
 import Link from 'next/link';
 import Masthead from '../../components/Masthead.jsx';
 import ToolIntro from '../../components/ToolIntro.jsx';
@@ -13,7 +12,12 @@ export const metadata = {
   alternates: { canonical: '/plan' },
 };
 
-export default function Page() {
+/* Dynamic because it reads searchParams. See the note at the top of Planner:
+   the alternative was a Suspense boundary whose fallback — the word
+   "Loading…" — was the entire server HTML of this page. */
+export default async function Page({ searchParams }) {
+  const sp = (await searchParams) || {};
+  const one = v => (Array.isArray(v) ? v[0] : v) ?? null;
   // Read here rather than in Planner: Planner is a client component, and the
   // twenty-six town medians are the whole payload — six fields each, resolved
   // at build because this page is static.
@@ -69,9 +73,8 @@ export default function Page() {
       <ToolUse id="plan" />
 
       <section className="pane">
-        <Suspense fallback={<p className="hint">Loading…</p>}>
-          <Planner markets={markets} budget={budget()} />
-        </Suspense>
+        <Planner markets={markets} budget={budget()}
+          initial={{ price: one(sp.price), type: one(sp.type), from: one(sp.from) }} />
       </section>
 
       <section className="pane">
