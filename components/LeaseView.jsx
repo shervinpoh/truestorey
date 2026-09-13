@@ -89,6 +89,22 @@ export default function LeaseView({ observed = null }) {
         </aside>
       </div>
 
+      {/* ── THE ANSWER FOLLOWS YOU BELOW 900px ────────────────────────────
+          Below the two-column breakpoint the aside goes static and the answer
+          leaves the screen while the reader is still changing the assumptions
+          that produce it — which is the opposite of what the comment above
+          .planlayout says the sticky summary is for.
+
+          .planbar and its scroll-padding have existed since Planner.jsx got
+          them. Three of the four calculators sharing this layout never got
+          one; this is the third. aria-hidden because it repeats the aside
+          verbatim and a screen reader does not need both figures announced
+          again on every keystroke. */}
+      <div className="planbar" aria-hidden="true">
+        <span><i className="lab">Against freehold</i> <b className="mono">{pct == null ? "—" : `${pct.toFixed(1)}%`}</b></span>
+        <span><i className="lab">One more year</i> <b className="mono">{yearCost == null ? "—" : money(yearCost)}</b></span>
+      </div>
+
       <h2 className="sh" style={{ marginTop: 26 }}>
         <span>The table</span><span>99 years, as a share of freehold</span>
       </h2>

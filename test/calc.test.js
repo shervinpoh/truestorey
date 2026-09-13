@@ -194,7 +194,11 @@ import { readFileSync as readSrc } from 'node:fs';
 import { join } from 'node:path';
 
 test('every two-column calculator pins its answer below the breakpoint', () => {
-  for (const f of ['components/Planner.jsx', 'components/Ledger.jsx']) {
+  /* All four, not the one that was broken. /cost was found first, and looking
+     for the same shape found /progressive and /lease with it too — the fix had
+     reached one of four pages that share this layout. */
+  for (const f of ['components/Planner.jsx', 'components/Ledger.jsx',
+                   'components/Progressive.jsx', 'components/LeaseView.jsx']) {
     const src = readSrc(join(process.cwd(), f), 'utf8');
     const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\{\/\*[\s\S]*?\*\/\}/g, '')
       .split('\n').filter(l => !/^\s*(\/\/|\*)/.test(l)).join('\n');

@@ -107,6 +107,11 @@ const nextConfig = {
     // /cost reads a filed rent beside the cost of ownership. Both the rent
     // index and the shards are opened at request time.
     '/api/rent': ['./data/rents.json', './data/records/**', './data/index.json'],
+    // /yield sends a count per project and fetches the cohorts when a reader
+    // opens one. Reading yield.json at request time is invisible to the tracer,
+    // so without this the route works in dev and returns nothing for every
+    // project in production — the failure this whole map exists to prevent.
+    '/api/yield': ['./data/yield.json'],
     '/api/catalogue': ['./data/index.json'],
     // A watch is refused unless the block exists, and recordByHref reads a
     // shard by a path built at request time — the exact pattern the tracer

@@ -61,7 +61,14 @@ export default function Page() {
 
       <section className="pane">
         <YieldView
-          projects={projects.map(p => ({ label: p.label, district: p.district, href: p.href, grossYield: p.grossYield, cohorts: p.cohorts }))}
+          /* A COUNT, NOT THE COHORTS. This trimmed the dataset and kept the
+             one field that was the bulk — 1,441 projects averaging 2.7 cohorts
+             each, every one serialised so a collapsed row could print "3
+             sizes". The page was 884KB against 27–70 for everything else.
+             658KB to 142KB. The cohorts arrive from /api/yield when a reader
+             opens a project, which is the only time they are on screen. */
+          projects={projects.map(p => ({ label: p.label, district: p.district, href: p.href,
+                                        grossYield: p.grossYield, sizes: p.cohorts?.length || 0 }))}
           districts={districts}
           min={y.min} />
       </section>

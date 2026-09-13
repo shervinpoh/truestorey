@@ -22,6 +22,31 @@ export default function YieldView({ projects, districts, min }) {
   const [q, setQ] = useState('');
   const [district, setDistrict] = useState('');
   const [open, setOpen] = useState(null);
+  /* ── COHORTS ARRIVE WHEN ONE IS OPENED ──────────────────────────────────
+     They used to be in the page. All of them, for all 1,441 projects, so a
+     collapsed row could print the word "3 sizes" — 884KB against 27–70 for
+     every other page on the site, and the third instance of the failure
+     CLAUDE.md already records against /mop and /market.
+
+     Cached by href, so opening the same project twice costs one request.
+     A failure closes the row and says so rather than leaving a spinner: a
+     cohort table that cannot load is one disclosure off, not a broken page. */
+  const [cohorts, setCohorts] = useState({});   // href → rows | 'loading' | 'failed'
+
+  async function toggle(href) {
+    if (open === href) { setOpen(null); return; }
+    setOpen(href);
+    if (cohorts[href] && cohorts[href] !== 'failed') return;
+    setCohorts(c => ({ ...c, [href]: 'loading' }));
+    try {
+      const res = await fetch(`/api/yield?href=${encodeURIComponent(href)}`);
+      const j = await res.json();
+      if (!res.ok || !Array.isArray(j.cohorts)) throw new Error(j.error || 'no cohorts');
+      setCohorts(c => ({ ...c, [href]: j.cohorts }));
+    } catch {
+      setCohorts(c => ({ ...c, [href]: 'failed' }));
+    }
+  }
 
   const term = q.trim().toLowerCase();
   const shown = useMemo(() => {
@@ -80,13 +105,22 @@ export default function YieldView({ projects, districts, min }) {
                     <span className="mono">{pc(p.grossYield)}</span>
                   </td>
                   <td className="mono">
-                    <button className="linkish" onClick={() => setOpen(open === p.href ? null : p.href)}
+                    <button className="linkish" onClick={() => toggle(p.href)}
                       aria-expanded={open === p.href}>
-                      {p.cohorts.length} size{p.cohorts.length === 1 ? '' : 's'}
+                      {p.sizes} size{p.sizes === 1 ? '' : 's'}
                     </button>
                   </td>
                 </tr>
-                {open === p.href && p.cohorts.map(c => (
+                {open === p.href && cohorts[p.href] === 'loading' && (
+                  <tr className="cohort"><td colSpan={3} className="mono">Reading the cohorts…</td></tr>
+                )}
+                {open === p.href && cohorts[p.href] === 'failed' && (
+                  <tr className="cohort"><td colSpan={3}>
+                    The size cohorts for this project could not be read. The yield above is
+                    unaffected — it was computed at build time and is on the page already.
+                  </td></tr>
+                )}
+                {open === p.href && Array.isArray(cohorts[p.href]) && cohorts[p.href].map(c => (
                   <tr key={p.href + c.band} className="cohort">
                     <th scope="row" className="mono">
                       {c.areaFrom}–{c.areaTo} sqm{c.beds ? ` · ${c.beds} bed` : ''}
