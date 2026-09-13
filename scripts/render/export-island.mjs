@@ -31,8 +31,20 @@
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { boundaries, town as townOf, getIndex } from '../../lib/data/query.js';
 import { RAMP, quantileBreaks, bandOf } from '../../lib/ramp.js';
+import { titleCase } from '../../lib/name.js';
 
 const OUT = new URL('../../data/render/island.json', import.meta.url);
+/* A SECOND, TINY FILE, AND IT IS NOT TIDINESS.
+   island.json is 85KB of coordinates. The page that shows the render needs
+   eleven scalars off it — the sources, the period, the two extremes — and
+   this repo has now shipped an entire dataset to print a handful of numbers
+   three times: /mop at 2.7MB, /market at 2.7MB, /yield at 884KB, each one
+   because a component took one field off a structure and the whole structure
+   went into the RSC payload behind it. Reading the big file and destructuring
+   carefully works right up until someone passes the object instead, and
+   nothing goes red when they do. A separate file cannot be passed by
+   accident. */
+const META = new URL('../../data/render/island-meta.json', import.meta.url);
 
 const areas = boundaries()?.areas || [];
 if (!areas.length) {
@@ -78,8 +90,31 @@ const out = {
   shapes,
 };
 
+/* The extremes, named, because the caption states a finding rather than
+   describing a picture. The ratio is the finding: the dearest town's median
+   is 1.7 times the cheapest, which is why the relief is gentle and why the
+   heights had to be zero-based. A range-mapped bar drew that same 1.7 as 25. */
+const byPsf = shapes.filter(s => s.psf).sort((a, b) => b.psf - a.psf);
+const top = byPsf[0], bottom = byPsf[byPsf.length - 1];
+
+const meta = {
+  builtAt: out.builtAt,
+  source: out.source,
+  psfSource: out.psfSource,
+  period: out.period,
+  accessedAt: out.accessedAt,
+  lo: out.lo,
+  hi: out.hi,
+  pricedAreas: out.pricedAreas,
+  totalAreas: out.totalAreas,
+  ratio: out.lo ? out.hi / out.lo : null,
+  highest: top ? { name: titleCase(top.name), psf: top.psf } : null,
+  lowest: bottom ? { name: titleCase(bottom.name), psf: bottom.psf } : null,
+};
+
 mkdirSync(new URL('.', OUT), { recursive: true });
 writeFileSync(OUT, JSON.stringify(out));
+writeFileSync(META, JSON.stringify(meta, null, 2));
 console.log(`\n${shapes.length} planning areas, ${priced.length} with a filed median.`);
 console.log(`Bands at ${breaks.map(Math.round).join(' · ')} psf.`);
-console.log(`Written to data/render/island.json\n`);
+console.log(`Written to data/render/island.json and island-meta.json\n`);

@@ -2390,6 +2390,47 @@ sup.cite a:hover{text-decoration:underline}
 .pagefignote{font-size:var(--t-small);color:var(--mute);margin:8px 0 0;max-width:58ch}
 .pagefig .prov{margin:14px 0 0}
 
+/* ── THE RELIEF ON /map ────────────────────────────────────────────────────
+   A rendered picture, so the rules are the ones pictures need rather than the
+   ones figures need.
+
+   height:auto IS LOAD-BEARING. The img carries width="2400" height="1200" so
+   the box is reserved before the bytes land, and an HTML height attribute
+   outranks an aspect-ratio in the cascade — this site has already shipped an
+   editorial thumbnail that rendered 120x360 for exactly that reason, through
+   a build that was perfectly clean. Nothing catches it except looking.
+
+   The image does NOT get a radius. --r2 is for a panel; a radius on a
+   photograph or a render crops the subject, and the render's own ground runs
+   to the edge of the frame, so a rounded corner would cut a corner off
+   Singapore's sea rather than off a container.
+
+   It gets a hairline instead, because the render's mid ground and the sunk
+   ground of .bleed are close enough in value that the image's edge would
+   otherwise dissolve into the band it sits in. The picture is deliberately
+   held at a mid value so it works on both themes, and the price of that is
+   that it needs telling apart from its surroundings. */
+.relief{padding-top:26px;padding-bottom:24px}
+.reliefig{margin:0}
+.relief picture{display:block}
+.relief img{display:block;width:100%;height:auto;
+  border:1px solid var(--line2);background:var(--sunk)}
+.reliefcap{margin:16px 0 0}
+.relieflab{display:block;font-size:var(--t-micro);letter-spacing:.1em;
+  text-transform:uppercase;color:var(--mute);margin:0 0 8px}
+.reliefsup{font-size:var(--t-body);color:var(--ink2);margin:0;max-width:62ch}
+.reliefnote{font-size:var(--t-small);color:var(--mute);margin:10px 0 0;max-width:62ch}
+.relief .prov{margin:14px 0 0}
+
+/* Two columns once there is room for the text to sit beside the picture
+   without either getting thin. Below it, one column — a 2:1 render and a
+   paragraph side by side on a phone gives 20 characters a line. */
+@media(min-width:900px){
+  .reliefig{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,1fr);
+    gap:26px;align-items:start}
+  .reliefcap{margin:0}
+}
+
 /* ── KEYBOARD PARITY ───────────────────────────────────────────────────────
    Every link and button already takes a focus ring from the global rule near
    the top, so this is not an accessibility gap — it is a parity one. 39

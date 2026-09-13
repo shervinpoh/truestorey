@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import Masthead from '../../components/Masthead.jsx';
 import PriceMap from '../../components/PriceMap.jsx';
+import IslandRelief from '../../components/IslandRelief.jsx';
 
 export const metadata = {
   title: 'Price map — every block and project in Singapore by psf | Truestorey',
@@ -16,8 +17,18 @@ function loadMap() {
   return JSON.parse(fs.readFileSync(p, 'utf8'));
 }
 
+/* Eleven scalars for the relief's caption. NOT island.json, which is 85KB of
+   coordinates — see the note at the top of IslandRelief.jsx. This page is
+   static, so the read happens at build and never at request time; it is
+   outside the tracer's problem for the same reason. */
+function loadRelief() {
+  const p = path.join(process.cwd(), 'data', 'render', 'island-meta.json');
+  if (!fs.existsSync(p)) return null;
+  return JSON.parse(fs.readFileSync(p, 'utf8'));
+}
+
 export default function Page() {
-  const map = loadMap();
+  const map = loadMap(), relief = loadRelief();
   if (!map) {
     return (
       <main className="shell">
@@ -32,6 +43,8 @@ export default function Page() {
     <main className="shell wide">
       <Masthead crumbs={[{ href: '/', label: 'Home' }]} title="Price map"
         sub={`All ${total.toLocaleString('en-SG')} blocks and projects with a filed transaction, plotted by median price per square foot. Hover for the figure, click to open. Jump to a town to frame it and dim the rest.`} />
+
+      <IslandRelief meta={relief} />
 
       <section className="pane">
         <PriceMap map={map} />
@@ -57,8 +70,9 @@ export default function Page() {
           real transactions is worse than no rail line at all.</div>
         <div className="note method"><b>A town name sits where its housing is.</b> Each label is drawn at the
           median coordinate of that town's own plotted blocks, not at the centre of a boundary — there is
-          no boundary file here, and drawing one from memory would be the same mistake as drawing the rail
-          lines. Names that would overlap are dropped rather than overprinted, so the map thins out instead
+          no boundary file in this map&rsquo;s own data, and drawing one from memory would be the same mistake as
+          drawing the rail lines. The relief above this map does use URA&rsquo;s published boundaries, which is a
+          different file and a different view; what neither of them does is invent an outline. Names that would overlap are dropped rather than overprinted, so the map thins out instead
           of turning into a smear of text.</div>
         <div className="note"><b>128 records are missing from this map.</b> They are the ones whose
           address could not be placed confidently enough to publish. They still have their own pages

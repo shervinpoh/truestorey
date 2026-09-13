@@ -120,6 +120,7 @@ cy = (min(lats) + max(lats)) / 2
 # has no filed resale because nobody lives in it.
 lo, hi = D["lo"], D["hi"]
 BASE, TALL = 0.05, 1.25
+HAIRPIN = math.radians(150)
 
 
 def height(psf):
@@ -185,11 +186,62 @@ for s in D["shapes"]:
         new_verts = [g for g in ext["geom"] if isinstance(g, bmesh.types.BMVert)]
         bmesh.ops.translate(bm, vec=(0, 0, z), verts=new_verts)
         bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+
+        # ── SMOOTH THE CURTAIN, KEEP THE TOP EDGE ──────────────────────────
+        # Flat shading corrugated every wall. A planning-area boundary follows
+        # roads, canals and rail, so it zig-zags hard: the median turn between
+        # consecutive segments is 38.7 degrees and a third of them exceed 60.
+        # Every one of those became its own facet with its own tone, and the
+        # south walls read as corrugated iron — an artefact, over a boundary
+        # that is entirely real.
+        #
+        # SIMPLIFYING IS THE WRONG FIX AND THE NUMBERS SAY SO. Douglas-Peucker
+        # keeps the extremes of a zig-zag and drops what lies between, so it
+        # sharpens what is left: at a 223m tolerance the vertex count falls
+        # from 4,110 to 942 and the median turn RISES from 38.7 to 74.9
+        # degrees. Fewer facets, each a harder crease. It would also move a
+        # published boundary by up to 223 metres to make a picture look
+        # better, which is not a trade this site makes.
+        #
+        # So the geometry is untouched and the SHADING changes. Interpolating
+        # normals across a wall joint costs nothing true: the silhouette, which
+        # is the only part a reader reads as a boundary, stays exactly where
+        # URA put it.
+        #
+        # THE TEST IS CAP-OR-WALL, NOT AN ANGLE. A plain 80-degree threshold
+        # was tried first, on the reasoning that it sits below the 90 a top
+        # face meets its wall at. It cleaned up two thirds of the joints and
+        # left the rest striped, because a quarter of this boundary turns by
+        # more than 80 degrees and those are ordinary corners, not hairpins.
+        # Raising the threshold toward 90 to catch them would have started
+        # rounding the top edge, which is the one crease that must survive:
+        # it is what makes a town read as a plate with a thickness rather than
+        # as a tint.
+        #
+        # Whether an edge is a top edge is not a question about angles. A cap
+        # faces up, a wall faces sideways, and the two are told apart by the
+        # z of their normals with enormous margin. So: every wall-to-wall joint
+        # smooths regardless of how hard it turns, every cap-to-wall edge stays
+        # sharp, and the 150-degree cap catches the genuine hairpins where a
+        # boundary doubles back on itself and an averaged normal would point
+        # along the wall instead of out of it.
+        for e in bm.edges:
+            if len(e.link_faces) != 2:
+                e.smooth = False
+                continue
+            f1, f2 = e.link_faces
+            both_walls = abs(f1.normal.z) < 0.5 and abs(f2.normal.z) < 0.5
+            try:
+                hairpin = e.calc_face_angle() > HAIRPIN
+            except ValueError:
+                hairpin = True
+            e.smooth = both_walls and not hairpin
+
         bm.to_mesh(mesh)
         bm.free()
 
         mesh.materials.append(mats[s["colour"]] if s["colour"] else mat_unpriced)
-        mesh.shade_flat()
+        mesh.shade_smooth()
         built += 1
 
 print(f"[island] built {built} polygons from {len(D['shapes'])} areas")
@@ -198,17 +250,44 @@ print(f"[island] built {built} polygons from {len(D['shapes'])} areas")
 bpy.ops.mesh.primitive_plane_add(size=60, location=(0, 0, -0.02))
 bpy.context.object.data.materials.append(material("ground", lin(GROUND), rough=0.95))
 
-# ── light ───────────────────────────────────────────────────────────────────
-# One key, low and from the west, because that is the light this site has a
-# whole feature about. It is also what makes a relief readable: a shadow down
-# one side of every town is the thing that says these are heights rather than
-# a flat map somebody tinted.
+# ── LIGHT THE WALLS THE CAMERA CAN ACTUALLY SEE ─────────────────────────────
+# The first version used one key "low and from the west", because that is the
+# light this site has a whole feature about. It rendered the four most
+# expensive towns on the island as a black mass.
+#
+# The camera stands to the south-east, so every vertical wall it can see faces
+# south-east. A key from the west-north-west lights the far side of all of
+# them. Queenstown at 859 psf, Bukit Timah at 793, Bukit Merah at 792 and
+# Bishan at 733 are tall, dark-banded and clustered, so their own height put
+# them in each other's shadow as well: the top of the entire distribution, and
+# the single thing the picture exists to show, arrived unreadable.
+#
+# The key now comes from the east-south-east at 42 degrees, about 35 degrees
+# off the camera's own azimuth. Off-axis rather than dead-on, so the walls
+# still fall away from the tops and the relief keeps its form; on the camera's
+# side rather than behind the subject, so the form is legible.
+#
+# Thematic accuracy lost nothing here. This is not the sun study — no claim is
+# made about where light falls on a real building — so the sun's bearing is a
+# compositional choice, and a bearing that hides the subject is the wrong one.
 sun = bpy.data.lights.new("key", type="SUN")
 sun.energy = 2.6
 sun.angle = math.radians(2.5)
 sun_obj = bpy.data.objects.new("key", sun)
-sun_obj.rotation_euler = (math.radians(58), 0, math.radians(-118))
+sun_obj.rotation_euler = (math.radians(48), 0, math.radians(70))
 scene.collection.objects.link(sun_obj)
+
+# A fill from behind and opposite, at a quarter of the key. Not to flatten the
+# relief — the shadows are what make it read — but so that a wall in shadow is
+# still a COLOUR. The ramp's dark end is #164F52, which is already low in
+# value; unlit and in cast shadow it goes to near-black, and a band that
+# cannot be told from its own shadow has stopped encoding a price.
+fill = bpy.data.lights.new("fill", type="SUN")
+fill.energy = 0.65
+fill.angle = math.radians(35)
+fill_obj = bpy.data.objects.new("fill", fill)
+fill_obj.rotation_euler = (math.radians(62), 0, math.radians(-125))
+scene.collection.objects.link(fill_obj)
 
 world = bpy.data.worlds.new("world")
 scene.world = world
@@ -222,7 +301,7 @@ world.node_tree.nodes["Background"].inputs[1].default_value = 1.35
 # figures it was built from.
 cam = bpy.data.cameras.new("cam")
 cam.type = "ORTHO"
-cam.ortho_scale = 11.2
+cam.ortho_scale = 10.6
 cam_obj = bpy.data.objects.new("cam", cam)
 cam_obj.location = (8.4, -8.4, 11.0)
 scene.collection.objects.link(cam_obj)
@@ -251,7 +330,12 @@ except Exception:
 scene.cycles.samples = SAMPLES
 scene.cycles.use_denoising = True
 scene.render.resolution_x = RES
-scene.render.resolution_y = int(RES * 9 / 16)
+# 2:1, not 16:9. Singapore is a lozenge drawn on a tilt, so the corners of a
+# frame are empty whatever you do — but a 16:9 frame left a band of bare ground
+# across the top and bottom as well, and the island only reached 77% of the
+# height. Trimming the bands is free; widening the island is not, because
+# ortho_scale is the only thing standing between this and a crop.
+scene.render.resolution_y = int(RES / 2)
 scene.render.film_transparent = False
 
 # ── AVIF AND WEBP, FROM ONE RENDER ──────────────────────────────────────────

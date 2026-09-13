@@ -1,0 +1,23 @@
+{
+  "builtAt": "2026-09-13T16:17:14.551Z",
+  "source": "URA Master Plan 2019 Planning Area Boundary (No Sea), via data.gov.sg",
+  "psfSource": "HDB Resale Flat Prices (data.gov.sg)",
+  "period": {
+    "from": "2023-09",
+    "to": "2026-09"
+  },
+  "accessedAt": "2026-09-10",
+  "lo": 501,
+  "hi": 859,
+  "pricedAreas": 24,
+  "totalAreas": 55,
+  "ratio": 1.7145708582834331,
+  "highest": {
+    "name": "Queenstown",
+    "psf": 859
+  },
+  "lowest": {
+    "name": "Choa Chu Kang",
+    "psf": 501
+  }
+}
