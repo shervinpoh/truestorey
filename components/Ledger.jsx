@@ -319,6 +319,30 @@ export default function Ledger({ indices = {} }) {
         </aside>
       </div>
 
+      {/* ── THE ANSWER FOLLOWS YOU BELOW 900px ────────────────────────────
+          The comment above .planlayout says why the summary is sticky: "the
+          two figures that matter stay visible while you argue with the
+          assumptions that produce them." Below the breakpoint the aside goes
+          static and that intent is lost entirely — measured on a 375px
+          viewport, the last input sits at 656px and the answer at 2,011px, so
+          every adjustment meant scrolling 1,355px to find out whether
+          anything moved. A calculator you cannot see the result of while you
+          change it is a form.
+
+          The bar, the CSS and the scroll-padding that keeps it from covering
+          a focused input have existed since Planner.jsx got them. This page
+          shares the same layout and never got one.
+
+          aria-hidden because it repeats the aside above it verbatim; a screen
+          reader has already been given both figures and does not need them
+          announced a second time on every keystroke. */}
+      <div className="planbar" aria-hidden="true">
+        <span><i className="lab">A sale must clear</i> <b className="mono">{f(clear)}</b></span>
+        {cpfBack
+          ? <span><i className="lab">Back to CPF</i> <b className="mono">{f(cpfBack.total)}</b></span>
+          : <span><i className="lab">Gone for good</i> <b className="mono">{f(r.friction)}</b></span>}
+      </div>
+
       {r.renting && (
         <>
           <h2 className="sh" style={{ marginTop: 26 }}><span>Against renting the same thing</span></h2>

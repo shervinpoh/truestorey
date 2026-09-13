@@ -174,3 +174,45 @@ test('an unreviewed cash floor is reported as unreviewed', () => {
     HDB_LOAN_CASH_MIN_REVIEWED === null);
   assert.strictEqual(plan({ ...base, propertyType: 'HDB', hdbLoan: false }).cashFloorUnverified, false);
 });
+
+/**
+ * A calculator you cannot see the result of while you change it is a form.
+ *
+ * .planlayout carries the reason it is two columns: "the answer sticky, so the
+ * two figures that matter stay visible while you argue with the assumptions
+ * that produce them." Below 900px the aside goes static and that intent is
+ * lost — measured on /cost at 375px, the last input sat at 656px and the
+ * answer at 2,011px, so every adjustment meant scrolling 1,355px to find out
+ * whether anything had moved.
+ *
+ * .planbar, its CSS and the scroll-padding that stops it covering a focused
+ * input have existed since Planner.jsx got them. /cost shares the same layout
+ * and never got one, which is why this asserts on both rather than on the one
+ * that was broken.
+ */
+import { readFileSync as readSrc } from 'node:fs';
+import { join } from 'node:path';
+
+test('every two-column calculator pins its answer below the breakpoint', () => {
+  for (const f of ['components/Planner.jsx', 'components/Ledger.jsx']) {
+    const src = readSrc(join(process.cwd(), f), 'utf8');
+    const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\{\/\*[\s\S]*?\*\/\}/g, '')
+      .split('\n').filter(l => !/^\s*(\/\/|\*)/.test(l)).join('\n');
+    assert.match(code, /className="planlayout"/,
+      `${f} is not the two-column calculator this test describes`);
+    assert.match(code, /className="planbar"/,
+      `${f} has no sticky answer below 900px, so its result is off-screen while you type`);
+    /* It repeats the aside verbatim. A screen reader has already been given
+       both figures and does not need them announced again on every keystroke. */
+    assert.match(code, /className="planbar" aria-hidden="true"/,
+      `${f}'s bar is announced twice to a screen reader`);
+  }
+});
+
+test('the bar cannot cover the input being typed into', () => {
+  const css = readSrc(join(process.cwd(), 'app', 'globals.css'), 'utf8');
+  assert.match(css, /scroll-padding-bottom:76px/,
+    'the page no longer reserves room for the pinned bar');
+  assert.match(css, /\.planform input,\.planform select,\.seg button\{scroll-margin-bottom:76px\}/,
+    'a focused input can scroll to where the bar covers it');
+});
