@@ -169,7 +169,7 @@ export default async function Home() {
           ].map(p => (
             <article className="perspective" key={p.subject}>
               <Link href={p.href}>
-                <EditorialImage post={editorialAsset(p.subject)} className="perspective-image" />
+                <EditorialImage post={editorialAsset(p.subject, p.slug || p.href || '')} className="perspective-image" />
                 <div className="perspective-copy"><p className="lab">{p.label}</p><h3>{p.title}</h3>
                   <p>{p.text}</p><span className="perspective-go">{p.cta} <span aria-hidden="true">↗</span></span></div>
               </Link>
