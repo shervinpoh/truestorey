@@ -23,18 +23,49 @@ Same architecture as island.py. Blender receives a spec that already knows
 every dimension; this script owns no measurements of its own. A layout is a
 JSON file and adding one is authoring data, not editing a renderer.
 
-That split matters more here than it did for the island, because the specs come
-from two different places and must not diverge in treatment:
+── A TYPOLOGY IS NOT A LAYOUT, AND THE FIRST VERSION OF THIS NOTE SAID IT WAS ─
+This file was committed claiming that flatType x model "identifies a standard
+layout" and that 15 of them cover 92.7% of filed resales. The second half is
+true and the first half is not, which made the whole thing misleading. Shervin
+said floor plans differ even inside one model. He is right, and the data this
+repo already held said so:
 
-  HDB      a published typology. flatType x model identifies a standard layout,
-           and 15 of them cover 92.7% of every filed resale. Built once, they
-           serve every block page on the site.
-  CONDO    no typology exists. 2,974 projects, and one of them (Normanton Park)
-           has 48 distinct unit areas on its own. So a condo spec is authored
-           per project, from the developer's or the agent's own plan, for the
-           projects actually being marketed.
+  4 ROOM Model A, 22,772 filed resales:  44 DISTINCT AREAS.
+  The commonest single area, 93 sqm, is 31.4% of them. Clearly bimodal — one
+  cluster at 90-94 and another at 100-106.
 
-One engine, two ways of feeding it. Nothing here knows which it is.
+Era explains most of that split, and tightens it a great deal:
+
+  1980s  n=3,770  median 104 sqm   p10 103 - p90 108
+  1990s  n=4,956  median 103 sqm   p10 100 - p90 108
+  2000s  n=2,680  median  90 sqm   p10  86 - p90  96
+  2010s  n=8,916  median  93 sqm   p10  92 - p90  93
+  2020s  n=2,450  median  93 sqm   p10  92 - p90  94
+
+And a block is mostly uniform: of 2,265 blocks with four or more sales of this
+type, 53.5% have exactly one area and 82% have at most two.
+
+BUT EQUAL AREA IS NOT EQUAL SHAPE. Two 93 sqm flats can be mirrored across a
+stairwell core, or be a corner unit against a middle one, or come from two
+precincts whose architects adapted the type differently. Area is necessary and
+nowhere near sufficient, so even the tight 2010s cohort is not provably one
+plan. No amount of arithmetic on this dataset can establish a layout, because
+the dataset holds no geometry.
+
+So a library keyed on the typology can only ever be REPRESENTATIVE — "a typical
+4-room Model A from the 2010s" — and must say so. It cannot be "your flat".
+
+── HENCE: THE SPEC COMES FROM A PLAN, NOT FROM A KEY ─────────────────────────
+The accurate input is the floor plan of the actual unit, which the buyer of a
+specific unit already has. One engine, and what differs is only where a spec
+was traced from and how honestly it is labelled:
+
+  PER UNIT      traced from that unit's own plan. Accurate. Says "this unit".
+  REPRESENTATIVE traced from one real plan of a type. Says "a typical X", never
+                "yours", and carries the spread above so a reader knows the
+                type varies.
+
+Nothing here knows which it is. `label` in the spec is what the page prints.
 
 ── NOTHING UNVERIFIED IS ALLOWED OUT ─────────────────────────────────────────
 A spec carries `verified`. If it is not true, this still renders — you have to
