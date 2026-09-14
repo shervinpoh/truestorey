@@ -6,6 +6,7 @@ import ToolIntro from '../../components/ToolIntro.jsx';
 import ToolUse from '../../components/ToolUse.jsx';
 import FloorplanUpload from '../../components/FloorplanUpload.jsx';
 import UnitTurntable from '../../components/UnitTurntable.jsx';
+import PlanStudio from '../../components/PlanStudio.jsx';
 
 /* What the renderer actually drew — nine rooms and their sizes, already scaled
    and already snapped. This page must not derive them: the scale comes from
@@ -34,6 +35,16 @@ export default function Page() {
       <ToolIntro href="/floorplan" />
       <ToolUse id="floorplan" />
       <section className="pane"><FloorplanUpload /></section>
+
+      <section className="pane">
+        <h2 className="sh"><span>Turn your own plan into a model</span><span className="mono">in this browser</span></h2>
+        <p className="hint" style={{ margin: '0 0 4px', maxWidth: '62ch' }}>
+          Drop in a floor plan and it finds the walls, works out every dimension from the unit&rsquo;s
+          floor area, and builds the flat. It runs entirely on your own device &mdash; the image is
+          never uploaded, and nothing is stored.
+        </p>
+        <PlanStudio />
+      </section>
 
       {model && (
         <section className="pane">
