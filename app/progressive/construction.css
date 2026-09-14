@@ -1,0 +1,77 @@
+/* A single architectural study, controlled by the reader. The pale studio
+   is the material of the maquette in both themes; labels sit outside it. */
+.construction{margin-bottom:52px;--study-ground:#e2e2e0;--mono:"IBM Plex Mono",ui-monospace,monospace}
+.planbar[hidden]{display:none}
+.construction-intro{display:grid;grid-template-columns:1.25fr 1fr;gap:48px;align-items:end;padding:18px 0 26px}
+.construction-intro .lab{margin:0 0 14px;color:var(--acc-ink)}
+.construction-intro h2{font-size:clamp(30px,3.3vw,48px);line-height:1.02;letter-spacing:-.035em;font-weight:650;margin:0}
+.construction-intro>p{font-size:17px;color:var(--ink2);line-height:1.55;max-width:40ch;margin:0 0 2px}
+.construction-assumptions{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:14px 0;border-top:1px solid var(--line);font-size:14px}
+.construction-assumptions p{margin:0;color:var(--ink2)}
+.construction-assumptions strong{font-family:var(--mono);font-size:13px;color:var(--ink);font-weight:500}
+.construction-assumptions a{white-space:nowrap;color:var(--acc-ink);text-underline-offset:4px}
+.construction-stages{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));list-style:none;padding:0;margin:0;border:1px solid var(--edge);border-radius:var(--r2) var(--r2) 0 0;overflow:hidden}
+.construction-stages li{margin:0;min-width:0}
+.construction-stages button{width:100%;height:84px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:9px;padding:12px;color:var(--ink2);background:var(--card);border:0;border-right:1px solid var(--line);border-radius:0;cursor:pointer;font:inherit;font-size:12px;line-height:1.1;text-align:left}
+.construction-stages li:last-child button{border-right:0}
+.construction-stages button:hover{background:var(--sunk);color:var(--ink)}
+.construction-stages button[aria-pressed=true]{background:var(--acc);color:var(--on-acc)}
+.construction-step{font-family:var(--mono);font-size:17px}
+.construction-stage-label small{display:block;margin-top:4px;font-family:var(--mono);font-size:9px;color:inherit;opacity:.72}
+.construction-stages button:focus-visible,.construction button:focus-visible,.construction summary:focus-visible{outline:3px solid var(--ink);outline-offset:-4px}
+.construction-study{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);border:1px solid var(--line);border-top:0;background:var(--card)}
+.construction-mobile-result{display:none}
+.construction-return{margin:0 0 16px;font-size:14px;color:var(--acc-ink)}
+.construction-return a{text-decoration:underline;text-underline-offset:4px}
+#construction-heading{scroll-margin-top:calc(var(--headh) + 24px)}
+.construction-figure{margin:0;background:var(--study-ground);display:flex;flex-direction:column;min-width:0}
+.construction-art{position:relative;aspect-ratio:1440/1320;overflow:hidden}
+.construction-art picture,.construction-art img{display:block;width:100%;height:100%;object-fit:cover}
+.construction-art-label{position:absolute;inset:22px 24px auto;display:flex;justify-content:space-between;color:#48514f;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.09em;pointer-events:none}
+.construction-art-label b{font-weight:500}
+.construction-figure figcaption{margin-top:auto;padding:18px 24px 24px;color:#48514f;font-size:12px;line-height:1.6}
+.construction-key{display:inline-block;width:8px;height:8px;margin-right:7px;background:#164f52}
+.construction-missing{height:100%;display:flex;flex-direction:column;justify-content:center;text-align:center;padding:32px;color:#48514f}
+.construction-panel{padding:28px 30px 25px}
+.construction-stage-heading .lab{color:var(--acc-ink);margin:0 0 12px}
+.construction-stage-heading h3{font-size:clamp(25px,2.4vw,34px);line-height:1.08;letter-spacing:-.025em;margin:0;max-width:17ch;font-weight:650}
+.construction-description{font-size:15px;color:var(--ink2);line-height:1.5;margin:16px 0 22px}
+.construction-due{padding:18px 0;border-top:1px solid var(--line)}
+.construction-due>strong{display:block;font-family:var(--mono);font-weight:450;font-size:clamp(26px,2.7vw,39px);line-height:1.25;letter-spacing:-.045em;margin-top:6px}
+.construction-due>p{font-size:12px;color:var(--ink2);margin:6px 0 0}
+.construction-funds{margin:0 0 20px;font-size:14px}
+.construction-funds>div{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line2)}
+.construction-funds dt{color:var(--ink2)}
+.construction-funds dd{margin:0;font-family:var(--mono);font-size:13px;white-space:nowrap}
+.construction-mortgage{padding:16px 18px;background:var(--acc-soft);border-radius:var(--r1)}
+.construction-mortgage .lab{font-size:10px;color:var(--acc-ink);line-height:1.5}
+.construction-mortgage p{margin:5px 0 4px;color:var(--acc-ink)}
+.construction-mortgage strong{font-family:var(--mono);font-size:28px;font-weight:500;letter-spacing:-.035em}
+.construction-mortgage p>span{font-size:12px}
+.construction-mortgage small{font-size:12px;line-height:1.5;color:var(--ink2)}
+.construction-progress{margin-top:22px}
+.construction-progress>div:first-child{display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--ink2)}
+.construction-progress strong{font-family:var(--mono);font-weight:500;color:var(--ink)}
+.construction-meter{height:5px;background:var(--line);margin:9px 0 8px}
+.construction-meter>span{display:block;height:100%;background:var(--acc-lit)}
+.construction-progress small{font-size:11px;color:var(--mute);line-height:1.4;display:block}
+.construction-notice{display:grid;grid-template-columns:1.25fr 1fr;gap:32px;padding:23px 26px;background:var(--sunk);border:1px solid var(--line);border-top:0;border-radius:0 0 var(--r2) var(--r2)}
+.construction-notice .lab{margin:0 0 7px}
+.construction-notice p{font-size:14px;margin:0;color:var(--ink2);line-height:1.5;max-width:62ch}
+.construction-notice details{align-self:start;font-size:14px;min-width:0}
+.construction-notice summary{cursor:pointer;padding:10px 0;color:var(--acc-ink);min-height:44px;text-decoration:underline;text-underline-offset:4px}
+.construction-notice blockquote{margin:8px 0 14px;padding-left:15px;border-left:2px solid var(--edge);font-size:14px;color:var(--ink2);line-height:1.55}
+.construction-notice details>a{display:block;margin-top:12px;color:var(--acc-ink)}
+.construction-bottom{display:flex;gap:24px;align-items:flex-start;justify-content:space-between;padding:18px 0}
+.construction-bottom>p{font-size:11px;color:var(--mute);line-height:1.6;max-width:80ch;margin:0}
+.construction-bottom a{color:inherit;text-decoration:underline}
+.construction-navigation{display:flex;gap:8px;flex-shrink:0}
+.construction-navigation button{font:inherit;font-size:13px;min-height:44px;border:1px solid var(--edge);border-radius:var(--r1);background:var(--card);color:var(--ink);padding:10px 14px;cursor:pointer}
+.construction-navigation button:last-child{background:var(--acc);color:var(--on-acc);border-color:var(--acc)}
+.construction-navigation button:disabled{opacity:.4;cursor:default}
+#purchase-assumptions{scroll-margin-top:calc(var(--headh) + 20px)}
+@media(min-width:1000px){.construction-figure{position:relative}.construction-art{position:sticky;top:calc(var(--headh) + 10px)}}
+@media(max-width:900px){.construction-stages button{padding:10px 7px;font-size:10px}.construction-panel{padding:22px}.construction-intro{gap:24px}.construction-study{grid-template-columns:1.1fr 1fr}.construction-bottom{flex-direction:column}.construction-navigation{align-self:flex-end}}
+@media(max-width:680px){.construction-intro{grid-template-columns:1fr;gap:16px;padding-top:10px}.construction-intro h2{font-size:34px}.construction-intro>p{font-size:16px;max-width:none}.construction-assumptions{align-items:flex-start;flex-direction:column;gap:8px}.construction-assumptions p{font-size:13px;line-height:1.6}.construction-assumptions a{min-height:36px;padding:6px 0}.construction-stages{grid-template-columns:repeat(3,minmax(0,1fr))}.construction-stages button{height:58px;flex-direction:row;align-items:center;justify-content:flex-start;gap:9px;padding:8px 12px;font-size:12px;border-bottom:1px solid var(--line)}.construction-step{font-size:13px}.construction-stage-label small{margin-top:3px}.construction-study{grid-template-columns:1fr}.construction-art{aspect-ratio:1.2}.construction-art img{object-fit:cover}.construction-figure figcaption{font-size:11px;padding:10px 18px 18px}.construction-art-label{inset:14px 18px auto}.construction-panel{padding:24px 20px}.construction-stage-heading h3{max-width:none;font-size:30px}.construction-notice{grid-template-columns:1fr;gap:12px;padding:20px}.construction-due>strong{font-size:36px}.construction-bottom{gap:16px}.construction-navigation{width:100%;justify-content:space-between}.construction-navigation button{flex:1}.construction-intro .lab{font-size:10px}}
+@media print{.construction-stages,.construction-navigation,.construction-assumptions a{display:none}.construction-art{position:static}.construction-study{grid-template-columns:1fr 1fr}.construction{break-inside:avoid}.construction-notice details{display:block}.construction-notice details>*{display:block}}
+@media(max-width:680px){.construction-mobile-result{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:var(--card);padding:14px 16px;border:1px solid var(--line);border-top:0}.construction-mobile-result span{display:block;font-size:10px;color:var(--ink2);margin-bottom:5px}.construction-mobile-result strong{font-family:var(--mono);font-size:19px;font-weight:500;letter-spacing:-.03em}.construction-mobile-result small{font-family:inherit;font-size:10px;font-weight:400}}

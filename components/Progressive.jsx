@@ -1,12 +1,13 @@
 'use client';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { progressive, STAGES, BUC_SOURCE, NOTICE_DAYS, STAMPING } from '../lib/calc/buc.js';
+import { progressive, BUC_SOURCE, NOTICE_DAYS, STAMPING } from '../lib/calc/buc.js';
 import { bsd, absd } from '../lib/calc/stampDuty.js';
 import { f } from './fmt.js';
 import { Figure } from './Motion.jsx';
 import MoneyInput from './MoneyInput.jsx';
 import Row from './PlanRow.jsx';
+import ConstructionStudy from './ConstructionStudy.jsx';
 
 /**
  * The progressive payment ladder for a home still under construction.
@@ -36,7 +37,7 @@ export default function Progressive() {
   const [tenure, setTenure] = useState(25);
   const [profile, setProfile] = useState('SC');
   const [owned, setOwned] = useState(1);
-  const [open, setOpen] = useState(null);
+  const [showPlanBar, setShowPlanBar] = useState(false);
 
   const r = useMemo(() => progressive({
     price: Number(price) || 0, ltv,
@@ -63,8 +64,11 @@ export default function Progressive() {
 
   return (
     <>
-      <div className="planlayout">
+      <ConstructionStudy rows={r.rows} price={r.price} rate={Number(rate) || 0}
+        tenure={Number(tenure) || 25} bookingFee={r.bookingFee} onStudyPassed={setShowPlanBar} />
+      <div className="planlayout" id="purchase-assumptions">
         <div className="planinputs">
+          <p className="construction-return"><a href="#construction-heading">See these figures in the construction study ↑</a></p>
           <fieldset className="plangroup">
             <legend className="lab">The purchase</legend>
             <div className="planform">
@@ -168,53 +172,10 @@ export default function Progressive() {
           one; this is the second. aria-hidden because it repeats the aside
           verbatim and a screen reader does not need both figures announced
           again on every keystroke. */}
-      <div className="planbar" aria-hidden="true">
+      <div className="planbar" aria-hidden="true" hidden={!showPlanBar}>
         <span><i className="lab">Before the bank pays</i> <b className="mono">{money(r.cashCpfTotal + duty.total)}</b></span>
         <span><i className="lab">Cash, not CPF</i> <b className="mono">{money(r.bookingFee)}</b></span>
       </div>
-
-      <h2 className="sh" style={{ marginTop: 26 }}>
-        <span>The ladder</span><span>{STAGES.length} stages · 100% of the price</span>
-      </h2>
-
-      <ul className="ladder">
-        {r.rows.map((x, i) => (
-          <li key={x.on} className={x.kind ? `st-${x.kind}` : undefined}>
-            <button type="button" aria-expanded={open === i}
-              onClick={() => setOpen(open === i ? null : i)}>
-              <span className="pct mono">{x.pct}%</span>
-              <span className="what">
-                <b>{x.on}</b>
-                <small>
-                  {x.own > 0 && <>{money(x.own)} yours</>}
-                  {x.own > 0 && x.loan > 0 && ' · '}
-                  {x.loan > 0 && <>{money(x.loan)} drawn</>}
-                </small>
-              </span>
-              <span className="mth mono">
-                {x.monthly > 0 ? <>{money(x.monthly)}<i>/mo</i></> : <i>no loan yet</i>}
-              </span>
-            </button>
-            {open === i && (
-              <div className="ladderdet">
-                {/* A quotation, not a summary. */}
-                <p className="quote">{x.wording}</p>
-                <p className="hint" style={{ margin: '8px 0 0' }}>
-                  {x.kind === 'signing'
-                    ? <>Due on signing, or within 8 weeks of the Option date — whichever the agreement
-                      says. This is the only stage the Rules attach a clock to.</>
-                    : x.kind === 'completion'
-                      ? <>Only 2% of this reaches the developer on the day. The other 13% sits with the
-                        Singapore Academy of Law until the CSC is issued and the Final Payment Date
-                        passes — that is your protection, not theirs.</>
-                      : <>Falls due within {NOTICE_DAYS} days of the developer&rsquo;s notice that this
-                        stage is complete. There is no date for it, only the notice.</>}
-                </p>
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
 
       <h2 className="sh" style={{ marginTop: 26 }}>
         <span>Stamp duty</span><span>on top of the price, on its own clock</span>

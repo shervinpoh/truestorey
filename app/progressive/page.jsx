@@ -3,6 +3,7 @@ import Masthead from '../../components/Masthead.jsx';
 import ToolIntro from '../../components/ToolIntro.jsx';
 import ToolUse from '../../components/ToolUse.jsx';
 import Progressive from '../../components/Progressive.jsx';
+import './construction.css';
 
 export const metadata = {
   title: 'Paying for a home still being built — the progressive payment ladder | Truestorey',
