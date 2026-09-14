@@ -171,5 +171,5 @@
     }
   ],
   "provenance": "Traced from this unit's own floor plan with scripts/render/trace.html on 14 Sep 2026. Rooms are in TRACED PIXELS; the renderer solves metres per pixel as sqrt(areaSqm / traced area). verified stays false until the plan, its source and its date are recorded here by a human \u2014 the flag means somebody checked, not that the numbers look plausible.",
-  "areaBasis": "90 sqm as stated for the unit. The aircon ledge is marked includeInArea:false; the balcony was not traced. The door cross-check reads the narrowest door at 0.66m, implying 100 sqm against the stated 90 \u2014 a +11% gap, inside the +/-12% noise of a 33-pixel door, so consistent."
+  "areaBasis": "Here the 90 excludes the aircon ledge, and the balcony was not traced at all. The door check agrees: the narrowest door works out at 0.66m, which would put the flat at 100 sqm if that door is a standard 0.70m bathroom door \u2014 an 11% gap, and a door only 33 pixels wide carries about 12% of slack on its own, so the two figures do not actually disagree."
 }

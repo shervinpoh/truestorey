@@ -255,6 +255,48 @@ for axis, lo_key, size_key in (("x", "x", "w"), ("y", "y", "d")):
               f"onto one line at {(a + b) / 2:.2f}m")
 
 
+# ── WHAT WAS ACTUALLY DRAWN, WRITTEN DOWN ───────────────────────────────────
+# The page that shows these frames also prints the room sizes, and it must not
+# compute them. Two things stand between a spec and the geometry on screen: the
+# area-derived scale, and the snap that pulls near-miss edges onto shared lines
+# and moves a dimension by up to 15cm doing it. Reimplementing both in JavaScript
+# to fill a table is the failure this repo already records against proceeds.js
+# and against the price ramp — and it is worse here, because nothing would go
+# red. The table would simply disagree with the picture beside it, by a few
+# centimetres, forever.
+#
+# So the renderer writes what it drew. Rooms are aggregated by group, since an
+# L-shaped room is several boxes and a reader wants one line for it.
+import collections
+
+rooms_out = collections.OrderedDict()
+for r in S["rooms"]:
+    g = r.get("group") or r["name"]
+    e = rooms_out.setdefault(g, {"name": r["name"], "kind": r.get("kind"),
+                                 "areaSqm": 0.0, "boxes": [], "counts": True})
+    e["areaSqm"] += r["w"] * r["d"]
+    e["boxes"].append([round(r["w"], 2), round(r["d"], 2)])
+    if r.get("includeInArea") is False:
+        e["counts"] = False
+for e in rooms_out.values():
+    e["areaSqm"] = round(e["areaSqm"], 1)
+    e["boxes"].sort(key=lambda b: b[0] * b[1], reverse=True)
+
+side = {
+    "label": S.get("label"),
+    "labelNote": S.get("labelNote"),
+    "verified": bool(S.get("verified")),
+    "areaSqm": S.get("areaSqm"),
+    "areaBasis": S.get("areaBasis"),
+    "provenance": S.get("provenance"),
+    "scaleMPerUnit": round(S.get("_scale"), 6) if S.get("_scale") else None,
+    "rooms": list(rooms_out.values()),
+}
+with open(os.path.splitext(OUT)[0] + "-rooms.json", "w") as fh:
+    json.dump(side, fh, indent=2)
+print(f"[layout] wrote {os.path.basename(os.path.splitext(OUT)[0])}-rooms.json "
+      f"({len(rooms_out)} rooms)")
+
 CUT = float(S.get("cutM", 1.30))          # doll's-house wall height
 CEIL = float(S.get("ceilingM", 2.60))
 WALL_EXT = 0.20                            # exterior wall thickness, metres

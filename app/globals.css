@@ -2425,6 +2425,42 @@ sup.cite a:hover{text-decoration:underline}
 .reliefcap .reliefsup + .reliefsup{margin-top:12px}
 .relief .prov{margin:14px 0 0}
 
+/* ── THE UNIT TURNTABLE ────────────────────────────────────────────────────
+   Square, because a turntable's subject changes its own bounding box as it
+   turns: a flat 11.5m by 9.8m sweeps a 15.1m diagonal at 45 degrees, so a frame
+   cropped to the flat head-on would cut its corners off halfway round. The
+   camera's ortho scale is set from that diagonal and the frame has to match it.
+
+   touch-action:none on the stage or a drag on a phone scrolls the page instead
+   of turning the flat, which is the single most likely way this ships feeling
+   broken on the device most readers use.
+
+   height:auto for the reason written against .relief img: the intrinsic height
+   attribute reserves the box and would otherwise win outright. */
+.ttable{margin:0}
+.ttstage{background:var(--sunk);border:1px solid var(--line2);border-radius:var(--r2);
+  overflow:hidden;touch-action:none;cursor:grab;user-select:none}
+.ttstage:active{cursor:grabbing}
+.ttstage img{display:block;width:100%;height:auto;
+  -webkit-user-drag:none;user-select:none}
+.ttctl{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;
+  margin-top:12px}
+.ttctl .lab{margin:0}
+.ttctl input[type=range]{width:100%;accent-color:var(--acc)}
+.tthint{font-size:var(--t-micro);color:var(--mute);white-space:nowrap;
+  font-variant-numeric:tabular-nums}
+
+/* The derived room table. Mono on the figures because every dimension here is
+   a measurement, which is the same rule the rest of the site follows. */
+.ttrooms{width:100%;border-collapse:collapse;margin-top:18px;font-size:var(--t-small)}
+.ttrooms th{text-align:left;font-size:var(--t-micro);letter-spacing:.08em;
+  text-transform:uppercase;color:var(--mute);font-weight:600;
+  padding:0 0 6px;border-bottom:1px solid var(--line)}
+.ttrooms td{padding:7px 0;border-bottom:1px solid var(--line2);color:var(--ink2)}
+.ttrooms td.m{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  font-size:var(--t-micro);text-align:right;white-space:nowrap;color:var(--ink)}
+
+
 /* Two columns once there is room for the text to sit beside the picture
    without either getting thin. Below it, one column — a 2:1 render and a
    paragraph side by side on a phone gives 20 characters a line. */
