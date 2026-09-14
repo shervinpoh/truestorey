@@ -175,14 +175,85 @@ def rescale(spec):
         lo, hi = min(doors), max(doors)
         implied = area * (0.70 / lo) ** 2
         off = (implied / area - 1) * 100
+
+        # ── THE THRESHOLD HAS TO KNOW HOW THIN THE DOOR WAS ────────────────
+        # A flat 8% band cried wolf on the first real trace. The narrowest door
+        # there was 33 traced pixels; clicking it to +/-2px is already +/-12% of
+        # implied area, because the error doubles going from a length to an
+        # area. So a fixed band tighter than the measurement is a warning that
+        # fires on good work, which is the fastest way to teach someone to
+        # ignore warnings.
+        #
+        # The band is derived from the door's own traced width instead. On that
+        # trace it comes out at +/-12% and the +13% reading falls inside it —
+        # correctly, because the doors read 0.66, 0.68, 0.87, 0.91, 0.92 and
+        # 1.18m, which is two bathrooms, three bedrooms and a main entrance.
+        px = lo / s if s else 0
+        noise = 2 * (2.0 / px) * 100 if px > 4 else 25
+        band = max(8.0, noise)
         print(f"[layout] door check: {len(doors)} doors, {lo:.2f}m to {hi:.2f}m")
-        print(f"[layout]   if the narrowest is a 0.70m bathroom door, the area "
-              f"would be {implied:.1f} sqm ({off:+.0f}%)")
-        if abs(off) > 8:
-            print("[layout] WARNING: that disagrees with the stated area. Check "
-                  "areaSqm and check includeInArea on balconies, ledges and voids.")
+        print(f"[layout]   narrowest read as a 0.70m bathroom door implies "
+              f"{implied:.0f} sqm ({off:+.0f}%), noise on a {px:.0f}-unit door "
+              f"is +/-{noise:.0f}%")
+        if abs(off) > band:
+            print("[layout] WARNING: that is outside the noise. Check areaSqm, "
+                  "and check includeInArea on balconies, ledges and voids.")
+        else:
+            print("[layout]   inside the noise — consistent with the stated area.")
 
 rescale(S)
+
+# ── SNAP TRACED EDGES ONTO SHARED LINES ─────────────────────────────────────
+# A hand trace cannot click the same pixel twice. On the first real one, edges
+# that are plainly one wall landed up to 13.7 px apart — 27cm — and the wall
+# derivation, which keys lines on an exact coordinate, built a separate wall for
+# each. Near-coincident walls are coincident faces, and Cycles renders those
+# black. It is the same failure as the island silhouette and the first wall
+# pass, arriving a third way: not from geometry that overlaps by construction,
+# but from geometry that was MEANT to coincide and missed.
+#
+# So coordinates are clustered onto shared lines before anything is built.
+# Chaining, not a fixed grid: a fixed grid would split a wall whose two traces
+# straddle a gridline, which is the bug it was meant to fix. The tolerance is
+# roughly one internal wall — merging within that cannot erase a real room,
+# because a room narrower than its own wall does not exist.
+#
+# Every merge is printed with its spread. A 27cm merge is worth a human look
+# even when it is right, and silently tidying a trace is how a wrong flat gets
+# rendered confidently.
+SNAP_M = 0.15
+
+
+def snap_axis(rooms, lo_key, size_key, tol):
+    edges = sorted({round(r[lo_key], 4) for r in rooms} |
+                   {round(r[lo_key] + r[size_key], 4) for r in rooms})
+    groups, cur = [], [edges[0]]
+    for v in edges[1:]:
+        if v - cur[-1] <= tol:
+            cur.append(v)
+        else:
+            groups.append(cur)
+            cur = [v]
+    groups.append(cur)
+    table, merged = {}, []
+    for g in groups:
+        c = sum(g) / len(g)
+        if len(g) > 1:
+            merged.append((g[0], g[-1], len(g)))
+        for v in g:
+            table[v] = c
+    for r in rooms:
+        a = table[round(r[lo_key], 4)]
+        b = table[round(r[lo_key] + r[size_key], 4)]
+        r[lo_key], r[size_key] = a, max(b - a, 0.05)
+    return merged
+
+
+for axis, lo_key, size_key in (("x", "x", "w"), ("y", "y", "d")):
+    for a, b, n in snap_axis(S["rooms"], lo_key, size_key, SNAP_M):
+        print(f"[layout] snapped {n} {axis} edges spanning {(b - a) * 100:.0f}cm "
+              f"onto one line at {(a + b) / 2:.2f}m")
+
 
 CUT = float(S.get("cutM", 1.30))          # doll's-house wall height
 CEIL = float(S.get("ceilingM", 2.60))
