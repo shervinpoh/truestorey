@@ -77,9 +77,14 @@ const trimHdb = r => ({ month: r.month, price: r.price, psf: Math.round(r.psf),
   model: r.model, remainingLease: r.remainingLease });
 
 const SALE_TYPE = { '1': 'New sale', '2': 'Sub sale', '3': 'Resale' };
+/* `estate` is the named development a landed house sits in, carried through so
+   a street page can say so. It is null for the generic filing, which is most of
+   URA's landed data and means only that URA attached no estate name. */
+const GENERIC_LANDED = 'LANDED HOUSING DEVELOPMENT';
 const trimPriv = r => ({ month: uraMonth(r.contractDate), price: r.price, psf: Math.round(r.psf),
   areaSqm: r.areaSqm, floor: r.floorRange, propertyType: r.propertyType,
-  saleType: SALE_TYPE[r.typeOfSale] || r.typeOfSale, tenure: r.tenure });
+  saleType: SALE_TYPE[r.typeOfSale] || r.typeOfSale, tenure: r.tenure,
+  ...(r.project && r.project !== GENERIC_LANDED ? { estate: r.project } : {}) });
 
 async function main() {
   const hdb = await readJson('hdb.json');
@@ -143,11 +148,34 @@ async function main() {
       index.private.districts[d] = { ...summarise(rows), byType };
     }
 
-    // Project layer — the addressable unit for private.
-    // URA buckets all landed under "LANDED HOUSING DEVELOPMENT"; that is not a
-    // project name, so landed is addressed by street instead.
-    const LANDED = 'LANDED HOUSING DEVELOPMENT';
-    const projKey = r => (r.project === LANDED ? `street|${r.street}` : `proj|${r.project}`);
+    /* Project layer — the addressable unit for private.
+       ── A LANDED HOUSE IS ADDRESSED BY ITS STREET, WHATEVER URA CALLS IT ───
+       This used to key on the project name: anything URA filed as "LANDED
+       HOUSING DEVELOPMENT" became a street, everything else became a project.
+       That left 5,929 of 8,860 landed houses — two thirds — reachable only
+       under an estate name, and 225 streets with no page at all. Searching
+       "Cashew Crescent" returned nothing while its 18 terrace and semi-detached
+       sales sat under "CASHEW VILLAS" at a /condo/ URL, which is also the wrong
+       namespace for a landed estate.
+
+       The split is now URA's own propertyType, not the project name. A Terrace,
+       Semi-detached or Detached is a house and belongs to its street. A STRATA
+       Terrace, Semi-detached or Detached is a unit in a development with shared
+       property — Parc Clematis has six among 1,062 apartments — and belongs
+       with that development, because it is not comparable to a freehold house
+       on the same road and putting them on one page would say it was.
+
+       Nothing is lost by moving: no landed project in this dataset spans more
+       than one street, and every sale keeps its estate name, so a street page
+       can still say which development a house sits in.
+
+       443 named project pages hold nothing but houses and therefore stop
+       existing. They were landed estates filed under /condo/, which is a URL
+       this site should not have been publishing. */
+    const STRATA = /^Strata/i;
+    const HOUSE = /Terrace|Semi-detached|Detached/i;
+    const isHouse = r => HOUSE.test(r.propertyType) && !STRATA.test(r.propertyType);
+    const projKey = r => (isHouse(r) ? `street|${r.street}` : `proj|${r.project}`);
 
     for (const [key, rows] of groupBy(priv.rows, projKey)) {
       const isStreet = key.startsWith('street|');
@@ -163,6 +191,10 @@ async function main() {
       records[id] = {
         id, kind: 'PRIVATE', slug, href, ns, shard: shardOf[ns](slug),
         project: isStreet ? null : name, street: isStreet ? name : first.street,
+        /* Which named estates have houses on this street. A reader searching a
+           street should still find out that the sales sit in Cashew Villas. */
+        ...(isStreet ? { estates: [...new Set(rows.map(r => r.project)
+          .filter(p => p && p !== GENERIC_LANDED))].sort() } : {}),
         label: isStreet ? `Landed · ${name}` : name,
         landed: isStreet,
         district: first.district, segment: first.marketSegment,
@@ -222,7 +254,13 @@ async function main() {
   for (const r of Object.values(records)) {
     if (r.kind !== 'PRIVATE') continue;
     projects[r.ns].push({ slug: r.slug, href: r.href, label: r.label,
-                          district: r.district, segment: r.segment, n: r.n, medianPsf: r.medianPsf });
+                          district: r.district, segment: r.segment, n: r.n, medianPsf: r.medianPsf,
+                          /* The named estates whose houses are on this street. /land joins GLS
+                             winners to records by NAME, and a site awarded as "Gabriel Villas"
+                             has to resolve to something now that landed estates are addressed by
+                             street. Carrying the estate names keeps that join working without a
+                             second lookup table. */
+                          ...(r.estates?.length ? { estates: r.estates } : {}) });
   }
   for (const k of Object.keys(projects)) projects[k].sort((a, b) => a.label.localeCompare(b.label));
 

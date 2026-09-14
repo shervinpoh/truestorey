@@ -13,6 +13,7 @@ import Storey from './Storey.jsx';
 import SectionNav from './SectionNav.jsx';
 import NearbySales from './NearbySales.jsx';
 import SunPath from './SunPath.jsx';
+import BlockMop from './BlockMop.jsx';
 import { titleCase } from '../lib/name.js';
 import { track } from './Track.jsx';
 import { EVENTS } from '../lib/analytics.js';
@@ -50,7 +51,7 @@ import { EVENTS } from '../lib/analytics.js';
  * The proceeds waterfall re-anchors when the flat-type filter moves, so the
  * slider is never centred on a median that is no longer on screen.
  */
-export default function RecordPage({ rec, attribution, crumbs, posts = [], near = null, nearManifest = null, storey = null, canWatch = false, canCapture = false, locator = null, land = null, sales = null, sun = null, sunApprovals = null }) {
+export default function RecordPage({ rec, attribution, crumbs, posts = [], near = null, nearManifest = null, storey = null, canWatch = false, canCapture = false, locator = null, land = null, sales = null, sun = null, sunApprovals = null, mop = null }) {
   const [median, setMedian] = useState(rec.medianPrice);
 
   useEffect(() => { track(EVENTS.RECORD, { href: rec.href, kind: rec.kind }); }, [rec.href]);
@@ -66,9 +67,10 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
   const hasSun = Boolean(sun);
   const sectionIds = [
     'overview',
-    locator && 'place',
     rec.series?.length > 1 && 'history',
     rec.recent?.length > 0 && 'transactions',
+    hdb && mop && 'mop',
+    locator && 'place',
     hasFloor && 'floor',
     hasNear && 'nearby',
     hasSales && 'nearbysales',
@@ -79,10 +81,20 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
 
   return (
     <main className="shell">
+      {/* A landed street names the estates on it. Houses are addressed by
+          street because that is what a buyer searches and what URA files, but
+          "Cashew Crescent" alone loses the fact that its eighteen sales are
+          Cashew Villas — a name the reader may well have been given by an
+          agent, and the name this site used to file them under. */}
       <Masthead crumbs={crumbs} title={titleCase(rec.label)}
-        sub={hdb
-          ? `${rec.n} filed resale transactions · ${titleCase(rec.town)} · ${rec.remainingLease} of lease left`
-          : `${rec.n} filed transactions · District ${rec.district} · ${rec.segment}`} />
+        sub={[
+          hdb
+            ? `${rec.n} filed resale transactions · ${titleCase(rec.town)} · ${rec.remainingLease} of lease left`
+            : `${rec.n} filed transactions · District ${rec.district} · ${rec.segment}`,
+          rec.estates?.length
+            ? `${rec.estates.length === 1 ? 'Houses here are in' : 'Estates on this street:'} ${rec.estates.map(titleCase).join(', ')}`
+            : null,
+        ].filter(Boolean).join(' · ')} />
 
       <SectionNav ids={sectionIds} />
 
@@ -95,6 +107,8 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
               hdb={hdb} hasFloor={hasFloor} hasNear={hasNear} />
           } />
       </section>
+
+      {hdb && mop && <BlockMop data={mop} rec={rec} />}
 
       {/* ── THE MAP GETS ITS OWN SECTION ──────────────────────────────────
           It was a slot inside RecordView's afterSummary, wedged between a
