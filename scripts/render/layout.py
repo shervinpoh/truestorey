@@ -266,12 +266,32 @@ WALL_INT = 0.10                            # partition thickness
 # flat — so a palette would be decoration competing with the only thing that
 # matters, which is where the walls are and what fits between them. Warm
 # neutrals, one darker tone for furniture so it separates from the floor.
-FLOOR = (0xE8, 0xE3, 0xDA)
-WALL = (0xD3, 0xCE, 0xC5)
-WET = (0xDA, 0xD9, 0xD6)                   # bath, kitchen, yard — a shade cooler
-FURN = (0x9A, 0x93, 0x88)
-SOFT = (0x7F, 0x86, 0x83)
-GROUND = (0xF6, 0xF5, 0xF2)
+# A LADDER, MEASURED, because the first version was not one. Everything was
+# pitched between 81% and 96% luminance and the render came back at a mean of
+# 82.3% with HALF of every pixel inside 0.4 percentage points of itself. Floor
+# and wall were 8 points apart on paper and indistinguishable once lit; wet
+# rooms and dry were 4 points apart and identical. A reader could not see where
+# a room ended, which is the only thing this picture has to do.
+#
+# These are roughly ten points apart each, brightest to darkest, and the order
+# is chosen rather than inherited: WALLS are the brightest because walls are
+# what define a layout and they catch the light from above. The GROUND sits in
+# the middle so the flat reads as an object on a surface rather than a shape cut
+# out of one — the same reasoning as the island's mid ground, and the same
+# reason it survives on both page themes.
+#
+#   WALL   92%      the structure
+#   WET    82%      bath, kitchen, yard, shelter
+#   FLOOR  65%      dry rooms
+#   GROUND 56%      outside the flat
+#   SOFT   51%      beds, sofa
+#   FURN   36%      wardrobes, counters, tables
+FLOOR = (0xAE, 0xA6, 0x9A)
+WALL = (0xED, 0xEA, 0xE3)
+WET = (0xD2, 0xD2, 0xCE)                   # bath, kitchen, yard — cooler, tiled
+FURN = (0x61, 0x5B, 0x52)
+SOFT = (0x7E, 0x83, 0x7F)
+GROUND = (0x91, 0x8E, 0x87)
 
 WET_KINDS = {"bath", "kitchen", "yard", "shelter", "wc"}
 
@@ -493,8 +513,8 @@ bpy.context.object.data.materials.append(MAT["ground"])
 # and the floor is what is being measured. One sun for shape, a bright world
 # for fill.
 sun = bpy.data.lights.new("key", type="SUN")
-sun.energy = 2.2
-sun.angle = math.radians(18)
+sun.energy = 3.1
+sun.angle = math.radians(11)
 sun_obj = bpy.data.objects.new("key", sun)
 sun_obj.rotation_euler = (math.radians(34), 0, math.radians(55))
 scene.collection.objects.link(sun_obj)
@@ -502,8 +522,11 @@ scene.collection.objects.link(sun_obj)
 world = bpy.data.worlds.new("w")
 scene.world = world
 world.use_nodes = True
+# 1.9 was flooding the scene. Ambient that strong lifts every shadow into the
+# same value as everything else, which is most of why the first pass had no
+# separation at all — the palette was flat AND the light refused to model it.
 world.node_tree.nodes["Background"].inputs[0].default_value = lin((0xFF, 0xFD, 0xF8))
-world.node_tree.nodes["Background"].inputs[1].default_value = 1.9
+world.node_tree.nodes["Background"].inputs[1].default_value = 0.9
 
 cam = bpy.data.cameras.new("cam")
 cam.type = "ORTHO"
