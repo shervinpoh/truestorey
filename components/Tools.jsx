@@ -370,14 +370,31 @@ function Duty() {
 
       <div className="figwrap" style={{ marginTop: 22 }}>
         <div>
+          {/* ── .total, NOT .duty ─────────────────────────────────────────
+              This read `a?.duty ?? 0` and `money(a.duty)` for months, and the
+              total on this page was BSD alone. A foreigner buying at S$1.2m was
+              told S$32,600 against a real S$752,600 — understated by S$720,000,
+              on a figure published under a CEA registration.
+
+              It is an easy mistake to make and a hard one to see: bsd() returns
+              bands where each band DOES carry `.duty`, so `.duty` looks like the
+              house convention, while absd() and ssd() return `.total`. Then two
+              things hid it. `?? 0` turned the undefined into a silent zero, and
+              money() renders a non-finite number as an em dash — so the page
+              read "ABSD — at 60%", which looks exactly like a deliberate
+              statement that no ABSD applies.
+
+              test/tools-duty.test.js now checks every property this component
+              reads off bsd(), absd() and ssd() against the real return values,
+              so a rename in either direction goes red instead of quiet. */}
           <span className="lab">Total stamp duty on purchase</span>
-          <div className="big">{money(b.total + (a?.duty ?? 0))}</div>
+          <div className="big">{money(b.total + (a ? a.total : 0))}</div>
         </div>
         <div className="figside">
           <span className="lab">Made up of</span>
           <div className="r">
             BSD {money(b.total)}<br />
-            ABSD {a ? `${money(a.duty)} at ${pc(a.rate)}` : '—'}
+            ABSD {a ? `${money(a.total)} at ${pc(a.rate)}` : '—'}
           </div>
         </div>
       </div>
@@ -399,7 +416,11 @@ function Duty() {
           <div className="figwrap" style={{ marginTop: 20 }}>
             <div>
               <span className="lab">Seller&apos;s stamp duty if you sell today</span>
-              <div className="big">{money(s.duty ?? 0)}</div>
+              {/* .total, same bug as the purchase figure above: this read
+                  s.duty and printed S$0 for every seller. A flat bought on
+                  1 Jun 2024 and sold today sits in the legacy regime's 4% band
+                  — S$48,000 on S$1.2m, shown as nothing. */}
+              <div className="big">{money(s.total)}</div>
             </div>
             <div className="figside">
               <span className="lab">Rate</span>
