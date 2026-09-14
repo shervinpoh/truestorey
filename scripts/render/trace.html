@@ -108,6 +108,12 @@
         <option value="balcony">Balcony</option>
         <option value="ledge">Aircon ledge</option>
       </select>
+      <label style="display:flex;gap:7px;align-items:flex-start;margin-top:9px">
+        <input type="checkbox" id="join" style="width:auto;margin-top:3px">
+        <span>Part of the <b>previous</b> room &mdash; for an L&#8209;shape</span>
+      </label>
+      <p class="hint">Real rooms are not rectangles. Draw an L&#8209;shaped room as two or three boxes with
+        this ticked, and they become one room: no wall between them, one lot of furniture.</p>
       <p class="hint">Balcony and aircon ledge default to <b>not</b> counting toward the area. Untick anything else the figure excludes.</p>
     </fieldset>
 
@@ -166,7 +172,7 @@ function draw() {
     ctx.strokeRect(r.x, r.y, r.w, r.d);
     ctx.fillStyle = '#0B0D0F';
     ctx.font = '600 11px -apple-system,sans-serif';
-    ctx.fillText(r.name, r.x + 4, r.y + 13);
+    ctx.fillText(r.name + (r.part ? ' ·' : ''), r.x + 4, r.y + 13);
     if (s) {
       ctx.font = '10px ui-monospace,Menlo,monospace';
       ctx.fillStyle = '#3D4448';
@@ -191,7 +197,11 @@ function refresh() {
   else {
     const px = 1 / s;
     el.innerHTML = `${s.toFixed(5)} m per pixel &nbsp;·&nbsp; ${px.toFixed(1)} px per metre<br>` +
-      `${rooms.filter(r => r.inArea).length} rooms counting toward ${areaInput.value} sqm`;
+      `${rooms.filter(r => r.inArea).length} boxes counting toward ${areaInput.value} sqm` +
+      `<div class="flag" style="margin-top:7px"><b>The scale is spread across whatever you have ` +
+      `traced so far.</b> It is only right once EVERY room the figure counts is boxed in — ` +
+      `kitchen, baths, shelter, corridor, the lot. Trace four rooms of a flat and tell it 90 sqm ` +
+      `and it will confidently size those four as if they were the whole flat.</div>`;
   }
 
   /* HDB door leaves are about 0.85m for a bedroom and 0.70m for a bathroom.
@@ -243,9 +253,9 @@ function refresh() {
   tb.innerHTML = '';
   for (const r of rooms) {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${r.name}</td>` +
+    tr.innerHTML = `<td>${r.name}${r.part ? ' <span style="color:var(--mute)">· part</span>' : ''}</td>` +
       `<td class="m">${s ? (r.w * s).toFixed(2) + '×' + (r.d * s).toFixed(2) : '—'}</td>` +
-      `<td class="m">${s ? (r.w * r.d * s * s).toFixed(1) : '—'}</td>` +
+      `<td class="m">${s ? (r.w * r.d * s * s).toFixed(1) : '—'}${r.group && !r.part ? ' →' + (rooms.filter(q => q.group === r.group).reduce((t, q) => t + q.w * q.d, 0) * s * s).toFixed(1) : ''}</td>` +
       `<td><input type="checkbox" style="width:auto" ${r.inArea ? 'checked' : ''}></td>` +
       `<td class="x">&times;</td>`;
     tr.querySelector('input').onchange = e => { r.inArea = e.target.checked; refresh(); draw(); };
@@ -306,11 +316,23 @@ cv.onpointerup = e => {
   } else {
     const w = Math.abs(x - start.x), d = Math.abs(y - start.y);
     if (w > 6 && d > 6) {
-      const kind = document.getElementById('kind').value;
-      n++;
-      rooms.push({ name: KIND_LABEL[kind] + (kind === 'bedroom' || kind === 'bath' ? ' ' + n : ''),
-                   kind, x: Math.min(start.x, x), y: Math.min(start.y, y), w, d,
-                   inArea: !EXCLUDED.has(kind) });
+      const join = document.getElementById('join').checked && rooms.length;
+      if (join) {
+        /* Adopt the previous room wholesale — name, kind and group. The group
+           is what stops the renderer building a wall along the seam between
+           two boxes of one room. */
+        const prev = rooms[rooms.length - 1];
+        if (!prev.group) prev.group = prev.name;
+        rooms.push({ name: prev.name, kind: prev.kind, group: prev.group,
+                     x: Math.min(start.x, x), y: Math.min(start.y, y), w, d,
+                     inArea: prev.inArea, part: true });
+      } else {
+        const kind = document.getElementById('kind').value;
+        n++;
+        rooms.push({ name: KIND_LABEL[kind] + (kind === 'bedroom' || kind === 'bath' ? ' ' + n : ''),
+                     kind, x: Math.min(start.x, x), y: Math.min(start.y, y), w, d,
+                     inArea: !EXCLUDED.has(kind) });
+      }
     }
   }
   start = null; drag = null; refresh();
@@ -341,6 +363,7 @@ document.getElementById('gen').onclick = () => {
       name: r.name, kind: r.kind,
       x: +r.x.toFixed(1), y: +(H - r.y - r.d).toFixed(1),
       w: +r.w.toFixed(1), d: +r.d.toFixed(1),
+      ...(r.group ? { group: r.group } : {}),
       ...(r.inArea ? {} : { includeInArea: false })
     })),
     openings: doors.map(o => {

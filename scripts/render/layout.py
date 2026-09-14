@@ -281,13 +281,29 @@ for r in rooms:
 # is counted per elementary span. Covered twice means a partition between two
 # rooms, drawn thin and once. Covered once means it faces outside, drawn thick.
 # Nothing can overlap because the spans tile the line by construction.
+# ── AN L-SHAPED ROOM IS SEVERAL RECTANGLES THAT MUST NOT BE WALLED APART ────
+# Real rooms are not rectangles. A master bedroom with a wardrobe recess, or a
+# living room that wraps a corner, has to be traced as two or three boxes
+# because a box is what a tracer can draw — and then the wall derivation sees
+# an edge covered by two rooms, calls it a partition, and builds a wall through
+# the middle of somebody's bedroom. The render looks entirely convincing and
+# the flat it shows does not exist.
+#
+# `group` is how a spec says "these boxes are one room". An edge covered twice
+# by the SAME group is interior to a single space and gets no wall at all.
+# Rooms with no group are their own group, so nothing changes for simple ones.
+def group_of(r):
+    return r.get("group") or r["name"]
+
+
 EPS = 1e-6
 lines = {}
 for r in rooms:
     x, y, w, d = r["x"], r["y"], r["w"], r["d"]
+    g = group_of(r)
     for o, c, a, b in (("h", y, x, x + w), ("h", y + d, x, x + w),
                        ("v", x, y, y + d), ("v", x + w, y, y + d)):
-        lines.setdefault((o, round(c, 3)), []).append((round(a, 3), round(b, 3)))
+        lines.setdefault((o, round(c, 3)), []).append((round(a, 3), round(b, 3), g))
 
 openings = S.get("openings", [])
 
@@ -308,16 +324,19 @@ def spans_on(orient, coord, lo, hi):
 
 
 for (orient, coord), intervals in lines.items():
-    cuts = sorted({v for iv in intervals for v in iv})
+    cuts = sorted({v for a, b, _ in intervals for v in (a, b)})
     for k in range(len(cuts) - 1):
         lo, hi = cuts[k], cuts[k + 1]
         if hi - lo < 0.02:
             continue
         mid = (lo + hi) / 2
-        cover = sum(1 for a, b in intervals if a < mid < b)
-        if cover == 0:
+        covering = [g for a, b, g in intervals if a < mid < b]
+        if not covering:
             continue
-        thick = WALL_INT if cover > 1 else WALL_EXT
+        # Two boxes of one room meeting: interior to a single space, no wall.
+        if len(covering) > 1 and len(set(covering)) == 1:
+            continue
+        thick = WALL_INT if len(covering) > 1 else WALL_EXT
 
         # An opening is a span with no wall below the cut. A door reaches the
         # floor; a window keeps its sill, so at a 1.3m cut it reads as a window
@@ -384,7 +403,14 @@ def place(r):
         box(f"{name}-{r['name']}", cx, cy, fh / 2, fw, fd, fh, mat)
 
 
+# Once per ROOM, in its largest box. Placing per box would put a bed in the
+# wardrobe recess as well as in the bedroom.
+by_group = {}
 for r in rooms:
+    g = group_of(r)
+    if g not in by_group or r["w"] * r["d"] > by_group[g]["w"] * by_group[g]["d"]:
+        by_group[g] = r
+for r in by_group.values():
     place(r)
 
 # ── ground, light, camera ───────────────────────────────────────────────────
@@ -456,5 +482,11 @@ for i in range(FRAMES):
         result.save_render(filepath=f"{OUT}{tag}-{i:02d}{ext}", scene=scene)
     print(f"[layout] frame {i + 1}/{FRAMES}")
 
-print(f"[layout] {S['flatType']} · {S['model']} — {len(rooms)} rooms, "
+# A traced spec carries a `label`, not flatType/model — those exist only on the
+# representative HDB ones. Assuming them crashed on the first real trace, after
+# the frames had already been written, which is the most annoying place to fail.
+name = S.get("label") or " · ".join(
+    x for x in (S.get("flatType"), S.get("model")) if x) or S.get("id", "layout")
+groups = len({r.get("group") or r["name"] for r in rooms})
+print(f"[layout] {name} — {len(rooms)} boxes in {groups} rooms, "
       f"{FRAMES} frames, verified={bool(S.get('verified'))}")
