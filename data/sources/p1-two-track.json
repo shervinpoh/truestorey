@@ -1,0 +1,31 @@
+{
+  "scheme": "Two-Track Scheme, Phase 2C",
+  "publishedBy": "Ministry of Education — Enhancing the Primary One Registration Framework for Greater Access and Inclusivity",
+  "sourceUrl": "https://www.moe.gov.sg/news/press-releases/20260910-enhancing-the-primary-one-registration-framework-for-greater-access-and-inclusivity",
+  "annexUrl": "https://www.moe.gov.sg/media/newsroom/news/press/2026/b0d58e7a-5220-49b9-bc9c-a7f783a4f510.pdf",
+  "announcedAt": "2026-09-10",
+  "effectiveFrom": "the 2027 P1 Registration Exercise, for children entering Primary 1 in 2028",
+  "enteredAt": "2026-09-14",
+  "enteredBy": "Shervin Poh",
+
+  "what": "At these schools Phase 2C places are split equally into two tracks — Phase 2C (≤2km) and Phase 2C (>2km) — and neither track has priority over the other. Balloting happens within a track if Singapore Citizen applicants exceed its places, and unfilled places in one track flow to the other. MOE selected them because public housing is under 40% of dwelling units within 2km of the school.",
+
+  "whyItIsHere": "This site tells a reader how many primary schools fall inside a 1km band, on the stated basis that Phases 2A/2B/2C order applicants by distance in three bands — within 1km, 1km to 2km, beyond 2km. At these twelve that ordering stops applying in Phase 2C. Being 300m away gains nothing over being 1.5km away, since both sit in the same track; and being beyond 2km goes from last in line to a guaranteed half of the places. The band is still right for Phases 2A and 2B, and for the other 167 primary schools in this dataset.",
+
+  "note": "Hand-entered because MOE publishes the list as a PDF annex with no machine-readable form. Every name below was matched exactly against the name in data/amenities.json, which comes from data.gov.sg — all twelve matched, so nothing here is fuzzy-matched at build time and a rename upstream will fail loudly rather than silently drop a school. The eighth entry's name did not survive text extraction from the annex; it was resolved by geocoding its published postal code through OneMap, which returned Raffles Girls' Primary School at 21 Hillcrest Road, 0m from this repo's own coordinate for that school. It was not filled in from memory.",
+
+  "schools": [
+    { "name": "ANGLO-CHINESE SCHOOL (JUNIOR)", "address": "16 Winstedt Road, Singapore 227988" },
+    { "name": "ANGLO-CHINESE SCHOOL (PRIMARY)", "address": "50 Barker Road, Singapore 309918" },
+    { "name": "CHIJ (KATONG) PRIMARY", "address": "17 Martia Road, Singapore 424821" },
+    { "name": "METHODIST GIRLS' SCHOOL (PRIMARY)", "address": "11 Blackmore Drive, Singapore 599986" },
+    { "name": "NANYANG PRIMARY SCHOOL", "address": null },
+    { "name": "NGEE ANN PRIMARY SCHOOL", "address": "344 Marine Terrace, Singapore 449149" },
+    { "name": "PEI HWA PRESBYTERIAN PRIMARY SCHOOL", "address": "7 Pei Wah Avenue, Singapore 597610" },
+    { "name": "RAFFLES GIRLS' PRIMARY SCHOOL", "address": "21 Hillcrest Road, Singapore 289072" },
+    { "name": "SINGAPORE CHINESE GIRLS' PRIMARY SCHOOL", "address": "190 Dunearn Road, Singapore 309437" },
+    { "name": "ST. MARGARET'S SCHOOL (PRIMARY)", "address": "136 Sophia Road, Singapore 228197" },
+    { "name": "TANJONG KATONG PRIMARY SCHOOL", "address": "10 Seraya Road, Singapore 437259" },
+    { "name": "TAO NAN SCHOOL", "address": "49 Marine Crescent, Singapore 449761" }
+  ]
+}

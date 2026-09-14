@@ -124,6 +124,51 @@ async function placeCurated(list) {
   return out;
 }
 
+/**
+ * MOE's Phase 2C Two-Track Scheme, applied to the schools layer.
+ *
+ * Announced 10 Sep 2026 and effective from the 2027 registration exercise.
+ * At twelve schools, Phase 2C places are split equally into a track for homes
+ * within 2km and a track for homes beyond it, and NEITHER TRACK HAS PRIORITY
+ * OVER THE OTHER.
+ *
+ * That matters here because this site publishes a count of primary schools
+ * inside a 1km band, on the stated basis that Phases 2A/2B/2C order applicants
+ * by distance in three bands. At these twelve that ordering stops applying in
+ * Phase 2C: 300m gains nothing over 1.5km, both being in the same track, and a
+ * home beyond 2km goes from last in line to a guaranteed half of the places.
+ *
+ * ── MATCHED EXACTLY, AND LOUDLY ────────────────────────────────────────────
+ * The list is hand-entered because MOE publishes it as a PDF annex. Names are
+ * matched exactly against the layer, which comes from data.gov.sg, and all
+ * twelve matched when it was written. A rename upstream therefore THROWS
+ * rather than quietly flagging eleven — a school silently losing its flag
+ * would leave this site telling a reader that distance orders a phase where
+ * MOE has said it does not.
+ */
+async function markTwoTrack(rows) {
+  const src = await readJson(path.join(SOURCES, 'p1-two-track.json'), null);
+  if (!src?.schools?.length) {
+    console.log('\n           ! data/sources/p1-two-track.json missing — no Phase 2C flags set');
+    return rows;
+  }
+  const byName = new Map(rows.map(r => [r.name.toUpperCase(), r]));
+  const missing = [];
+  for (const s of src.schools) {
+    const hit = byName.get(s.name.toUpperCase());
+    if (!hit) { missing.push(s.name); continue; }
+    hit.p1TwoTrack = true;
+  }
+  if (missing.length) {
+    throw new Error(
+      `Phase 2C two-track list names ${missing.length} school(s) not in this layer: `
+      + `${missing.join('; ')}. Either the upstream name changed or MOE revised the list — `
+      + `fix data/sources/p1-two-track.json rather than letting the flag go missing.`);
+  }
+  process.stdout.write(`(${src.schools.length} two-track) `);
+  return rows;
+}
+
 /* ------------------------------------------------------------------ run */
 
 async function main() {
@@ -153,6 +198,7 @@ async function main() {
       }
 
       if (!rows.length) throw new Error('nothing usable after cleaning');
+      if (key === 'schools') rows = await markTwoTrack(rows);
       next.layers[key] = {
         label: spec.label, count: rows.length, within: spec.within,
         source: via, attribution: spec.attribution,

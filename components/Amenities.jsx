@@ -34,6 +34,11 @@ export default function Amenities({ near, manifest }) {
 
   const L = manifest.layers || {};
   const station = rail[0];
+  /* MOE's Phase 2C Two-Track Scheme, announced 10 Sep 2026 and effective from
+     the 2027 registration exercise. The note below only appears when one of
+     the twelve is actually in range — a caveat about schools a reader cannot
+     see is noise, and this component already carries enough of them. */
+  const twoTrack = [...p1, ...p2].filter(s => s.p1TwoTrack);
   const future = s => /announced|construction|planned|future/i.test(s?.status || '');
 
   return (
@@ -81,6 +86,7 @@ export default function Amenities({ near, manifest }) {
                   <span className="d mono">
                     {fmtDistance(s.m)}
                     {nearBoundary(s.m) && <em className="edge"> on the 1km line</em>}
+                    {s.p1TwoTrack && <em className="edge"> · 2C two-track</em>}
                   </span>
                 </li>
               ))}
@@ -91,10 +97,29 @@ export default function Amenities({ near, manifest }) {
               <summary>{p2.length} more between 1km and 2km</summary>
               <ul className="amlist">
                 {p2.map(s => (
-                  <li key={s.name}><span className="n">{titleCase(s.name)}</span><span className="d mono">{fmtDistance(s.m)}</span></li>
+                  <li key={s.name}><span className="n">{titleCase(s.name)}</span>
+                    <span className="d mono">{fmtDistance(s.m)}
+                      {s.p1TwoTrack && <em className="edge"> · 2C two-track</em>}</span></li>
                 ))}
               </ul>
             </details>
+          )}
+
+          {twoTrack.length > 0 && (
+            <div className="note method">
+              <b>Distance stops ordering Phase 2C at {twoTrack.length === 1 ? 'one of these schools' : `${twoTrack.length} of these schools`}, from the 2027 registration exercise.</b>{' '}
+              MOE is splitting Phase 2C places equally into a track for homes within 2km and a track
+              for homes beyond it, with <em>neither track having priority over the other</em>, at
+              twelve schools where public housing is under 40% of dwelling units within 2km. Marked{' '}
+              <em className="edge">2C two-track</em> above: {twoTrack.map(s => titleCase(s.name)).join(', ')}.
+              {' '}At {twoTrack.length === 1 ? 'it' : 'those'}, being 300m away buys nothing over being
+              1.5km away in that phase — both sit in the same track and ballot within it — and a home
+              beyond 2km goes from last in line to half the places. Phases 2A and 2B are unchanged, and
+              so is every other school in this list. Announced{' '}
+              <a href="https://www.moe.gov.sg/news/press-releases/20260910-enhancing-the-primary-one-registration-framework-for-greater-access-and-inclusivity"
+                target="_blank" rel="noopener noreferrer">10 September 2026</a>; it first applies to
+              children entering Primary 1 in 2028.
+            </div>
           )}
 
           <div className="note">
