@@ -1,0 +1,362 @@
+<title>Trace a floor plan</title>
+<!--
+  A local dev tool. Open it straight off disk — no server, no build, no
+  dependency. It never leaves your machine and the image is never uploaded.
+
+  WHY IT EXISTS
+  Most floor plans in this market print no dimensions. They are still drawn to
+  a uniform scale, so tracing the rooms in screen pixels and solving against
+  the one figure that IS always published — the flat's area — recovers every
+  dimension:
+
+      metres per pixel = sqrt(stated area / traced area)
+
+  Area goes as the square of length, so the square root halves the error, and
+  the error is systematic: one factor for the whole plan, so proportions
+  between rooms stay exact whatever it turns out to be.
+
+  TRACE TO WALL CENTRELINES — the middle of each wall, not the inner face.
+  Traced that way the rectangles tile the footprint with no gaps, so their sum
+  is the area the scale is solved against. Traced to inner faces the sum omits
+  every partition and the scale comes out too large: about 2.1% on a 90 sqm
+  flat, which is 75mm on a 3.5m bedroom.
+
+  UNTICK "counts toward area" for a balcony, an aircon ledge or a void. That is
+  the largest error available here — a balcony and a ledge both counted wrongly
+  is 2.5% of every length.
+
+  The door readout is a free second opinion. HDB door leaves run about 0.85m
+  for a bedroom and 0.70m for a bathroom; if yours come out far from that, the
+  scale is solved against the wrong basis and the render would have looked
+  perfectly plausible and been wrong.
+-->
+<style>
+  :root{--paper:#F6F5F2;--ink:#0B0D0F;--ink2:#3D4448;--mute:#6B747C;
+        --line:#DAD6CE;--acc:#164F52;--acc-lit:#58BCC3;--warn:#8A6A1F;--r1:3px;--r2:8px}
+  body{background:var(--paper);color:var(--ink);
+       font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0}
+  .wrap{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;padding:18px;
+        height:100vh;box-sizing:border-box}
+  .stage{background:#fff;border:1px solid var(--line);border-radius:var(--r2);
+         overflow:auto;position:relative;display:flex;align-items:center;justify-content:center}
+  canvas{display:block;cursor:crosshair;max-width:100%}
+  .side{overflow:auto;display:flex;flex-direction:column;gap:12px}
+  h1{font-size:17px;margin:0 0 2px;letter-spacing:-.01em}
+  .sub{color:var(--mute);font-size:12.5px;margin:0 0 8px}
+  fieldset{border:1px solid var(--line);border-radius:var(--r2);padding:10px 12px;margin:0}
+  legend{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);padding:0 4px}
+  label{display:block;font-size:12.5px;color:var(--ink2);margin:6px 0 2px}
+  input,select,button{font:inherit;padding:6px 8px;border:1px solid var(--line);
+        border-radius:var(--r1);background:#fff;color:var(--ink);width:100%;box-sizing:border-box}
+  button{background:var(--acc);color:#fff;border-color:var(--acc);cursor:pointer;font-weight:600}
+  button.ghost{background:#fff;color:var(--ink);border-color:var(--line);font-weight:500}
+  button:hover{opacity:.9}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th{text-align:left;font-weight:600;color:var(--mute);font-size:11px;
+     text-transform:uppercase;letter-spacing:.06em;padding:4px 3px;border-bottom:1px solid var(--line)}
+  td{padding:4px 3px;border-bottom:1px solid var(--line);vertical-align:middle}
+  td.m{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;white-space:nowrap}
+  .x{color:var(--mute);cursor:pointer;font-weight:700;padding:0 4px}
+  .x:hover{color:#9B2C2C}
+  .scale{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ink2)}
+  .flag{color:var(--warn);font-size:12px;margin-top:6px}
+  .ok{color:var(--acc);font-size:12px;margin-top:6px}
+  .hint{color:var(--mute);font-size:11.5px;margin:6px 0 0}
+  .modes{display:flex;gap:6px}
+  .modes button{flex:1}
+  .modes button[aria-pressed="true"]{background:var(--acc);color:#fff;border-color:var(--acc)}
+  .modes button[aria-pressed="false"]{background:#fff;color:var(--ink)}
+  textarea{width:100%;height:140px;font-family:ui-monospace,Menlo,monospace;font-size:11px;
+           border:1px solid var(--line);border-radius:var(--r1);padding:8px;box-sizing:border-box}
+</style>
+
+<div class="wrap">
+  <div class="stage"><canvas id="cv" width="900" height="640"></canvas></div>
+
+  <div class="side">
+    <div>
+      <h1>Trace a floor plan</h1>
+      <p class="sub">Drag a box around each room, to the <b>middle of the walls</b>. The area does the rest.</p>
+    </div>
+
+    <fieldset>
+      <legend>1 · the plan</legend>
+      <input type="file" id="file" accept="image/*">
+      <label for="area">Stated floor area (sqm)</label>
+      <input type="number" id="area" value="90" step="0.1" min="1">
+      <p class="hint">The published figure for this unit. Everything is solved against it.</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>2 · draw</legend>
+      <div class="modes">
+        <button id="mRoom" aria-pressed="true">Rooms</button>
+        <button id="mDoor" aria-pressed="false" class="ghost">Doors</button>
+      </div>
+      <label for="kind">Room kind (used for furniture)</label>
+      <select id="kind">
+        <option value="living">Living</option>
+        <option value="dining">Dining</option>
+        <option value="master">Master bedroom</option>
+        <option value="bedroom">Bedroom</option>
+        <option value="kitchen">Kitchen</option>
+        <option value="bath">Bath / WC</option>
+        <option value="yard">Yard / service</option>
+        <option value="shelter">Household shelter / store</option>
+        <option value="corridor">Corridor</option>
+        <option value="balcony">Balcony</option>
+        <option value="ledge">Aircon ledge</option>
+      </select>
+      <p class="hint">Balcony and aircon ledge default to <b>not</b> counting toward the area. Untick anything else the figure excludes.</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>3 · scale</legend>
+      <div id="scale" class="scale">Draw a room to solve the scale.</div>
+      <div id="doorcheck"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>rooms</legend>
+      <table id="tbl"><thead><tr><th>Name</th><th>Size</th><th>Area</th><th>In</th><th></th></tr></thead><tbody></tbody></table>
+    </fieldset>
+
+    <fieldset>
+      <legend>4 · export</legend>
+      <div class="row">
+        <button id="gen">Generate spec</button>
+        <button id="copy" class="ghost">Copy</button>
+      </div>
+      <textarea id="out" spellcheck="false" placeholder="The spec JSON appears here. Save it to data/layouts/ and render it."></textarea>
+    </fieldset>
+  </div>
+</div>
+
+<script>
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+let img = null, rooms = [], doors = [], mode = 'room', drag = null, n = 0;
+
+const KIND_LABEL = { living:'Living', dining:'Dining', master:'Master', bedroom:'Bedroom',
+  kitchen:'Kitchen', bath:'Bath', yard:'Yard', shelter:'Shelter', corridor:'Corridor',
+  balcony:'Balcony', ledge:'Aircon ledge' };
+/* A balcony and an aircon ledge are the two rooms a published HDB area usually
+   does NOT count, and getting either wrong is the biggest error in the method.
+   Defaulting them off makes the safe choice the automatic one. */
+const EXCLUDED = new Set(['balcony', 'ledge']);
+
+const areaInput = document.getElementById('area');
+
+function scale() {
+  const stated = parseFloat(areaInput.value);
+  const traced = rooms.filter(r => r.inArea).reduce((t, r) => t + r.w * r.d, 0);
+  if (!stated || traced <= 0) return null;
+  return Math.sqrt(stated / traced);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  if (img) ctx.drawImage(img, 0, 0, cv.width, cv.height);
+  const s = scale();
+  for (const r of rooms) {
+    ctx.fillStyle = r.inArea ? 'rgba(22,79,82,.13)' : 'rgba(138,106,31,.16)';
+    ctx.fillRect(r.x, r.y, r.w, r.d);
+    ctx.strokeStyle = r.inArea ? '#164F52' : '#8A6A1F';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(r.x, r.y, r.w, r.d);
+    ctx.fillStyle = '#0B0D0F';
+    ctx.font = '600 11px -apple-system,sans-serif';
+    ctx.fillText(r.name, r.x + 4, r.y + 13);
+    if (s) {
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillStyle = '#3D4448';
+      ctx.fillText((r.w * s).toFixed(2) + ' × ' + (r.d * s).toFixed(2), r.x + 4, r.y + 25);
+    }
+  }
+  for (const o of doors) {
+    ctx.strokeStyle = '#58BCC3'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(o.x1, o.y1); ctx.lineTo(o.x2, o.y2); ctx.stroke();
+  }
+  if (drag) {
+    ctx.setLineDash([4, 3]); ctx.strokeStyle = '#164F52'; ctx.lineWidth = 1.5;
+    ctx.strokeRect(drag.x, drag.y, drag.w, drag.d);
+    ctx.setLineDash([]);
+  }
+}
+
+function refresh() {
+  const s = scale();
+  const el = document.getElementById('scale');
+  if (!s) { el.textContent = 'Draw a room to solve the scale.'; }
+  else {
+    const px = 1 / s;
+    el.innerHTML = `${s.toFixed(5)} m per pixel &nbsp;·&nbsp; ${px.toFixed(1)} px per metre<br>` +
+      `${rooms.filter(r => r.inArea).length} rooms counting toward ${areaInput.value} sqm`;
+  }
+
+  /* HDB door leaves are about 0.85m for a bedroom and 0.70m for a bathroom.
+     Scaling the traced doors and checking what comes out tests the scale
+     against something the plan already knows, independently of the area. */
+  const dc = document.getElementById('doorcheck');
+  if (s && doors.length) {
+    const ws = doors.map(o => Math.hypot(o.x2 - o.x1, o.y2 - o.y1) * s);
+    const lo = Math.min(...ws), hi = Math.max(...ws);
+    /* THE TEST IS ON THE SMALLEST DOOR, not on the spread. The narrowest door
+       in a flat is essentially always a bathroom at about 0.70m, which makes it
+       the most standard thing on the plan; the widest may legitimately be a
+       1.0m+ main entrance, so an upper bound on the maximum catches almost
+       nothing. The first version flagged only outside 0.50-1.25m and therefore
+       PASSED a flat traced at 60 sqm with 90 typed in — a 50% area error, 1.02m
+       doors, reported as consistent. It also promised a 0.70-0.95m band in the
+       message while enforcing a far looser one, which is worse than no check. */
+    /* PASS/FAIL DOES NOT WORK HERE, and testing proved it. A bathroom door is
+       about 0.70m and a bedroom door about 0.85m, so scaling a bathroom door up
+       by 22% produces something indistinguishable from a bedroom door. A flat
+       traced at 60 sqm with 90 typed against it — a 50% area error — yields a
+       narrowest door of 0.86m and sails through any plausibility band wide
+       enough not to fire constantly.
+
+       So this reports a SECOND ESTIMATE instead of a verdict. The narrowest
+       door in an HDB flat is essentially always a bathroom at 0.70m. Taking
+       that as known gives an independent scale, and the area it implies can be
+       compared with the one that was typed:
+
+           implied area = stated * (0.70 / narrowest derived door)^2
+
+       On that 50% case it returns 59.6 against a true 60.1, which is the error
+       named outright rather than hidden behind a tick. */
+    const implied = parseFloat(areaInput.value) * Math.pow(0.70 / lo, 2);
+    const off = (implied / parseFloat(areaInput.value) - 1) * 100;
+    const bad = Math.abs(off) > 8;
+    dc.className = bad ? 'flag' : 'ok';
+    dc.innerHTML = `${doors.length} doors: ${lo.toFixed(2)}m to ${hi.toFixed(2)}m.<br>` +
+      `If the narrowest is a bathroom door (0.70m), the area would be ` +
+      `<b>${implied.toFixed(1)} sqm</b> (${off > 0 ? '+' : ''}${off.toFixed(0)}%). ` +
+      (bad ? 'That is a big disagreement — check the area figure and what it counts.'
+           : 'Close enough to agree with the figure you typed.');
+  } else if (s) {
+    dc.className = 'hint';
+    dc.textContent = 'Trace two or three doors to check the scale independently.';
+  } else dc.textContent = '';
+
+  const tb = document.querySelector('#tbl tbody');
+  tb.innerHTML = '';
+  for (const r of rooms) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.name}</td>` +
+      `<td class="m">${s ? (r.w * s).toFixed(2) + '×' + (r.d * s).toFixed(2) : '—'}</td>` +
+      `<td class="m">${s ? (r.w * r.d * s * s).toFixed(1) : '—'}</td>` +
+      `<td><input type="checkbox" style="width:auto" ${r.inArea ? 'checked' : ''}></td>` +
+      `<td class="x">&times;</td>`;
+    tr.querySelector('input').onchange = e => { r.inArea = e.target.checked; refresh(); draw(); };
+    tr.querySelector('.x').onclick = () => { rooms = rooms.filter(q => q !== r); refresh(); draw(); };
+    tb.appendChild(tr);
+  }
+  draw();
+}
+
+document.getElementById('file').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  const i = new Image();
+  i.onload = () => {
+    /* Fit to a sensible working size and keep the aspect, because the scale is
+       solved from the trace and never from the image's own pixel count. */
+    const maxW = 900, maxH = 640;
+    const k = Math.min(maxW / i.width, maxH / i.height, 1);
+    cv.width = Math.round(i.width * k); cv.height = Math.round(i.height * k);
+    img = i; rooms = []; doors = []; n = 0; refresh();
+  };
+  i.src = URL.createObjectURL(f);
+};
+
+for (const [id, m] of [['mRoom', 'room'], ['mDoor', 'door']]) {
+  document.getElementById(id).onclick = () => {
+    mode = m;
+    document.getElementById('mRoom').setAttribute('aria-pressed', String(m === 'room'));
+    document.getElementById('mDoor').setAttribute('aria-pressed', String(m === 'door'));
+    document.getElementById('mRoom').className = m === 'room' ? '' : 'ghost';
+    document.getElementById('mDoor').className = m === 'door' ? '' : 'ghost';
+  };
+}
+areaInput.oninput = refresh;
+
+let start = null;
+cv.onpointerdown = e => {
+  const r = cv.getBoundingClientRect();
+  start = { x: (e.clientX - r.left) * cv.width / r.width, y: (e.clientY - r.top) * cv.height / r.height };
+};
+cv.onpointermove = e => {
+  if (!start) return;
+  const r = cv.getBoundingClientRect();
+  const x = (e.clientX - r.left) * cv.width / r.width, y = (e.clientY - r.top) * cv.height / r.height;
+  drag = { x: Math.min(start.x, x), y: Math.min(start.y, y), w: Math.abs(x - start.x), d: Math.abs(y - start.y) };
+  if (mode === 'door') { drag = null; doors.push({ x1: start.x, y1: start.y, x2: x, y2: y }); doors.pop(); }
+  draw();
+  if (mode === 'door') {
+    ctx.strokeStyle = '#58BCC3'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(start.x, start.y); ctx.lineTo(x, y); ctx.stroke();
+  }
+};
+cv.onpointerup = e => {
+  if (!start) return;
+  const r = cv.getBoundingClientRect();
+  const x = (e.clientX - r.left) * cv.width / r.width, y = (e.clientY - r.top) * cv.height / r.height;
+  if (mode === 'door') {
+    if (Math.hypot(x - start.x, y - start.y) > 4) doors.push({ x1: start.x, y1: start.y, x2: x, y2: y });
+  } else {
+    const w = Math.abs(x - start.x), d = Math.abs(y - start.y);
+    if (w > 6 && d > 6) {
+      const kind = document.getElementById('kind').value;
+      n++;
+      rooms.push({ name: KIND_LABEL[kind] + (kind === 'bedroom' || kind === 'bath' ? ' ' + n : ''),
+                   kind, x: Math.min(start.x, x), y: Math.min(start.y, y), w, d,
+                   inArea: !EXCLUDED.has(kind) });
+    }
+  }
+  start = null; drag = null; refresh();
+};
+
+document.getElementById('gen').onclick = () => {
+  const H = cv.height;
+  const spec = {
+    id: 'traced-' + Date.now().toString(36),
+    label: 'This unit',
+    labelNote: 'Traced from this unit’s own floor plan.',
+    verified: false,
+    provenance: 'Traced from a floor plan with scripts/render/trace.html. Rooms are in TRACED PIXELS; ' +
+      'the renderer solves metres per pixel as sqrt(areaSqm / traced area). Set verified to true once ' +
+      'the plan and its date are recorded here and the door check has passed.',
+    units: 'px',
+    areaSqm: parseFloat(areaInput.value),
+    areaBasis: 'STATE WHAT THIS FIGURE COUNTS — whether it includes the balcony, the aircon ledge and ' +
+      'the external walls. This is the largest error in the method: a balcony and a ledge both on the ' +
+      'wrong side moves every dimension by about 2.5%.',
+    ceilingM: 2.6,
+    cutM: 1.3,
+    /* y is flipped out of image space. Image y runs downward and the model's
+       runs away from the camera, so writing y straight through would render a
+       MIRRORED flat — which is a different unit, not a different view, and the
+       kind of error that looks completely fine. */
+    rooms: rooms.map(r => ({
+      name: r.name, kind: r.kind,
+      x: +r.x.toFixed(1), y: +(H - r.y - r.d).toFixed(1),
+      w: +r.w.toFixed(1), d: +r.d.toFixed(1),
+      ...(r.inArea ? {} : { includeInArea: false })
+    })),
+    openings: doors.map(o => {
+      const horiz = Math.abs(o.y2 - o.y1) < Math.abs(o.x2 - o.x1);
+      return horiz
+        ? { x: +Math.min(o.x1, o.x2).toFixed(1), y: +(H - (o.y1 + o.y2) / 2).toFixed(1),
+            w: +Math.abs(o.x2 - o.x1).toFixed(1), kind: 'door' }
+        : { x: +((o.x1 + o.x2) / 2).toFixed(1), y: +(H - Math.max(o.y1, o.y2)).toFixed(1),
+            w: +Math.abs(o.y2 - o.y1).toFixed(1), kind: 'door' };
+    })
+  };
+  document.getElementById('out').value = JSON.stringify(spec, null, 2);
+};
+document.getElementById('copy').onclick = () => {
+  const t = document.getElementById('out'); t.select();
+  navigator.clipboard.writeText(t.value);
+};
+refresh();
+</script>

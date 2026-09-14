@@ -102,6 +102,88 @@ RES = int(arg("--width", "1400"))
 with open(SPEC) as fh:
     S = json.load(fh)
 
+# ── SCALE FROM THE STATED AREA, SO A PLAN NEEDS NO DIMENSIONS ───────────────
+# Most floor plans in this market print no dimensions at all. They are still
+# drawn to a uniform scale, which is the only property the method needs: trace
+# the rooms in ANY unit — screen pixels off the image is easiest — and the one
+# figure that IS always published, the flat's area, recovers the scale.
+#
+#     s = sqrt(stated_area / traced_area)        metres per traced unit
+#
+# The square root is the whole trick. Area scales with the square of length, so
+# a 4% error in the area becomes a 2% error in every dimension, and the error is
+# SYSTEMATIC — one scale factor for the whole plan. Proportions between rooms
+# stay exact no matter what: if a bedroom traces 1.64 times the width of a
+# queen bed, it is 1.64 times the width of a queen bed.
+#
+# ROOMS MUST BE TRACED TO WALL CENTRELINES, not to the inner faces. Traced to
+# centrelines the rectangles tile the footprint with no gaps, so their sum IS
+# the area the scale is solved against, and the walls this script draws straddle
+# the shared edges exactly as they do on the plan. Traced to inner faces the sum
+# omits every partition and the scale comes out too large.
+#
+# `includeInArea: false` marks a room the published figure does NOT count — a
+# balcony, an aircon ledge, a void. Getting that wrong is the largest error
+# available here: on a 110 sqm flat a 5 sqm ledge wrongly included is 4.5% of
+# area and 2.2% of every length.
+def rescale(spec):
+    if spec.get("units", "m") == "m":
+        return
+    area = spec.get("areaSqm")
+    if not area:
+        raise SystemExit("units is not metres and areaSqm is missing — "
+                         "there is nothing to solve the scale against")
+    traced = sum(r["w"] * r["d"] for r in spec["rooms"]
+                 if r.get("includeInArea", True))
+    if traced <= 0:
+        raise SystemExit("traced area is zero")
+    s = math.sqrt(area / traced)
+    for r in spec["rooms"]:
+        for k in ("x", "y", "w", "d"):
+            r[k] *= s
+    for o in spec.get("openings", []):
+        for k in ("x", "y", "w"):
+            o[k] *= s
+        if o.get("sillM_traced"):
+            o["sillM"] = o["sillM_traced"] * s
+    spec["_scale"] = s
+    spec["_tracedUnits"] = spec.get("units")
+    print(f"[layout] scale {s:.5f} m per {spec.get('units')} "
+          f"(traced {traced:.0f} -> stated {area} sqm)")
+
+    # ── A FREE SECOND OPINION, AND IT IS WORTH TAKING ──────────────────────
+    # The plan contains objects whose real size is fixed by regulation and
+    # habit: a bedroom door leaf is about 0.85m and a bathroom door about
+    # 0.70m. Scaling them with the area-derived factor and checking what comes
+    # out is an independent test of the scale that costs nothing. If the doors
+    # land far off, the area basis is wrong — almost always a balcony or ledge
+    # counted on the wrong side — and that is worth knowing BEFORE the render
+    # looks plausible and wrong.
+    # Tested on the SMALLEST door. The narrowest door in a flat is essentially
+    # always a bathroom at about 0.70m, which makes it the most standard thing
+    # on a plan; the widest may legitimately be a 1.0m+ main entrance, so a cap
+    # on the maximum catches almost nothing. A first version flagged only
+    # outside 0.50-1.25m and passed a 60 sqm flat with 90 typed against it —
+    # a 50% area error reported as fine.
+    #
+    # And it is a check on GROSS error only. A 2% scale error — a balcony
+    # counted on the wrong side — yields 0.83m doors and is indistinguishable
+    # from correct. Nothing here can catch that except knowing what the
+    # published figure measures.
+    doors = [o["w"] for o in spec.get("openings", []) if o.get("kind") == "door"]
+    if doors:
+        lo, hi = min(doors), max(doors)
+        implied = area * (0.70 / lo) ** 2
+        off = (implied / area - 1) * 100
+        print(f"[layout] door check: {len(doors)} doors, {lo:.2f}m to {hi:.2f}m")
+        print(f"[layout]   if the narrowest is a 0.70m bathroom door, the area "
+              f"would be {implied:.1f} sqm ({off:+.0f}%)")
+        if abs(off) > 8:
+            print("[layout] WARNING: that disagrees with the stated area. Check "
+                  "areaSqm and check includeInArea on balconies, ledges and voids.")
+
+rescale(S)
+
 CUT = float(S.get("cutM", 1.30))          # doll's-house wall height
 CEIL = float(S.get("ceilingM", 2.60))
 WALL_EXT = 0.20                            # exterior wall thickness, metres
