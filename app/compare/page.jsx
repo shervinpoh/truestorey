@@ -48,6 +48,20 @@ export default async function Page({ searchParams }) {
   const kinds = new Set(recs.map(r => r.kind));
   const mixed = kinds.size > 1;
 
+  /* ── "Sizes filed" CALLED AN APARTMENT A SIZE ──────────────────────────────
+     HDB files sizes in this field — "3 ROOM", "4 ROOM". Private files TYPES —
+     "Apartment", "Condominium", "Terrace". One label over both told a reader
+     that Apartment was a size.
+
+     Computed from the RECORDS BEING COMPARED, once, because a row spans every
+     column and can only carry one label. A first attempt made the label a
+     function of the record, which is the shape of the value getter beside it —
+     and `<th>{label}</th>` cannot render a function, so the page 500'd. The
+     mixed case is real: an HDB block and a condo can be compared here. */
+  const typesLabel = recs.every(r => r.kind === 'HDB') ? 'Flat types filed'
+    : recs.some(r => r.kind === 'HDB') ? 'Types filed'
+    : 'Property types filed';
+
   const rows = [
     ['Median price', r => money(r.medianPrice)],
     ['Median psf', r => `${psf(r.medianPsf)} psf`],
@@ -64,7 +78,7 @@ export default async function Page({ searchParams }) {
     ['Where', r => (r.kind === 'HDB'
       ? titleCase(r.town)
       : `District ${r.district}${r.segment ? ` · ${r.segment}` : ''}`)],
-    ['Sizes filed', r => ((r.flatTypes || r.propertyTypes || []).join(', ') || '—')],
+    [typesLabel, r => ((r.flatTypes || r.propertyTypes || []).join(', ') || '—')],
   ];
 
   return (

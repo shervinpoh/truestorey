@@ -86,8 +86,23 @@ export default async function Page({ params }) {
           {post.source === 'file'
             ? 'Written by Shervin Poh.'
             : 'Written by the Truestorey desk from the filed data, and published by Shervin Poh.'}
-          {' '}Figures are read live from the filed data, so nothing here
-          goes stale without the number going with it.
+          {/* ── THE FRESHNESS CLAIM IS TRUE OF ONE KIND OF POST ─────────────
+              This said "Figures are read live from the filed data" on EVERY
+              article. It is only true of the ones Shervin writes himself:
+              Insight.jsx renders a pipeline post's stored HTML as-is and says
+              so in its own comment — "Shortcodes are not run over it" — because
+              a pipeline that emitted one by accident would be quoting a figure
+              nobody wrote.
+
+              So on a desk article the sentence promised a mechanism the
+              renderer deliberately withholds. What a reader needs there is the
+              date the figures were true, which the post already carries. */}
+          {post.source === 'file'
+            ? <>{' '}Its figures are read live from the filed data, so nothing here
+              goes stale without the number going with it.</>
+            : <>{' '}Its figures were read from the filed data when it was published
+              {post.date ? ` on ${post.date}` : ''} and are not re-read since. The
+              pages they came from carry the current ones.</>}
         </p>
         {post.image && (
           <figure className="posthero">

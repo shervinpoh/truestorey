@@ -22,6 +22,12 @@ export default function YieldView({ projects, districts, min }) {
   const [q, setQ] = useState('');
   const [district, setDistrict] = useState('');
   const [open, setOpen] = useState(null);
+  /* ── 200 PROJECTS ON FIRST PAINT ─────────────────────────────────────────
+     Rendering 200 rows before a reader has typed anything is a wall, not a
+     table: the filters underneath it are below the fold on a phone, so the
+     first impression of this tool is a list nobody asked for. 25 is enough to
+     show what the table IS, and the count says how many are behind it. */
+  const [limit, setLimit] = useState(25);
   /* ── COHORTS ARRIVE WHEN ONE IS OPENED ──────────────────────────────────
      They used to be in the page. All of them, for all 1,441 projects, so a
      collapsed row could print the word "3 sizes" — 884KB against 27–70 for
@@ -93,7 +99,7 @@ export default function YieldView({ projects, districts, min }) {
             </tr>
           </thead>
           <tbody>
-            {shown.slice(0, 200).map(p => (
+            {shown.slice(0, limit).map(p => (
               <Fragment key={p.href}>
                 <tr>
                   <th scope="row" style={{ whiteSpace: 'normal' }}>
@@ -136,9 +142,13 @@ export default function YieldView({ projects, districts, min }) {
           </tbody>
         </table>
       )}
-      {shown.length > 200 && (
+      {shown.length > limit && (
         <p className="hint" style={{ marginTop: 10 }}>
-          Showing the top 200 of {num(shown.length)}. Narrow by district or search a name.
+          Showing {num(limit)} of {num(shown.length)}.{' '}
+          <button className="linkish" onClick={() => setLimit(l => l + 100)}>
+            Show 100 more
+          </button>{' '}
+          — or narrow by district or search a name.
         </p>
       )}
     </>

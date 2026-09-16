@@ -44,7 +44,12 @@ export default function Page() {
           label={`Flats reaching their fifth year, ${m.generatedForYear} to ${m.generatedForYear + 4}`}
           value={m.totals.upcomingUnits.toLocaleString('en-SG')}
           unit="units"
-          support={`Across ${m.totals.upcomingBlocks.toLocaleString('en-SG')} blocks. Every one of them is a household that becomes able to sell for the first time, with the month attached.`}
+          /* "with the month attached" claimed a precision the note underneath
+             immediately withdrew: key collection dates are not published, so
+             these are the EARLIEST a flat could reach five years, derived from
+             the lease commencement year. A headline that needs the caveat below
+             it to be true is a headline that is not true. */
+          support={`Across ${m.totals.upcomingBlocks.toLocaleString('en-SG')} blocks. Each is a household that becomes able to sell for the first time, in the year shown at the earliest.`}
           note="Eligibility to sell is not an intention to sell, and it is not incoming supply. It is the month a door opens, not a count of anyone walking through it."
           source={`${m.source} · accessed ${String(m.accessedAt).slice(0, 10)}`} />
       )}

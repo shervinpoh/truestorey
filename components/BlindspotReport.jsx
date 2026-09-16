@@ -203,6 +203,11 @@ export default function BlindspotReport() {
 function Result({ report, boxRef }) {
   const r = report;
   const pctOfMax = r.max ? r.points / r.max : 0;
+  /* Checks that contributed at least one point. The weighted total cannot
+     be read back into a count, so it is counted here from the checks
+     themselves rather than inferred. */
+  const flaggedChecks = (r.checks || []).filter(c => c.points > 0).length;
+
 
   return (
     <div ref={boxRef} style={{ marginTop: 30, scrollMarginTop: 76 }}>
@@ -210,12 +215,26 @@ function Result({ report, boxRef }) {
 
       <div className="scorewrap">
         <div className="scorenum">
-          <span className="filtn">Things flagged</span>
+          {/* NOT "Things flagged". The figure is a WEIGHTED TOTAL — a price in
+              the top decile alone contributes 3 — so "6 of 15 things" describes
+              a count nothing here produces. On the result that prompted this,
+              six points came from three checks, and a reader who believed the
+              label was looking for three findings that did not exist.
+
+              The weighted total stays, because it is what the published rubric
+              computes. What changes is that it is called one, and the count of
+              checks that actually contributed is said beside it. */}
+          <span className="filtn">Risk points</span>
           <span className="bigscore">
             <Figure value={r.points} format={v => String(Math.round(v))} className="scoreval" />
             <em> of {r.max}</em>
           </span>
           <span className="scoreband">{r.band}</span>
+          {flaggedChecks > 0 && (
+            <span className="hint" style={{ display: 'block', marginTop: 4 }}>
+              from {flaggedChecks} of {r.checks.length} checks
+            </span>
+          )}
         </div>
         <div className="scoresay">
           <p className="hint" style={{ margin: '0 0 10px' }}><b>{r.direction}</b> {r.meaning}</p>
@@ -292,9 +311,12 @@ function Result({ report, boxRef }) {
       </p>
 
       <div className="mapfocus" style={{ marginTop: 22 }}>
-        <b>Want this run properly?</b>
-        <span>Six checks is what can be done from public data alone. Your CPF, your
-          timeline and the actual condition of the unit are not in any of it.</span>
+        {/* "Want this run properly?" read as an admission that what the reader
+            had just been shown was run improperly. It was describing the LIMIT
+            of public data and landed as a confession. */}
+        <b>Next: what the purchase would cost</b>
+        <span>Six checks is what public data alone can answer. Your CPF, your
+          timeline and the actual condition of the unit are in none of it.</span>
         <Link href={`/plan?price=${r.input.askPrice || ''}&from=${encodeURIComponent(r.record.href)}`}>
           Price the purchase →
         </Link>

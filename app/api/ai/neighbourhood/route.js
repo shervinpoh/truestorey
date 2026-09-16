@@ -165,10 +165,28 @@ export async function POST(req) {
       search: {
         // Helps at the margins. Not the fix — see the note at the top.
         web_search_options: { user_location: { country: 'SG' } },
-        // Not a topic filter. These four answered "East Coast" with the US
-        // seaboard and a dictionary definition, and none of them is ever the
-        // best source for a question about Singapore property.
-        search_domain_filter: ['-wikipedia.org', '-britannica.com', '-dictionary.com', '-dictionary.cambridge.org'],
+        /* Not a topic filter, and not a preference — an exclusion list, because
+           this site has already learned that a preference stated in a prompt
+           does not hold. RULE 1 refused Manchester on every probe and then
+           answered it from the live route, which is why scope moved into
+           lib/scope.js before the model is called. RULE 3 below asks for
+           primary sources in exactly the same way, and a review found the tool
+           citing Straits Times and CNA on a Bishan question.
+
+           The first four answered "East Coast" with the US seaboard and a
+           dictionary definition. The rest are CLAUDE.md rule 9 enforced where
+           it can actually be enforced: this site does not reproduce news, it
+           indexes primary sources and links to them, and a citation is the
+           answer's source rather than its decoration.
+
+           Excluding a publication does not deny the reporting exists. RULE 4
+           already says to state that it does and let the link carry it — what
+           changes is that the ANSWER cannot be built out of it. */
+        search_domain_filter: [
+          '-wikipedia.org', '-britannica.com', '-dictionary.com', '-dictionary.cambridge.org',
+          '-straitstimes.com', '-businesstimes.com.sg', '-edgeprop.sg',
+          '-stackedhomes.com', '-channelnewsasia.com',
+        ],
       },
       signal: req.signal,
     });

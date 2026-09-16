@@ -17,8 +17,6 @@ export default function Page() {
     return (
       <main className="shell">
         <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]} title="Tower view" />
-      <ToolIntro href="/floors" />
-      <ToolUse id="floors" />
         <div className="warn"><p style={{ margin: 0 }}>Not built yet. Run <code>npm run build:storey</code>.</p></div>
       </main>
     );
@@ -33,11 +31,30 @@ export default function Page() {
   };
   const hdb4 = s.hdb.national['4 ROOM']?.within;
 
+  /* ── THE POOLED FIGURE IS COMPUTED, NOT TYPED ─────────────────────────────
+     This paragraph used to open "Pooling the whole country says a high floor is
+     worth about 91%" as literal prose, beside a second paragraph whose figure
+     was read live. The data says 144.3%. So the page was making a two-sided
+     comparison with one side stale by 53 percentage points — and the stale side
+     was the one the argument rests on.
+
+     It is the lowest storey band's median psf against the highest, for 4-room
+     flats, across the whole country: exactly the naive comparison the section
+     exists to reject. Reading it from the same file the rest of the page reads
+     means it cannot drift again. */
+  const bands = s.hdb.national['4 ROOM']?.bands || [];
+  const pooled = bands.length > 1
+    ? Math.round((bands[bands.length - 1][2] / bands[0][2] - 1) * 1000) / 10
+    : null;
+
   return (
     <main className="shell">
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
         title="Tower view"
         sub="What a higher floor is worth, measured by comparing a building with itself rather than with other buildings. Free, and it stays free." />
+
+      <ToolIntro href="/floors" />
+      <ToolUse id="floors" />
 
       <section className="pane">
         <FloorView storey={trimmed} />
@@ -46,7 +63,8 @@ export default function Page() {
       <section className="pane">
         <h2 className="sh"><span>Why this is not the number you usually see</span></h2>
         <div className="note">
-          <b>Pooling the whole country says a high floor is worth about 91%.</b> That figure is
+          <b>Pooling the whole country says a high floor is worth{' '}
+          {pooled ? `about ${pooled}%` : 'a great deal more'}.</b> That figure is
           almost entirely wrong. A 4-room flat on the 35th storey is at Pinnacle@Duxton or in
           Bidadari — central, new, and long-leased. Comparing it against every low-floor 4-room in
           Singapore measures the estate, not the storey.

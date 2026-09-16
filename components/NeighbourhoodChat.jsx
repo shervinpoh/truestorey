@@ -1,5 +1,5 @@
 'use client';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import AnswerText from './AnswerText.jsx';
 import { splitAnswer, citedIndexes } from '../lib/answer.js';
 
@@ -38,6 +38,23 @@ export default function NeighbourhoodChat() {
   const [error, setError] = useState('');
   const abort = useRef(null);
   const end = useRef(null);
+  /* True while the reader is at (or near) the bottom. Set by their own
+     scrolling, so following is something they opt into by staying put. */
+  const follow = useRef(true);
+
+  /* Passive, because this listener must never delay a scroll. 120px of slack so
+     that a reader who is essentially at the bottom still gets followed — an
+     exact-bottom test breaks the moment the stream appends a line. */
+  useEffect(() => {
+    const onScroll = () => {
+      const gap = document.documentElement.scrollHeight
+        - window.scrollY - window.innerHeight;
+      follow.current = gap < 120;
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   async function ask(text) {
     const question = (text ?? q).trim();
@@ -85,7 +102,16 @@ export default function NeighbourhoodChat() {
             if (Array.isArray(c) && c.length) { cites = c; setSources(c); }
           } catch { /* a partial frame — the next chunk completes it */ }
         }
-        end.current?.scrollIntoView({ block: 'end' });
+        /* ── DO NOT DRAG THE READER DOWN WHILE THEY ARE READING ──────────
+           This ran on EVERY streamed chunk, so the page pulled itself
+           downward a dozen times while the answer arrived — and if the reader
+           had scrolled up to re-read a line, it yanked them away from it.
+           A stream is not a reason to take the viewport off someone.
+
+           Follow only while they are already at the bottom, which is the
+           behaviour of every chat that does this well: if they have scrolled
+           up, they have said what they want to look at. */
+        if (follow.current) end.current?.scrollIntoView({ block: 'end' });
       }
 
       setTurns(t => [...t, { role: 'assistant', content: answer, sources: cites }]);
