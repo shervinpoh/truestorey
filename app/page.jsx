@@ -1,7 +1,7 @@
 import EditorialImage from '../components/EditorialImage.jsx';
 import { editorialAsset } from '../lib/editorial-assets.js';
 import Link from 'next/link';
-import { catalogue, hdbIndex, allUrls, archive, allTowns, projects, boundaries, getIndex } from '../lib/data/query.js';
+import { catalogue, hdbIndex, allUrls, archive, allTowns, projects, boundaries, getIndex, storey } from '../lib/data/query.js';
 import { feed } from '../lib/articles.js';
 import { NAV, SITUATIONS } from '../lib/nav.js';
 import { ogForHome } from '../lib/og.js';
@@ -90,6 +90,35 @@ export default async function Home() {
   const blocks = towns.reduce((a, t) => a + t.blockCount, 0);
   const refreshed = getIndex().hdb?.accessedAt;
 
+  /* ── THE FIRST SCREEN SAID NOTHING ABOUT ANY PROPERTY ─────────────────────
+     It opened with "A clearer view of Singapore property" — a sentence any
+     portal in this market could print — then a search box, then a count of how
+     many rows the site holds. A claim, a piece of homework, and a boast about
+     volume. A stranger could read all of it and learn nothing they did not
+     already know, which is the whole of the retention problem.
+
+     What replaces it is the site's own strongest finding, and it has to be
+     COMPUTED rather than typed. /floors carried "about 91%" as literal prose
+     for long enough that the data moved to 144% underneath it; a headline
+     figure on the homepage would rot the same way and be seen by more people.
+
+     Why this finding and not another: it is counter to what nearly every buyer
+     and agent believes, it is provable from filed sales alone, no listing
+     portal can compute it because it needs every sale in a building rather
+     than one, and it demonstrates in one sentence what the site is FOR —
+     comparing like with like and saying so when the received wisdom does not
+     survive it. A spread-within-one-block finding was measured first and
+     dropped: the widest was 241%, and it turned out to be two-room flats,
+     which makes it an artefact rather than a finding. */
+  const s4 = storey()?.hdb?.national?.['4 ROOM'];
+  const bands = s4?.bands || [];
+  const floorFinding = s4?.within && bands.length > 1 ? {
+    pooled: Math.round((bands[bands.length - 1][2] / bands[0][2] - 1) * 100),
+    within: s4.within.p50,
+    neg: s4.within.neg,
+    blocks: s4.within.n,
+  } : null;
+
   const allTools = NAV.find(g => g.group === 'Tools').items.filter(i => i.href !== '/tools');
   // The homepage is a route into the product, not a second /tools. Printing
   // every tool here made eleven equal 118px cards before the archive and the
@@ -109,8 +138,17 @@ export default async function Home() {
       <section className="hero">
         <div className="herosay">
           <h1>A clearer view of <span>Singapore property.</span></h1>
-          <p className="sub">Start with what was actually paid. Explore the transactions,
-            understand the costs, and see the source behind every figure.</p>
+          {floorFinding ? (
+            <p className="sub">Pool every 4-room flat in Singapore and a high floor looks
+              worth <b>{floorFinding.pooled}% more</b>. Compare a block with <i>itself</i> — same
+              building, same lease, same address — and it is <b>{floorFinding.within}%</b>. In{' '}
+              {floorFinding.neg} of {floorFinding.blocks} blocks the high floor sold for <i>less</i>.{' '}
+              <Link href="/floors">See how that is measured →</Link>
+            </p>
+          ) : (
+            <p className="sub">Start with what was actually paid. Explore the transactions,
+              understand the costs, and see the source behind every figure.</p>
+          )}
           <div className="herosearch">
             <h2 className="sh"><span>Find a block or project</span></h2>
             <Search />
