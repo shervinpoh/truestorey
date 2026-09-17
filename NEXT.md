@@ -585,6 +585,20 @@ nothing. An offer that fits is the entire difference between this and a popup.
 
 ### 8.4 The MOP date belongs on the block page
 
+**Implemented 14 Sep, with a source correction.** The premise below that
+`mop.json` carries an MOP month is false: it holds completion years and the
+earliest resale month seen in a rolling window. The block page now says the
+MOP month is unavailable, shows the earliest possible fifth year, and labels
+the earliest filing held separately. No filing month becomes an MOP date.
+
+The comparison uses the town's nearest earlier fifth-year cohort as an
+explicitly labelled proxy, then counts filings in the following calendar
+year over the months actually held. Block and town use the same period, the
+town includes the block, partial years are named, and a missing period shows
+no counts. `build:mop-filings` reads the full HDB download rather than the
+twenty-sale record sample and runs with transaction refreshes. Named MOP
+months still require a source the current register does not contain.
+
 **This is smaller than it first looks, and that is the finding.**
 `app/hdb/[town]/[block]/page.jsx` exists for every block already, and already
 carries both `WatchBlock` and `Gate`. So this is not 749 new pages. It is a

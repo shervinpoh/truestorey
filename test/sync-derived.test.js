@@ -30,7 +30,7 @@ const scripts = JSON.parse(readFileSync(new URL('../package.json', import.meta.u
 
 /** raw file the sync replaces -> npm scripts that must run after it */
 const DERIVED = {
-  'index.json': ['build:storey', 'build:map', 'build:comps', 'build:trend', 'build:budget'],
+  'index.json': ['build:storey', 'build:map', 'build:comps', 'build:trend', 'build:budget', 'build:mop-filings'],
   'rental.json': ['build:yield', 'build:rents'],
   'mop.json': ['build:map'],
 };
@@ -62,7 +62,7 @@ test('every rebuild named here is a script that exists', () => {
 test('the derived builds are in the build pipeline too', () => {
   // npm run data is what a deploy runs. A file built only by sync would be
   // missing from a fresh checkout.
-  for (const s of ['build:comps', 'build:rents', 'build:trend', 'build:budget'])
+  for (const s of ['build:comps', 'build:rents', 'build:trend', 'build:budget', 'build:mop-filings'])
     assert.match(scripts.data, new RegExp(s), `npm run data does not run ${s}`);
 });
 

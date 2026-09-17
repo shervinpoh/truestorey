@@ -13,6 +13,7 @@ import Storey from './Storey.jsx';
 import SectionNav from './SectionNav.jsx';
 import NearbySales from './NearbySales.jsx';
 import SunPath from './SunPath.jsx';
+import BlockMop from './BlockMop.jsx';
 import { titleCase } from '../lib/name.js';
 import { track } from './Track.jsx';
 import { EVENTS } from '../lib/analytics.js';
@@ -50,7 +51,7 @@ import { EVENTS } from '../lib/analytics.js';
  * The proceeds waterfall re-anchors when the flat-type filter moves, so the
  * slider is never centred on a median that is no longer on screen.
  */
-export default function RecordPage({ rec, attribution, crumbs, posts = [], near = null, nearManifest = null, storey = null, canWatch = false, canCapture = false, locator = null, land = null, sales = null, sun = null, sunApprovals = null }) {
+export default function RecordPage({ rec, attribution, crumbs, posts = [], near = null, nearManifest = null, storey = null, canWatch = false, canCapture = false, locator = null, land = null, sales = null, sun = null, sunApprovals = null, mop = null }) {
   const [median, setMedian] = useState(rec.medianPrice);
 
   useEffect(() => { track(EVENTS.RECORD, { href: rec.href, kind: rec.kind }); }, [rec.href]);
@@ -68,6 +69,7 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
     'overview',
     rec.series?.length > 1 && 'history',
     rec.recent?.length > 0 && 'transactions',
+    hdb && mop && 'mop',
     locator && 'place',
     hasFloor && 'floor',
     hasNear && 'nearby',
@@ -106,6 +108,7 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
           } />
       </section>
 
+      {hdb && mop && <BlockMop data={mop} rec={rec} />}
 
       {/* ── THE MAP GETS ITS OWN SECTION ──────────────────────────────────
           It was a slot inside RecordView's afterSummary, wedged between a

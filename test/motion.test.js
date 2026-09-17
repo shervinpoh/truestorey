@@ -233,7 +233,7 @@ test('the section nav does not offer a destination that was never built', () => 
   const nav = readFileSync(new URL('../components/SectionNav.jsx', import.meta.url), 'utf8');
   const ids = [...nav.matchAll(/\{ id: '([a-z]+)'/g)].map(m => m[1]);
   assert.ok(ids.includes('place'), 'the map section is not in the nav');
-  const sources = ['RecordPage', 'RecordView', 'LandTrail', 'NearbySales', 'SunPath', 'Storey']
+  const sources = ['RecordPage', 'RecordView', 'LandTrail', 'NearbySales', 'SunPath', 'Storey', 'BlockMop']
     .map(f => { try { return readFileSync(new URL(`../components/${f}.jsx`, import.meta.url), 'utf8'); }
                 catch { return ''; } }).join('\n');
   for (const id of ids) {

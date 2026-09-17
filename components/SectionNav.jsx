@@ -26,9 +26,10 @@ import { still } from './Motion.jsx';
  */
 const ITEMS = [
   { id: 'overview', label: 'Overview' },
-  { id: 'place', label: 'Where it sits' },
   { id: 'history', label: 'Price history' },
   { id: 'transactions', label: 'Transactions' },
+  { id: 'mop', label: 'MOP context' },
+  { id: 'place', label: 'Where it sits' },
   { id: 'floor', label: 'Floor premium' },
   { id: 'nearby', label: 'Nearby' },
   { id: 'nearbysales', label: 'Sold nearby' },

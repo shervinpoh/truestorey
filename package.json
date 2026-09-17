@@ -10,8 +10,8 @@
     "ingest:hdb": "node scripts/ingest-hdb.mjs",
     "ingest:ura": "node --env-file-if-exists=.env.local scripts/ingest-ura.mjs",
     "index": "node scripts/build-index.mjs",
-    "data": "npm run ingest:hdb && npm run ingest:index && npm run ingest:ppi && npm run ingest:mop && npm run index && npm run build:comps && npm run build:rents && npm run build:trend && npm run build:budget && npm run build:storey && npm run build:guides",
-    "data:all": "npm run ingest:hdb && npm run ingest:ura && npm run ingest:index && npm run ingest:ppi && npm run ingest:sora && npm run ingest:mop && npm run index && npm run build:comps && npm run build:rents && npm run build:trend && npm run build:budget && npm run build:storey",
+    "data": "npm run ingest:hdb && npm run ingest:index && npm run ingest:ppi && npm run ingest:mop && npm run index && npm run build:comps && npm run build:rents && npm run build:trend && npm run build:budget && npm run build:storey && npm run build:guides && npm run build:mop-filings",
+    "data:all": "npm run ingest:hdb && npm run ingest:ura && npm run ingest:index && npm run ingest:ppi && npm run ingest:sora && npm run ingest:mop && npm run index && npm run build:comps && npm run build:rents && npm run build:trend && npm run build:budget && npm run build:storey && npm run build:mop-filings",
     "test": "node --test test/*.test.js",
     "ingest:index": "node scripts/ingest-index.mjs",
     "ingest:ppi": "node scripts/ingest-ppi.mjs",
@@ -52,7 +52,8 @@
     "audit:articles": "node scripts/audit-articles.mjs",
     "desk": "node --env-file-if-exists=.env.local scripts/desk.mjs",
     "backfill:photos": "node --env-file-if-exists=.env.local scripts/backfill-photos.mjs",
-    "render:island": "node scripts/render/export-island.mjs && \"/Applications/Blender.app/Contents/MacOS/Blender\" -b -P scripts/render/island.py -- --out public/editorial/island-a.png --samples 128 --width 2400"
+    "render:island": "node scripts/render/export-island.mjs && \"/Applications/Blender.app/Contents/MacOS/Blender\" -b -P scripts/render/island.py -- --out public/editorial/island-a.png --samples 128 --width 2400",
+    "build:mop-filings": "node scripts/build-mop-filings.mjs"
   },
   "dependencies": {
     "next": "^15.0.0",

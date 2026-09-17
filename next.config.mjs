@@ -73,6 +73,9 @@ const nextConfig = {
   },
 
   outputFileTracingIncludes: {
+    // Long-tail block pages render on demand too. The raw resale download
+    // remains excluded; this is the small, build-time count index.
+    '/hdb/*/*': ['./data/mop.json', './data/mop-filings.json', './data/records/hdb/**'],
     // Blindspot reads records, geocodes and the MOP register at request time.
     '/api/ai/blindspot': [
       './data/records/**',

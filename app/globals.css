@@ -2109,6 +2109,18 @@ sup.cite a:hover{text-decoration:underline}
 .note.method b{color:var(--ink2);font-weight:600}
 .note.method a{color:var(--ink2);text-decoration:underline;text-underline-offset:2px}
 
+/* Two counts with their own provenance. Stacked on phones so the source
+   stays with its figure without a horizontally scrolling comparison table. */
+.blockmop h3{font-size:var(--t-lead);margin:24px 0 8px}
+.blockmop .missing{border-left-color:var(--warn)}
+.mopcounts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin:22px 0}
+.mopcounts>div{border-top:1px solid var(--line);padding-top:12px;min-width:0}
+.mopcounts dt{font-size:var(--t-small);margin-bottom:8px}
+.mopcounts dd{margin:0}
+.mopcounts dd>b{font-size:var(--t-lead)}
+.mopcounts .prov{margin:8px 0 0}
+@media(max-width:600px){.mopcounts{grid-template-columns:1fr;gap:16px}}
+
 /* ── the editorial desk ─────────────────────────────────────────────────────
    /insights was a masthead, a filter and one chronological list. A flat river
    gives every piece the same weight, so nothing leads and a reader arriving

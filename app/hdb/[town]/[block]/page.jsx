@@ -8,6 +8,7 @@ import { configured as mailConfigured } from '../../../../lib/email.js';
 import { configured as crmConfigured } from '../../../../lib/crm.js';
 import { ldJson, dataset } from '../../../../lib/schema.js';
 import { insightsForBlock, insightsForTown } from '../../../../lib/insights.js';
+import { mopFor } from '../../../../lib/data/query.js';
 
 export const dynamicParams = true;   // the tail renders on demand and is then cached
 
@@ -48,7 +49,7 @@ export default async function Page({ params }) {
     <>
       <script type="application/ld+json"
         dangerouslySetInnerHTML={ldJson(recordSchema(rec))} />
-      <RecordPage sun={sun} sunApprovals={sunApprovals} canWatch={mailConfigured()} canCapture={crmConfigured()} locator={locatorFor(rec)} rec={rec} storey={storeyFor(rec)} near={nearby(rec)} sales={nearbySalesFor(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []}
+      <RecordPage mop={mopFor(rec)} sun={sun} sunApprovals={sunApprovals} canWatch={mailConfigured()} canCapture={crmConfigured()} locator={locatorFor(rec)} rec={rec} storey={storeyFor(rec)} near={nearby(rec)} sales={nearbySalesFor(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []}
       posts={[...insightsForBlock(rec.href), ...insightsForTown(town)]
         .filter((p, k, a) => a.findIndex(x => x.slug === p.slug) === k).slice(0, 4)}
       crumbs={[{ href: '/', label: 'Home' }, { href: '/hdb', label: 'HDB' },
