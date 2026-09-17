@@ -41,11 +41,20 @@ export default function Page() {
      It is the lowest storey band's median psf against the highest, for 4-room
      flats, across the whole country: exactly the naive comparison the section
      exists to reject. Reading it from the same file the rest of the page reads
-     means it cannot drift again. */
-  const bands = s.hdb.national['4 ROOM']?.bands || [];
-  const pooled = bands.length > 1
-    ? Math.round((bands[bands.length - 1][2] / bands[0][2] - 1) * 1000) / 10
-    : null;
+     means it cannot drift again.
+
+     ── AND THEN IT WAS THE WRONG FIGURE, COMPUTED ────────────────────────
+     Reading it live fixed the drift and kept the definition: lowest storey
+     band against highest, floors 1-3 against 46-48. The paragraph after it
+     set that beside `within`, which is floors 1-6 against 13+, and said "a
+     tenth of that". Two definitions of a high floor is not a comparison. At
+     the same cuts pooling gives 26.7% for 4-room, not 144%, and the argument
+     holds at that size — so the figure changed and the argument stayed.
+     `spread` is computed in build-storey.mjs with exactly the cuts `within`
+     uses, which is the only way the two can sit side by side. */
+  const pooled = s.hdb.national['4 ROOM']?.spread ?? null;
+  const cut = s.cuts.hdb;
+  const mostly = pooled != null && hdb4 && hdb4.p50 < pooled / 2;
 
   return (
     <main className="shell">
@@ -63,18 +72,20 @@ export default function Page() {
       <section className="pane">
         <h2 className="sh"><span>Why this is not the number you usually see</span></h2>
         <div className="note">
-          <b>Pooling the whole country says a high floor is worth{' '}
-          {pooled ? `about ${pooled}%` : 'a great deal more'}.</b> That figure is
-          almost entirely wrong. A 4-room flat on the 35th storey is at Pinnacle@Duxton or in
-          Bidadari — central, new, and long-leased. Comparing it against every low-floor 4-room in
-          Singapore measures the estate, not the storey.
+          <b>Pooling every 4-room flat in the country says floors {cut.hi} and up are worth{' '}
+          {pooled != null ? `about ${pooled}%` : 'noticeably'} more per square foot than floors
+          1–{cut.lo}.</b> {mostly ? 'Most of that is not the height.' : 'Part of that is not the height.'}{' '}
+          The blocks tall enough to have a {cut.hi}th floor are mostly the newer, longer-leased
+          ones, so comparing them against every low floor in Singapore measures the block as much
+          as the storey.
         </div>
         <div className="note">
-          <b>Comparing a block with itself says about {hdb4 ? `${hdb4.p50}%` : 'a tenth of that'}.</b>{' '}
+          <b>Comparing a block with itself says about {hdb4 ? `${hdb4.p50}%` : 'less'}.</b>{' '}
           Same building, same lease, same location, same flat model — all of it identical on both
-          sides of the ratio, so what is left is closer to the height. That is the figure this page
-          leads with, taken across {hdb4 ? hdb4.n.toLocaleString('en-SG') : ''} blocks that have
-          enough filed sales high and low to be compared at all.
+          sides of the ratio, so what is left is closer to the height. The floors compared are the
+          same as in the figure above, which is what lets the two be read against each other. That
+          is the figure this page leads with, taken across {hdb4 ? hdb4.n.toLocaleString('en-SG') : ''} blocks
+          that have enough filed sales high and low to be compared at all.
         </div>
         <div className="note">
           <b>It is not always positive.</b> {hdb4 ? `${hdb4.neg} of those ${hdb4.n.toLocaleString('en-SG')} blocks` : 'Some blocks'}{' '}

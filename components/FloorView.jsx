@@ -100,16 +100,15 @@ export default function FloorView({ storey }) {
             </div>
             <div className="storeycard">
               <span className="filtn">Pooled across {S.unit}s — the misleading one</span>
-              {rec.spread != null || group === '' ? (
+              {rec.spread != null ? (
                 <>
-                  <b className="statnum" style={{ color: 'var(--mute)' }}>
-                    {rec.bands?.length > 1 ? pc(Math.round((rec.bands[rec.bands.length - 1][2] / rec.bands[0][2] - 1) * 1000) / 10) : '—'}
-                  </b>
+                  <b className="statnum" style={{ color: 'var(--mute)' }}>{pc(rec.spread)}</b>
                   <p className="hint">
-                    Top band against bottom band, every {S.unit} in {label} thrown in together. It runs
-                    far above the honest figure because the tall {S.unit}s in most places are also the
-                    newest and the most central. Shown so you can see the size of the trap, not
-                    because it answers anything.
+                    The same floors as the figure beside it — {storey.cuts[side].hi}+ against
+                    1–{storey.cuts[side].lo} — with every {S.unit} in {label} thrown in together.{' '}
+                    {rec.within && rec.spread <= rec.within.p50
+                      ? 'Here it sits at or below that figure, so pooling is not what inflates the premium in this one.'
+                      : `It runs above that figure because the ${S.unit}s with high floors are not the same ${S.unit}s as the ones without. Shown so you can see the size of the trap, not because it answers anything.`}
                   </p>
                 </>
               ) : (

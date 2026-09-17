@@ -153,6 +153,14 @@ function build({ rows, cut, groupOf, typeOf, unitOf }) {
       psf: Math.round(med(e.rows.map(r => r.psf))),
       bands: bandsOf(e.rows),
       within: within(clear.filter(u => u.type === e.type)),
+      /* The pooled figure AT THE SAME CUTS as `within`. The homepage and /floors
+         used to set `within` against top band over bottom band — floors 46-48
+         against 1-3 — and call the gap the cost of pooling. For 4-room that was
+         144% against 10.5%, when pooling at the same floors 1-6 against 13+
+         gives 26.7%. Two definitions of "high floor" is not a finding, and the
+         honest one is still a real one. Towns already carried this; the
+         country did not, which is why the pages reached for the bands. */
+      spread: usable(e, BAR.group) ? r1(med(e.hi) / med(e.lo) - 1) : null,
     };
   }
 

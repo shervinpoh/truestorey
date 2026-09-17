@@ -109,14 +109,30 @@ export default async function Home() {
      comparing like with like and saying so when the received wisdom does not
      survive it. A spread-within-one-block finding was measured first and
      dropped: the widest was 241%, and it turned out to be two-room flats,
-     which makes it an artefact rather than a finding. */
-  const s4 = storey()?.hdb?.national?.['4 ROOM'];
-  const bands = s4?.bands || [];
-  const floorFinding = s4?.within && bands.length > 1 ? {
-    pooled: Math.round((bands[bands.length - 1][2] / bands[0][2] - 1) * 100),
+     which makes it an artefact rather than a finding. So was the typical
+     cheapest-to-dearest gap inside one block: $68k, $85k or $108k depending
+     only on how many sales a block needed to count, because a range grows
+     with its sample. A headline whose size is a threshold choice is not one.
+
+     ── IT SHIPPED COMPARING TWO DIFFERENT "HIGH FLOORS" ────────────────────
+     The first version read the pooled figure off the band table — floors
+     46-48 against floors 1-3 — and set it against `within`, which is floors
+     13+ against 1-6. That printed 144% beside 10.5% and called the gap the
+     cost of pooling. At the same cuts pooling gives 26.7%. The finding
+     survives the correction; the drama did not, and the drama was the part
+     a reader would have repeated. Both figures now come from the same cuts,
+     and the headline only says "most" while the data says it. */
+  const st = storey();
+  const s4 = st?.hdb?.national?.['4 ROOM'];
+  const floorFinding = s4?.within && s4.spread != null ? {
+    pooled: s4.spread,
     within: s4.within.p50,
     neg: s4.within.neg,
     blocks: s4.within.n,
+    sales: s4.n,
+    mostly: s4.within.p50 < s4.spread / 2,
+    cut: st.cuts.hdb, side: st.bars.side,
+    source: st.source?.hdb, period: st.source?.period,
   } : null;
 
   const allTools = NAV.find(g => g.group === 'Tools').items.filter(i => i.href !== '/tools');
@@ -137,17 +153,29 @@ export default async function Home() {
       </div>
       <section className="hero">
         <div className="herosay">
-          <h1>A clearer view of <span>Singapore property.</span></h1>
           {floorFinding ? (
-            <p className="sub">Pool every 4-room flat in Singapore and a high floor looks
-              worth <b>{floorFinding.pooled}% more</b>. Compare a block with <i>itself</i> — same
-              building, same lease, same address — and it is <b>{floorFinding.within}%</b>. In{' '}
-              {floorFinding.neg} of {floorFinding.blocks} blocks the high floor sold for <i>less</i>.{' '}
-              <Link href="/floors">See how that is measured →</Link>
-            </p>
+            <>
+              <h1>{floorFinding.mostly
+                ? 'Most of a high-floor premium isn’t the height.'
+                : 'What a high floor is worth, inside the building.'}</h1>
+              <p className="sub">Across Singapore, 4-room flats on floors {floorFinding.cut.hi} and up
+                sold for <b>{floorFinding.pooled}% more</b> per square foot than floors{' '}
+                <span style={{ whiteSpace: 'nowrap' }}>1–{floorFinding.cut.lo}</span>. Compare a block with <i>itself</i> — same building, same
+                lease, same address — and it is <b>{floorFinding.within}%</b>. The rest is which
+                blocks the high floors are in. In {floorFinding.neg} of {floorFinding.blocks} blocks
+                the high floor sold for <i>less</i>.{' '}
+                <Link href="/floors">How that is measured →</Link>
+              </p>
+              <p className="prov">{floorFinding.source} · <span style={{ whiteSpace: 'nowrap' }}>{floorFinding.period?.from}–{floorFinding.period?.to}</span>
+                {' · '}median psf · {num(floorFinding.sales)} sales of 4-room flats · {floorFinding.blocks} blocks
+                with {floorFinding.side}+ sales at each end</p>
+            </>
           ) : (
-            <p className="sub">Start with what was actually paid. Explore the transactions,
-              understand the costs, and see the source behind every figure.</p>
+            <>
+              <h1>A clearer view of <span>Singapore property.</span></h1>
+              <p className="sub">Start with what was actually paid. Explore the transactions,
+                understand the costs, and see the source behind every figure.</p>
+            </>
           )}
           <div className="herosearch">
             <h2 className="sh"><span>Find a block or project</span></h2>
