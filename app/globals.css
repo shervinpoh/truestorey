@@ -1097,6 +1097,14 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 .plansumrows div{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:var(--t-small);
  color:var(--ink2)}
 .plansumrows b{color:var(--ink);font-weight:600}
+/* Sending a result on. Under the figures it sends, and quiet: two ghost buttons
+   and the one sentence about where the figures go. */
+.shareresult{border-top:1px solid var(--line);margin-top:12px;padding-top:12px}
+.shareresult-actions{display:flex;flex-wrap:wrap;gap:8px}
+.shareresult .hint{margin:8px 0 0}
+.shareresult-manual{display:block;margin-top:10px}
+.shareresult-manual input{width:100%;margin-top:4px;font-family:"IBM Plex Mono",ui-monospace,monospace;
+ font-size:var(--t-small)}
 
 /* The sticky bottom bar is the small-screen form of the same idea. */
 .planbar{display:none}

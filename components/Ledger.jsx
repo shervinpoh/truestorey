@@ -8,6 +8,8 @@ import { titleCase } from '../lib/name.js';
 import { ledger } from '../lib/calc/ledger.js';
 import Downside from './Downside.jsx';
 import Scenarios from './Scenarios.jsx';
+import ShareResult from './ShareResult.jsx';
+import { COST_SHARE, COST_LABELS, decodeShare, encodeShare } from '../lib/share.js';
 
 /**
  * What owning it costs, before it does anything.
@@ -35,19 +37,28 @@ const TYPES = [
   ['PRIVATE', 'Private'],
 ];
 
+/* Named, because a shared link is compared against them: a page still at its
+   defaults carries no fragment, so the address bar does not fill with a link
+   to a result nobody entered. */
+const DEFAULTS = {
+  price: 1_600_000, bought: '2021-06', type: 'PRIVATE', profile: 'SC', owned: 1,
+  cashDown: 200_000, cpfDown: 200_000, cpfMonthly: 2_500, rate: 3.6, tenure: 30, held: 5, agent: 2,
+};
+const DEFAULT_HASH = encodeShare(COST_SHARE, DEFAULTS);
+
 export default function Ledger({ indices = {} }) {
-  const [price, setPrice] = useState(1_600_000);
-  const [bought, setBought] = useState('2021-06');
-  const [type, setType] = useState('PRIVATE');
-  const [profile, setProfile] = useState('SC');
-  const [owned, setOwned] = useState(1);
-  const [cashDown, setCashDown] = useState(200_000);
-  const [cpfDown, setCpfDown] = useState(200_000);
-  const [cpfMonthly, setCpfMonthly] = useState(2_500);
-  const [rate, setRate] = useState(3.6);
-  const [tenure, setTenure] = useState(30);
-  const [held, setHeld] = useState(5);
-  const [agent, setAgent] = useState(2);
+  const [price, setPrice] = useState(DEFAULTS.price);
+  const [bought, setBought] = useState(DEFAULTS.bought);
+  const [type, setType] = useState(DEFAULTS.type);
+  const [profile, setProfile] = useState(DEFAULTS.profile);
+  const [owned, setOwned] = useState(DEFAULTS.owned);
+  const [cashDown, setCashDown] = useState(DEFAULTS.cashDown);
+  const [cpfDown, setCpfDown] = useState(DEFAULTS.cpfDown);
+  const [cpfMonthly, setCpfMonthly] = useState(DEFAULTS.cpfMonthly);
+  const [rate, setRate] = useState(DEFAULTS.rate);
+  const [tenure, setTenure] = useState(DEFAULTS.tenure);
+  const [held, setHeld] = useState(DEFAULTS.held);
+  const [agent, setAgent] = useState(DEFAULTS.agent);
 
   /* Which home, so the ledger can read a filed rent for it. Optional: every
      figure below works without it, and the omissions list says what is missing
@@ -59,6 +70,33 @@ export default function Ledger({ indices = {} }) {
   const [market, setMarket] = useState(null);
   const [lookup, setLookup] = useState('idle');
   const seq = useRef(0);
+
+  /* ── A RESULT AS A LINK ────────────────────────────────────────────────
+     Read from the fragment once, on mount, and written back on a debounce.
+     The fragment and not the query string: see lib/share.js — these inputs
+     can identify a household, and a fragment never reaches a server.
+
+     Applied through the setters, never through input events, so opening a
+     link someone sent is not counted as using the tool (ToolUse listens for
+     real interaction only). The figures animate from the defaults to the
+     link's values on arrival; a static page cannot know the fragment before
+     it renders. */
+  const [fromLink, setFromLink] = useState(null);
+  useEffect(() => {
+    const got = decodeShare(COST_SHARE, window.location.hash);
+    if (!got) return;
+    const v = got.values;
+    const set = [['price', setPrice], ['bought', setBought], ['type', setType],
+      ['profile', setProfile], ['owned', setOwned], ['cashDown', setCashDown],
+      ['cpfDown', setCpfDown], ['cpfMonthly', setCpfMonthly], ['rate', setRate],
+      ['tenure', setTenure], ['held', setHeld], ['agent', setAgent]];
+    for (const [k, fn] of set) if (k in v) fn(v[k]);
+    if (v.home) {
+      setPicked({ href: v.home, label: v.label || v.home.split('/').pop().replace(/-/g, ' '), sub: '' });
+      if (v.beds) setBeds(v.beds);
+    }
+    setFromLink({ dropped: [...new Set(got.dropped.map(k => COST_LABELS[k]))] });
+  }, []);
 
   useEffect(() => {
     const term = q.trim();
@@ -106,6 +144,26 @@ export default function Ledger({ indices = {} }) {
   }), [p, bought, type, profile, owned, loan, rate, tenure, cashDown, cpfDown, cpfMonthly, held, agent,
        market?.rent?.median]);
 
+  const shareValues = {
+    price, bought, type, profile, owned, cashDown, cpfDown, cpfMonthly, rate, tenure, held, agent,
+    ...(picked ? { home: picked.href, label: picked.label, beds } : {}),
+  };
+  const shareHash = encodeShare(COST_SHARE, shareValues);
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const { pathname, search, hash } = window.location;
+      const ours = decodeShare(COST_SHARE, hash) !== null;
+      // Only ever touch a fragment this page wrote. #mop-style anchors belong
+      // to whoever linked here.
+      if (shareHash === DEFAULT_HASH) {
+        if (ours) window.history.replaceState(null, '', pathname + search);
+      } else if (hash !== `#${shareHash}` && (ours || !hash)) {
+        window.history.replaceState(null, '', `${pathname}${search}#${shareHash}`);
+      }
+    }, 500);
+    return () => clearTimeout(t);
+  }, [shareHash]);
+
   const clear = r.breakEven.returnOfCash;
   const cpfBack = r.cpfReturns;
   // Against what was paid — a comparison with the reader's OWN purchase price,
@@ -126,6 +184,15 @@ export default function Ledger({ indices = {} }) {
     <>
       <div className="planlayout">
         <div className="planinputs">
+          {fromLink && (
+            <p className="note" role="status" style={{ marginTop: 0 }}>
+              <b>Opened from a shared link.</b> These are the figures it carried
+              {fromLink.dropped.length > 0 && <> — except the{' '}
+                {new Intl.ListFormat('en-GB', { type: 'conjunction' }).format(fromLink.dropped)}, which
+                could not be read and {fromLink.dropped.length === 1 ? 'was' : 'were'} left as this page
+                starts</>}. Change anything and the result is yours.
+            </p>
+          )}
           <fieldset className="plangroup">
             <legend className="lab">The purchase</legend>
             <div className="planform">
@@ -315,6 +382,8 @@ export default function Ledger({ indices = {} }) {
               <div><span>CPF to refund</span><b className="mono">{f(r.cpf.total)}</b></div>
               <div><span>Loan still owing</span><b className="mono">{f(r.holding.outstanding)}</b></div>
             </div>
+            <ShareResult tool="cost" title="What owning it actually costs — Truestorey"
+              url={() => `${window.location.origin}${window.location.pathname}#${shareHash}`} />
           </div>
         </aside>
       </div>

@@ -1,0 +1,117 @@
+/**
+ * A calculator result as a link — lib/share.js, and /cost's use of it.
+ *
+ * The failures worth a test, each one a one-line change that looks harmless:
+ *
+ *  · The figures move from the fragment to the query string. Every purchase
+ *    price, purchase month and named home then lands in the host's request
+ *    log on every open. Nothing on screen changes, which is why it needs a
+ *    test rather than a reviewer.
+ *  · A link is trusted. A fragment is typed by anyone; a figure that fails
+ *    validation must be named as unread, never clamped into a number the
+ *    sender did not send.
+ *  · The page rewrites a fragment it did not write, and #mop-style anchors
+ *    stop working on the page that owns them.
+ *  · The share event gains a field. Analytics is allowlisted precisely so
+ *    that an extra property cannot put a figure in the events table.
+ */
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { COST_SHARE, COST_LABELS, decodeShare, encodeShare } from '../lib/share.js';
+import { EVENTS, sanitise } from '../lib/analytics.js';
+
+const code = (...p) => readFileSync(path.join(process.cwd(), ...p), 'utf8')
+  .replace(/\{\/\*[\s\S]*?\*\/\}/g, '').replace(/\/\*[\s\S]*?\*\//g, '')
+  .split('\n').filter(l => !/^\s*(\/\/|\*)/.test(l)).join('\n');
+
+const sample = {
+  price: 1_600_000, bought: '2021-06', type: 'PRIVATE', profile: 'SC', owned: 1,
+  cashDown: 200_000, cpfDown: 200_000, cpfMonthly: 2_500, rate: 3.6, tenure: 30, held: 5, agent: 2,
+};
+
+test('a result survives the round trip exactly, including a named home', () => {
+  const withHome = { ...sample, home: '/condo/normanton-park', label: "Normanton Park — St. Mary's", beds: '3' };
+  for (const values of [sample, withHome]) {
+    const got = decodeShare(COST_SHARE, '#' + encodeShare(COST_SHARE, values));
+    assert.deepEqual(got.dropped, []);
+    assert.deepEqual(got.values, values);
+  }
+});
+
+test('an anchor, an empty hash or another version is not a share link', () => {
+  for (const h of ['', '#', '#mop', '#transactions', 'mop', '#v=2&price=1600000', '#price=1600000']) {
+    assert.equal(decodeShare(COST_SHARE, h), null, `${JSON.stringify(h)} decoded as a share link`);
+  }
+});
+
+test('a link is untrusted: a bad field is named as unread, never clamped or guessed', () => {
+  const got = decodeShare(COST_SHARE, '#' + new URLSearchParams({
+    v: '1', price: '-5', bought: '2021-13', type: 'VILLA', tenure: '99', rate: '3.6abc',
+    cashDown: '1e6', home: 'javascript:alert(1)', label: 'x'.repeat(81), beds: '6',
+    held: '7', agent: '1.5',
+  }).toString());
+  assert.deepEqual(got.values, { held: 7, agent: 1.5 });
+  assert.deepEqual(got.dropped.sort(),
+    ['bought', 'beds', 'cashDown', 'home', 'label', 'price', 'rate', 'tenure', 'type'].sort());
+  assert.ok(!('tenure' in got.values), 'tenure 99 was clamped into a figure the sender never typed');
+  for (const bad of ['https://evil.example/x', '//evil.example', '/hdb/../../etc', '/HDB/Bishan', '/condo/a/b/c']) {
+    assert.deepEqual(decodeShare(COST_SHARE, `#v=1&home=${encodeURIComponent(bad)}`).dropped, ['home'], bad);
+  }
+  for (const k of got.dropped) assert.ok(COST_LABELS[k], `no human name for ${k}, so the page cannot say which figure it dropped`);
+});
+
+test('a label cannot carry a line break or a control character into the page', () => {
+  const got = decodeShare(COST_SHARE, '#' + new URLSearchParams({ v: '1', label: 'Blk 1\n\u0000Two\tThree  ' }));
+  assert.equal(got.values.label, 'Blk 1 Two Three');
+});
+
+test('encoding never produces a link its own decoder refuses', () => {
+  /* The sender's figures as the page holds them: an input's string, a slider's
+     float, a cleared box. A link that opened with "your price could not be
+     read" would be this function's fault, not the reader's. */
+  const held = { ...sample, price: 1_600_000.4, rate: '3.60', agent: '2', tenure: '30', owned: '2', cashDown: '' };
+  const hash = encodeShare(COST_SHARE, held);
+  const got = decodeShare(COST_SHARE, '#' + hash);
+  assert.deepEqual(got.dropped, []);
+  assert.equal(got.values.price, 1_600_000);
+  assert.equal(got.values.rate, 3.6);
+  assert.equal(got.values.owned, 2);
+  assert.ok(!('cashDown' in got.values), 'an empty field is left out, not sent as zero');
+  assert.ok(!encodeShare(COST_SHARE, { ...sample, price: 0 }).includes('price='),
+    'a value the decoder would refuse is left out at the source');
+});
+
+test('/cost keeps the figures in the fragment and never in the query string', () => {
+  const src = code('components', 'Ledger.jsx');
+  assert.match(src, /decodeShare\(COST_SHARE, window\.location\.hash\)/, 'the page no longer reads a shared link from the fragment');
+  assert.doesNotMatch(src, /useSearchParams|location\.search\)|URLSearchParams\(window\.location\.search/,
+    'the page reads its figures from the query string — those reach the server log on every open');
+  assert.match(src, /url=\{\(\) => `\$\{window\.location\.origin\}\$\{window\.location\.pathname\}#\$\{shareHash\}`\}/,
+    'the copied link is not pathname + # + fragment');
+  assert.doesNotMatch(src, /\?\$\{shareHash\}|search:\s*shareHash/, 'the share state is being put in a query string');
+});
+
+test('/cost only rewrites a fragment it wrote', () => {
+  const src = code('components', 'Ledger.jsx');
+  assert.match(src, /const ours = decodeShare\(COST_SHARE, hash\) !== null;/);
+  assert.match(src, /if \(ours\) window\.history\.replaceState/,
+    'the page clears a fragment without checking it is a share link');
+  assert.match(src, /\(ours \|\| !hash\)/, 'the page overwrites an anchor somebody linked to');
+});
+
+test('the share event can carry the tool and the method, and nothing else', () => {
+  const src = code('lib', 'analytics.js');
+  assert.match(src, /\[EVENTS\.SHARE\]:\s*\['tool', 'how'\]/);
+  const out = sanitise({ e: EVENTS.SHARE, s: 'abc123', tool: 'cost', how: 'copy', price: 1_600_000, url: '/cost#v=1&price=1600000' });
+  assert.deepEqual(Object.keys(out).sort(), ['e', 'how', 's', 't', 'tool']);
+});
+
+test('the share control says where the figures go, and builds the link at the click', () => {
+  const src = code('components', 'ShareResult.jsx');
+  assert.match(src, /never sends to a server/, 'the note about where the figures go is gone');
+  assert.match(src, /Anyone you\s+send it to sees the same figures/, 'the note stopped saying the recipient sees the figures');
+  assert.match(src, /const link = url\(\);/, 'the link is built before the click, so a fast click copies a stale result');
+  assert.match(src, /track\(EVENTS\.SHARE, \{ tool, how: 'copy' \}\)/);
+});
