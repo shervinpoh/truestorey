@@ -79,3 +79,22 @@ export default function ShareResult({ tool, title, url }) {
     </div>
   );
 }
+
+/**
+ * What a reader sees when they open a link somebody sent. It names any field
+ * the link carried that could not be read, rather than letting a figure quietly
+ * revert to the page's own starting value and answer a different question.
+ */
+export function OpenedFromLink({ fromLink, labels }) {
+  if (!fromLink) return null;
+  const dropped = [...new Set(fromLink.dropped.map(k => labels[k] || k))];
+  return (
+    <p className="note" role="status" style={{ marginTop: 0 }}>
+      <b>Opened from a shared link.</b> These are the figures it carried
+      {dropped.length > 0 && <> — except the{' '}
+        {new Intl.ListFormat('en-GB', { type: 'conjunction' }).format(dropped)}, which
+        could not be read and {dropped.length === 1 ? 'was' : 'were'} left as this page
+        starts</>}. Change anything and the result is yours.
+    </p>
+  );
+}

@@ -8,6 +8,9 @@ import { titleCase } from '../lib/name.js';
 import { Figure } from './Motion.jsx';
 import MoneyInput from './MoneyInput.jsx';
 import Row from './PlanRow.jsx';
+import ShareResult, { OpenedFromLink } from './ShareResult.jsx';
+import useShareLink from './useShareLink.js';
+import { PLAN_SHARE, PLAN_LABELS } from '../lib/share.js';
 
 /**
  * TDSR, BSD and ABSD as one answer.
@@ -383,6 +386,18 @@ export default function Planner({ markets = {}, budget = null, initial = {} }) {
   const [loans, setLoans] = useState(0);
   const from = initial.from || null;
 
+  /* A result as a link — see components/useShareLink.js. The type is set
+     directly rather than through chooseType, which clamps the price to the
+     new type's slider range: a link's price is what its sender typed. */
+  const { fromLink, url: shareUrl } = useShareLink(PLAN_SHARE,
+    { price, type, hdbLoan, a1, g1, a2, g2, debts, cash, cpf, profile, owned, loans },
+    v => {
+      const set = { price: setPrice, type: setType, hdbLoan: setHdbLoan, a1: setA1, g1: setG1,
+        a2: setA2, g2: setG2, debts: setDebts, cash: setCash, cpf: setCpf, profile: setProfile,
+        owned: setOwned, loans: setLoans };
+      for (const [k, fn] of Object.entries(set)) if (k in v) fn(v[k]);
+    });
+
   const input = useMemo(() => ({
     applicants: [
       { fixedIncome: Number(a1) || 0, age: Number(g1) || 35 },
@@ -451,6 +466,7 @@ export default function Planner({ markets = {}, budget = null, initial = {} }) {
 
       <div className="planlayout">
         <div className="planinputs">
+          <OpenedFromLink fromLink={fromLink} labels={PLAN_LABELS} />
           <fieldset className="plangroup">
             <legend className="lab">What you are buying</legend>
             <BuyingWhat type={type} setType={chooseType} hdbLoan={hdbLoan} setHdbLoan={setHdbLoan} price={price} />
@@ -547,6 +563,7 @@ export default function Planner({ markets = {}, budget = null, initial = {} }) {
               <div><span>Limited by</span><b>{r.limitedBy}</b></div>
               <div><span>Downpayment</span><b className="mono">{money(r.downpayment)}</b></div>
             </div>
+            <ShareResult tool="plan" title="What you can afford — Truestorey" url={shareUrl} />
           </div>
         </aside>
       </div>

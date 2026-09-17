@@ -8,6 +8,9 @@ import { Figure } from './Motion.jsx';
 import MoneyInput from './MoneyInput.jsx';
 import Row from './PlanRow.jsx';
 import ConstructionStudy from './ConstructionStudy.jsx';
+import ShareResult, { OpenedFromLink } from './ShareResult.jsx';
+import useShareLink from './useShareLink.js';
+import { PROGRESSIVE_SHARE, PROGRESSIVE_LABELS } from '../lib/share.js';
 
 /**
  * The progressive payment ladder for a home still under construction.
@@ -39,6 +42,15 @@ export default function Progressive() {
   const [owned, setOwned] = useState(1);
   const [showPlanBar, setShowPlanBar] = useState(false);
 
+  /* A result as a link — see components/useShareLink.js. */
+  const { fromLink, url: shareUrl } = useShareLink(PROGRESSIVE_SHARE,
+    { price, ltv, fee, rate, tenure, profile, owned },
+    v => {
+      const set = { price: setPrice, ltv: setLtv, fee: setFee, rate: setRate, tenure: setTenure,
+        profile: setProfile, owned: setOwned };
+      for (const [k, fn] of Object.entries(set)) if (k in v) fn(v[k]);
+    });
+
   const r = useMemo(() => progressive({
     price: Number(price) || 0, ltv,
     bookingFeePct: fee, rate: (Number(rate) || 0) / 100, tenureYears: Number(tenure) || 25,
@@ -68,6 +80,7 @@ export default function Progressive() {
         tenure={Number(tenure) || 25} bookingFee={r.bookingFee} onStudyPassed={setShowPlanBar} />
       <div className="planlayout" id="purchase-assumptions">
         <div className="planinputs">
+          <OpenedFromLink fromLink={fromLink} labels={PROGRESSIVE_LABELS} />
           <p className="construction-return"><a href="#construction-heading">See these figures in the construction study ↑</a></p>
           <fieldset className="plangroup">
             <legend className="lab">The purchase</legend>
@@ -157,6 +170,7 @@ export default function Progressive() {
               <div><span>Instalment at TOP</span><b className="mono">{money(r.monthlyAtTop)}</b></div>
               <div><span>Once fully drawn</span><b className="mono">{money(r.monthlyFinal)}</b></div>
             </div>
+            <ShareResult tool="progressive" title="Paying for a home still being built — Truestorey" url={shareUrl} />
           </div>
         </aside>
       </div>

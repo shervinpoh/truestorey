@@ -19,7 +19,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { COST_SHARE, COST_LABELS, decodeShare, encodeShare } from '../lib/share.js';
+import { COST_SHARE, COST_LABELS, PLAN_SHARE, PLAN_LABELS, PROGRESSIVE_SHARE, PROGRESSIVE_LABELS, decodeShare, encodeShare } from '../lib/share.js';
 import { EVENTS, sanitise } from '../lib/analytics.js';
 
 const code = (...p) => readFileSync(path.join(process.cwd(), ...p), 'utf8')
@@ -83,22 +83,80 @@ test('encoding never produces a link its own decoder refuses', () => {
     'a value the decoder would refuse is left out at the source');
 });
 
-test('/cost keeps the figures in the fragment and never in the query string', () => {
-  const src = code('components', 'Ledger.jsx');
-  assert.match(src, /decodeShare\(COST_SHARE, window\.location\.hash\)/, 'the page no longer reads a shared link from the fragment');
-  assert.doesNotMatch(src, /useSearchParams|location\.search\)|URLSearchParams\(window\.location\.search/,
-    'the page reads its figures from the query string — those reach the server log on every open');
-  assert.match(src, /url=\{\(\) => `\$\{window\.location\.origin\}\$\{window\.location\.pathname\}#\$\{shareHash\}`\}/,
+const TOOLS = [
+  ['components/Ledger.jsx', 'COST_SHARE', 'COST_LABELS', 'cost'],
+  ['components/Planner.jsx', 'PLAN_SHARE', 'PLAN_LABELS', 'plan'],
+  ['components/Progressive.jsx', 'PROGRESSIVE_SHARE', 'PROGRESSIVE_LABELS', 'progressive'],
+];
+
+test('the figures stay in the fragment and never reach a query string, on every tool', () => {
+  const hook = code('components', 'useShareLink.js');
+  assert.match(hook, /decodeShare\(schema, window\.location\.hash\)/, 'a shared link is no longer read from the fragment');
+  assert.match(hook, /url: \(\) => `\$\{window\.location\.origin\}\$\{window\.location\.pathname\}#\$\{shareHash\}`/,
     'the copied link is not pathname + # + fragment');
-  assert.doesNotMatch(src, /\?\$\{shareHash\}|search:\s*shareHash/, 'the share state is being put in a query string');
+  for (const f of ['components/useShareLink.js', ...TOOLS.map(t => t[0])]) {
+    const src = code(...f.split('/'));
+    assert.doesNotMatch(src, /useSearchParams|URLSearchParams\(window\.location\.search|\?\$\{shareHash\}/,
+      `${f} puts share state in, or reads it from, the query string — those reach the server log on every open`);
+  }
 });
 
-test('/cost only rewrites a fragment it wrote', () => {
-  const src = code('components', 'Ledger.jsx');
-  assert.match(src, /const ours = decodeShare\(COST_SHARE, hash\) !== null;/);
-  assert.match(src, /if \(ours\) window\.history\.replaceState/,
-    'the page clears a fragment without checking it is a share link');
-  assert.match(src, /\(ours \|\| !hash\)/, 'the page overwrites an anchor somebody linked to');
+test('every tool uses the one hook, with its own schema, labels and share button', () => {
+  /* Three copies of the read-and-sync logic is how one of them ends up
+     overwriting anchors or trusting a link while the other two do not. */
+  for (const [f, schema, labels, tool] of TOOLS) {
+    const src = code(...f.split('/'));
+    assert.match(src, new RegExp(`useShareLink\\(${schema},`), `${f} does not read its link through useShareLink`);
+    assert.doesNotMatch(src, /decodeShare\(|replaceState\(/, `${f} carries its own copy of the link logic`);
+    assert.match(src, new RegExp(`<OpenedFromLink fromLink=\\{fromLink\\} labels=\\{${labels}\\} />`),
+      `${f} opens a link without saying so, or without naming what it could not read`);
+    assert.match(src, new RegExp(`<ShareResult tool="${tool}" title="[^"]+" url=\\{shareUrl\\} />`), `${f} has no share button`);
+  }
+});
+
+test('the hook only rewrites a fragment it wrote, and a page at its start carries none', () => {
+  const hook = code('components', 'useShareLink.js');
+  assert.match(hook, /const ours = decodeShare\(schema, hash\) !== null;/);
+  assert.match(hook, /if \(ours\) window\.history\.replaceState/, 'a fragment is cleared without checking it is a share link');
+  assert.match(hook, /\(ours \|\| !hash\)/, 'an anchor somebody linked to is overwritten');
+  assert.match(hook, /if \(start\.current === null\) start\.current = shareHash;/);
+  assert.match(hook, /if \(shareHash === start\.current\)/,
+    'the page compares against fixed defaults, so /plan opened from a block page gets a fragment nobody made');
+});
+
+test('/plan and /progressive links survive the round trip, on/off and numbered choices included', () => {
+  const plan = { price: 720_000, type: 'EC_RESALE', hdbLoan: false, a1: 6200, g1: 34, a2: 0, g2: 32,
+    debts: 800, cash: 80_000, cpf: 120_000, profile: 'SPR', owned: 2, loans: 1 };
+  const p = decodeShare(PLAN_SHARE, '#' + encodeShare(PLAN_SHARE, plan));
+  assert.deepEqual(p.dropped, []);
+  assert.deepEqual(p.values, plan, 'false and 0 must survive — a falsy value is still a value');
+
+  const prog = { price: 2_100_000, ltv: 0.55, fee: 0.1, rate: 2.85, tenure: 30, profile: 'FOREIGNER', owned: 3 };
+  const g = decodeShare(PROGRESSIVE_SHARE, '#' + encodeShare(PROGRESSIVE_SHARE, prog));
+  assert.deepEqual(g.dropped, []);
+  assert.deepEqual(g.values, prog);
+
+  const bad = decodeShare(PROGRESSIVE_SHARE, '#v=1&ltv=0.6&fee=0.10&price=1500000');
+  assert.deepEqual(bad.dropped, ['ltv'], '0.6 is not a loan-to-value tier and must not be accepted as one');
+  assert.equal(bad.values.fee, 0.1, '"0.10" is the 10% booking fee, written another way');
+  assert.deepEqual(decodeShare(PLAN_SHARE, '#v=1&hdbLoan=true&loans=2').dropped, ['hdbLoan', 'loans']);
+});
+
+test('every field a link can carry has a name the page can say', () => {
+  for (const [schema, labels] of [[COST_SHARE, COST_LABELS], [PLAN_SHARE, PLAN_LABELS], [PROGRESSIVE_SHARE, PROGRESSIVE_LABELS]]) {
+    const missing = Object.keys(schema.fields).filter(k => !labels[k]);
+    assert.deepEqual(missing, [], `${schema.tool}: a dropped field would be named by its code, not in words`);
+  }
+});
+
+test('/plan applies a linked type without clamping the linked price', () => {
+  /* chooseType pulls the price down to the new type's slider ceiling. A link
+     carrying a S$2m EC resale must open at S$2m, not at whatever the slider
+     tops out at. */
+  const src = code('components', 'Planner.jsx');
+  const apply = /useShareLink\(PLAN_SHARE,[\s\S]*?\}\);/.exec(src)?.[0] || '';
+  assert.match(apply, /type: setType/);
+  assert.doesNotMatch(apply, /chooseType/);
 });
 
 test('the share event can carry the tool and the method, and nothing else', () => {
