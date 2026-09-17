@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { blockMop, buildMopFilings, mopCopy, namedMonth } from '../lib/mop.js';
+import { blockMop, buildMopFilings, mopCopy, mopRelevant, namedMonth } from '../lib/mop.js';
 import { hdbHref } from '../lib/name.js';
 import config from '../next.config.mjs';
 
@@ -73,24 +73,66 @@ test('the preceding cohort is the nearest earlier year in the same town, even wi
   assert.match(mopCopy(data, rec).method, /completion-year proxy, not a dated MOP wave/);
 });
 
-test('block and inclusive town counts use the same following year and the full uncapped download', () => {
-  const rows = [...yearRows(), ...Array.from({ length: 25 }, () => row('2025-06')),
-    row('2025-06', { block: '10' }), row('2025-06', { street: 'OTHER RD' }),
+test('the previous wave is counted at its own blocks, beside the inclusive town total', () => {
+  /* The first version counted THIS block and the town. Neither is the previous
+     wave, and this block's row was zero by construction whenever the counted
+     year came before its own fifth year. */
+  const at9 = (month = '2025-06') => row(month, { block: '9' });
+  const rows = [...yearRows().map(r => ({ ...r, block: '9' })), ...Array.from({ length: 25 }, () => at9()),
+    row('2025-06'), row('2025-06', { block: '10' }), row('2025-06', { street: 'OTHER RD' }),
     row('2025-06', { town: 'BISHAN' }), row('2024-12'), row('2026-01')];
   const data = result(rows);
-  assert.equal(data.comparison.block, 37, 'identical-looking filings can be different units; never deduplicate them');
-  assert.equal(data.comparison.town, 39);
+  assert.equal(data.comparison.year, 2025);
+  assert.equal(data.comparison.cohortBlocks, 1);
+  assert.equal(data.comparison.cohort, 37, 'identical-looking filings can be different units; never deduplicate them');
+  assert.equal(data.comparison.town, 40);
   assert.equal(data.comparison.partial, false);
   assert.equal(data.firstMonth, '2024-12');
   const copy = mopCopy(data, rec);
-  assert.equal(copy.rows[0].period, copy.rows[1].period);
-  assert.match(copy.scope, /town total includes this block/);
+  assert.ok(copy.rows.every(r => r.period === copy.rows[0].period), 'every row must share one period');
+  assert.match(copy.scope, /town total includes the blocks above/);
+  assert.match(copy.rows[0].label, /previous wave’s 1 block$/);
+});
+
+test('this block is never counted for a year before its own fifth year', () => {
+  /* 26 of 278 real pages printed "0 filings" at the block beside the town's
+     total, for flats whose five years had not run. A null with a reason is
+     the truth; a zero reads as a measurement. */
+  const early = result([...yearRows(), row('2025-06')]);
+  assert.equal(early.earliestYear, 2026);
+  assert.equal(early.comparison.block, null);
+  const copy = mopCopy(early, rec);
+  assert.ok(!copy.rows.some(r => r.label.startsWith('At ')), 'a block row printed for a year it could not have filed in');
+  assert.match(copy.blockNote, /not counted for 2025: its earliest possible fifth year is 2026/);
+
+  const due = result([...yearRows(), row('2025-06')], register([
+    block({ yearCompleted: 2020, earliestMop: 2025 }), block({ block: '9', yearCompleted: 2019, earliestMop: 2024 })]));
+  assert.equal(due.comparison.year, 2025);
+  assert.equal(due.comparison.block, 13, 'a block whose fifth year has arrived is counted');
+  assert.equal(mopCopy(due, rec).blockNote, null);
+  assert.ok(mopCopy(due, rec).rows.some(r => r.label === 'At Blk 10A Test Rd'));
+});
+
+test('the section shows only where MOP is current, and never goes silent on an unknown', () => {
+  const window = buildMopFilings(input(yearRows(2024)));
+  const at = (changes, r = rec) => mopRelevant(blockMop(r, register([block(changes),
+    block({ block: '9', yearCompleted: 2019, earliestMop: 2024 })]), window), r);
+  assert.equal(at({}), true, 'fifth year 2026 against a window from 2024');
+  assert.equal(at({ yearCompleted: 2019, earliestMop: 2024 }), true, 'a fifth year inside the window');
+  assert.equal(at({ yearCompleted: 1976, earliestMop: 1981 }), false, 'a 1981 fifth year is not MOP context');
+  const unmatched = r => mopRelevant(blockMop(r, register([]), window), r);
+  assert.equal(unmatched({ ...rec, leaseCommence: 1978 }), false, 'an unmatched 1978 block is still a 1978 block');
+  assert.equal(unmatched({ ...rec, leaseCommence: 2021 }), true);
+  assert.equal(unmatched({ ...rec }), true, 'with no year from anywhere, the could-not-match note is what shows');
+  assert.equal(mopRelevant(null, rec), false);
+  assert.match(read('lib/data/query.js'), /return mopRelevant\(data, rec\) \? data : null;/,
+    'mopFor stopped gating, so the nav and the section appear on every block page again');
 });
 
 test('a partial rolling window is labelled and never annualised or expanded to missing months', () => {
   const data = result([row('2025-09'), row('2025-10'), row('2025-11'), row('2025-12')]);
   assert.deepEqual(data.comparison.period, { from: '2025-09', to: '2025-12' });
-  assert.equal(data.comparison.block, 4);
+  assert.equal(data.comparison.town, 4, 'counted over the four held months only');
   assert.equal(data.comparison.partial, true);
   assert.match(mopCopy(data, rec).partial, /months outside this period have not been treated as zero/);
   assert.match(mopCopy(data, rec).lag, /latest month may be incomplete/);
@@ -98,7 +140,8 @@ test('a partial rolling window is labelled and never annualised or expanded to m
 
 test('a measured zero is distinct from a missing file, unheld year, unknown town or national gap', () => {
   const zero = result(yearRows().map(r => ({ ...r, block: '99' })));
-  assert.equal(zero.comparison.block, 0);
+  assert.equal(zero.comparison.cohort, 0, 'a held year with no filings at the wave is a measured zero');
+  assert.equal(zero.comparison.block, null, 'and this block is not counted before its fifth year');
   assert.equal(zero.comparison.town, 12);
   assert.equal(zero.firstMonth, null);
   const missing = [
@@ -157,7 +200,12 @@ test('real-data joins agree with raw rows and a block payload does not ship a re
     const { from, to } = data.comparison.period;
     const rows = hdb.rows.filter(row => row.town === b.town && row.month >= from && row.month <= to);
     assert.equal(data.comparison.town, rows.length);
-    assert.equal(data.comparison.block, rows.filter(row => row.block === b.block && row.street === b.street).length);
+    const wave = new Set(blocks.filter(w => w.town === b.town && w.earliestMop === data.previousYear
+      && w.earliestMop === w.yearCompleted + 5).map(w => `${w.block}|${w.street}`));
+    assert.equal(data.comparison.cohortBlocks, wave.size);
+    assert.equal(data.comparison.cohort, rows.filter(row => wave.has(`${row.block}|${row.street}`)).length);
+    if (b.earliestMop > data.comparison.year) assert.equal(data.comparison.block, null);
+    else assert.equal(data.comparison.block, rows.filter(row => row.block === b.block && row.street === b.street).length);
     checked++;
   }
   assert.ok(checked > 0, 'the current register should exercise a measured comparison');

@@ -37,6 +37,7 @@ export default function BlockMop({ data, rec }) {
               <Source source={data.filingSource} period={row.period} /></dd>
           </div>)}
         </dl>
+        {copy.blockNote && <p className="hint">{copy.blockNote}</p>}
         <p className="hint">{copy.scope}</p>
         <p className="hint">{copy.lag}</p>
       </> : <>
