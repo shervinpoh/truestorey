@@ -67,9 +67,28 @@ test('nothing is both excluded and required', () => {
  * because Node does not strip JSX — and the build failed with three
  * module-not-found errors. The suite is not a substitute for the build here,
  * but it can at least check that a relative import names a file that exists.
+ *
+ * ── AND THAT THE FILE IS IN GIT, NOT JUST ON THIS DISK ─────────────────────
+ * Exists is not enough. A commit staged components/RecordPage.jsx whole, and
+ * the working copy carried another piece of in-progress work's import of
+ * ./BlockMop.jsx — a file that was on disk and never committed. This test
+ * passed locally because the disk had it; Vercel's checkout did not, and three
+ * deploys in a row failed while every push looked fine. The live site sat on
+ * a two-day-old build and nothing here said so. A file git does not track does
+ * not exist as far as a deploy is concerned, so neither does it here.
  */
 import { readdirSync as readdirForImports } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import path from 'node:path';
+
+/* null outside a git checkout (a tarball, a build container), where only the
+   disk can be asked. */
+const tracked = (() => {
+  try {
+    const out = execFileSync('git', ['ls-files', '-z'], { cwd: process.cwd(), encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+    return new Set(out.split('\0').filter(Boolean).map(f => path.resolve(process.cwd(), f)));
+  } catch { return null; }
+})();
 
 test('every relative import in app/ and components/ resolves to a real file', () => {
   const roots = ['app', 'components'];
@@ -86,6 +105,8 @@ test('every relative import in app/ and components/ resolves to a real file', ()
       const target = path.resolve(path.dirname(file), m[1]);
       if (!existsSync(target)) {
         broken.push(`${path.relative(process.cwd(), file)} → ${m[1]}`);
+      } else if (tracked && tracked.has(file) && !tracked.has(target)) {
+        broken.push(`${path.relative(process.cwd(), file)} → ${m[1]} (on disk, not committed — a deploy will not have it)`);
       }
     }
   }

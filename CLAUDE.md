@@ -336,6 +336,18 @@ who chose dark gets a white flash on every navigation. `test/contrast.test.js`
 now measures both grounds; it read only the first `:root` before, which is
 always the light one.
 
+**Three pushes deployed nothing for two days, and every one looked fine.**
+A commit staged `components/RecordPage.jsx` whole. The working copy also held
+someone else's in-progress import of `./BlockMop.jsx`, a file on disk and never
+committed. Locally every test passed and every page rendered, because the disk
+had the file; Vercel's checkout did not, so the build failed and the live site
+stayed on the last good deploy while three commits were described as live.
+Two lessons. Staging a file stages every hunk in it, not the ones you wrote —
+when the tree holds other work, read `git diff --cached` before committing. And
+a push is not a deploy: `gh api repos/shervinpoh/truestorey/commits/<sha>/statuses`
+says whether it built. `test/tracing.test.js` now fails when a tracked file
+imports an untracked one.
+
 ## Layout
 
 ```
