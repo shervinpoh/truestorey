@@ -91,6 +91,10 @@ export default function Page() {
           are not sold, shared, or used to build a profile. The site is served from Vercel, which
           receives the request as any web host does. Data sources are queried at build time, not by
           your browser, so looking something up here does not tell a government API who asked.
+          One exception, and only in the main search box: when nothing filed matches what you
+          typed, this site&rsquo;s server asks OneMap, the Singapore Land Authority&rsquo;s address
+          index, whether it is a real address. OneMap receives the words you typed, from this
+          server &mdash; not your IP address or anything else about you.
         </p>
 
         <h2 className="sh"><span>Asking what is held, or removing it</span></h2>
@@ -118,6 +122,7 @@ const DESCRIPTIONS = {
   LEAD_START: 'The first keystroke in the enquiry form. No content.',
   LEAD_SUBMIT: 'An enquiry was sent, and whether the consent box was ticked. No name, email or message.',
   TOOL_RUN: 'A tool was actually used — its name only, once per tab.',
+  SHARE: 'A link to a calculator result was copied or shared — which tool, and how. Not the link and not the figures, which never reach this site.',
   SITUATION: 'A guided path was taken from the tools page.',
   VITALS: 'How fast the page was: load, layout stability, response to the first interaction.',
 };

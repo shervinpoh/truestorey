@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { track } from './Track.jsx';
 import { EVENTS } from '../lib/analytics.js';
+import { worthLooking, emptyLine } from '../lib/address.js';
 
 /**
  * Typeahead over every block and project. Navigates — it does not set state.
@@ -38,28 +39,45 @@ export default function Search({ autoFocus = false }) {
   /* Whether the CURRENT term has been answered. Not derivable from sugg.length:
      an empty array means both "no matches" and "not asked yet". */
   const [answered, setAnswered] = useState('');
+  /* What OneMap said, when it was asked. See app/api/search/route.js. */
+  const [resolved, setResolved] = useState(null);
 
   useEffect(() => {
     const term = q.trim();
-    if (term.length < 2) { setSugg([]); setSeeking(false); setAnswered(''); return; }
+    if (term.length < 2) { setSugg([]); setSeeking(false); setAnswered(''); setResolved(null); return; }
     setSeeking(true);
     const ctl = new AbortController();
+    let pause;
+    const settle = (results, how) => {
+      setSugg(results); setAi(-1); setSeeking(false); setAnswered(term); setResolved(how || null);
+      // What people look for — and especially what they fail to find — is the
+      // most useful thing this site can tell him.
+      track(results.length ? EVENTS.SEARCH : EVENTS.SEARCH_EMPTY,
+            results.length ? { q: term, n: results.length } : { q: term });
+    };
+    // An aborted request is a superseded keystroke, not a failure — leave
+    // `seeking` true so the next one owns it. A real failure clears it, or
+    // the box would say "searching" for ever.
+    const failed = e => { if (e.name !== 'AbortError') { setSeeking(false); setAnswered(term); } };
     const t = setTimeout(() => {
       fetch(`/api/search?q=${encodeURIComponent(term)}&limit=8`, { signal: ctl.signal })
         .then(r => r.json()).then(d => {
           const results = d.results || [];
-          setSugg(results); setAi(-1); setSeeking(false); setAnswered(term);
-          // What people look for — and especially what they fail to find — is the
-          // most useful thing this site can tell him.
-          track(results.length ? EVENTS.SEARCH : EVENTS.SEARCH_EMPTY,
-                results.length ? { q: term, n: results.length } : { q: term });
+          if (results.length || !worthLooking(term)) return settle(results);
+          /* ── NOTHING FILED UNDER THAT: ASK SLA, ONCE THE READER PAUSES ────
+             OneMap throttles after a few requests, so it is never asked per
+             keystroke — only after 450ms more with nothing typed, and the
+             cleanup below cancels the wait on the next key. `seeking` stays
+             true meanwhile, so "Nothing matching" is not shown and then
+             replaced by an answer. */
+          pause = setTimeout(() => {
+            fetch(`/api/search?q=${encodeURIComponent(term)}&limit=8&resolve=1`, { signal: ctl.signal })
+              .then(r => r.json()).then(d2 => settle(d2.results || [], d2.resolved)).catch(failed);
+          }, 450);
         })
-        // An aborted request is a superseded keystroke, not a failure — leave
-        // `seeking` true so the next one owns it. A real failure clears it, or
-        // the box would say "searching" for ever.
-        .catch(e => { if (e.name !== 'AbortError') { setSeeking(false); setAnswered(term); } });
+        .catch(failed);
     }, 140);
-    return () => { clearTimeout(t); ctl.abort(); };
+    return () => { clearTimeout(t); clearTimeout(pause); ctl.abort(); };
   }, [q]);
 
   const go = href => {
@@ -96,7 +114,7 @@ export default function Search({ autoFocus = false }) {
                   onMouseDown={() => go(s.href)} onMouseEnter={() => setAi(i)}>
                 <span className="t">{s.kind === 'HDB' ? 'HDB' : 'PTE'}</span>
                 <span className="n">{s.label}</span>
-                <span className="s">{s.sub}</span>
+                <span className="s">{s.address ? `${s.address} · via OneMap` : s.sub}</span>
                 <span className="c mono">{s.n}</span>
               </li>
             ))}
@@ -117,7 +135,7 @@ export default function Search({ autoFocus = false }) {
           appeared under an EMPTY search field. Fixing the flash on keystroke
           introduced a worse one on an empty box. */}
       {answered && answered === q.trim() && !sugg.length && !seeking && !busy && (
-        <p className="hint" style={{marginTop:8}}>Nothing matching that. Try the block number on its own, or the street.</p>
+        <p className="hint" style={{marginTop:8}}>{emptyLine(resolved)}</p>
       )}
     </>
   );

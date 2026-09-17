@@ -98,6 +98,17 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
 
       <SectionNav ids={sectionIds} />
 
+      {/* A reader arrives here from "22 Cashew Crescent" — search sets the
+          house number aside, and OneMap resolves a full address to its road.
+          The page must not let that read as a page about house 22. */}
+      {rec.landed && (
+        <p className="note">
+          <b>Filed by street, not by house.</b> URA publishes a landed sale&rsquo;s street and never
+          its house number, so every sale on {titleCase(rec.street)} is counted together here. This
+          page cannot say which house sold, or what any one house fetched.
+        </p>
+      )}
+
       {/* The one section on this page that changes ground. See .bleed. */}
       <section className="pane bleed" id="overview">
         <RecordView rec={rec} attribution={attribution}

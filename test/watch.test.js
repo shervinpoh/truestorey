@@ -199,7 +199,9 @@ test('nothing collects an address unless it can actually be used', () => {
 test('the search says nothing when there is nothing typed', () => {
   const s = src('components/Search.jsx');
   // The guard immediately before the empty-state paragraph.
-  const m = /\{\s*(answered[^\n]*?)\s*&&\s*\(\s*\n\s*<p className="hint"[^>]*>Nothing matching/.exec(s);
+  // The line itself is emptyLine(resolved) since the OneMap fallback, which has
+  // three things to say instead of one; the guard in front of it is unchanged.
+  const m = /\{\s*(answered[^\n]*?)\s*&&\s*\(\s*\n\s*<p className="hint"[^>]*>(?:Nothing matching|\{emptyLine\(resolved\)\})/.exec(s);
   assert.ok(m, 'could not find the empty-state condition');
   assert.match(m[1], /^answered\s*&&\s*answered === q\.trim\(\)/,
     'the condition must require a NON-EMPTY answered term, not just an equal one');
