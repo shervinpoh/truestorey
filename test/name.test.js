@@ -154,3 +154,39 @@ test('trimming never turns a query into nothing', () => {
   assert.deepEqual(searchRecords('560123', { limit: 3 }), []);
   assert.deepEqual(searchRecords('zzzznotathing', { limit: 3 }), []);
 });
+
+/**
+ * A street word written the other way.
+ *
+ * HDB abbreviates ("JLN TENAGA", "BT BATOK"), URA's landed streets are in full
+ * ("JALAN ANTOI"), and a reader types whichever they know. "649 Jalan" and
+ * "22 cashew" were real failed searches in the analytics table.
+ */
+test('a street word finds its abbreviation, in both directions', () => {
+  const at = q => searchRecords(q, { limit: 3 }).map(h => h.href);
+  assert.ok(at('649 Jalan').includes('/hdb/bedok/649-jln-tenaga'), '"649 Jalan" no longer finds Blk 649 JLN TENAGA');
+  assert.ok(at('649 Jalan Tenaga').includes('/hdb/bedok/649-jln-tenaga'));
+  assert.ok(at('Jln Antoi').includes('/landed/jalan-antoi'), 'an abbreviation no longer finds a street filed in full');
+  assert.ok(at('Bukit Batok Street 21').length, 'full words no longer find an abbreviated HDB street');
+  assert.ok(searchRecords('Commonwealth Close', { limit: 1 })[0]?.label.includes("C'WEALTH CL"),
+    "C'WEALTH is split in two by norm() and has to be joined before mapping");
+});
+
+test('mapping street words never breaks a name typed halfway', () => {
+  /* "Normanton Pa" is a prefix of NORMANTON PARK and of nothing in
+     NORMANTON PK. The plain match has to run first and unchanged. */
+  assert.equal(searchRecords('Normanton Pa', { limit: 1 })[0]?.label, 'NORMANTON PARK');
+  assert.ok(searchRecords("St George's Lane", { limit: 1 })[0]?.label.includes("ST. GEORGE'S LANE"),
+    'ST as Saint was mapped as a street word');
+});
+
+test('a house number on a landed street finds the street, never an HDB block', () => {
+  assert.equal(searchRecords('22 cashew', { limit: 1 })[0]?.href, '/landed/cashew-crescent',
+    'URA publishes no house numbers, so "22 cashew" must fall back to the street');
+  assert.equal(searchRecords('22 Cashew Crescent', { limit: 1 })[0]?.href, '/landed/cashew-crescent');
+  assert.equal(searchRecords('570 ang mo kio', { limit: 1 })[0]?.href, '/hdb/ang-mo-kio/570-ang-mo-kio-ave-3',
+    'an HDB block number was set aside although the block exists');
+  assert.deepEqual(searchRecords('22 cashew', { kind: 'HDB', limit: 3 }), [],
+    'the landed fallback leaked into an HDB-only search');
+  assert.deepEqual(searchRecords('9999 nothingstreet', { limit: 3 }), []);
+});
