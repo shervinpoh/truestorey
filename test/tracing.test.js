@@ -44,8 +44,16 @@ test('the Blindspot route can open every file it reads', () => {
 });
 
 test('a route that resolves records is given the shards', () => {
-  for (const r of ['/api/record', '/api/watch', '/compare', '/api/rent'])
+  for (const r of ['/api/record', '/api/watch', '/compare', '/api/rent', '/api/report'])
     assert.ok(listed(r).has('records/**'), `${r} resolves a record and cannot open the shards`);
+});
+
+test('the emailed report can open the rent index it quotes', () => {
+  /* It recomputes the ledger server-side and reads a filed rent by a path
+     built at request time — the pattern the tracer cannot follow. Left out,
+     the email goes out with the rent comparison missing in production and
+     complete in dev, which is the failure this whole map exists to prevent. */
+  assert.ok(listed('/api/report').has('rents.json'));
 });
 
 test('nothing is both excluded and required', () => {
