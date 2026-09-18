@@ -5,12 +5,13 @@ import MoneyInput from './MoneyInput.jsx';
 import { Figure } from './Motion.jsx';
 import { f, num } from './fmt.js';
 import { titleCase } from '../lib/name.js';
-import { ledger } from '../lib/calc/ledger.js';
+import { costLedger } from '../lib/report/cost.js';
 import Downside from './Downside.jsx';
 import Scenarios from './Scenarios.jsx';
 import ShareResult, { OpenedFromLink } from './ShareResult.jsx';
+import EmailReport from './EmailReport.jsx';
 import useShareLink from './useShareLink.js';
-import { COST_SHARE, COST_LABELS } from '../lib/share.js';
+import { COST_SHARE, COST_LABELS, COST_DEFAULTS as DEFAULTS } from '../lib/share.js';
 
 /**
  * What owning it costs, before it does anything.
@@ -38,12 +39,7 @@ const TYPES = [
   ['PRIVATE', 'Private'],
 ];
 
-const DEFAULTS = {
-  price: 1_600_000, bought: '2021-06', type: 'PRIVATE', profile: 'SC', owned: 1,
-  cashDown: 200_000, cpfDown: 200_000, cpfMonthly: 2_500, rate: 3.6, tenure: 30, held: 5, agent: 2,
-};
-
-export default function Ledger({ indices = {} }) {
+export default function Ledger({ indices = {}, canEmail = false }) {
   const [price, setPrice] = useState(DEFAULTS.price);
   const [bought, setBought] = useState(DEFAULTS.bought);
   const [type, setType] = useState(DEFAULTS.type);
@@ -93,35 +89,26 @@ export default function Ledger({ indices = {} }) {
       .catch(() => { if (mine === seq.current) { setMarket(null); setLookup('failed'); } });
   }, [picked, beds]);
 
-  const p = Number(price) || 0;
-  const loan = Math.max(0, p - (Number(cashDown) || 0) - (Number(cpfDown) || 0));
-  const ltv = p > 0 ? loan / p : 0;
+  /* The one set of figures this page holds: what the share link carries, what
+     the email report is rendered from, and what the ledger is computed on. */
+  const shareValues = useMemo(() => ({
+    price, bought, type, profile, owned, cashDown, cpfDown, cpfMonthly, rate, tenure, held, agent,
+    ...(picked ? { home: picked.href, label: picked.label, beds } : {}),
+  }), [price, bought, type, profile, owned, cashDown, cpfDown, cpfMonthly, rate, tenure, held, agent,
+       picked, beds]);
 
-  const r = useMemo(() => ledger({
-    price: p,
-    purchaseDate: `${bought}-01`,
-    propertyType: type,
-    buyerProfile: profile,
-    propertyCount: Number(owned) || 1,
-    loan,
-    loanRate: (Number(rate) || 0) / 100,
-    loanYears: Number(tenure) || 25,
-    cashDown: Number(cashDown) || 0,
-    cpfDown: Number(cpfDown) || 0,
-    cpfMonthly: Number(cpfMonthly) || 0,
-    yearsHeld: Number(held) || 0,
-    agentFeePct: Number(agent) || 0,
-    monthlyRent: market?.rent?.median ?? null,
-  }), [p, bought, type, profile, owned, loan, rate, tenure, cashDown, cpfDown, cpfMonthly, held, agent,
-       market?.rent?.median]);
+  /* costLedger, not ledger(): the mapping from these fields to the calculator's
+     arguments lives in lib/report/cost.js so the emailed copy cannot drift from
+     what is on the screen. */
+  const { r, loan, ltv } = useMemo(
+    () => costLedger(shareValues, { monthlyRent: market?.rent?.median ?? null }),
+    [shareValues, market?.rent?.median]);
+  const p = Number(price) || 0;
 
   /* A result as a link — see components/useShareLink.js. The figures animate
      from the defaults to the link's values on arrival; a static page cannot
      know the fragment before it renders. */
-  const { fromLink, url: shareUrl } = useShareLink(COST_SHARE, {
-    price, bought, type, profile, owned, cashDown, cpfDown, cpfMonthly, rate, tenure, held, agent,
-    ...(picked ? { home: picked.href, label: picked.label, beds } : {}),
-  }, v => {
+  const { fromLink, url: shareUrl, hash: shareHash } = useShareLink(COST_SHARE, shareValues, v => {
     const set = { price: setPrice, bought: setBought, type: setType, profile: setProfile,
       owned: setOwned, cashDown: setCashDown, cpfDown: setCpfDown, cpfMonthly: setCpfMonthly,
       rate: setRate, tenure: setTenure, held: setHeld, agent: setAgent };
@@ -481,12 +468,17 @@ export default function Ledger({ indices = {} }) {
         <ul className="bul">{r.caveats.map(c => <li key={c.slice(0, 24)}>{c}</li>)}</ul>
       </div>
 
+      {/* After the answer, never in front of it — §8.2: the email is a copy,
+          not the unlock. Absent entirely when the server cannot send. */}
+      {canEmail && <EmailReport tool="cost" hash={shareHash} title="the ledger" />}
+
       <p className="prov" style={{ marginTop: 22 }}>
         {r.sources.map(s => `${s.name} (effective ${s.effective})`).join(' · ')}
         {' · '}CPF refund rule:{' '}
         <a href="https://www.cpf.gov.sg/service/article/how-much-do-i-need-to-refund-to-my-cpf-account-if-i-am-selling-my-whole-property"
            target="_blank" rel="noopener noreferrer">CPF Board</a>
-        {' · '}nothing on this page is saved or sent anywhere.
+        {' · '}nothing on this page is saved, and nothing leaves your browser unless you ask for
+        the emailed copy — which is written from your figures and stored nowhere.
       </p>
 
       <h2 className="sh" style={{ marginTop: 26 }}><span>The rest of it</span></h2>

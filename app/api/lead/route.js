@@ -20,43 +20,26 @@ import { CONSENT_COPY_VERSION, normaliseMobile } from '../../../lib/consent.js';
    top of that file: two consent-writing paths is how the Consent Basis column
    ends up recording wording nobody was shown. */
 import { configured as crmConfigured, consentFields, writeContact } from '../../../lib/crm.js';
+/* The body cap, the throttle and the honeypot moved to lib/formguard.js when
+   the report route needed the same three. Same numbers, one implementation. */
+import { MAX_BODY, ipOf, isBot, makeThrottle, readJson } from '../../../lib/formguard.js';
 
 export { CONSENT_COPY_VERSION };
 export const dynamic = 'force-dynamic';
 
-const MAX_BODY = 8 * 1024;        // a lead is ~1KB; anything larger is not a lead
-const WINDOW_MS = 60 * 60 * 1000;
-const MAX_PER_WINDOW = 5;
-
-/**
- * Per-IP throttle. In-memory, so it resets on redeploy and is per-instance on
- * serverless — deliberately a speed bump, not a security boundary. The real
- * guard against a flooded CRM is the duplicate-mobile check in the Apps Script.
- */
-const hits = new Map();
-function throttled(ip) {
-  const now = Date.now();
-  const list = (hits.get(ip) || []).filter(t => now - t < WINDOW_MS);
-  list.push(now);
-  hits.set(ip, list);
-  if (hits.size > 5000) for (const [k, v] of hits) if (!v.some(t => now - t < WINDOW_MS)) hits.delete(k);
-  return list.length > MAX_PER_WINDOW;
-}
+/* The real guard against a flooded CRM is the duplicate-mobile check in the
+   Apps Script; this is the speed bump in front of it. */
+const throttled = makeThrottle({ windowMs: 60 * 60 * 1000, max: 5 });
 
 export async function POST(req) {
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+  const ip = ipOf(req);
 
-  const raw = await req.text();
-  if (raw.length > MAX_BODY) {
-    return NextResponse.json({ error: 'That request was too large.' }, { status: 413 });
-  }
-  let body;
-  try { body = JSON.parse(raw); }
-  catch { return NextResponse.json({ error: 'Could not read that form.' }, { status: 400 }); }
+  const read = await readJson(req, { max: MAX_BODY });
+  if (read.error) return NextResponse.json({ error: read.error }, { status: read.status });
+  const body = read.body;
 
-  // Honeypot: a hidden field only an automated submitter fills. Answer 200 so
-  // the bot has nothing to tune against, but write nothing.
-  if (body.website) return NextResponse.json({ ok: true });
+  // Answer 200 to a bot so it has nothing to tune against, but write nothing.
+  if (isBot(body)) return NextResponse.json({ ok: true });
 
   if (throttled(ip)) {
     return NextResponse.json(

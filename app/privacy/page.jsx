@@ -123,6 +123,7 @@ const DESCRIPTIONS = {
   LEAD_SUBMIT: 'An enquiry was sent, and whether the consent box was ticked. No name, email or message.',
   TOOL_RUN: 'A tool was actually used — its name only, once per tab.',
   SHARE: 'A link to a calculator result was copied or shared — which tool, and how. Not the link and not the figures, which never reach this site.',
+  REPORT: 'A written copy of a result was emailed — which tool. Not the address, which is not stored, and not the figures.',
   SITUATION: 'A guided path was taken from the tools page.',
   VITALS: 'How fast the page was: load, layout stability, response to the first interaction.',
 };

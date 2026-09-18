@@ -1106,6 +1106,21 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 .shareresult-manual input{width:100%;margin-top:4px;font-family:"IBM Plex Mono",ui-monospace,monospace;
  font-size:var(--t-small)}
 
+/* The emailed copy, under the finished answer. A panel rather than a strip:
+   it is an offer at the end, and §8.2 is explicit that it must never read as
+   the way to get the figures. */
+.emailreport{margin:24px 0 0;padding:18px 20px;background:var(--card);border:1px solid var(--line);
+ border-radius:var(--r2)}
+.emailreport h3{font-size:var(--t-lead);margin:0 0 6px}
+.emailreport .hint{margin:8px 0 0;max-width:62ch}
+.emailreport-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;align-items:center}
+.emailreport-row input[type=email]{flex:1 1 260px;min-width:0;padding:13px 14px;font-size:var(--t-body);
+ border:1px solid var(--edge);border-radius:var(--r1);background:var(--paper)}
+.emailreport-row input[type=email]:focus{outline:2px solid var(--acc);outline-offset:2px;border-color:var(--acc)}
+.emailreport-row .cta{width:auto;flex:0 0 auto;padding:13px 20px}
+.emailreport-row .cta[disabled]{opacity:.55;cursor:not-allowed}
+@media(max-width:560px){.emailreport{padding:16px}.emailreport-row .cta{width:100%}}
+
 /* The sticky bottom bar is the small-screen form of the same idea. */
 .planbar{display:none}
 @media(max-width:900px){

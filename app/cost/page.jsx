@@ -3,6 +3,7 @@ import ToolIntro from '../../components/ToolIntro.jsx';
 import ToolUse from '../../components/ToolUse.jsx';
 import Ledger from '../../components/Ledger.jsx';
 import { priceIndices } from '../../lib/data/query.js';
+import { configured as mailConfigured } from '../../lib/email.js';
 import FromBack from '../../components/FromBack.jsx';
 
 export const metadata = {
@@ -21,7 +22,7 @@ export default function Page() {
       <ToolIntro href="/cost" example="figures" />
       <ToolUse id="cost" />
       <section className="pane">
-        <Ledger indices={priceIndices()} />
+        <Ledger indices={priceIndices()} canEmail={mailConfigured()} />
       </section>
     </main>
   );

@@ -53,6 +53,10 @@ export default function useShareLink(schema, values, apply) {
 
   return {
     fromLink,
+    /* The fragment itself, for anything that has to send the result somewhere
+       the address bar cannot reach — the emailed copy asks the server to
+       recompute it from exactly this. */
+    hash: shareHash,
     // Pathname only. /plan's ?from= names the page THIS reader came from, which
     // is nothing to do with whoever the link is sent to.
     url: () => `${window.location.origin}${window.location.pathname}#${shareHash}`,
