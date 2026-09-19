@@ -18,7 +18,44 @@ async function fetchPage(offset) {
   return json.result;
 }
 
-export async function ingestHdb({ monthsBack = 36 } = {}) {
+/**
+ * ── THE FULL HISTORY, WHICH WAS ALREADY BEING DOWNLOADED AND DISCARDED ─────
+ * `monthsBack` keeps data/hdb.json to three years, and the comment below is
+ * right that older rows bloat the bundle without helping the SITE. But the
+ * fetch above pulls all 240,345 records from 2017-01 regardless — the filter
+ * throws away six and a half years that cost nothing to keep.
+ *
+ * Those years are the only way to test the AVM against a market that moved.
+ * The 2018 cooling measures, the 2020 circuit breaker, the 2021-22 run-up and
+ * the current flat stretch are four different regimes, and an accuracy figure
+ * measured only on the last one is a fact about 2026. So `--history` writes
+ * them, separately, for lib/consult and scripts/ only.
+ *
+ * COMPACT ROWS, NOT OBJECTS. 240k objects with ten keys each is ~60MB of
+ * repeated field names; the same rows as arrays with one schema at the top are
+ * under half that and parse faster. psf is not stored — it is price over area
+ * and storing a derived figure is how two of them end up disagreeing.
+ *
+ * The file is gitignored AND in outputFileTracingExcludes. The tracer reads
+ * the disk, not the index, and this repo has forgotten that twice.
+ */
+const HISTORY_FIELDS = ['month', 'town', 'block', 'street', 'flatType', 'model',
+                        'storeyRange', 'areaSqm', 'leaseCommence', 'price'];
+
+async function writeHistory(records, meta) {
+  const rows = records
+    .filter(r => r.month && Number(r.floor_area_sqm) > 0 && Number(r.resale_price) > 0)
+    .map(r => [r.month, r.town, r.block, r.street_name, r.flat_type, r.flat_model,
+               r.storey_range, Number(r.floor_area_sqm), Number(r.lease_commence_date),
+               Number(r.resale_price)])
+    .sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+  const out = { ...meta, fields: HISTORY_FIELDS, count: rows.length,
+                span: { from: rows[0]?.[0] || null, to: rows.at(-1)?.[0] || null }, rows };
+  await fs.writeFile(new URL('../data/.hdb-history.json', import.meta.url), JSON.stringify(out));
+  console.log(`Wrote data/.hdb-history.json — ${rows.length.toLocaleString()} rows, ${out.span.from} to ${out.span.to}`);
+}
+
+export async function ingestHdb({ monthsBack = 36, history = false } = {}) {
   const accessedAt = new Date().toISOString();
   const first = await fetchPage(0);
   const total = first.total;
@@ -31,6 +68,16 @@ export async function ingestHdb({ monthsBack = 36 } = {}) {
     process.stdout.write(`\r  fetched ${records.length.toLocaleString()} / ${total.toLocaleString()}`);
   }
   console.log('');
+
+  if (history) {
+    await fs.mkdir(new URL('../data/', import.meta.url), { recursive: true });
+    await writeHistory(records, {
+      source: 'HDB Resale Flat Prices (data.gov.sg)',
+      resourceId: RESOURCE_ID,
+      licence: 'Singapore Open Data Licence v1.0',
+      accessedAt,
+    });
+  }
 
   // Keep only the recent window — older data bloats the bundle without helping.
   const cutoff = new Date();
@@ -120,5 +167,5 @@ export async function ingestHdb({ monthsBack = 36 } = {}) {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  ingestHdb().catch(e => { console.error('\nINGEST FAILED:', e.message); process.exit(1); });
+  ingestHdb({ history: process.argv.includes('--history') }).catch(e => { console.error('\nINGEST FAILED:', e.message); process.exit(1); });
 }

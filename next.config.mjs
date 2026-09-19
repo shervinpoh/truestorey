@@ -54,6 +54,28 @@ const nextConfig = {
       // not the index — and leaving it out of this list took the blindspot
       // function from 75.6MB to 222.5MB against a 250MB ceiling.
       './data/.zoning-raw.geojson',
+      // The local reading list. Headlines and links from publishers own feeds,
+      // for reference only — rule 9 keeps every one of these outlets off the
+      // site, and this excludes them from any build as well.
+      './data/.reading.json',
+      // Listings exports and the accumulated store. Licensed, gitignored,
+      // and read only by scripts/ and the local consult panel.
+      './data/.listings.json',
+      // REALIS exports and their derived index. Licensed data, gitignored,
+      // and never served — nothing under app/ may import the layer that reads
+      // them (test/consult-boundary.test.js).
+      './data/.realis.json',
+      // The island-wide scan's cached result, read only by scripts/ and the
+      // local consult panel. Never by a route.
+      './data/.scan.json',
+      // Full HDB resale history back to 2017. Read only by lib/consult and
+      // scripts/, never by a route — data/hdb.json is what the site serves.
+      './data/.hdb-history.json',
+      // Per-trial AVM backtest dump, megabytes of intermediate written by
+      // `npm run build:avm-error`. Read only by scripts/, and the small table
+      // it produces (data/avm-error.json) is what anything else reads. In
+      // .gitignore too — but that list is not the one the tracer consults.
+      './data/.avm-trials.jsonl',
       // Same again for the URA planning download. Gitignoring a raw file and
       // forgetting this list has now happened twice; if you add an ingest that
       // saves its raw download, it belongs here in the same commit.

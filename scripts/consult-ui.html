@@ -1,0 +1,1315 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consult</title>
+<link rel="stylesheet" href="/tokens.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Follows the rules in CLAUDE.md: warm ground with a real surface above it,
+   --acc for interface and --acc-lit ONLY for data that is live or selected,
+   3px on a control and 8px on a panel, five type steps and no sixth. */
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:var(--t-body);line-height:1.55;-webkit-text-size-adjust:100%}
+h1,h2,h3{font-family:Archivo,system-ui,sans-serif;font-variation-settings:"wdth" 88;
+  font-weight:600;letter-spacing:-.01em;margin:0}
+.mono,.fig,td.num,.prov{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+.wrap{max-width:980px;margin:0 auto;padding:0 18px 72px}
+header{border-bottom:1px solid var(--line);background:var(--card);margin-bottom:22px}
+header .wrap{padding-block:16px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+header h1{font-size:var(--t-lead)}
+header .sub{font-size:var(--t-micro);color:var(--mute);font-family:"IBM Plex Mono",monospace}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:18px;margin-bottom:18px}
+.panel > h2{font-size:var(--t-lead);margin-bottom:4px}
+.panel > .lede{font-size:var(--t-small);color:var(--ink2);margin:0 0 14px}
+label{display:block;font-size:var(--t-micro);font-family:"IBM Plex Mono",monospace;
+  text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin-bottom:5px}
+input,select,button{font:inherit;border-radius:var(--r1)}
+input,select{width:100%;padding:9px 11px;border:1px solid var(--edge);background:var(--card);color:var(--ink)}
+input:focus,select:focus{outline:2px solid var(--acc);outline-offset:1px;border-color:var(--acc)}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:12px}
+button.go{background:var(--acc);color:var(--on-acc);border:1px solid var(--acc);padding:10px 20px;cursor:pointer;font-weight:600}
+button.go:hover{background:var(--acc-ink)}
+button.ghost{background:transparent;color:var(--acc);border:1px solid var(--edge);padding:8px 14px;cursor:pointer}
+button.ghost:hover{border-color:var(--acc)}
+.hits{list-style:none;margin:6px 0 0;padding:0;border:1px solid var(--line);border-radius:var(--r1);overflow:hidden}
+.hits li{padding:9px 11px;cursor:pointer;border-bottom:1px solid var(--line2);font-size:var(--t-small)}
+.hits li:last-child{border-bottom:0}
+.hits li:hover,.hits li[aria-selected=true]{background:var(--acc-soft)}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.chip{border:1px solid var(--edge);background:var(--card);border-radius:var(--r1);padding:6px 11px;
+  cursor:pointer;font-size:var(--t-small)}
+/* --acc-lit marks the SELECTED thing. Nothing else uses it. */
+.chip[aria-pressed=true]{border-color:var(--acc);background:var(--acc-soft);
+  box-shadow:inset 0 -2px 0 var(--acc-lit);font-weight:600}
+.big{font-family:"IBM Plex Mono",monospace;font-size:clamp(30px,6vw,46px);line-height:1.05;letter-spacing:-.02em}
+.band{font-family:"IBM Plex Mono",monospace;font-size:var(--t-lead);color:var(--ink2)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:var(--t-small);margin:10px 0 0}
+.kv dt{color:var(--mute);font-family:"IBM Plex Mono",monospace;font-size:var(--t-micro);text-transform:uppercase;letter-spacing:.05em}
+.kv dd{margin:0}
+table{width:100%;border-collapse:collapse;font-size:var(--t-small)}
+th{text-align:left;font-family:"IBM Plex Mono",monospace;font-size:var(--t-micro);text-transform:uppercase;
+  letter-spacing:.05em;color:var(--mute);font-weight:400;border-bottom:1px solid var(--line);padding:6px 8px 6px 0}
+td{padding:6px 8px 6px 0;border-bottom:1px solid var(--line2)}
+td.num{text-align:right;padding-right:14px}
+.scroll{overflow-x:auto}
+.verdict{border-left:3px solid var(--acc);padding:10px 0 10px 14px;margin:14px 0}
+.verdict.warnv{border-left-color:var(--warn)}
+.verdict .code{font-family:"IBM Plex Mono",monospace;font-size:var(--t-small);font-weight:500;letter-spacing:.02em}
+.test{margin:14px 0;padding-top:12px;border-top:1px solid var(--line2)}
+.test h3{font-size:var(--t-body);margin-bottom:4px}
+.flag{display:flex;gap:10px;font-size:var(--t-small);padding:6px 0;border-bottom:1px solid var(--line2)}
+.flag b{font-family:"IBM Plex Mono",monospace;font-weight:500;min-width:92px}
+.note{font-size:var(--t-small);color:var(--ink2);margin:10px 0 0}
+.prov{font-size:var(--t-micro);color:var(--mute);margin-top:12px;line-height:1.5}
+.warnbox{border:1px solid var(--warn);border-radius:var(--r1);padding:10px 12px;font-size:var(--t-small);margin:12px 0;color:var(--ink)}
+.bar{height:6px;background:var(--sunk);border-radius:var(--r1);overflow:hidden;margin-top:5px}
+.bar i{display:block;height:100%;background:var(--acc-lit)}
+.meta{font-size:var(--t-micro);font-family:"IBM Plex Mono",monospace;color:var(--mute)}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:6px}
+.err{color:var(--warn);font-size:var(--t-small)}
+
+details.calc{padding:0}
+details.calc summary{list-style:none;cursor:pointer;padding:16px 18px;display:flex;align-items:center;gap:10px}
+details.calc summary::-webkit-details-marker{display:none}
+details.calc summary::before{content:"+";font-family:"IBM Plex Mono",monospace;color:var(--acc);font-size:var(--t-lead);line-height:1}
+details.calc[open] summary::before{content:"\2212"}
+details.calc summary h2{font-size:var(--t-lead)}
+details.calc > *:not(summary){padding-left:18px;padding-right:18px}
+details.calc > *:last-child{padding-bottom:18px}
+details.calc .row:last-of-type{margin-bottom:14px}
+.result{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}
+.good{color:var(--up)} .bad{color:var(--dn)}
+
+#nav{display:flex;gap:2px;margin-left:auto}
+#nav a{font-family:"IBM Plex Mono",monospace;font-size:var(--t-micro);text-transform:uppercase;
+  letter-spacing:.07em;text-decoration:none;color:var(--ink2);padding:7px 13px;border-radius:var(--r1);
+  border:1px solid transparent}
+#nav a:hover{background:var(--sunk)}
+#nav a[aria-current=page]{background:var(--acc);color:var(--on-acc)}
+tr.pick{cursor:pointer}
+tr.pick:hover td{background:var(--acc-soft)}
+.gapdown{color:var(--dn);font-weight:600} .gapup{color:var(--up);font-weight:600}
+
+textarea{width:100%;padding:10px 11px;border:1px solid var(--edge);border-radius:var(--r1);
+  font-family:"IBM Plex Mono",monospace;font-size:var(--t-small);background:var(--card);color:var(--ink);resize:vertical}
+textarea:focus{outline:2px solid var(--acc);outline-offset:1px}
+td input{padding:5px 7px;font-size:var(--t-small)}
+.pill{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:var(--t-micro);
+  padding:2px 7px;border-radius:var(--r1);border:1px solid var(--line);color:var(--ink2)}
+.pill.bad{border-color:var(--dn);color:var(--dn)}
+.chosen{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line2);font-size:var(--t-small)}
+.chosen button{border:0;background:none;color:var(--dn);cursor:pointer;font-size:var(--t-body)}
+.cmp th:first-child{width:180px}
+.cmp td{vertical-align:top}
+
+.drop{display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;text-align:center;
+  border:1.5px dashed var(--edge);border-radius:var(--r2);padding:28px 16px;background:var(--card);cursor:pointer;margin:6px 0 12px}
+.drop:hover,.drop:focus,.drop.over{border-color:var(--acc);background:var(--acc-soft);outline:none}
+.drop b{font-size:var(--t-body)}
+.filerow{display:flex;gap:10px;align-items:baseline;font-size:var(--t-small);padding:6px 0;border-bottom:1px solid var(--line2)}
+.filerow .meta{margin-left:auto}
+fieldset.sweep{border:1px solid var(--line);border-radius:var(--r2);padding:10px 14px 12px;margin:0 0 12px}
+fieldset.sweep legend{font-family:Archivo,system-ui,sans-serif;font-variation-settings:"wdth" 88;font-weight:600;font-size:var(--t-body);padding:0 6px}
+label.opt{display:flex;gap:10px;align-items:flex-start;text-transform:none;letter-spacing:0;font-family:inherit;
+  font-size:var(--t-small);color:var(--ink);margin:8px 0;cursor:pointer}
+label.opt input{width:auto;margin-top:3px}
+label.opt.disabled{opacity:.5;cursor:not-allowed}
+.would{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:10px 0}
+.would > div{border:1px solid var(--line);border-radius:var(--r2);padding:10px 12px;font-size:var(--t-small)}
+.would > div.chosen{border-color:var(--acc);box-shadow:inset 0 -2px 0 var(--acc-lit)}
+.would b.n{font-family:"IBM Plex Mono",monospace;font-size:var(--t-lead)}
+.pill.stale{border-color:var(--warn);color:var(--warn)}
+.unused{color:var(--warn)}
+
+.lever{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
+.lever:first-child{border-top:0;margin-top:0;padding-top:0}
+.lever h3{font-size:var(--t-lead);font-family:Archivo,system-ui,sans-serif;font-variation-settings:"wdth" 88}
+.lever .premise{font-size:var(--t-body);color:var(--ink2);margin:4px 0 12px}
+.chain{margin:10px 0}
+.chain > h4{font-family:"IBM Plex Mono",monospace;font-size:var(--t-micro);text-transform:uppercase;
+  letter-spacing:.06em;color:var(--mute);font-weight:400;margin:0 0 6px}
+.chain.no > h4{color:var(--warn)}
+.chain .item{font-size:var(--t-small);padding:7px 0;border-bottom:1px solid var(--line2)}
+.chain .item b{display:block;margin-bottom:2px}
+.srcs{font-size:var(--t-small);margin-top:10px}
+.srcs a{color:var(--acc);text-decoration:none;border-bottom:1px solid var(--acc-soft)}
+.srcs a:hover{border-bottom-color:var(--acc)}
+.reading{display:inline-block;border:1px solid var(--line);border-radius:var(--r2);padding:10px 14px;margin:0 10px 10px 0}
+.reading .v{font-family:"IBM Plex Mono",monospace;font-size:var(--t-lead)}
+
+.art{padding:10px 0;border-bottom:1px solid var(--line2)}
+.art a.t{font-size:var(--t-body);color:var(--ink);text-decoration:none;font-weight:600;line-height:1.35}
+.art a.t:hover{color:var(--acc)}
+.art .meta{display:block;margin-top:3px}
+.art .sum{font-size:var(--t-small);color:var(--ink2);margin-top:3px}
+.art .new{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:var(--t-micro);
+  color:var(--acc);border:1px solid var(--acc-lit);border-radius:var(--r1);padding:0 5px;margin-right:6px}
+.lv{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:var(--t-micro);
+  border:1px solid var(--line);border-radius:var(--r1);padding:0 5px;margin-left:6px;color:var(--mute)}
+@media print{
+  header,#nav,.formpanel,.actions,.hits,details.calc:not([open]){display:none!important}
+  details.calc summary{display:none}
+  body{background:#fff;font-size:11pt}
+  .panel{border:1px solid #ccc;break-inside:avoid;page-break-inside:avoid;margin-bottom:12px}
+  .wrap{max-width:none;padding:0}
+  a{text-decoration:none;color:inherit}
+}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>Consult</h1>
+  <nav id="nav">
+    <a href="#/valuation" data-page="valuation">Valuation</a>
+    <a href="#/scan" data-page="scan">Scan</a>
+    <a href="#/find" data-page="find">Find</a>
+    <a href="#/development" data-page="development">Development</a>
+    <a href="#/compare" data-page="compare">Compare</a>
+    <a href="#/data" data-page="data">Data</a>
+    <a href="#/briefing" data-page="briefing">Briefing</a>
+  </nav>
+  <span class="sub" id="ctx">local · not deployed</span>
+</div></header>
+
+<div class="wrap">
+<section class="page" id="page-valuation">
+  <section class="panel formpanel">
+    <h2>The property</h2>
+    <p class="lede">Type an address. Everything else fills itself in from what that block has actually filed — change anything that is wrong.</p>
+
+    <label for="q">Address, block or project</label>
+    <input id="q" autocomplete="off" placeholder="e.g. 649 jln tenaga, or bishan st 24">
+    <ul class="hits" id="hits" hidden></ul>
+
+    <div id="picked" hidden>
+      <div class="chips" id="types"></div>
+      <div class="row">
+        <div><label for="area">Floor area (sqft)</label><input id="area" inputmode="numeric"></div>
+        <div><label for="floor">Storey</label><input id="floor" inputmode="numeric" placeholder="optional"></div>
+        <div><label for="price">Asking price (S$)</label><input id="price" inputmode="numeric" placeholder="optional"></div>
+        <div><label for="years">Hold (years)</label>
+          <select id="years"><option>3</option><option>5</option><option selected>7</option><option>10</option></select></div>
+      </div>
+      <div class="actions">
+        <button class="go" id="run">Run the report</button>
+        <button class="ghost" id="safe" aria-pressed="false">Client-safe: off</button>
+      </div>
+      <p class="note" id="safenote" hidden>Client-safe drops the point estimate and keeps the range and the comparables — the shape rule 2 permits on anything that leaves this screen.</p>
+    </div>
+    <p class="err" id="err" hidden></p>
+  </section>
+
+
+  <details class="panel calc" id="planbox">
+    <summary><h2>Can they afford it?</h2></summary>
+    <p class="lede">TDSR, MSR, LTV and the stress rate, from <code>lib/calc</code>. Every rate carries a source and a review date.</p>
+    <div class="row">
+      <div><label for="pprice">Price (S$)</label><input id="pprice" inputmode="numeric"></div>
+      <div><label for="ptype">Property type</label><select id="ptype">
+        <option value="HDB">HDB</option><option value="EC_DEVELOPER">EC from developer</option>
+        <option value="EC_RESALE">EC resale</option><option value="PRIVATE">Private</option></select></div>
+      <div><label for="pprofile">Buyer</label><select id="pprofile">
+        <option value="SC">Singapore citizen</option><option value="PR">PR</option><option value="FOREIGNER">Foreigner</option></select></div>
+      <div><label for="pcount">Which property</label><select id="pcount">
+        <option value="1">1st</option><option value="2">2nd</option><option value="3">3rd or more</option></select></div>
+    </div>
+    <div class="row">
+      <div><label for="inc1">Applicant 1 — fixed monthly</label><input id="inc1" inputmode="numeric"></div>
+      <div><label for="var1">…variable monthly</label><input id="var1" inputmode="numeric" placeholder="optional"></div>
+      <div><label for="age1">…age</label><input id="age1" inputmode="numeric" value="35"></div>
+    </div>
+    <div class="row">
+      <div><label for="inc2">Applicant 2 — fixed monthly</label><input id="inc2" inputmode="numeric" placeholder="optional"></div>
+      <div><label for="var2">…variable monthly</label><input id="var2" inputmode="numeric" placeholder="optional"></div>
+      <div><label for="age2">…age</label><input id="age2" inputmode="numeric" placeholder="optional"></div>
+    </div>
+    <div class="row">
+      <div><label for="debts">Existing monthly debts</label><input id="debts" inputmode="numeric" placeholder="car, loans"></div>
+      <div><label for="cash">Cash available</label><input id="cash" inputmode="numeric"></div>
+      <div><label for="cpf">CPF OA available</label><input id="cpf" inputmode="numeric"></div>
+      <div><label for="loans">Existing housing loans</label><select id="loans"><option value="0">none</option><option value="1">one</option><option value="2">two or more</option></select></div>
+    </div>
+    <div class="actions"><button class="go" id="runplan">Work it out</button></div>
+    <div id="planout"></div>
+  </details>
+
+  <details class="panel calc" id="procbox">
+    <summary><h2>What would a seller clear?</h2></summary>
+    <p class="lede">The CPF refund with accrued interest is the number sellers are most often wrong about — and it is the one that decides whether there is cash at the end.</p>
+    <div class="row">
+      <div><label for="sprice">Sale price (S$)</label><input id="sprice" inputmode="numeric"></div>
+      <div><label for="sloan">Outstanding loan</label><input id="sloan" inputmode="numeric"></div>
+      <div><label for="scpf">CPF used (principal)</label><input id="scpf" inputmode="numeric"></div>
+      <div><label for="syears">Years held</label><input id="syears" inputmode="numeric"></div>
+    </div>
+    <div class="row">
+      <div><label for="stype">Property type</label><select id="stype"><option value="HDB">HDB</option><option value="PRIVATE">Private</option></select></div>
+      <div><label for="sdate">Purchase date</label><input id="sdate" type="date"></div>
+      <div><label for="sfee">Agent fee (%)</label><input id="sfee" inputmode="decimal" value="2"></div>
+      <div><label for="sother">Other costs</label><input id="sother" inputmode="numeric" placeholder="optional"></div>
+    </div>
+    <div class="actions"><button class="go" id="runproc">Work it out</button></div>
+    <div id="procout"></div>
+  </details>
+
+  <div id="out"></div>
+</section>
+
+<section class="page" id="page-scan" hidden>
+  <section class="panel">
+    <h2>Blocks trading away from their neighbourhood</h2>
+    <p class="lede">Every HDB block priced twice — once on its own filed sales, once on its neighbours' — with the part visible risk explains already stripped out. <b>This is a farming list, not listings.</b> It says where to look.</p>
+    <div class="row">
+      <div><label for="scantown">Town</label><select id="scantown"><option value="">all</option></select></div>
+      <div><label for="scanview">Show</label><select id="scanview">
+        <option value="unexplainedDown">Below, nothing explains it</option>
+        <option value="explainedDown">Below, but a risk explains it</option>
+        <option value="unexplainedUp">Above, nothing explains it</option>
+      </select></div>
+    </div>
+    <p class="prov" id="scanmeta"></p>
+    <div id="scanout"></div>
+  </section>
+</section>
+
+<section class="page" id="page-find" hidden>
+  <section class="panel">
+    <h2>Screen listings</h2>
+    <p class="lede">Paste listings — one per block, separated by a blank line. A link, copied detail, or both. <b>Nothing is fetched from a portal</b>; this reads what you paste.</p>
+    <label for="paste">Paste here</label>
+    <textarea id="paste" rows="8" placeholder="https://www.propertyguru.com.sg/listing/…
+Blk 649 Jln Tenaga
+S$858,000
+1,313 sqft
+#09-234
+
+Blk 275A Bishan St 24
+$1.28M
+1001 sqft"></textarea>
+    <div class="actions"><button class="go" id="doparse">Read them</button>
+      <button class="ghost" id="doscreen" hidden>Screen them</button></div>
+    <div id="parsed"></div>
+    <div id="screened"></div>
+  </section>
+
+  <section class="panel">
+    <h2>What your feed has been doing</h2>
+    <p class="lede">Built by <code>npm run ingest:listings</code>, one snapshot at a time. A single export is a list; a run of them tells you what has been sitting and what has been cut — which is the only reason to ingest weekly.</p>
+    <p class="prov" id="feedmeta"></p>
+    <div id="feedout"></div>
+  </section>
+</section>
+
+<section class="page" id="page-compare" hidden>
+  <section class="panel">
+    <h2>Side by side</h2>
+    <p class="lede">Up to four. Each is priced on its own evidence — nothing here is averaged across them.</p>
+    <label for="cq">Add a property</label>
+    <input id="cq" autocomplete="off" placeholder="search an address">
+    <ul class="hits" id="chits" hidden></ul>
+    <div id="clist"></div>
+    <div class="actions"><button class="go" id="docompare">Compare</button>
+      <button class="ghost" id="cclear">Clear</button></div>
+    <div id="compout"></div>
+  </section>
+</section>
+
+<section class="page" id="page-data" hidden>
+  <section class="panel">
+    <h2>Add an export</h2>
+    <p class="lede">Drop a CSV in. Nothing is written until you have seen exactly what it will do.</p>
+
+    <div class="chips" id="dkind">
+      <button class="chip" data-kind="listings" aria-pressed="true">Listings export</button>
+      <button class="chip" data-kind="realis" aria-pressed="false">REALIS export</button>
+    </div>
+    <p class="note" id="dkindnote">From AgentNet, 99.co Agent, SRX or the Huttons back-end. It needs an address or listing link, an asking price and a floor area — anything else is a bonus.</p>
+
+    <div class="drop" id="drop" tabindex="0" role="button" aria-label="Choose CSV files">
+      <b>Drop CSV files here</b>
+      <span class="meta">or click to choose · several files at once are imported together as one snapshot</span>
+      <input type="file" id="dfile" accept=".csv,text/csv" multiple hidden>
+    </div>
+    <div id="dfiles"></div>
+
+    <fieldset class="sweep" id="dsweep" hidden>
+      <legend>What does this export cover?</legend>
+      <label class="opt"><input type="radio" name="sweep" value="full">
+        <span><b>Everything I watch.</b> A full sweep — any listing I already had that is not in here is marked gone.</span></label>
+      <label class="opt"><input type="radio" name="sweep" value="partial">
+        <span><b>Only part of it.</b> One town, one saved search, a handful — nothing is marked gone.</span></label>
+      <p class="note meta">There is no default. Pick full by mistake on a filtered export and every listing it didn't cover disappears, which looks exactly like the market moving.</p>
+    </fieldset>
+
+    <div class="actions">
+      <button class="go" id="dcheck" disabled>Check it</button>
+      <button class="go" id="dimport" hidden disabled>Import</button>
+    </div>
+    <div id="dpreview"></div>
+    <div id="dresult"></div>
+  </section>
+
+  <section class="panel">
+    <h2>What the tools are running on</h2>
+    <p class="lede">Every tool reads a file somebody had to build. An old one gives confident answers about a market that has moved — and nothing inside the tool can tell.</p>
+    <div id="dstatus"></div>
+  </section>
+</section>
+
+<section class="page" id="page-briefing" hidden>
+  <section class="panel">
+    <h2>Today's reading</h2>
+    <p class="lede">Headlines and links from the publishers' own feeds. <b>Click through and read it at the source</b> — nothing of the article is held here beyond the one-liner they put in the feed themselves.</p>
+    <div class="chips" id="rdsrc"></div>
+    <p class="prov" id="rdmeta"></p>
+    <div id="rdout"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Where the indices stand</h2>
+    <p class="lede">The numbers every chain on this page ends in. Quarterly, and they lag whatever caused them by more than one quarter.</p>
+    <div id="readings"></div>
+  </section>
+
+  <section class="panel">
+    <h2>If the rate moves</h2>
+    <p class="lede">The two consequences people routinely merge: what a borrower <b>pays</b>, which moves, and what they may <b>borrow</b>, which often does not.</p>
+    <div class="row">
+      <div><label for="rloan">Loan (S$)</label><input id="rloan" inputmode="numeric" value="700000"></div>
+      <div><label for="rten">Tenure (years)</label><input id="rten" inputmode="numeric" value="25"></div>
+      <div><label for="rfrom">From (%)</label><input id="rfrom" inputmode="decimal" value="3.0"></div>
+      <div><label for="rto">To (%)</label><input id="rto" inputmode="decimal" value="3.5"></div>
+    </div>
+    <div class="row">
+      <div><label for="rinc">Household income (S$/mo)</label><input id="rinc" inputmode="numeric" value="12000" placeholder="optional"></div>
+      <div><label for="rdebt">Existing monthly debts</label><input id="rdebt" inputmode="numeric" placeholder="optional"></div>
+      <div><label for="rtype">Property type</label><select id="rtype">
+        <option value="HDB">HDB</option><option value="EC_DEVELOPER">EC from developer</option>
+        <option value="EC_RESALE">EC resale</option><option value="PRIVATE">Private</option></select></div>
+    </div>
+    <div class="actions"><button class="go" id="rrun">Work it out</button></div>
+    <div id="rout"></div>
+  </section>
+
+  <section class="panel">
+    <h2>How it reaches Singapore</h2>
+    <p class="lede"><b>This is not a news feed.</b> Nothing here reproduces anyone's reporting — the chains are written down once and reviewed like a rate, the primary sources are linked, and what changes between readings is the data at each link. The part usually missing from commentary is the third column: what a lever does <b>not</b> touch.</p>
+    <div id="levers"></div>
+  </section>
+</section>
+
+<section class="page" id="page-development" hidden>
+  <section class="panel">
+    <h2>Profile a development</h2>
+    <p class="lede">Not one unit priced — the whole thing, compared with itself. Holding one project constant is what makes its own size and floor spreads readable: location, tenure, vintage, facilities and developer are identical on both sides of every comparison below.</p>
+    <label for="dq">Project, condo or block</label>
+    <input id="dq" autocomplete="off" placeholder="e.g. the sail, 1919, 649 jln tenaga">
+    <ul class="hits" id="dhits" hidden></ul>
+  </section>
+  <div id="devout"></div>
+</section>
+</div>
+
+<script type="module">
+const $ = s => document.querySelector(s);
+const money = n => 'S$' + Number(n).toLocaleString('en-SG', { maximumFractionDigits: 0 });
+const pc = n => (n > 0 ? '+' : '') + (100 * n).toFixed(1) + '%';
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+let chosen = null, summary = null, safeMode = false;
+
+/* ── search ─────────────────────────────────────────────────────────────── */
+let t;
+$('#q').addEventListener('input', e => {
+  clearTimeout(t);
+  const q = e.target.value;
+  t = setTimeout(async () => {
+    if (q.trim().length < 2) { $('#hits').hidden = true; return; }
+    const r = await fetch('/api/search?q=' + encodeURIComponent(q)).then(x => x.json());
+    const ul = $('#hits');
+    ul.innerHTML = r.hits.map(h => `<li data-href="${esc(h.href)}">${esc(h.label)} <span class="meta">${esc(h.kind)}</span></li>`).join('');
+    ul.hidden = !r.hits.length;
+  }, 160);
+});
+$('#hits').addEventListener('click', e => {
+  const li = e.target.closest('li'); if (!li) return;
+  pick(li.dataset.href);
+});
+
+async function pick(href) {
+  const s = await fetch('/api/record?href=' + encodeURIComponent(href)).then(x => x.json());
+  if (s.error) { $('#err').textContent = s.error; $('#err').hidden = false; return; }
+  chosen = href; summary = s;
+  $('#err').hidden = true;
+  $('#hits').hidden = true;
+  $('#q').value = s.label;
+  $('#ctx').textContent = `${s.label}${s.town ? ' · ' + s.town : ''} · ${s.kind}`;
+  $('#types').innerHTML = s.types.map((t2, i) =>
+    `<button class="chip" aria-pressed="${i === 0}" data-i="${i}">${esc(t2.type)} <span class="meta">${t2.areaSqft} sqft · ${t2.n} filed</span></button>`).join('');
+  applyType(0);
+  $('#picked').hidden = false;
+}
+
+function applyType(i) {
+  const t2 = summary.types[i]; if (!t2) return;
+  $('#area').value = t2.areaSqft || '';
+  $('#floor').value = t2.floor ? Math.round(t2.floor) : '';
+  [...$('#types').children].forEach((c, j) => c.setAttribute('aria-pressed', String(j === i)));
+}
+$('#types').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (b) applyType(Number(b.dataset.i));
+});
+
+$('#safe').addEventListener('click', () => {
+  safeMode = !safeMode;
+  $('#safe').setAttribute('aria-pressed', String(safeMode));
+  $('#safe').textContent = 'Client-safe: ' + (safeMode ? 'on' : 'off');
+  $('#safenote').hidden = !safeMode;
+});
+
+/* ── run ────────────────────────────────────────────────────────────────── */
+$('#run').addEventListener('click', async () => {
+  $('#run').disabled = true; $('#run').textContent = 'Working…';
+  try {
+    const body = {
+      href: chosen,
+      areaSqft: Number($('#area').value),
+      floor: Number($('#floor').value) || null,
+      price: Number(String($('#price').value).replace(/[^0-9.]/g, '')) || null,
+      years: Number($('#years').value),
+      clientSafe: safeMode,
+    };
+    const r = await fetch('/api/report', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(x => x.json());
+    if (r.error) throw new Error(r.error);
+    render(r);
+  } catch (e) {
+    $('#err').textContent = e.message; $('#err').hidden = false;
+  } finally {
+    $('#run').disabled = false; $('#run').textContent = 'Run the report';
+  }
+});
+
+/* ── render ─────────────────────────────────────────────────────────────── */
+function render(r) {
+  const out = [];
+  const e = r.estimate;
+
+  /* the estimate */
+  if (!e.ok) {
+    out.push(panel('Estimate', `<div class="warnbox"><b>Did not run.</b><br>${esc(e.reason)}</div>
+      <p class="note">This is the honest state, not a failure to work around. A wider search would answer a different question and present it as this one.</p>`));
+  } else {
+    const pt = r.clientSafe ? '' : `<div class="big">${e.psf} psf</div><div class="band">${money(e.price)}</div>`;
+    const err = e.error ? `
+      <div class="test"><h3>How wrong this is likely to be</h3>
+      <p class="note"><b>${esc(e.error.band)}</b> — half of lookups like this came in within
+      <b>${(100 * e.error.medianPct).toFixed(1)}%</b>, nine in ten within <b>${(100 * e.error.p90Pct).toFixed(1)}%</b>.
+      Measured over ${e.error.trials.toLocaleString()} held-out sales${e.error.bin ? ' · ' + esc(e.error.bin) : ''}.</p>
+      <p class="note meta">This is not the band above. The band says where comparable homes transacted; this says how often an estimate built this way has missed.</p></div>`
+      : `<div class="warnbox">Error <b>unmeasured</b> — no error table has been built. That is not the same as the error being small. Run <code>npm run build:avm-error</code>.</div>`;
+    out.push(panel('Indicative range', `
+      ${pt}
+      <div class="band">${e.band.psfLow}–${e.band.psfHigh} psf · ${money(e.band.priceLow)} – ${money(e.band.priceHigh)}</div>
+      <p class="note">The weighted interquartile range of what comparable homes <b>actually transacted at</b>, restated onto ${r.input.floor ? 'storey ' + r.input.floor : 'the filed storeys'} and into one quarter's money. Not ±x% of a point, and not a confidence interval — no distribution was fitted, so none is claimed.</p>
+      ${err}
+      <dl class="kv">
+        <dt>cohort</dt><dd>${e.evidence.sample} comparable sales — ${e.evidence.fromAddress} at this address, ${e.evidence.fromNearby} nearby${e.evidence.radiusKm ? ' (within ' + e.evidence.radiusKm + 'km)' : ''}</dd>
+        <dt>type</dt><dd>${esc(e.evidence.flatType || '—')} <span class="meta">${esc(e.evidence.flatTypeBasis || '')}</span></dd>
+        <dt>size band</dt><dd>${e.evidence.areaFromSqm ?? '—'}–${e.evidence.areaToSqm ?? '—'} sqm around ${e.evidence.targetAreaSqm} sqm</dd>
+        ${e.evidence.floorAdjusted ? `<dt>storey</dt><dd>${e.evidence.floorAdjusted.moved} of ${e.evidence.floorAdjusted.of} restated onto storey ${e.evidence.floorAdjusted.to} · basis <b>${esc(e.evidence.floorAdjusted.basis)}</b>${e.evidence.floorAdjusted.basis === 'town bands' ? ' <span class="err">(fallback — confounded by building age)</span>' : ''}</dd>` : ''}
+        ${e.indexed?.ran !== false ? `<dt>restated to</dt><dd>${esc(e.indexed.asOfQuarter)} <span class="meta">${e.indexed.lagMonths}mo behind today · ${esc(e.indexed.series.label)}</span></dd>` : ''}
+      </dl>`));
+  }
+
+  /* the three tests */
+  if (r.residual?.ok) {
+    const R = r.residual, warn = /premium/.test(R.verdict.code);
+    out.push(panel('Against the asking price', `
+      <dl class="kv">
+        <dt>asking</dt><dd class="mono">${R.asking.psf} psf · ${money(R.asking.price)}</dd>
+        <dt>estimate</dt><dd class="mono">${R.estimate.psf} psf — asking is <b>${pc(R.gap.pct)}</b> (${money(Math.abs(R.gap.dollars))} ${R.gap.pct > 0 ? 'above' : 'below'})</dd>
+      </dl>
+      <div class="test"><h3>Test 1 · does the gap survive this method's own error?</h3>
+        <p class="note">${R.test1.ran
+          ? (R.test1.survives
+            ? `<b>Yes.</b> Beyond the typical ${(100 * R.test1.typicalMiss).toFixed(1)}% miss` + (R.test1.exceedsP90 ? `, and beyond the ${(100 * R.test1.tailMiss).toFixed(1)}% that nine in ten come under.` : `, inside the ${(100 * R.test1.tailMiss).toFixed(1)}% that one in ten misses by.`)
+            : `<b>No.</b> Inside the ${(100 * R.test1.typicalMiss).toFixed(1)}% that half of lookups like this miss by anyway. Everything below is noise.`)
+          : esc(R.test1.why)}</p></div>
+      <div class="test"><h3>Test 2 · does a risk the data can see explain the direction?</h3>
+        ${R.test2.flagged.length
+          ? R.test2.flagged.map(f => `<div class="flag"><b>${esc(f.key)} ${f.points}/${f.max}</b><span>${esc(f.finding)}</span></div>`).join('')
+          : `<p class="note"><b>Nothing flagged.</b> All ${R.test2.coverage.ran} checks came back clear.</p>`}
+        ${R.test2.clear.length ? `<p class="note meta">clear: ${R.test2.clear.map(c => esc(c.key)).join(', ')}</p>` : ''}
+        ${R.test2.coverage.couldNotRun.length ? `<p class="err">could not run: ${R.test2.coverage.couldNotRun.map(c => esc(c.key)).join(', ')}</p>` : ''}</div>
+      <div class="verdict ${warn ? 'warnv' : ''}">
+        <div class="code">Test 3 · ${esc(R.verdict.code)}</div>
+        <p class="note">${esc(R.verdict.says)}</p>
+        ${R.verdict.qualifier ? `<p class="err">${esc(R.verdict.qualifier)}</p>` : ''}
+      </div>
+      <p class="prov">${esc(R.whatIsLeft)}</p>`));
+  }
+
+  /* the score */
+  if (r.score?.ok) {
+    const s = r.score;
+    out.push(panel('What it has going for it', `
+      <div class="band">${s.points} <span class="meta">of a possible ${s.max}</span></div>
+      <div class="bar"><i style="width:${(100 * s.ratio).toFixed(0)}%"></i></div>
+      <p class="note meta">${esc(s.polarity)}</p>
+      ${s.factors.map(f => `<div class="flag"><b>${esc(f.key)} ${f.ran ? f.points + '/' + f.max : 'n/a'}</b><span>${esc(f.finding || f.why)}</span></div>`).join('')}
+      <p class="prov">${esc(s.basis)}</p>`));
+  }
+
+  /* the outlook */
+  if (r.outlook?.ok) {
+    const o = r.outlook, L = o.lease, R2 = o.record;
+    out.push(panel(`Holding it ${o.years} years`, `
+      <div class="test"><h3>What is already scheduled</h3>
+        ${L.ran && !L.freehold ? `<p class="note"><b>Lease</b> ${L.leftNow} years left → <b>${L.leftThen}</b> in ${o.years}. SLA relativity ${L.relativityNow}% → ${L.relativityThen}% of freehold — <b>${pc(L.dropPct)}</b>, whatever the market does.</p>
+          <p class="note meta">and it accelerates: ${L.ladder.map(x => `${x.at}yr left ${x.perYear.toFixed(2)}/yr`).join(' · ')}</p>`
+          : `<p class="note"><b>Lease</b> ${esc(L.note || L.why)}</p>`}
+        <p class="note"><b>Costs</b> duty ${money(o.friction.buyDuty)} · selling ${money(o.friction.sellCost)} — <b>${pc(o.friction.totalPct)}</b> of the price, round trip.</p>
+      </div>
+      <div class="verdict"><div class="code">The hurdle</div>
+        <p class="note"><b>${pc(o.hurdle.totalPct)} over ${o.years} years</b> (${(100 * o.hurdle.cagr).toFixed(2)}% a year compounding) just to return the money that went in. ${pc(o.hurdle.parts.friction)} of that is costs, ${pc(o.hurdle.parts.lease)} is the lease running down.</p></div>
+      <div class="test"><h3>How often the record cleared a hurdle that size</h3>
+        ${R2.ran ? `<p class="note">Every ${o.years}-year stretch in the ${esc(R2.index.label)}, ${R2.from} to ${R2.to} — ${R2.n} of them, ${R2.independent} non-overlapping.</p>
+          <div class="scroll"><table><tr><th>p10</th><th>p25</th><th>median</th><th>p75</th><th>p90</th></tr>
+          <tr><td class="num">${pc(R2.percentiles.p10)}</td><td class="num">${pc(R2.percentiles.p25)}</td><td class="num"><b>${pc(R2.percentiles.median)}</b></td><td class="num">${pc(R2.percentiles.p75)}</td><td class="num">${pc(R2.percentiles.p90)}</td></tr></table></div>
+          <p class="note">${R2.negative} of ${R2.n} finished below where they started. <b>${R2.belowHurdle.count} of ${R2.belowHurdle.of}</b> finished at or below the ${pc(o.hurdle.totalPct)} hurdle.</p>
+          ${R2.regime?.preModern ? `<div class="warnbox">${esc(R2.regime.note)}</div>` : ''}
+          <p class="prov">extremes, for the record and not as a forecast: worst ${pc(R2.extremes.worst.change)} (${R2.extremes.worst.from} → ${R2.extremes.worst.to}), best ${pc(R2.extremes.best.change)} (${R2.extremes.best.from} → ${R2.extremes.best.to}). Each is ONE overlapping window out of ${R2.n}, and the least stable number here.</p>`
+        : `<div class="warnbox"><b>Did not run.</b> ${esc(R2.why)}${R2.longestReadable ? ` The longest this index supports is <b>${R2.longestReadable} years</b>.` : ''}</div>`}
+      </div>
+      ${o.supply?.ran && o.supply.mop ? `<div class="test"><h3>Supply already on the calendar</h3>
+        <p class="note">${o.supply.mop.upcomingBlocks} blocks within 1km reach MOP inside ${o.supply.mop.years} years — ${o.supply.mop.upcomingUnits.toLocaleString()} units against ${o.supply.mop.totalUnits.toLocaleString()} nearby (${(100 * o.supply.mop.ratio).toFixed(1)}%).</p>
+        <p class="note meta">${esc(o.supply.note)}</p></div>` : ''}
+      <div class="test"><h3>What this cannot see</h3>
+        <ul class="note">${o.unknown.map(u => `<li>${esc(u)}</li>`).join('')}</ul></div>`));
+  }
+
+  /* comparables */
+  if (r.estimate.ok && r.estimate.comparables) {
+    out.push(panel('Every comparable, and what was done to it', `
+      <div class="scroll"><table>
+      <tr><th>month</th><th>address</th><th class="num">filed</th><th class="num">→storey</th><th class="num">×index</th><th class="num">=used</th><th class="num">dist</th>${r.clientSafe ? '' : '<th class="num">weight</th>'}</tr>
+      ${[...r.estimate.comparables].sort((a, b) => (b.weight ?? 0) - (a.weight ?? 0)).map(c => `<tr>
+        <td class="mono">${esc(c.month)}</td><td>${esc(c.label)}</td>
+        <td class="num">${c.psfFiled ?? c.psfPreIndex}</td>
+        <td class="num">${c.psfFiled ? c.psfPreIndex : '—'}</td>
+        <td class="num">${c.indexFactor ? c.indexFactor.toFixed(3) : '—'}</td>
+        <td class="num"><b>${c.psf}</b></td>
+        <td class="num">${c.distanceM ?? 0}m</td>
+        ${r.clientSafe ? '' : `<td class="num">${(c.weight ?? 0).toFixed(3)}</td>`}</tr>`).join('')}
+      </table></div>
+      <p class="prov">Distances are straight-line. What sits between two points — a canal, an expressway, a fence — is in no dataset held here.</p>`));
+  }
+
+  /* provenance + export */
+  out.push(panel('Source and method', `
+    <p class="prov">
+      ${esc(r.record.label)} · ${esc(r.record.kind)}${r.record.town ? ' · ' + esc(r.record.town) : ''}<br>
+      AVM ${esc(r.estimate.version || '—')}${r.estimate.error ? ' · error table ' + esc(r.estimate.error.builtAt || '') : ''}<br>
+      Sources: HDB Resale Flat Prices (data.gov.sg, Singapore Open Data Licence v1.0) · URA Data Service · SLA leasehold relativity table<br>
+      Generated ${esc(r.generatedAt)}${r.clientSafe ? ' · CLIENT-SAFE: the point estimate is withheld' : ''}
+    </p>
+    <div class="warnbox">An indicative range from recorded transactions and the details given. <b>Not an HDB, bank or licensed valuer's valuation.</b> Final sale price, loan amount and official valuation may differ.</div>
+    <div class="actions">
+      <button class="ghost" onclick="window.print()">Export as PDF</button>
+      <button class="ghost" id="dl">Download this report</button>
+    </div>`));
+
+  $('#out').innerHTML = out.join('');
+  $('#dl').addEventListener('click', () => {
+    const doc = '<!doctype html><meta charset="utf-8"><title>' + esc(r.record.label) + '</title>' +
+      '<style>' + [...document.querySelectorAll('style')].map(s => s.textContent).join('') + '</style>' +
+      '<div class="wrap">' + $('#out').innerHTML + '</div>';
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([doc], { type: 'text/html' }));
+    a.download = (r.record.label || 'report').replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.html';
+    a.click();
+  });
+  $('#out').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+
+/* ── the calculators ─────────────────────────────────────────────────────
+   Separate from the valuation on purpose: what a home is worth, what a buyer
+   can borrow and what a seller clears are three different questions, and
+   answering them in one blob is how a reader stops being able to tell which
+   number came from where. */
+function prefillCalcs() {
+  const asking = Number(String($('#price').value).replace(/[^0-9.]/g, '')) || null;
+  if (asking) { if (!$('#pprice').value) $('#pprice').value = asking; if (!$('#sprice').value) $('#sprice').value = asking; }
+  if (summary && !$('#ptype').dataset.touched) {
+    const t = summary.kind === 'HDB' ? 'HDB' : 'PRIVATE';
+    $('#ptype').value = t; $('#stype').value = t;
+  }
+}
+$('#ptype').addEventListener('change', e => { e.target.dataset.touched = '1'; });
+for (const id of ['#planbox', '#procbox']) $(id).addEventListener('toggle', prefillCalcs);
+
+$('#runplan').addEventListener('click', async () => {
+  const num = id => Number(String($(id).value).replace(/[^0-9.]/g, '')) || 0;
+  const body = {
+    price: num('#pprice'), propertyType: $('#ptype').value, profile: $('#pprofile').value,
+    propertyCount: Number($('#pcount').value), monthlyDebts: num('#debts'),
+    cashAvailable: num('#cash'), cpfAvailable: num('#cpf'), existingLoans: Number($('#loans').value),
+    applicants: [
+      { fixedIncome: num('#inc1'), variableIncome: num('#var1'), age: num('#age1') || 35 },
+      { fixedIncome: num('#inc2'), variableIncome: num('#var2'), age: num('#age2') || 35 },
+    ],
+  };
+  const r = await fetch('/api/plan', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(x => x.json());
+  if (r.error) { $('#planout').innerHTML = `<p class="err">${esc(r.error)}</p>`; return; }
+  const p = r.plan, a = p.afford;
+  $('#planout').innerHTML = `<div class="result">
+    <div class="big">${money(p.loan)}</div>
+    <div class="band">borrowable — limited by <b>${esc(p.limitedBy)}</b></div>
+    <dl class="kv">
+      <dt>tenure</dt><dd>${a.tenureYears} years, assessed at the ${(100 * p.assumptions.stressRate).toFixed(1)}% stress rate (not the offered rate)</dd>
+      <dt>income counted</dt><dd>${money(a.totalIncomeCounted)}/mo${body.applicants.some(x => x.variableIncome) ? ' — variable income haircut applied' : ''}</dd>
+      <dt>ltv</dt><dd>${(100 * p.ltv.rate).toFixed(0)}% · ${esc(p.ltv.why)}</dd>
+      <dt>downpayment</dt><dd>${money(p.downpayment)} — cash ${money(p.cashTowardsDown)}, CPF ${money(p.cpfTowardsDown)}${p.cashFloor ? ` (cash floor ${money(p.cashFloor)})` : ''}</dd>
+      <dt>duties</dt><dd>${money(p.dutyTotal)}</dd>
+      <dt>cash needed</dt><dd class="mono"><b>${money(p.cashNeeded)}</b></dd>
+    </dl>
+    <p class="note ${p.works ? 'good' : 'bad'}"><b>${p.works ? 'This works on the figures given.' : `Short by ${money(p.shortfall)}.`}</b></p>
+    ${p.ratesUnverified ? '<div class="warnbox">The LTV table has no review date recorded — treat these as unverified.</div>' : ''}
+    ${p.cashFloorUnverified ? '<div class="warnbox">The HDB cash floor has no review date recorded.</div>' : ''}
+    <p class="prov">TDSR ${(100 * p.assumptions.tdsrLimit).toFixed(0)}%${p.assumptions.msrLimit ? ` · MSR ${(100 * p.assumptions.msrLimit).toFixed(0)}%` : ''} · stress ${(100 * p.assumptions.stressRate).toFixed(1)}% · rates reviewed ${esc(r.reviewed.rates)}${r.reviewed.ltv ? ` · LTV reviewed ${esc(r.reviewed.ltv)}` : ''}. An indication of borrowing capacity, not a loan approval — the bank decides.</p>
+  </div>`;
+});
+
+$('#runproc').addEventListener('click', async () => {
+  const num = id => Number(String($(id).value).replace(/[^0-9.]/g, '')) || 0;
+  const body = {
+    salePrice: num('#sprice'), outstandingLoan: num('#sloan'), cpfPrincipal: num('#scpf'),
+    yearsHeld: num('#syears'), propertyType: $('#stype').value,
+    purchaseDate: $('#sdate').value || null, agentFeePct: $('#sfee').value, otherCosts: num('#sother'),
+  };
+  const r = await fetch('/api/proceeds', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(x => x.json());
+  if (r.error) { $('#procout').innerHTML = `<p class="err">${esc(r.error)}</p>`; return; }
+  const p = r.proceeds;
+  $('#procout').innerHTML = `<div class="result">
+    <div class="big ${p.cashInHand < 0 ? 'bad' : ''}">${money(p.cashInHand)}</div>
+    <div class="band">${p.cashInHand < 0 ? 'to bring to completion' : 'cash in hand'}</div>
+    <div class="scroll"><table>
+      <tr><th>item</th><th class="num">amount</th></tr>
+      <tr><td>Sale price</td><td class="num">${money(p.salePrice)}</td></tr>
+      <tr><td>Outstanding loan</td><td class="num">−${money(p.outstandingLoan)}</td></tr>
+      <tr><td>CPF principal returned</td><td class="num">−${money(p.cpfPrincipal)}</td></tr>
+      <tr><td>CPF accrued interest</td><td class="num">−${money(p.cpfAccruedInterest)}</td></tr>
+      <tr><td>Agent fee + GST</td><td class="num">−${money(p.agentFee)}</td></tr>
+      <tr><td>Legal</td><td class="num">−${money(p.legalFees)}</td></tr>
+      ${p.ssd.total ? `<tr><td>Seller's stamp duty (${(100 * p.ssd.rate).toFixed(0)}%)</td><td class="num">−${money(p.ssd.total)}</td></tr>` : ''}
+      ${p.otherCosts ? `<tr><td>Other</td><td class="num">−${money(p.otherCosts)}</td></tr>` : ''}
+    </table></div>
+    <p class="note">The CPF refund is <b>${money(p.cpfTotalReturned)}</b> — principal plus ${money(p.cpfAccruedInterest)} of accrued interest. It goes back to CPF, not to the seller.</p>
+    ${r.timeline ? `<p class="note meta">${esc(JSON.stringify(r.timeline.ssd ?? r.timeline).slice(0, 160))}</p>` : ''}
+    <ul class="prov">${p.caveats.map(c => `<li>${esc(c)}</li>`).join('')}</ul>
+  </div>`;
+});
+
+
+/* ── pages ───────────────────────────────────────────────────────────────
+   Separate surfaces because they answer separate questions. Valuation is
+   about one home you already have in mind; Scan is about ten thousand you do
+   not. Stacking them on one screen would make the page long and the purpose
+   unclear, which is the same failure as a report that answers three questions
+   in one blob. */
+
+
+
+
+
+/* ── development ─────────────────────────────────────────────────────────
+   The AVM discards everything that is not a comparable, which is right for
+   pricing and useless for research. This keeps the development. */
+let devT;
+$('#dq').addEventListener('input', e => {
+  clearTimeout(devT);
+  const q = e.target.value;
+  devT = setTimeout(async () => {
+    if (q.trim().length < 2) { $('#dhits').hidden = true; return; }
+    const r = await fetch('/api/search?q=' + encodeURIComponent(q)).then(x => x.json());
+    $('#dhits').innerHTML = r.hits.map(h => `<li data-href="${esc(h.href)}">${esc(h.label)} <span class="meta">${esc(h.kind)}</span></li>`).join('');
+    $('#dhits').hidden = !r.hits.length;
+  }, 160);
+});
+$('#dhits').addEventListener('click', async e => {
+  const li = e.target.closest('li'); if (!li) return;
+  $('#dhits').hidden = true;
+  $('#devout').innerHTML = '<section class="panel"><p class="note">Reading…</p></section>';
+  const p = await fetch('/api/development?href=' + encodeURIComponent(li.dataset.href)).then(x => x.json());
+  renderDev(p);
+});
+
+function renderDev(p) {
+  if (!p.ok) { $('#devout').innerHTML = `<section class="panel"><div class="warnbox">${esc(p.reason)}</div></section>`; return; }
+  const I = p.identity, T = p.transactions;
+  const out = [];
+
+  out.push(panel(I.label, `
+    <div class="big">${T.medianPsf} psf</div>
+    <div class="band">median of ${T.total.toLocaleString()} filed transactions · ${esc(T.from)} to ${esc(T.to)}</div>
+    <p class="note meta">middle 90% ran ${T.lowPsf}–${T.highPsf} psf</p>
+    <dl class="kv">
+      ${I.district ? `<dt>district</dt><dd>D${esc(I.district)}${I.segment ? ` · ${esc(I.segment)}` : ''}</dd>` : ''}
+      ${I.town ? `<dt>town</dt><dd>${esc(I.town)}</dd>` : ''}
+      ${I.street ? `<dt>street</dt><dd>${esc(I.street)}</dd>` : ''}
+      ${I.propertyTypes.length ? `<dt>types</dt><dd>${I.propertyTypes.map(esc).join(', ')}</dd>` : ''}
+      ${I.tenures.length ? `<dt>tenure</dt><dd>${I.tenures.map(esc).join(' · ')}</dd>` : ''}
+      ${p.lease ? `<dt>lease</dt><dd>${p.lease.freehold ? 'Freehold or equivalent' : `${p.lease.yearsLeft} years left${p.lease.relativity ? ` · ${p.lease.relativity}% of freehold on SLA's table` : ''}`}</dd>` : ''}
+      ${p.liquidity ? `<dt>trades</dt><dd>${p.liquidity.rate.toFixed(1)} times a year, against a market median of ${p.liquidity.median} across ${p.liquidity.of.toLocaleString()} addresses${p.liquidity.quieter ? ' — quieter than most' : ''}</dd>` : ''}
+    </dl>`));
+
+  if (p.unitMix) out.push(panel('What it contains, and what each size trades at', `
+    <div class="scroll"><table>
+      <tr><th>size band</th><th class="num">sales</th><th class="num">median psf</th><th class="num">median price</th></tr>
+      ${p.unitMix.bands.map(b => `<tr><td class="mono">${b.fromSqft}–${b.toSqft} sqft</td>
+        <td class="num">${b.n}</td><td class="num"><b>${b.medianPsf}</b></td><td class="num">${money(b.medianPrice)}</td></tr>`).join('')}
+    </table></div>
+    <p class="note"><b>${esc(p.unitMix.says)}</b></p>
+    <p class="prov">Bands are cut from this project's own size distribution rather than a fixed ladder — a development of studios and one of townhouses do not share sensible cut points. Measured inside one project, so location, tenure, vintage and facilities are identical across every row.</p>`));
+
+  out.push(panel('How its own floors price', p.floors.ran ? `
+    <div class="scroll"><table>
+      <tr><th>storeys</th><th class="num">sales</th><th class="num">median psf</th></tr>
+      ${p.floors.bands.map(b => `<tr><td class="mono">${esc(b.label)}</td><td class="num">${b.n}</td><td class="num">${b.medianPsf}</td></tr>`).join('')}
+    </table></div>
+    <p class="note"><b>${esc(p.floors.says)}</b></p>
+    <p class="prov">This is the development's own floor premium, not the town or district curve the valuation uses. Where they disagree, this one is about this building and the other is about its neighbourhood.</p>`
+    : `<div class="warnbox">${esc(p.floors.why)}</div>`));
+
+  out.push(panel('Year by year', `
+    <div class="scroll"><table>
+      <tr><th>year</th><th class="num">sales</th><th class="num">median psf</th><th>how they sold</th></tr>
+      ${T.byYear.map(y => `<tr><td class="mono">${esc(y.year)}</td><td class="num">${y.n}</td><td class="num"><b>${y.medianPsf}</b></td>
+        <td class="note">${y.types.map(t => `${esc(t.label)} ${t.n}${t.medianPsf ? ` @ ${t.medianPsf}` : ''}`).join(' · ')}</td></tr>`).join('')}
+    </table></div>
+    ${T.hasLifecycle ? `<p class="prov">A project that has sold new, sub-sale and resale shows its whole arc here. A developer's new-sale price is not a resale comparable — it carries a fresh lease, a showflat and no seller to negotiate with — so the columns are kept apart rather than pooled.</p>`
+      : `<p class="prov">Median psf over whatever sold that year, so it moves when the MIX moves as well as when prices do — a year of large units reads higher without anything repricing.</p>`}`));
+
+  if (p.rental || p.yield) out.push(panel('What it rents for', `
+    ${p.rental?.all ? `<p class="note">Median rent <b>${money(p.rental.all.median)}</b>/month across ${p.rental.all.n} filed contracts, ${esc(p.rental.all.from)} to ${esc(p.rental.all.to)} — the middle of them ran ${money(p.rental.all.low)} to ${money(p.rental.all.high)}.</p>` : ''}
+    ${p.rental?.beds ? `<div class="scroll"><table><tr><th>bedrooms</th><th class="num">contracts</th><th class="num">median rent</th></tr>
+      ${Object.entries(p.rental.beds).map(([b, v]) => `<tr><td class="mono">${esc(b)}</td><td class="num">${v.n}</td><td class="num">${money(v.median)}</td></tr>`).join('')}</table></div>` : ''}
+    ${p.yield?.cohorts?.length ? `<div class="scroll"><table><tr><th>size band</th><th class="num">beds</th><th class="num">median rent</th><th class="num">median price</th><th class="num">gross yield</th></tr>
+      ${p.yield.cohorts.map(c => `<tr><td class="mono">${esc(c.band)} sqm</td><td class="num">${c.beds ?? '—'}</td>
+        <td class="num">${money(c.medianRent)}</td><td class="num">${money(c.medianPrice)}</td>
+        <td class="num"><b>${c.grossYield}%</b></td></tr>`).join('')}</table></div>` : ''}
+    <p class="prov">Gross, not net — before maintenance, agent fees, vacancy, tax and interest. The test that matters for a leveraged purchase is this figure against the mortgage rate: when the rate is higher, the purchase is cash-negative from day one. See Briefing.</p>`));
+
+  const sup = [];
+  if (p.pipeline) sup.push(`<p class="note"><b>${p.pipeline.projects}</b> project(s) in the URA pipeline for D${esc(p.pipeline.district)} — ${p.pipeline.units.toLocaleString()} units.</p>
+    <div class="scroll"><table><tr><th>project</th><th>developer</th><th class="num">units</th><th class="num">expected TOP</th></tr>
+    ${p.pipeline.list.map(x => `<tr><td>${esc(x.project)}</td><td class="meta">${esc(x.developer || '—')}</td>
+      <td class="num">${x.totalUnits.toLocaleString()}</td><td class="num">${x.expectedTOP ?? '<span class="meta">not stated</span>'}</td></tr>`).join('')}</table></div>`);
+  if (p.gls?.sites?.length) sup.push(`<p class="note">${p.gls.sites.length} GLS site(s) within 1km.</p>`);
+  else if (p.gls) sup.push(`<p class="note">No GLS site within 1km (${esc(p.gls.programme || '')}).</p>`);
+  if (sup.length) out.push(panel('What is coming nearby', sup.join('') +
+    `<p class="prov">Most of the URA pipeline carries no expected TOP year and it is stored as null rather than guessed. Becoming built is not the same as being listed.</p>`));
+
+  out.push(panel('Source', `<p class="prov">${p.sources.map(esc).join(' · ')}<br>
+    Every figure above is this development compared with itself over its own filed transactions. It is not a valuation of any unit in it — for that, use Valuation.</p>`));
+
+  $('#devout').innerHTML = out.join('');
+  $('#devout').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+
+/* ── reading list ────────────────────────────────────────────────────────
+   Headlines, links, and the publisher's own one-line summary. The link is the
+   product: it is read at the source. Feed text is untrusted — escaped here,
+   and never treated as an instruction. */
+let rdSource = null, rdLever = null;
+async function loadReading(force = false) {
+  const qs = new URLSearchParams();
+  if (rdSource) qs.set('source', rdSource);
+  if (rdLever) qs.set('lever', rdLever);
+  if (force) qs.set('force', '1');
+  $('#rdout').innerHTML = '<p class="note">Fetching…</p>';
+  const r = await fetch('/api/reading?' + qs).then(x => x.json());
+
+  const chip = (label, active, attrs) => `<button class="chip" ${attrs} aria-pressed="${active}">${esc(label)}</button>`;
+  $('#rdsrc').innerHTML =
+    chip('All', !rdSource && !rdLever, 'data-src="" data-lev=""')
+    + r.known.map(s => chip(s.name.replace(/ ·.*/, ''), rdSource === s.key, `data-src="${esc(s.key)}"`)).join('')
+    + ['fed', 'mas', 'cooling', 'supply'].map(l => chip(l, rdLever === l, `data-lev="${esc(l)}"`)).join('')
+    + `<button class="chip" id="rdforce" title="Fetch now">refresh</button>`;
+
+  const failed = r.sources.filter(s => !s.ok);
+  $('#rdmeta').innerHTML = `${r.held} items held · last fetched ${r.updatedAt ? new Date(r.updatedAt).toLocaleString('en-SG') : 'never'}`
+    + (r.refreshed ? ' · refreshed just now' : '')
+    + (r.newCount ? ` · <b>${r.newCount} new since you last looked</b>` : '')
+    + (failed.length ? `<br><span class="err">Could not reach: ${failed.map(f => `${esc(f.name)} (${esc(f.error)}${f.lastGood ? `, last good ${f.lastGood.slice(0, 10)}` : ''})`).join(' · ')}</span>` : '');
+
+  $('#rdout').innerHTML = r.items.length ? r.items.map(i => `<div class="art">
+      ${i.isNew ? '<span class="new">new</span>' : ''}
+      <a class="t" href="${esc(i.link)}" target="_blank" rel="noopener noreferrer">${esc(i.title)}</a>
+      ${i.lever ? `<span class="lv">${esc(i.lever)}</span>` : ''}
+      <span class="meta">${esc(i.sourceName || '')}${i.author ? ` · ${esc(i.author)}` : ''}${i.published ? ` · ${new Date(i.published).toLocaleDateString('en-SG', { day: 'numeric', month: 'short' })}` : ''}</span>
+      ${i.summary ? `<div class="sum">${esc(i.summary)}</div>` : ''}
+    </div>`).join('')
+    : '<p class="note">Nothing matches that filter.</p>';
+}
+$('#rdsrc').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  if (b.id === 'rdforce') return loadReading(true);
+  if (b.dataset.src !== undefined && b.dataset.lev !== undefined) { rdSource = null; rdLever = null; }
+  else if (b.dataset.src !== undefined) { rdSource = rdSource === b.dataset.src ? null : b.dataset.src; rdLever = null; }
+  else if (b.dataset.lev !== undefined) { rdLever = rdLever === b.dataset.lev ? null : b.dataset.lev; rdSource = null; }
+  loadReading();
+});
+
+/* ── briefing ────────────────────────────────────────────────────────────
+   The map is written and versioned; only the readings and the arithmetic
+   change between visits. See lib/consult/transmission.js for why it is not a
+   feed of summarised articles. */
+let briefingLoaded = false;
+async function loadBriefing() {
+  const r = await fetch('/api/briefing').then(x => x.json());
+  $('#readings').innerHTML = r.readings.map(x => x.missing
+    ? `<div class="reading" style="border-color:var(--warn)"><b>${esc(x.title)}</b><br><span class="v">—</span><br><span class="note" style="color:var(--warn)">${esc(x.why)}</span></div>`
+    : `<div class="reading"><b>${esc(x.title)}</b><br>
+        <span class="v">${esc(String(x.latest?.index ?? x.latest?.rate ?? '—'))}</span>
+        <span class="meta">${esc(String(x.latest?.quarter ?? x.latest?.date ?? ''))}</span><br>
+        ${Number.isFinite(x.qoq) ? `<span class="${x.qoq < 0 ? 'gapdown' : 'gapup'}">${pc(x.qoq / 100)} qoq</span> · ` : ''}
+        ${Number.isFinite(x.yoy) ? `<span class="${x.yoy < 0 ? 'gapdown' : 'gapup'}">${pc(x.yoy / 100)} yoy</span>` : ''}
+      </div>`).join('');
+
+  const block = (cls, title, rows) => rows?.length ? `<div class="chain ${cls}"><h4>${esc(title)}</h4>
+    ${rows.map(([h, b]) => `<div class="item"><b>${esc(h)}</b>${esc(b)}</div>`).join('')}</div>` : '';
+
+  $('#levers').innerHTML = r.levers.map(L => `<div class="lever">
+    <h3>${esc(L.title)}</h3>
+    <p class="premise">${esc(L.premise)}</p>
+    ${block('', 'What it touches directly', L.direct)}
+    ${block('', 'What it reaches, and through what', L.indirect)}
+    ${block('no', 'What it does NOT touch', L.notDirect)}
+    ${block('', 'What in our own data would show it', L.watch)}
+    <div class="srcs"><b>Primary sources</b><br>${L.sources.map(([t, u]) =>
+      `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(t)}</a>`).join(' · ')}</div>
+  </div>`).join('');
+  $('#levers').insertAdjacentHTML('beforeend',
+    `<p class="prov">Transmission map ${esc(r.version)}, reviewed ${esc(r.reviewed)}. Reviewed like a rate: when a chain stops being true, it is edited here rather than argued around.</p>`);
+  briefingLoaded = true;
+}
+
+$('#rrun').addEventListener('click', async () => {
+  const n = id => Number(String($(id).value).replace(/[^0-9.]/g, '')) || 0;
+  const inc = n('#rinc');
+  const body = { loan: n('#rloan'), tenureYears: n('#rten'), from: n('#rfrom'), to: n('#rto'),
+    monthlyDebts: n('#rdebt'), propertyType: $('#rtype').value,
+    applicants: inc ? [{ fixedIncome: inc, age: 35 }] : [] };
+  const r = await fetch('/api/briefing/scenario', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(x => x.json());
+  if (!r.ok) { $('#rout').innerHTML = `<p class="err">${esc(r.reason)}</p>`; return; }
+  const c = r.capacity;
+  $('#rout').innerHTML = `<div class="result">
+    <div class="would">
+      <div><b>What they pay</b><br>
+        <b class="n">${money(r.monthlyBefore)}</b> → <b class="n">${money(r.monthlyAfter)}</b> a month
+        <p class="note ${r.monthlyDelta > 0 ? 'bad' : 'good'}">${r.monthlyDelta > 0 ? '+' : ''}${money(r.monthlyDelta)} a month · ${r.annualDelta > 0 ? '+' : ''}${money(r.annualDelta)} a year</p></div>
+      ${c ? `<div><b>What they can borrow</b><br>
+        <b class="n">${money(c.maxLoanBefore)}</b> → <b class="n">${money(c.maxLoanAfter)}</b>
+        <p class="note ${c.unchanged ? 'good' : 'bad'}">${c.unchanged ? 'Unchanged.' : `${money(c.maxLoanAfter - c.maxLoanBefore)}`}</p>
+        <p class="note meta">assessed at ${(100 * c.assessedBefore).toFixed(1)}% → ${(100 * c.assessedAfter).toFixed(1)}% · floor ${(100 * c.floor).toFixed(1)}%</p></div>`
+        : '<div><b>What they can borrow</b><p class="note meta">Add a household income to see this half.</p></div>'}
+    </div>
+    <p class="note"><b>${esc(r.says)}</b></p>
+    <p class="prov">TDSR is assessed at a medium-term floor rate, not at the rate a bank offers — so below that floor a rise changes the payment and not the ceiling. Rates reviewed ${esc(r.reviewed)}. An indication, not a loan approval.</p>
+  </div>`;
+});
+
+/* ── data ────────────────────────────────────────────────────────────────
+   Read in the browser, sent as text. No upload library and no multipart
+   parser on the other end: an export is a CSV and the server wants its words. */
+let dKind = 'listings', dFiles = [], dPreviewed = false;
+const KIND_NOTE = {
+  listings: 'From AgentNet, 99.co Agent, SRX or the Huttons back-end. It needs an address or listing link, an asking price and a floor area — anything else is a bonus.',
+  realis: 'Exported from REALIS. Licensed data: it is stored in a folder git ignores and never reaches the public site. The unit number is the column that matters — it is what gives you the stack.',
+};
+
+function resetPreview() {
+  dPreviewed = false;
+  $('#dpreview').innerHTML = ''; $('#dresult').innerHTML = '';
+  $('#dimport').hidden = true; $('#dimport').disabled = true;
+  $('#dcheck').disabled = !dFiles.length;
+}
+function setKind(k) {
+  dKind = k;
+  for (const c of $('#dkind').children) c.setAttribute('aria-pressed', String(c.dataset.kind === k));
+  $('#dkindnote').textContent = KIND_NOTE[k];
+  $('#dsweep').hidden = k !== 'listings';
+  for (const r of document.querySelectorAll('input[name=sweep]')) { r.checked = false; r.disabled = false; r.parentElement.classList.remove('disabled'); }
+  resetPreview();
+}
+$('#dkind').addEventListener('click', e => { const b = e.target.closest('.chip'); if (b) setKind(b.dataset.kind); });
+
+async function takeFiles(list) {
+  const csvs = [...list].filter(f => /\.csv$/i.test(f.name) || f.type === 'text/csv');
+  const total = csvs.reduce((n, f) => n + f.size, 0);
+  if (total > 30e6) { $('#dfiles').innerHTML = '<p class="err">Over 30MB together — split the export.</p>'; return; }
+  dFiles = await Promise.all(csvs.map(async f => ({ name: f.name, size: f.size, text: await f.text() })));
+  $('#dfiles').innerHTML = dFiles.length
+    ? dFiles.map(f => `<div class="filerow"><b>${esc(f.name)}</b><span class="meta">${f.size < 1024 ? `${f.size} bytes` : f.size < 1048576 ? `${(f.size / 1024).toFixed(0)} KB` : `${(f.size / 1048576).toFixed(1)} MB`}</span></div>`).join('')
+    : '<p class="err">No CSV files in that.</p>';
+  resetPreview();
+}
+const drop = $('#drop');
+drop.addEventListener('click', () => $('#dfile').click());
+drop.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('#dfile').click(); } });
+$('#dfile').addEventListener('change', e => takeFiles(e.target.files));
+drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('over'); takeFiles(e.dataTransfer.files); });
+
+function sweepChoice() {
+  const r = document.querySelector('input[name=sweep]:checked');
+  return r ? r.value : null;
+}
+function syncImportButton() {
+  const ready = dPreviewed && (dKind !== 'listings' || !!sweepChoice());
+  $('#dimport').disabled = !ready;
+  for (const card of document.querySelectorAll('.would > div')) card.classList.toggle('chosen', card.dataset.sweep === sweepChoice());
+}
+document.addEventListener('change', e => { if (e.target.name === 'sweep') syncImportButton(); });
+
+$('#dcheck').addEventListener('click', async () => {
+  $('#dcheck').disabled = true; $('#dcheck').textContent = 'Reading…';
+  try {
+    const r = await fetch('/api/data/preview', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ kind: dKind, files: dFiles.map(f => ({ name: f.name, text: f.text })) }) }).then(x => x.json());
+    if (r.error) throw new Error(r.error);
+    renderPreview(r);
+    dPreviewed = true;
+    $('#dimport').hidden = false;
+    syncImportButton();
+  } catch (e) {
+    $('#dpreview').innerHTML = `<p class="err">${esc(e.message)}</p>`;
+  } finally {
+    $('#dcheck').disabled = false; $('#dcheck').textContent = 'Check it';
+  }
+});
+
+function fileBlock(f) {
+  if (!f.ok) return `<div class="warnbox"><b>${esc(f.name)}</b> could not be read. ${esc(f.reason)}</div>`;
+  const used = f.mapping.filter(m => m.field);
+  return `<div class="result">
+    <h3>${esc(f.name)}</h3>
+    <p class="note">${f.read.toLocaleString()} rows read${f.skippedPreamble ? ` · ${f.skippedPreamble} title line(s) above the header skipped` : ''}${f.ragged ? ` · <span class="err">${f.ragged} malformed row(s) dropped</span>` : ''}${f.noPrice ? ` · ${f.noPrice} without an asking price skipped` : ''}${f.skippedRows ? ` · ${f.skippedRows} without a price or area skipped` : ''}</p>
+    ${f.missingFields?.length ? `<div class="warnbox">This file has no column for <b>${esc(f.missingFields.join(', '))}</b>. Rows will import but cannot be priced.</div>` : ''}
+    ${f.noUnitColumn ? `<div class="warnbox">No unit number column. The stack is the whole reason for a REALIS import — without it this is the free URA data with extra steps.</div>` : ''}
+    <div class="scroll"><table>
+      <tr><th>your column</th><th>read as</th></tr>
+      ${f.mapping.map(m => `<tr><td>${esc(m.header)}</td><td>${m.field ? `<span class="mono">${esc(m.field)}</span>` : '<span class="unused">not used</span>'}</td></tr>`).join('')}
+    </table></div>
+    <p class="prov">${used.length} of ${f.mapping.length} columns used. A column you need showing "not used" means its header is spelled differently from anything known — tell me the header and I'll add it.</p>
+    ${f.unresolvedCount ? `<p class="note"><b>${f.unresolvedCount}</b> row(s) matched no address and won't price${f.unresolved?.length ? `: <span class="meta">${f.unresolved.map(esc).join(' · ')}</span>` : ''}.</p>` : ''}
+    ${f.fuzzy ? `<p class="note meta">${f.fuzzy} address(es) matched by search rather than exactly — worth a glance in Find before trusting them.</p>` : ''}
+    ${f.implausible?.length ? `<div class="warnbox"><b>Advertised sizes that don't match what the block files:</b><ul>${f.implausible.map(x => `<li>${esc(x.label)} — ${esc(x.why)}</li>`).join('')}</ul></div>` : ''}
+  </div>`;
+}
+
+function renderPreview(r) {
+  const out = r.files.map(fileBlock);
+  if (r.kind === 'listings') {
+    const card = (key, title, x) => x.refused
+      ? `<div data-sweep="${key}"><b>${title}</b><p class="err">Refused. ${esc(x.reason)}</p></div>`
+      : `<div data-sweep="${key}"><b>${title}</b><br>
+          <b class="n">${x.added}</b> new · <b class="n">${x.cut}</b> cut · <b class="n">${x.raised}</b> raised · <b class="n">${x.gone}</b> gone
+          <p class="note meta">${x.active.toLocaleString()} active of ${x.known.toLocaleString()} known afterwards</p>
+          ${key === 'full' && x.goneShare > 0.5 ? `<p class="err">${(100 * x.goneShare).toFixed(0)}% of what is active would go. That is more likely a narrower export than a market that emptied in a week.</p>` : ''}
+          ${x.first ? `<p class="note meta">First snapshot — days on market starts today for everything in it.</p>` : ''}</div>`;
+    out.push(`<div class="result"><h3>What importing would do</h3>
+      <div class="would">${card('full', 'As everything I watch', r.asFull)}${card('partial', 'As only part of it', r.asPartial)}</div></div>`);
+    const fullRadio = document.querySelector('input[name=sweep][value=full]');
+    fullRadio.disabled = !!r.asFull.refused;
+    fullRadio.parentElement.classList.toggle('disabled', !!r.asFull.refused);
+    if (r.asFull.refused && fullRadio.checked) fullRadio.checked = false;
+    const sample = r.files.filter(f => f.ok).flatMap(f => f.sample).slice(0, 6);
+    if (sample.length) out.push(`<div class="result"><h3>First rows, as they'll be stored</h3><div class="scroll"><table>
+      <tr><th>matched</th><th class="num">asking</th><th class="num">sqft</th><th class="num">storey</th><th>link</th></tr>
+      ${sample.map(x => `<tr><td>${x.href ? esc(x.label) : `<span class="err">no match</span> <span class="meta">${esc(x.label || '')}</span>`}</td>
+        <td class="num">${money(x.price)}</td><td class="num">${x.areaSqft ?? '—'}</td><td class="num">${x.floor ?? '—'}</td>
+        <td>${x.url ? '<span class="meta">yes</span>' : '—'}</td></tr>`).join('')}
+    </table></div></div>`);
+  } else {
+    out.push(`<div class="result"><h3>What importing would do</h3>
+      <p class="note"><b>${r.rows.toLocaleString()}</b> transactions · <b>${r.withUnitNumber.toLocaleString()}</b> with a unit number · <b>${r.stacks.toLocaleString()}</b> stacks${r.alreadyHeld ? ` · ${r.alreadyHeld.toLocaleString()} already held from an earlier export, counted once` : ''}.</p>
+      <p class="note meta">Stored for the stack analysis, which is the next build — no tool reads REALIS data yet, so importing it will not change any estimate today.</p></div>`);
+  }
+  $('#dpreview').innerHTML = out.join('');
+}
+
+$('#dimport').addEventListener('click', async () => {
+  $('#dimport').disabled = true; $('#dimport').textContent = 'Importing…';
+  try {
+    const partial = dKind === 'listings' ? sweepChoice() === 'partial' : undefined;
+    const r = await fetch('/api/data/import', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ kind: dKind, partial, files: dFiles.map(f => ({ name: f.name, text: f.text })) }) }).then(x => x.json());
+    if (r.error) throw new Error(r.error);
+    $('#dresult').innerHTML = r.kind === 'listings'
+      ? `<div class="result"><div class="band"><b>Imported.</b></div>
+          <p class="note">${r.added} new · ${r.cut} cut · ${r.raised} raised · ${r.partial ? 'nothing marked gone (partial)' : `${r.gone} gone`}. Now ${r.active.toLocaleString()} active of ${r.known.toLocaleString()} known across ${r.snapshots} snapshot(s).</p>
+          <p class="note meta">The file is kept in data/listings/imported/. The Find page shows what has been cut and what has been sitting.</p></div>`
+      : `<div class="result"><div class="band"><b>Imported.</b></div>
+          <p class="note">Saved as ${r.saved.map(esc).join(', ')}${r.skipped ? ` · ${r.skipped} unreadable file(s) not kept` : ''}. The index now holds ${r.count.toLocaleString()} transactions from ${r.files} export(s) · ${r.stacks.toLocaleString()} stacks${r.duplicates ? ` · ${r.duplicates.toLocaleString()} duplicates across exports counted once` : ''}.</p>
+          <p class="note meta">Stored, not yet used — the stack analysis is the next build.</p></div>`;
+    dFiles = []; $('#dfiles').innerHTML = ''; $('#dfile').value = '';
+    $('#dpreview').innerHTML = ''; $('#dimport').hidden = true;
+    feedData = null;
+    loadStatus();
+  } catch (e) {
+    $('#dresult').innerHTML = `<p class="err">${esc(e.message)}</p>`;
+    $('#dimport').disabled = false;
+  } finally {
+    $('#dimport').textContent = 'Import';
+  }
+});
+
+async function loadStatus() {
+  const r = await fetch('/api/data/status').then(x => x.json());
+  const when = iso => iso ? new Date(iso).toLocaleDateString('en-SG', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+  $('#dstatus').innerHTML = `<div class="scroll"><table>
+    <tr><th>data</th><th>as of</th><th></th><th>state</th><th>refresh</th></tr>
+    ${r.items.map(i => `<tr>
+      <td><b>${esc(i.title)}</b></td>
+      <td class="mono">${when(i.asOf)}${i.ageDays !== null ? `<br><span class="meta">${i.ageDays} day${i.ageDays === 1 ? '' : 's'} ago</span>` : ''}</td>
+      <td>${!i.present ? '<span class="pill">none</span>' : i.stale ? '<span class="pill stale">stale</span>' : '<span class="pill">current</span>'}</td>
+      <td class="note">${esc(i.detail)}</td>
+      <td><code>${esc(i.refresh)}</code></td></tr>`).join('')}
+  </table></div>`;
+}
+let feedData = null;
+
+/* ── the feed ───────────────────────────────────────────────────────────
+   Read-only here. Folding a snapshot in is a decision — full sweep or partial
+   — and not something a page refresh should make on your behalf. */
+async function loadFeed() {
+  const r = await fetch('/api/listings').then(x => x.json());
+  if (r.error) { $('#feedmeta').textContent = ''; $('#feedout').innerHTML = `<div class="warnbox">${esc(r.error)}</div>`; return; }
+  $('#feedmeta').textContent = `${r.active} active of ${r.known} known · ${r.snapshots} snapshot(s) since `
+    + `${new Date(r.since).toLocaleDateString('en-SG')} · last ${new Date(r.updatedAt).toLocaleString('en-SG')}`;
+  if (!r.signals.length) {
+    $('#feedout').innerHTML = `<p class="note">Nothing has been cut or has sat long enough to flag yet.`
+      + (r.snapshots < 2 ? ` Only ${r.snapshots} snapshot so far — cuts and days-on-market need at least two.` : '') + `</p>`;
+    return;
+  }
+  $('#feedout').innerHTML = `<div class="scroll"><table>
+    <tr><th>listing</th><th class="num">asking</th><th class="num">cuts</th><th class="num">days on</th><th>why it is here</th></tr>
+    ${r.signals.map(L => `<tr class="pick" data-href="${esc(L.href || '')}" data-area="${L.areaSqft || ''}" data-floor="${L.floor || ''}" data-price="${L.price || ''}">
+      <td>${esc(L.label || '—')}${L.unit ? ` <span class="meta">${esc(L.unit)}</span>` : ''}
+        ${L.url ? `<br><a href="${esc(L.url)}" target="_blank" rel="noopener" class="meta">open listing</a>` : ''}</td>
+      <td class="num">${money(L.price)}${L.movePct ? `<br><span class="gapdown">${pc(L.movePct)}</span>` : ''}</td>
+      <td class="num">${L.cuts || '—'}</td>
+      <td class="num">${L.days}${L.domIsFloor ? '<span class="meta">+</span>' : ''}</td>
+      <td class="note">${esc(L.why.join(' · '))}</td></tr>`).join('')}
+  </table></div>
+  <p class="prov">A <b>+</b> on days-on-market means it is a floor: measured from the first snapshot that covered the listing, not from when it was listed. A listing up for six months before your first ingest reads as new until a feed supplies its listed date. Click a row to price it.</p>`;
+  for (const tr of $('#feedout').querySelectorAll('tr.pick')) {
+    tr.addEventListener('click', async () => {
+      if (!tr.dataset.href) return;
+      await pick(tr.dataset.href);
+      if (tr.dataset.area) $('#area').value = tr.dataset.area;
+      if (tr.dataset.floor) $('#floor').value = tr.dataset.floor;
+      if (tr.dataset.price) $('#price').value = tr.dataset.price;
+      location.hash = '#/valuation';
+    });
+  }
+}
+
+/* ── find ────────────────────────────────────────────────────────────────
+   Two steps on purpose. `Read them` parses and shows what it got; `Screen
+   them` runs on whatever is in the table AFTER any correction. A single
+   button would screen the original paste and quietly ignore a typo you had
+   just fixed. */
+let parsed = [];
+$('#doparse').addEventListener('click', async () => {
+  const r = await fetch('/api/parse', { method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ text: $('#paste').value }) }).then(x => x.json());
+  parsed = r.listings || [];
+  if (!parsed.length) { $('#parsed').innerHTML = '<p class="note">Nothing readable in that paste.</p>'; return; }
+  $('#parsed').innerHTML = `<div class="result"><div class="scroll"><table>
+    <tr><th>matched</th><th>price</th><th>sqft</th><th>storey</th><th>checks</th></tr>
+    ${parsed.map((L, i) => `<tr>
+      <td>${L.label ? esc(L.label) : `<span class="err">no match</span><br><span class="meta">${esc(L.addressLine || '—')}</span>`}
+        ${L.unit ? `<br><span class="meta">${esc(L.unit)}</span>` : ''}</td>
+      <td><input data-i="${i}" data-f="price" value="${L.price ?? ''}" inputmode="numeric" style="width:110px"></td>
+      <td><input data-i="${i}" data-f="areaSqft" value="${L.areaSqft ?? ''}" inputmode="numeric" style="width:80px"></td>
+      <td><input data-i="${i}" data-f="floor" value="${L.floor ?? ''}" inputmode="numeric" style="width:60px"></td>
+      <td>${L.missing.length ? `<span class="pill bad">missing ${esc(L.missing.join(', '))}</span> ` : ''}
+        ${L.areaCheck?.ran === false ? '' : (L.areaCheck.plausible ? '<span class="pill">size ok</span>' : `<span class="pill bad">size looks wrong</span>`)}
+        ${L.note ? `<div class="note meta">${esc(L.note)}</div>` : ''}
+        ${L.areaCheck?.why ? `<div class="note" style="color:var(--dn)">${esc(L.areaCheck.why)}</div>` : ''}</td>
+    </tr>`).join('')}
+  </table></div><p class="prov">Correct anything wrong before screening. An overstated floor area understates the psf, which reads as a discount and ranks first.</p></div>`;
+  $('#parsed').addEventListener('input', e => {
+    const el = e.target; if (!el.dataset.f) return;
+    parsed[Number(el.dataset.i)][el.dataset.f] = Number(String(el.value).replace(/[^0-9.]/g, '')) || null;
+  });
+  $('#doscreen').hidden = false;
+});
+
+$('#doscreen').addEventListener('click', async () => {
+  const r = await fetch('/api/screen', { method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ listings: parsed }) }).then(x => x.json());
+  const rows = r.screened || [];
+  const shortlist = rows.filter(x => x.ok && x.residual?.verdict.code === 'discount-unexplained' && (x.score?.ratio ?? 0) >= 0.5);
+  $('#screened').innerHTML = `
+    <div class="result"><h3>Shortlist</h3>
+    <p class="note meta">Both halves must pass: an unexplained discount that survives the method's own error, AND a positive score of at least half of what could be scored. Cheap and bad is a bad flat at its correct price.</p>
+    ${shortlist.length ? `<div class="scroll"><table><tr><th>property</th><th class="num">asking</th><th class="num">est</th><th class="num">gap</th><th class="num">score</th></tr>
+      ${shortlist.sort((a, b) => a.residual.gap.pct - b.residual.gap.pct).map(x => `<tr><td>${esc(x.label)}</td>
+        <td class="num">${money(x.price)}</td><td class="num">${money(x.residual.estimate.price)}</td>
+        <td class="num gapdown">${pc(x.residual.gap.pct)}</td><td class="num">${x.score.points}/${x.score.max}</td></tr>`).join('')}
+      </table></div>` : `<p class="note">Nothing cleared both.</p>`}
+    <h3 style="margin-top:18px">Everything screened</h3>
+    <div class="scroll"><table><tr><th>property</th><th class="num">gap</th><th class="num">score</th><th>verdict</th></tr>
+      ${rows.map(x => `<tr><td>${esc(x.label || x.addressLine || '—')}</td>
+        <td class="num">${x.ok ? `<span class="${x.residual.gap.pct < 0 ? 'gapdown' : 'gapup'}">${pc(x.residual.gap.pct)}</span>` : '—'}</td>
+        <td class="num">${x.score ? x.score.points + '/' + x.score.max : '—'}</td>
+        <td>${x.ok ? esc(x.residual.verdict.code) + (x.residual.test2.flagged.length ? ` <span class="meta">(${x.residual.test2.flagged.map(f => esc(f.key)).join(', ')})</span>` : '')
+          : `<span class="err">${esc(x.reason)}</span>`}</td></tr>`).join('')}
+    </table></div></div>`;
+});
+
+/* ── compare ─────────────────────────────────────────────────────────── */
+let cmp = [];
+let ct;
+$('#cq').addEventListener('input', e => {
+  clearTimeout(ct);
+  const q = e.target.value;
+  ct = setTimeout(async () => {
+    if (q.trim().length < 2) { $('#chits').hidden = true; return; }
+    const r = await fetch('/api/search?q=' + encodeURIComponent(q)).then(x => x.json());
+    $('#chits').innerHTML = r.hits.map(h => `<li data-href="${esc(h.href)}">${esc(h.label)} <span class="meta">${esc(h.kind)}</span></li>`).join('');
+    $('#chits').hidden = !r.hits.length;
+  }, 160);
+});
+$('#chits').addEventListener('click', async e => {
+  const li = e.target.closest('li'); if (!li || cmp.length >= 4) return;
+  const s = await fetch('/api/record?href=' + encodeURIComponent(li.dataset.href)).then(x => x.json());
+  if (s.error) return;
+  cmp.push({ href: s.href, label: s.label, areaSqft: s.types[0]?.areaSqft || null, floor: s.types[0]?.floor ? Math.round(s.types[0].floor) : null, price: null });
+  $('#cq').value = ''; $('#chits').hidden = true;
+  drawList();
+});
+function drawList() {
+  $('#clist').innerHTML = cmp.map((c, i) => `<div class="chosen">
+    <b style="flex:1">${esc(c.label)}</b>
+    <input data-i="${i}" data-f="areaSqft" value="${c.areaSqft ?? ''}" style="width:90px" inputmode="numeric" aria-label="sqft">
+    <input data-i="${i}" data-f="floor" value="${c.floor ?? ''}" style="width:60px" inputmode="numeric" aria-label="storey">
+    <input data-i="${i}" data-f="price" value="${c.price ?? ''}" style="width:120px" inputmode="numeric" placeholder="price">
+    <button data-rm="${i}" title="remove">×</button></div>`).join('');
+  $('#clist').querySelectorAll('input').forEach(el => el.addEventListener('input', () => {
+    cmp[Number(el.dataset.i)][el.dataset.f] = Number(String(el.value).replace(/[^0-9.]/g, '')) || null;
+  }));
+  $('#clist').querySelectorAll('button[data-rm]').forEach(b => b.addEventListener('click', () => {
+    cmp.splice(Number(b.dataset.rm), 1); drawList();
+  }));
+}
+$('#cclear').addEventListener('click', () => { cmp = []; drawList(); $('#compout').innerHTML = ''; });
+
+$('#docompare').addEventListener('click', async () => {
+  if (!cmp.length) return;
+  const reports = await Promise.all(cmp.map(c => fetch('/api/report', { method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ href: c.href, areaSqft: c.areaSqft, floor: c.floor, price: c.price, years: 7 }) }).then(x => x.json())));
+  const f2 = (r, fn, alt = '—') => { try { const v = fn(r); return v === null || v === undefined ? alt : v; } catch { return alt; } };
+  const row = (label, fn) => `<tr><th>${esc(label)}</th>${reports.map(r => `<td>${f2(r, fn)}</td>`).join('')}</tr>`;
+  $('#compout').innerHTML = `<div class="result"><div class="scroll"><table class="cmp">
+    <tr><th></th>${reports.map(r => `<td><b>${esc(r.record.label)}</b><br><span class="meta">${esc(r.record.town || '')}</span></td>`).join('')}</tr>
+    ${row('Estimate', r => r.estimate.ok ? `<b class="mono">${r.estimate.psf} psf</b><br>${money(r.estimate.price)}` : `<span class="err">${esc(r.estimate.reason)}</span>`)}
+    ${row('Range', r => r.estimate.ok ? `${r.estimate.band.psfLow}–${r.estimate.band.psfHigh} psf` : '—')}
+    ${row('Typical error', r => r.estimate.error ? `${esc(r.estimate.error.band)} · ±${(100 * r.estimate.error.medianPct).toFixed(1)}%` : 'unmeasured')}
+    ${row('Cohort', r => r.estimate.ok ? `${r.estimate.evidence.sample} sales (${r.estimate.evidence.fromAddress} own)` : '—')}
+    ${row('Asking', r => r.residual?.ok ? `${money(r.residual.asking.price)}<br><b class="${r.residual.gap.pct < 0 ? 'gapdown' : 'gapup'}">${pc(r.residual.gap.pct)}</b>` : '—')}
+    ${row('Verdict', r => r.residual?.ok ? `<span class="mono">${esc(r.residual.verdict.code)}</span>` : '—')}
+    ${row('Score', r => r.score.ok ? `<b>${r.score.points}/${r.score.max}</b>` : '—')}
+    ${row('Lease', r => { const f = r.score.factors.find(x => x.key === 'lease'); return f?.ran ? `${f.value} years <span class="meta">${f.points}/${f.max}</span>` : '—'; })}
+    ${row('MRT', r => { const f = r.score.factors.find(x => x.key === 'rail'); return f?.ran ? `${f.value}m straight-line <span class="meta">${f.points}/${f.max}</span>` : '—'; })}
+    ${row('Primary within 1km', r => { const f = r.score.factors.find(x => x.key === 'primary'); return f?.ran ? `${f.value} <span class="meta">${f.points}/${f.max}</span>` : '—'; })}
+    ${row('Sells', r => { const f = r.score.factors.find(x => x.key === 'liquidity'); return f?.ran ? `${f.value.toFixed(1)}/yr <span class="meta">${f.points}/${f.max}</span>` : '—'; })}
+    ${row('Competing supply', r => { const f = r.score.factors.find(x => x.key === 'supply'); return f?.ran ? `${(100 * f.value).toFixed(1)}% to MOP <span class="meta">${f.points}/${f.max}</span>` : '—'; })}
+    ${row('7-year hurdle', r => r.outlook?.ok ? pc(r.outlook.hurdle.totalPct) : '—')}
+  </table></div>
+  <p class="prov">Each column is priced on its own evidence and its own cohort. Nothing is averaged across them, and a score is not a ranking — the 1km school band is ballot priority and never a place, and every distance is straight-line.</p></div>`;
+});
+
+const PAGES = ['valuation', 'scan', 'development', 'find', 'compare', 'data', 'briefing'];
+function route() {
+  const want = (location.hash.replace('#/', '') || 'valuation');
+  const page = PAGES.includes(want) ? want : 'valuation';
+  for (const p of PAGES) $('#page-' + p).hidden = (p !== page);
+  for (const a of document.querySelectorAll('#nav a')) {
+    if (a.dataset.page === page) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+  }
+  if (page === 'scan') loadScan();
+  if (page === 'find') loadFeed();
+  if (page === 'data') loadStatus();
+  if (page === 'briefing') { if (!briefingLoaded) loadBriefing(); loadReading(); }
+}
+addEventListener('hashchange', route);
+
+/* ── scan ────────────────────────────────────────────────────────────── */
+let scanData = null;
+async function loadScan() {
+  if (scanData) return renderScan();
+  const r = await fetch('/api/scan').then(x => x.json());
+  if (r.error) {
+    $('#scanout').innerHTML = `<div class="warnbox">${esc(r.error)}</div>`;
+    return;
+  }
+  scanData = r;
+  const towns = [...new Set(PAGES && ['unexplainedDown', 'explainedDown', 'unexplainedUp']
+    .flatMap(k => (r.hdb?.[k] || []).map(c => c.town)))].filter(Boolean).sort();
+  $('#scantown').innerHTML = '<option value="">all towns</option>' + towns.map(t => `<option>${esc(t)}</option>`).join('');
+  renderScan();
+}
+$('#scantown').addEventListener('change', renderScan);
+$('#scanview').addEventListener('change', renderScan);
+
+function renderScan() {
+  if (!scanData?.hdb) return;
+  const view = $('#scanview').value, town = $('#scantown').value;
+  const rows = (scanData.hdb[view] || []).filter(c => !town || c.town === town);
+  const age = Math.round((Date.now() - new Date(scanData.builtAt)) / 86400000);
+  $('#scanmeta').textContent =
+    `${scanData.hdb.scanned.toLocaleString()} blocks scanned · built ${new Date(scanData.builtAt).toLocaleString('en-SG')}`
+    + (age >= 1 ? ` — ${age} day${age > 1 ? 's' : ''} ago. Re-run npm run scan after a data refresh.` : '. Fresh.');
+  if (!rows.length) { $('#scanout').innerHTML = `<p class="note">Nothing in this column${town ? ' for ' + esc(town) : ''}.</p>`; return; }
+  $('#scanout').innerHTML = `<div class="scroll"><table>
+    <tr><th>block</th><th>town</th><th>type</th><th class="num">gap</th><th class="num">own/near psf</th><th class="num">n</th><th>flagged</th></tr>
+    ${rows.map(c => `<tr class="pick" data-href="${esc(c.href)}" data-area="${c.areaSqft}" data-floor="${c.floor || ''}">
+      <td>${esc(c.label)}</td><td>${esc(c.town || '')}</td><td>${esc(c.type || '')}</td>
+      <td class="num ${c.gap < 0 ? 'gapdown' : 'gapup'}">${pc(c.gap)}</td>
+      <td class="num">${c.selfPsf}/${c.nearPsf}</td>
+      <td class="num">${c.nSelf}/${c.nNear}</td>
+      <td>${c.flagged?.length ? c.flagged.map(f => esc(f.key)).join(', ') : '<b>nothing</b>'}${c.couldNotRun?.length ? ` <span class="err">(${c.couldNotRun.length} n/a)</span>` : ''}</td>
+    </tr>`).join('')}
+  </table></div>
+  <p class="prov">Own psf is this block priced on its own filed sales; near psf is the same block priced on its neighbours' only — two disjoint cohorts through identical machinery. Click a row to price it properly on the Valuation page.</p>`;
+  for (const tr of $('#scanout').querySelectorAll('tr.pick')) {
+    tr.addEventListener('click', async () => {
+      await pick(tr.dataset.href);
+      if (tr.dataset.area) $('#area').value = tr.dataset.area;
+      if (tr.dataset.floor) $('#floor').value = Math.round(Number(tr.dataset.floor));
+      location.hash = '#/valuation';
+      $('#price').focus();
+    });
+  }
+}
+route();
+
+function panel(title, inner) { return `<section class="panel"><h2>${esc(title)}</h2>${inner}</section>`; }
+</script>
+</body>
+</html>

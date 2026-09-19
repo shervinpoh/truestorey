@@ -48,3 +48,38 @@ data/.gls-awards-raw.xlsx
 # Blender's rolling local backups. Editable scene masters stay versioned.
 design/assets/scenes/*.blend1
 design/assets/__pycache__/
+
+# Per-trial backtest dump, rebuilt by `npm run build:avm-error`. Megabytes of
+# intermediate, and the TABLE it produces (data/avm-error.json) is the part
+# worth versioning. Must ALSO be in outputFileTracingExcludes — the tracer
+# reads the disk, not the index.
+data/.avm-trials.jsonl
+
+# Full HDB resale history back to 2017-01, written by `npm run ingest:hdb -- --history`.
+# data/hdb.json keeps three years for the site; this keeps all of it so the AVM
+# can be backtested against markets that moved. Must ALSO be in
+# outputFileTracingExcludes — the tracer reads the disk, not the index.
+data/.hdb-history.json
+
+# The island-wide scan's last result, read by the consult panel. Regenerable
+# from data/ by `npm run scan`, so a cache and not a source. Must ALSO be in
+# outputFileTracingExcludes — the tracer reads the disk, not the index.
+data/.scan.json
+
+# REALIS exports and anything derived from them. LICENSED DATA — this repo
+# pushes to a public remote and a push to master is a deploy, so a committed
+# export would be a licence breach and a publication in one move. Both must
+# ALSO be in outputFileTracingExcludes; the tracer reads the disk, not the index.
+data/realis/
+data/.realis.json
+
+# Listings exports and the accumulated store. Licensed to you by the portal,
+# and they carry other agents' contact details. This repo pushes to a public
+# remote. Both must ALSO be in outputFileTracingExcludes.
+data/listings/
+data/.listings.json
+
+# The reading list — headlines and links from publishers' own feeds, for
+# Shervin's reference only. Rule 9 keeps all of this off the site; this file
+# must ALSO be in outputFileTracingExcludes so no build can see it.
+data/.reading.json

@@ -1,0 +1,1192 @@
+{
+ "source": "URA Residential Development Pipeline (URA Data Service)",
+ "service": "PMI_Resi_Pipeline",
+ "licence": "URA Data Service — attribution required, see https://www.ura.gov.sg/maps/api/",
+ "accessedAt": "2026-09-15T22:10:48.303Z",
+ "projects": 78,
+ "totalUnits": 39181,
+ "datedProjects": 18,
+ "datedUnits": 8995,
+ "undatedProjects": 60,
+ "undatedUnits": 30186,
+ "byExpectedTOP": {
+  "2026": 994,
+  "2027": 2193,
+  "2028": 2156,
+  "2029": 1652,
+  "2030": 2000
+ },
+ "caveat": "Expected TOP is missing on most of this pipeline and is stored as null rather than guessed. Any supply timeline built from it covers only the dated share and must say so.",
+ "list": [
+  {
+   "project": "Thomson Reserve",
+   "developer": "Tamarind Development Pte Ltd",
+   "street": "Bright Hill Drive",
+   "district": "20",
+   "expectedTOP": 2030,
+   "units": {
+    "apartment": 1268,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 1268
+  },
+  {
+   "project": "Parktown Residence",
+   "developer": "Topaz Residential Pte Ltd/Topaz Commercial Pte Ltd",
+   "street": "Tampines Street 62",
+   "district": "18",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 1193,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 1193
+  },
+  {
+   "project": "Zyon Grand",
+   "developer": "CDL-MFA Altair Property Pte Ltd/CDL-MFA Vega Property Pte Ltd",
+   "street": "Zion Road",
+   "district": "03",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 1079,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 1079
+  },
+  {
+   "project": "Residential apartments",
+   "developer": "Chuan Grove Pte Ltd",
+   "street": "Chuan Grove",
+   "district": "19",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 1056,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 1056
+  },
+  {
+   "project": "Grand Dunman",
+   "developer": "Grand Dunman Pte Ltd",
+   "street": "Dunman Road",
+   "district": "15",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 1008,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 1008
+  },
+  {
+   "project": "Springleaf Residence",
+   "developer": "Springleaf Residence Pte Ltd",
+   "street": "Upper Thomson Road",
+   "district": "26",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 941,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 941
+  },
+  {
+   "project": "One Marina Gardens",
+   "developer": "Kingsford Marina Development Pte Ltd",
+   "street": "Marina Gardens Lane",
+   "district": "01",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 937,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 937
+  },
+  {
+   "project": "Chuan Park",
+   "developer": "Chuan Park Development Pte Ltd",
+   "street": "Lorong Chuan",
+   "district": "19",
+   "expectedTOP": 2027,
+   "units": {
+    "apartment": 0,
+    "condo": 916,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 916
+  },
+  {
+   "project": "The Reserve Residences",
+   "developer": "FE Landmark Pte Ltd/FEC Residences Trustee Pte Ltd/FEC Retail Trustee Pte Ltd",
+   "street": "Jalan Anak Bukit",
+   "district": "21",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 892,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 892
+  },
+  {
+   "project": "Residential apartments",
+   "developer": "Times Square Mall Pte Ltd/Polaris Time Square Residences Pte Ltd",
+   "street": "Chencharu Close",
+   "district": "27",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 876,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 876
+  },
+  {
+   "project": "Tengah Garden Residences/Tengah Garden Galleria",
+   "developer": "Tengah Garden Development Pte Ltd/TGA Development Pte Ltd",
+   "street": "Tengah Garden Avenue",
+   "district": "24",
+   "expectedTOP": 2029,
+   "units": {
+    "apartment": 863,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 863
+  },
+  {
+   "project": "Emerald Of Katong",
+   "developer": "Sim Lian JV (Katong) Pte Ltd",
+   "street": "Jalan Tembusu",
+   "district": "15",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 0,
+    "condo": 846,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 846
+  },
+  {
+   "project": "The Continuum",
+   "developer": "Hoi Hup Sunway Katong Pte Ltd",
+   "street": "Thiam Siew Avenue",
+   "district": "15",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 816,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 816
+  },
+  {
+   "project": "The Orie",
+   "developer": "Transcend Residential (Toa Payoh) Pte Ltd",
+   "street": "Lorong 1 Toa Payoh",
+   "district": "12",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 0,
+    "condo": 777,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 777
+  },
+  {
+   "project": "Aurelle Of Tampines",
+   "developer": "Sim Lian JV (Northbank) Pte Ltd",
+   "street": "Tampines Street 62",
+   "district": "18",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 0,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 760
+  },
+  {
+   "project": "Coastal Cabana",
+   "developer": "Pasir Ris Development Pte Ltd",
+   "street": "Jalan Loyang Besar",
+   "district": "17",
+   "expectedTOP": 2028,
+   "units": {
+    "apartment": 0,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 748
+  },
+  {
+   "project": "Residential/service apartments",
+   "developer": "Marina Centre Holdings Pte Ltd/Singapore Land Group Ltd",
+   "street": "Raffles Boulevard",
+   "district": "01",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 702,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 702
+  },
+  {
+   "project": "Canninghill Piers",
+   "developer": "DBS Trustee Limited/Legend Commercial Trustee Pte Ltd/Legend Quay Pte Ltd",
+   "street": "Clarke Quay",
+   "district": "06",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 696,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 696
+  },
+  {
+   "project": "W Residences Marina View - Singapore",
+   "developer": "Boulevard Development Pte Ltd/Boulevard Midtown Pte Ltd",
+   "street": "Marina View",
+   "district": "01",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 683,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 683
+  },
+  {
+   "project": "Skye at Holland",
+   "developer": "Holly Development Pte Ltd",
+   "street": "Holland Drive",
+   "district": "10",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 666,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 666
+  },
+  {
+   "project": "Otto Place",
+   "developer": "Hoi Hup Sunway Plantation Pte Ltd",
+   "street": "Plantation Close",
+   "district": "24",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 0,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 600
+  },
+  {
+   "project": "Lentor Hills Residences",
+   "developer": "Lentor Hills Development Pte Ltd",
+   "street": "Lentor Hills Road",
+   "district": "26",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 598,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 598
+  },
+  {
+   "project": "Promenade Peak",
+   "developer": "Valerian Residential Pte Ltd",
+   "street": "Zion Promenade",
+   "district": "03",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 0,
+    "condo": 596,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 596
+  },
+  {
+   "project": "Residential/service apartments/Retail development",
+   "developer": "River Valley Tower Pte Ltd",
+   "street": "River Valley Road",
+   "district": "10",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 591,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 591
+  },
+  {
+   "project": "Pinery Residences",
+   "developer": "Hoi Hup Sunway Tampines Residential Pte Ltd/Hoi Hup Sunway Tampines Commercial Pte Ltd",
+   "street": "Bedok Reservoir Road",
+   "district": "18",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 588,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 588
+  },
+  {
+   "project": "Rivelle Tampines",
+   "developer": "Sim Lian JV (Tampines 7) Pte Ltd",
+   "street": "Tampines Street 95",
+   "district": "18",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 0,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 572
+  },
+  {
+   "project": "Lucerne Grand",
+   "developer": "CDL Polaris Properties Pte Ltd/CDL Polaris Commercial Pte Ltd",
+   "street": "Lakeside Drive",
+   "district": "22",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 570,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 570
+  },
+  {
+   "project": "Nava Grove",
+   "developer": "Golden Ray Edge 3 Pte Ltd",
+   "street": "Pine Grove",
+   "district": "21",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 0,
+    "condo": 552,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 552
+  },
+  {
+   "project": "Narra Residences",
+   "developer": "Dairy Farm Walk JV Development Pte Ltd",
+   "street": "Dairy Farm Walk",
+   "district": "23",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 540,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 540
+  },
+  {
+   "project": "Lentor Mansion",
+   "developer": "Lentor Mansion Pte Ltd",
+   "street": "Lentor Gardens",
+   "district": "26",
+   "expectedTOP": 2027,
+   "units": {
+    "apartment": 533,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 533
+  },
+  {
+   "project": "River Green",
+   "developer": "Winchamp Investment Pte Ltd",
+   "street": "River Valley Green",
+   "district": "09",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 524,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 524
+  },
+  {
+   "project": "Pinetree Hill",
+   "developer": "United Venture Development (No. 5) Pte Ltd",
+   "street": "Pine Grove",
+   "district": "21",
+   "expectedTOP": 2026,
+   "units": {
+    "apartment": 0,
+    "condo": 520,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 520
+  },
+  {
+   "project": "Vela Bay",
+   "developer": "Bayshore Walk Pte Ltd",
+   "street": "Bayshore Walk",
+   "district": "16",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 515,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 515
+  },
+  {
+   "project": "Novo Place",
+   "developer": "Hoi Hup Sunway Jurong Pte Ltd",
+   "street": "Plantation Close",
+   "district": "24",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 0,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 504
+  },
+  {
+   "project": "Elta",
+   "developer": "HC Land (Clementi) Pte Ltd",
+   "street": "Clementi Avenue 1",
+   "district": "05",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 501,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 501
+  },
+  {
+   "project": "Lentor Gardens Residences",
+   "developer": "Kingsford Lentor Project Pte Ltd",
+   "street": "Lentor Gardens",
+   "district": "26",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 496,
+    "condo": 0,
+    "terrace": 3,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 499
+  },
+  {
+   "project": "Newport Residences",
+   "developer": "CDL Pisces Commercial Pte Ltd/CDL Pisces Serviced Residences Pte Ltd/Hong Leong Properties Pte Ltd",
+   "street": "Anson Road",
+   "district": "02",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 487,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 487
+  },
+  {
+   "project": "Lentor Central Residences",
+   "developer": "Lentor Central Park Pte Ltd",
+   "street": "Lentor Central",
+   "district": "26",
+   "expectedTOP": 2027,
+   "units": {
+    "apartment": 0,
+    "condo": 477,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 477
+  },
+  {
+   "project": "Hillock Green",
+   "developer": "Lentor Central Developments Pte Ltd",
+   "street": "Lentor Central",
+   "district": "26",
+   "expectedTOP": 2026,
+   "units": {
+    "apartment": 474,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 474
+  },
+  {
+   "project": "Penrith",
+   "developer": "Margaret Rise Development Pte Ltd",
+   "street": "Margaret Drive",
+   "district": "03",
+   "expectedTOP": 2029,
+   "units": {
+    "apartment": 462,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 462
+  },
+  {
+   "project": "River Modern",
+   "developer": "River Modern Pte Ltd",
+   "street": "River Valley Green",
+   "district": "09",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 455,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 455
+  },
+  {
+   "project": "Sora",
+   "developer": "Lakeside Residential Pte Ltd",
+   "street": "Yuan Ching Road",
+   "district": "22",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 440,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 440
+  },
+  {
+   "project": "Wynwood Grand",
+   "developer": "CDL Divine Pte Ltd",
+   "street": "Woodlands Drive 17",
+   "district": "25",
+   "expectedTOP": 2030,
+   "units": {
+    "apartment": 0,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 430
+  },
+  {
+   "project": "The Myst",
+   "developer": "CDL Aries Pte Ltd",
+   "street": "Upper Bukit Timah Road",
+   "district": "23",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 0,
+    "condo": 408,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 408
+  },
+  {
+   "project": "Faber Residence",
+   "developer": "Faber Residence Pte Ltd",
+   "street": "Faber Walk",
+   "district": "05",
+   "expectedTOP": 2028,
+   "units": {
+    "apartment": 399,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 399
+  },
+  {
+   "project": "Dunearn House",
+   "developer": "Phoenix Dunearn Pte Ltd",
+   "street": "Dunearn Road",
+   "district": "11",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 380,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 380
+  },
+  {
+   "project": "Canberra Crescent Residences",
+   "developer": "Peak Crescent Pte Ltd",
+   "street": "Canberra Crescent",
+   "district": "27",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 376,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 376
+  },
+  {
+   "project": "J’den",
+   "developer": "Tanglin R.E. Holdings Pte Ltd",
+   "street": "Jurong East Central 1",
+   "district": "22",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 368,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 368
+  },
+  {
+   "project": "The Collective At One Sophia",
+   "developer": "Sophia Residential Pte Ltd/Sophia Commercial Pte Ltd",
+   "street": "Sophia Road",
+   "district": "09",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 367,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 367
+  },
+  {
+   "project": "Union Square Residences",
+   "developer": "CDL Libra Pte Ltd/CDL Conservo Pte Ltd/Centro Property Holding Pte Ltd",
+   "street": "Havelock Road",
+   "district": "01",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 366,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 366
+  },
+  {
+   "project": "Bloomsbury Residences",
+   "developer": "Media Circle Development Pte Ltd",
+   "street": "Media Circle",
+   "district": "05",
+   "expectedTOP": 2028,
+   "units": {
+    "apartment": 358,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 358
+  },
+  {
+   "project": "Norwood Grand",
+   "developer": "CDL Stellar Pte Ltd",
+   "street": "Champions Way",
+   "district": "25",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 348,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 348
+  },
+  {
+   "project": "The Robertson Opus/Robertson Walk",
+   "developer": "Riverside Property Pte Ltd",
+   "street": "Unity Street",
+   "district": "09",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 348,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 348
+  },
+  {
+   "project": "The Sen",
+   "developer": "SL Capital (8) Pte Ltd",
+   "street": "Jalan Jurong Kechil",
+   "district": "21",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 0,
+    "condo": 347,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 347
+  },
+  {
+   "project": "Lyndenwoods",
+   "developer": "Tuas View Development Pte Ltd",
+   "street": "Science Park Drive",
+   "district": "05",
+   "expectedTOP": 2028,
+   "units": {
+    "apartment": 343,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 343
+  },
+  {
+   "project": "Hillhaven",
+   "developer": "East Residences Pte Ltd",
+   "street": "Hillview Rise",
+   "district": "23",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 0,
+    "condo": 341,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 341
+  },
+  {
+   "project": "Hudson Place Residences",
+   "developer": "Media Circle Alpha Development Pte Ltd",
+   "street": "Media Circle",
+   "district": "05",
+   "expectedTOP": 2029,
+   "units": {
+    "apartment": 327,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 327
+  },
+  {
+   "project": "TMW Maxwell",
+   "developer": "Maxwell Commercial Pte Ltd/Maxwell Residential Pte Ltd",
+   "street": "Maxwell Road",
+   "district": "01",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 324,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 324
+  },
+  {
+   "project": "The Lakegarden Residences",
+   "developer": "Winville Investment Pte Ltd",
+   "street": "Yuan Ching Road",
+   "district": "22",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 306,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 306
+  },
+  {
+   "project": "Residential apartments",
+   "developer": "HPL Properties Pte Ltd",
+   "street": "Cuscaden Road/Orchard Road",
+   "district": "09",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 304,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 304
+  },
+  {
+   "project": "Solano Grand",
+   "developer": "CDL Selesta Pte Ltd",
+   "street": "Senja Close",
+   "district": "23",
+   "expectedTOP": 2030,
+   "units": {
+    "apartment": 0,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 302
+  },
+  {
+   "project": "Upperhouse at Orchard Boulevard",
+   "developer": "United Venture Development (No.7) Pte Ltd",
+   "street": "Orchard Boulevard",
+   "district": "10",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 301,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 301
+  },
+  {
+   "project": "Kassia",
+   "developer": "Tripartite Developers Pte Ltd",
+   "street": "Flora Drive",
+   "district": "17",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 0,
+    "condo": 276,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 276
+  },
+  {
+   "project": "Blossoms By The Park",
+   "developer": "EL Development (Buona Vista) Pte Ltd/EL Development (One-North) Pte Ltd",
+   "street": "Slim Barracks Rise",
+   "district": "05",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 275,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 275
+  },
+  {
+   "project": "Terra Hill",
+   "developer": "Hoi Hup Sunway Kent Ridge Pte Ltd",
+   "street": "Yew Siang Road",
+   "district": "05",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 270,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 270
+  },
+  {
+   "project": "Lentoria",
+   "developer": "Lentor View Pte Ltd",
+   "street": "Lentor Hills Road",
+   "district": "26",
+   "expectedTOP": 2027,
+   "units": {
+    "apartment": 0,
+    "condo": 267,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 267
+  },
+  {
+   "project": "Service apartments",
+   "developer": "UE Development (Anson) Pte Ltd",
+   "street": "Anson Road",
+   "district": "02",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 255,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 255
+  },
+  {
+   "project": "Meyer Blue",
+   "developer": "United Venture Development (Meyer) Pte Ltd",
+   "street": "Meyer Road",
+   "district": "15",
+   "expectedTOP": 2028,
+   "units": {
+    "apartment": 226,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 226
+  },
+  {
+   "project": "Amberwood at Holland",
+   "developer": "Sim Lian JV (Holland) Pte Ltd",
+   "street": "Holland Link",
+   "district": "10",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 0,
+    "condo": 212,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 212
+  },
+  {
+   "project": "Pollen Collection II",
+   "developer": "Singapore United Estates Pte Ltd",
+   "street": "Pollen Crescent/Pollen Lane/Pollen Rise/Pollen Terrace",
+   "district": "28",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 0,
+    "condo": 0,
+    "terrace": 186,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 186
+  },
+  {
+   "project": "Luxus Hills",
+   "developer": "Singapore United Estates Pte Ltd",
+   "street": "Luxus Hill Heights/Luxus Hill Road/Luxus Hill View",
+   "district": "28",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 0,
+    "condo": 0,
+    "terrace": 160,
+    "semiDetached": 0,
+    "detached": 1
+   },
+   "totalUnits": 161
+  },
+  {
+   "project": "Luxus Hills",
+   "developer": "Singapore United Estates Pte Ltd",
+   "street": "Luxus Hill Road/Seletar Road",
+   "district": "28",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 0,
+    "condo": 0,
+    "terrace": 155,
+    "semiDetached": 4,
+    "detached": 0
+   },
+   "totalUnits": 159
+  },
+  {
+   "project": "Luxus Hills",
+   "developer": "Singapore United Estates Pte Ltd",
+   "street": "Luxus Hill Heights/Seletar Green Walk",
+   "district": "28",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 0,
+    "condo": 0,
+    "terrace": 136,
+    "semiDetached": 18,
+    "detached": 2
+   },
+   "totalUnits": 156
+  },
+  {
+   "project": "Skywaters Residences/The Skywaters",
+   "developer": "Ace Shenton Development Pte Ltd/Shenton Commercial Property Pte Ltd/Shenton Hotel Property Pte Ltd/Shenton Office Property Pte Ltd/Shenton Residential Property Pte Ltd",
+   "street": "Shenton Way",
+   "district": "01",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 146,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 146
+  },
+  {
+   "project": "Landed housing development",
+   "developer": "Singapore United Estates Pte Ltd",
+   "street": "Nim Road/Ang Mo Kio Avenue 5",
+   "district": "28",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 0,
+    "condo": 0,
+    "terrace": 85,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 85
+  },
+  {
+   "project": "51 Anson/Anson Centre",
+   "developer": "Hong Leong Holdings Limited",
+   "street": "Anson Road",
+   "district": "02",
+   "expectedTOP": 2028,
+   "units": {
+    "apartment": 82,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 82
+  },
+  {
+   "project": "Service apartments/Hotel/retail development",
+   "developer": "Fragrance Grandeur Pte Ltd",
+   "street": "Hoe Chiang Road",
+   "district": "02",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 46,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 46
+  },
+  {
+   "project": "Service apartments/Office/retail development",
+   "developer": "39 Robinson Road Pte Ltd",
+   "street": "Robinson Road",
+   "district": "01",
+   "expectedTOP": null,
+   "units": {
+    "apartment": 15,
+    "condo": 0,
+    "terrace": 0,
+    "semiDetached": 0,
+    "detached": 0
+   },
+   "totalUnits": 15
+  }
+ ]
+}

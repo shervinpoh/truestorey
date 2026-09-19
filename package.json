@@ -53,7 +53,22 @@
     "desk": "node --env-file-if-exists=.env.local scripts/desk.mjs",
     "backfill:photos": "node --env-file-if-exists=.env.local scripts/backfill-photos.mjs",
     "render:island": "node scripts/render/export-island.mjs && \"/Applications/Blender.app/Contents/MacOS/Blender\" -b -P scripts/render/island.py -- --out public/editorial/island-a.png --samples 128 --width 2400",
-    "build:mop-filings": "node scripts/build-mop-filings.mjs"
+    "backtest": "node scripts/backtest-avm.mjs",
+    "avm": "node scripts/avm.mjs",
+    "build:avm-error": "node scripts/backtest-avm.mjs --n 12000 --dump data/.avm-trials.jsonl >/dev/null && node scripts/build-avm-error.mjs",
+    "outlook": "node scripts/outlook.mjs",
+    "build:mop-filings": "node scripts/build-mop-filings.mjs",
+    "tune:avm": "node scripts/backtest-avm.mjs --n 12000 --dump data/.avm-trials.jsonl --cohorts >/dev/null && node scripts/tune-avm.mjs",
+    "measure:size": "node scripts/measure-size-gradient.mjs",
+    "ingest:hdb:history": "node scripts/ingest-hdb.mjs --history",
+    "backtest:rolling": "node scripts/backtest-rolling.mjs",
+    "scan": "node scripts/scan.mjs",
+    "find": "node scripts/find.mjs",
+    "consult": "node scripts/consult-server.mjs",
+    "ingest:pipeline": "node --env-file-if-exists=.env.local scripts/ingest-pipeline.mjs",
+    "ingest:realis": "node scripts/ingest-realis.mjs",
+    "ingest:listings": "node scripts/ingest-listings.mjs",
+    "reading": "node scripts/reading.mjs"
   },
   "dependencies": {
     "next": "^15.0.0",

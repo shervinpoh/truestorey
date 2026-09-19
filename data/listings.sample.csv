@@ -1,0 +1,7 @@
+# TEST FIXTURE — not real listings. Prices are invented to exercise the screener.
+# Replace with a real export: PropertyGuru AgentNet, 99.co Agent, SRX or the Huttons back-end.
+town,block,street,flatType,areaSqft,floor,askingPrice,url,source
+BEDOK,649,JLN TENAGA,5 ROOM,1313,9,795000,https://example.invalid/a,fixture
+BISHAN,275A,BISHAN ST 24,4 ROOM,1001,12,1050000,https://example.invalid/b,fixture
+PUNGGOL,271A,PUNGGOL WALK,4 ROOM,990,10,600000,https://example.invalid/c,fixture
+ANG MO KIO,310A,ANG MO KIO AVE 1,5 ROOM,1281,12,1150000,https://example.invalid/d,fixture
