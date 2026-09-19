@@ -5,6 +5,7 @@ import ToolUse from '../../components/ToolUse.jsx';
 import Planner from '../../components/Planner.jsx';
 import { allTowns, allDistricts, getIndex, budget } from '../../lib/data/query.js';
 import { titleCase } from '../../lib/name.js';
+import { configured as mailConfigured } from '../../lib/email.js';
 
 export const metadata = {
   title: 'Can I afford it — TDSR, downpayment and stamp duty in one answer | Truestorey',
@@ -74,7 +75,7 @@ export default async function Page({ searchParams }) {
 
       <section className="pane">
         <Planner markets={markets} budget={budget()}
-          initial={{ price: one(sp.price), type: one(sp.type), from: one(sp.from) }} />
+          initial={{ price: one(sp.price), type: one(sp.type), from: one(sp.from) }} canEmail={mailConfigured()} />
       </section>
 
       <section className="pane">

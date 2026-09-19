@@ -1,8 +1,8 @@
 'use client';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { progressive, BUC_SOURCE, NOTICE_DAYS, STAMPING } from '../lib/calc/buc.js';
-import { bsd, absd } from '../lib/calc/stampDuty.js';
+import { BUC_SOURCE, NOTICE_DAYS, STAMPING } from '../lib/calc/buc.js';
+import { progressiveResult } from '../lib/report/progressive.js';
 import { f } from './fmt.js';
 import { Figure } from './Motion.jsx';
 import MoneyInput from './MoneyInput.jsx';
@@ -10,7 +10,8 @@ import Row from './PlanRow.jsx';
 import ConstructionStudy from './ConstructionStudy.jsx';
 import ShareResult, { OpenedFromLink } from './ShareResult.jsx';
 import useShareLink from './useShareLink.js';
-import { PROGRESSIVE_SHARE, PROGRESSIVE_LABELS } from '../lib/share.js';
+import { PROGRESSIVE_SHARE, PROGRESSIVE_LABELS, PROGRESSIVE_DEFAULTS as D } from '../lib/share.js';
+import EmailReport from './EmailReport.jsx';
 
 /**
  * The progressive payment ladder for a home still under construction.
@@ -32,47 +33,34 @@ import { PROGRESSIVE_SHARE, PROGRESSIVE_LABELS } from '../lib/share.js';
 const money = n => (Number.isFinite(n) ? f(n) : '—');
 const pc = n => `${Math.round(n * 1000) / 10}%`;
 
-export default function Progressive() {
-  const [price, setPrice] = useState(1_500_000);
-  const [ltv, setLtv] = useState(0.75);
-  const [fee, setFee] = useState(0.05);
-  const [rate, setRate] = useState(2.5);
-  const [tenure, setTenure] = useState(25);
-  const [profile, setProfile] = useState('SC');
-  const [owned, setOwned] = useState(1);
+export default function Progressive({ canEmail = false }) {
+  const [price, setPrice] = useState(D.price);
+  const [ltv, setLtv] = useState(D.ltv);
+  const [fee, setFee] = useState(D.fee);
+  const [rate, setRate] = useState(D.rate);
+  const [tenure, setTenure] = useState(D.tenure);
+  const [profile, setProfile] = useState(D.profile);
+  const [owned, setOwned] = useState(D.owned);
   const [showPlanBar, setShowPlanBar] = useState(false);
 
-  /* A result as a link — see components/useShareLink.js. */
-  const { fromLink, url: shareUrl } = useShareLink(PROGRESSIVE_SHARE,
-    { price, ltv, fee, rate, tenure, profile, owned },
+  /* A result as a link — see components/useShareLink.js.
+     One set of figures: the link, the emailed copy and the ladder below. */
+  const shareValues = useMemo(() => ({ price, ltv, fee, rate, tenure, profile, owned }),
+    [price, ltv, fee, rate, tenure, profile, owned]);
+
+  const { fromLink, url: shareUrl, hash: shareHash } = useShareLink(PROGRESSIVE_SHARE, shareValues,
     v => {
       const set = { price: setPrice, ltv: setLtv, fee: setFee, rate: setRate, tenure: setTenure,
         profile: setProfile, owned: setOwned };
       for (const [k, fn] of Object.entries(set)) if (k in v) fn(v[k]);
     });
 
-  const r = useMemo(() => progressive({
-    price: Number(price) || 0, ltv,
-    bookingFeePct: fee, rate: (Number(rate) || 0) / 100, tenureYears: Number(tenure) || 25,
-  }), [price, ltv, fee, rate, tenure]);
+  /* progressiveResult, not progressive() and the duties separately: that
+     mapping lives in lib/report/progressive.js so the emailed copy cannot
+     drift from what is on the screen. Stamp duty is NOT part of the price and
+     so not part of the ladder — it sits beside it, added to the headline. */
+  const { r, duty, firstDraw } = useMemo(() => progressiveResult(shareValues), [shareValues]);
 
-  /*
-   * Stamp duty is NOT part of the price, so it is not part of the ladder — it
-   * is money on top, due on its own clock. Folding it into a stage percentage
-   * would corrupt a statutory schedule with a figure the schedule does not
-   * contain; leaving it off the upfront total would understate what a buyer
-   * needs by tens of thousands. So it sits beside the ladder, added to the
-   * headline, and dated separately.
-   */
-  const duty = useMemo(() => {
-    const p = Number(price) || 0;
-    const b = bsd(p), a = absd(p, profile, Number(owned) || 1);
-    return { bsd: b.total, absd: a.total, absdRate: a.rate, total: b.total + a.total };
-  }, [price, profile, owned]);
-
-  // The stage at which the bank first pays anything — the answer to "when
-  // does my mortgage start", which is not a date but a milestone.
-  const firstDraw = r.rows.findIndex(x => x.loan > 0);
 
   return (
     <>
@@ -240,6 +228,9 @@ export default function Progressive() {
         This plans a purchase from figures you typed; it does not value any property and it is not
         financial advice.
       </p>
+
+      {/* After the answer, never in front of it. Absent when nothing can send. */}
+      {canEmail && <EmailReport tool="progressive" hash={shareHash} title="the ladder" />}
 
       <h2 className="sh" style={{ marginTop: 26 }}><span>The rest of it</span></h2>
       <ul className="idx">

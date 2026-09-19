@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { plan, maxPrice } from '../lib/calc/plan.js';
+import { planResult } from '../lib/report/plan.js';
 import { SOURCES, RATES_REVIEWED, LTV_REVIEWED, PROPERTY_TYPES } from '../lib/calc/constants.js';
 import { f } from './fmt.js';
 import { titleCase } from '../lib/name.js';
@@ -10,7 +10,8 @@ import MoneyInput from './MoneyInput.jsx';
 import Row from './PlanRow.jsx';
 import ShareResult, { OpenedFromLink } from './ShareResult.jsx';
 import useShareLink from './useShareLink.js';
-import { PLAN_SHARE, PLAN_LABELS } from '../lib/share.js';
+import { PLAN_SHARE, PLAN_LABELS, PLAN_DEFAULTS as D } from '../lib/share.js';
+import EmailReport from './EmailReport.jsx';
 
 /**
  * TDSR, BSD and ABSD as one answer.
@@ -371,26 +372,31 @@ function BuyingWhat({ type, setType, hdbLoan, setHdbLoan, price }) {
  * calculator whose whole job is to answer a question about numbers somebody
  * just typed, that is the right side of the trade.
  */
-export default function Planner({ markets = {}, budget = null, initial = {} }) {
-  const [price, setPrice] = useState(Number(initial.price) || 650000);
+export default function Planner({ markets = {}, budget = null, initial = {}, canEmail = false }) {
+  const [price, setPrice] = useState(Number(initial.price) || D.price);
   // Record pages hand over HDB or PRIVATE; the EC branches are chosen here.
   const [type, setType] = useState(PROPERTY_TYPES.includes(initial.type) ? initial.type : 'HDB');
-  const [hdbLoan, setHdbLoan] = useState(true);
-  const [a1, setA1] = useState(6000); const [g1, setG1] = useState(34);
-  const [a2, setA2] = useState(5000); const [g2, setG2] = useState(32);
-  const [debts, setDebts] = useState(800);
-  const [cash, setCash] = useState(80000);
-  const [cpf, setCpf] = useState(120000);
-  const [profile, setProfile] = useState('SC');
-  const [owned, setOwned] = useState(1);
-  const [loans, setLoans] = useState(0);
+  const [hdbLoan, setHdbLoan] = useState(D.hdbLoan);
+  const [a1, setA1] = useState(D.a1); const [g1, setG1] = useState(D.g1);
+  const [a2, setA2] = useState(D.a2); const [g2, setG2] = useState(D.g2);
+  const [debts, setDebts] = useState(D.debts);
+  const [cash, setCash] = useState(D.cash);
+  const [cpf, setCpf] = useState(D.cpf);
+  const [profile, setProfile] = useState(D.profile);
+  const [owned, setOwned] = useState(D.owned);
+  const [loans, setLoans] = useState(D.loans);
   const from = initial.from || null;
 
   /* A result as a link — see components/useShareLink.js. The type is set
      directly rather than through chooseType, which clamps the price to the
      new type's slider range: a link's price is what its sender typed. */
-  const { fromLink, url: shareUrl } = useShareLink(PLAN_SHARE,
-    { price, type, hdbLoan, a1, g1, a2, g2, debts, cash, cpf, profile, owned, loans },
+  /* The one set of figures this page holds: the link, the emailed copy and the
+     assessment below are all rendered from it. */
+  const shareValues = useMemo(
+    () => ({ price, type, hdbLoan, a1, g1, a2, g2, debts, cash, cpf, profile, owned, loans }),
+    [price, type, hdbLoan, a1, g1, a2, g2, debts, cash, cpf, profile, owned, loans]);
+
+  const { fromLink, url: shareUrl, hash: shareHash } = useShareLink(PLAN_SHARE, shareValues,
     v => {
       const set = { price: setPrice, type: setType, hdbLoan: setHdbLoan, a1: setA1, g1: setG1,
         a2: setA2, g2: setG2, debts: setDebts, cash: setCash, cpf: setCpf, profile: setProfile,
@@ -398,23 +404,10 @@ export default function Planner({ markets = {}, budget = null, initial = {} }) {
       for (const [k, fn] of Object.entries(set)) if (k in v) fn(v[k]);
     });
 
-  const input = useMemo(() => ({
-    applicants: [
-      { fixedIncome: Number(a1) || 0, age: Number(g1) || 35 },
-      ...(Number(a2) > 0 ? [{ fixedIncome: Number(a2), age: Number(g2) || 35 }] : []),
-    ],
-    monthlyDebts: Number(debts) || 0,
-    propertyType: type,
-    hdbLoan: type === 'HDB' && hdbLoan,
-    existingLoans: Number(loans) || 0,
-    profile,
-    propertyCount: Number(owned) || 1,
-    cashAvailable: Number(cash) || 0,
-    cpfAvailable: Number(cpf) || 0,
-  }), [a1, g1, a2, g2, debts, type, hdbLoan, loans, profile, owned, cash, cpf]);
-
-  const r = useMemo(() => plan({ ...input, price: Number(price) || 0 }), [input, price]);
-  const cap = useMemo(() => maxPrice(input), [input]);
+  /* planResult, not plan() and maxPrice() directly: the mapping from these
+     fields to the calculator's arguments lives in lib/report/plan.js so the
+     emailed copy cannot drift from what is on the screen. */
+  const { input, r, cap } = useMemo(() => planResult(shareValues), [shareValues]);
 
   const market = type === 'HDB' ? markets.HDB : type.startsWith('EC') ? markets.EC : markets.PRIVATE;
   const priceMax = maxPriceFor(type);
@@ -597,6 +590,10 @@ export default function Planner({ markets = {}, budget = null, initial = {} }) {
         <Row label="Cash needed on the day" value={money(r.cashNeeded)} note="downpayment cash plus all three duties" strong />
       </div>
 
+      {/* After the answer, never in front of it — the email is a copy, not the
+          unlock. Absent entirely when the server cannot send. */}
+      {canEmail && <EmailReport tool="plan" hash={shareHash} title="the assessment" />}
+
       <p className="prov" style={{ marginTop: 22 }}>
         TDSR {pc(r.assumptions.tdsrLimit)}
         {r.assumptions.msrLimit ? ` · MSR ${pc(r.assumptions.msrLimit)}` : ' · MSR does not apply to this purchase'} ·
@@ -605,7 +602,8 @@ export default function Planner({ markets = {}, budget = null, initial = {} }) {
         {SOURCES.bsd.name} · {SOURCES.absd.name} · rates last reviewed {RATES_REVIEWED}
         {LTV_REVIEWED ? ` · LTV reviewed ${LTV_REVIEWED}` : ' · LTV not yet reviewed'}<br />
         This plans a purchase from figures you typed. It does not value any property, and it is not
-        financial advice. Nothing here is sent anywhere.
+        financial advice. Nothing here leaves your browser unless you ask for the emailed copy —
+        which is written from your figures and stored nowhere.
       </p>
     </>
   );

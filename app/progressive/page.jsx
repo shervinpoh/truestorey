@@ -3,6 +3,7 @@ import Masthead from '../../components/Masthead.jsx';
 import ToolIntro from '../../components/ToolIntro.jsx';
 import ToolUse from '../../components/ToolUse.jsx';
 import Progressive from '../../components/Progressive.jsx';
+import { configured as mailConfigured } from '../../lib/email.js';
 import './construction.css';
 
 export const metadata = {
@@ -21,7 +22,7 @@ export default function Page() {
       <ToolUse id="progressive" />
       <section className="pane">
         <Suspense fallback={<p className="hint">Loading…</p>}>
-          <Progressive />
+          <Progressive canEmail={mailConfigured()} />
         </Suspense>
       </section>
     </main>

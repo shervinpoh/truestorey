@@ -20,8 +20,12 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { renderCostReport, costLedger } from '../lib/report/cost.js';
+import { renderPlanReport, planResult } from '../lib/report/plan.js';
+import { renderProgressiveReport, progressiveResult } from '../lib/report/progressive.js';
 import { ledger } from '../lib/calc/ledger.js';
-import { COST_DEFAULTS, COST_SHARE, encodeShare } from '../lib/share.js';
+import { plan, maxPrice } from '../lib/calc/plan.js';
+import { progressive } from '../lib/calc/buc.js';
+import { COST_DEFAULTS, COST_SHARE, PLAN_DEFAULTS, PROGRESSIVE_DEFAULTS, encodeShare } from '../lib/share.js';
 import { EVENTS } from '../lib/analytics.js';
 
 const code = (...p) => readFileSync(path.join(process.cwd(), ...p), 'utf8')
@@ -106,7 +110,7 @@ test('a home named in the link is reported and escaped', () => {
   /* Both cells, not only the one that carries reader input today. A row label
      is built from figures and could grow one, and an unescaped cell is not a
      bug anybody notices until it is. */
-  const src = code('lib', 'report', 'cost.js');
+  const src = code('lib', 'report', 'shell.js');
   assert.match(src, /\$\{esc\(k\)\}/, 'the row label is written into the HTML unescaped');
   assert.match(src, /\$\{esc\(val\)\}/, 'the row value is written into the HTML unescaped');
 });
@@ -173,4 +177,98 @@ test('the page stops claiming nothing is ever sent anywhere', () => {
   assert.doesNotMatch(src, /nothing on this page is saved or sent anywhere\./,
     'the page promises nothing is sent while offering to email the reader a copy');
   assert.match(src, /unless you ask for\s*\n?\s*the emailed copy/);
+});
+
+/* ── THE OTHER TWO REPORTS ───────────────────────────────────────────────────
+   Asserted over all three rather than once per file: every rule below is a
+   rule about what may be emailed under a CEA registration number, and a third
+   report added next year must satisfy them without anyone remembering to
+   write these tests again. */
+const REPORTS = [
+  ['cost', () => renderCostReport({ values: values, link: 'https://truestorey.vercel.app/cost#v=1', agent: AGENT, siteUrl: 'https://truestorey.vercel.app' })],
+  ['plan', () => renderPlanReport({ values: { ...PLAN_DEFAULTS, price: 720_000 }, link: 'https://truestorey.vercel.app/plan#v=1', agent: AGENT, siteUrl: 'https://truestorey.vercel.app' })],
+  ['progressive', () => renderProgressiveReport({ values: { ...PROGRESSIVE_DEFAULTS, price: 2_100_000 }, link: 'https://truestorey.vercel.app/progressive#v=1', agent: AGENT, siteUrl: 'https://truestorey.vercel.app' })],
+];
+
+test('every report obeys the rules a licensed email has to obey', () => {
+  for (const [name, render] of REPORTS) {
+    const { subject, text, html } = render();
+    assert.ok(subject.length > 10 && subject.length < 120, `${name}: the subject is not a subject`);
+    for (const part of [text, html]) {
+      assert.match(part, /None of it is an opinion about what your home is worth or what it would fetch/, `${name}: rule 2`);
+      /* The heading as well as the sentence: an earlier mutation removed the
+         bold "This is not a valuation." and every assertion still passed. */
+      assert.match(part, /This is not a valuation\.|THIS IS NOT A VALUATION\./, `${name}: the valuation heading is gone`);
+      assert.doesNotMatch(part, /worth[\s\S]{0,40}S\$\d/i, `${name}: a figure is presented as what the home is worth`);
+      assert.doesNotMatch(part, /under[-\s]?valued|best deal|\bexpert\b|\bspecialist\b/i, `${name}: rule 7`);
+      assert.doesNotMatch(part, /should sell|sell now|time to sell|you should buy|we recommend/i, `${name}: advice`);
+      assert.match(part, /R066925H/, `${name}: rule 8 — the CEA particulars`);
+      assert.match(part, /effective \d{4}-\d{2}-\d{2}/, `${name}: rule 6 — a rate with no source and date`);
+      assert.match(part, /Your address was used once to send it and was not stored/, `${name}: the privacy line`);
+      assert.doesNotMatch(part, /\[object Object\]|undefined|NaN/, `${name}: a value leaked into the prose`);
+    }
+    assert.ok(text.length > 800, `${name}: the plain-text part is a stub`);
+    assert.doesNotMatch(html, /<img|<link|<style|class=|@font-face|<script/i, `${name}: an email client will mangle this`);
+    assert.match(text, /Open this result again: https:\/\/truestorey/, `${name}: no way back to the result`);
+  }
+});
+
+test('/plan and /progressive emails quote the figures their pages compute', () => {
+  const pv = { ...PLAN_DEFAULTS, price: 720_000, a1: 6200, cash: 90_000 };
+  const { r, cap, input } = planResult(pv);
+  const direct = plan({
+    applicants: [{ fixedIncome: 6200, age: 34 }, { fixedIncome: 5000, age: 32 }],
+    monthlyDebts: 800, propertyType: 'HDB', hdbLoan: true, existingLoans: 0, profile: 'SC',
+    propertyCount: 1, cashAvailable: 90_000, cpfAvailable: 120_000, price: 720_000,
+  });
+  assert.equal(r.cashNeeded, direct.cashNeeded);
+  assert.equal(r.loan, direct.loan);
+  assert.equal(cap, maxPrice(input));
+  const planText = renderPlanReport({ values: pv, link: 'https://x/plan#v=1', agent: AGENT, siteUrl: 'https://x' }).text;
+  assert.ok(planText.includes('S$' + direct.cashNeeded.toLocaleString('en-SG')), 'the cash figure is missing');
+  assert.ok(planText.includes('S$' + cap.toLocaleString('en-SG')), 'the budget is missing');
+  assert.match(planText, /Limited by\s+(TDSR|MSR|LTV|cash|Cash)/i, 'the binding rule is not named');
+
+  const gv = { ...PROGRESSIVE_DEFAULTS, price: 2_100_000, ltv: 0.55, fee: 0.1 };
+  const { r: g, duty } = progressiveResult(gv);
+  const gDirect = progressive({ price: 2_100_000, ltv: 0.55, bookingFeePct: 0.1, rate: 0.025, tenureYears: 25 });
+  assert.equal(g.loanTotal, gDirect.loanTotal);
+  assert.equal(g.bookingFee, gDirect.bookingFee);
+  const gText = renderProgressiveReport({ values: gv, link: 'https://x/progressive#v=1', agent: AGENT, siteUrl: 'https://x' }).text;
+  assert.ok(gText.includes('S$' + Math.round(g.cashCpfTotal + duty.total).toLocaleString('en-SG')), 'the upfront total is missing');
+  assert.equal((gText.match(/^  \d+% — /gm) || []).length, gDirect.rows.length, 'the ladder lost stages');
+  /* The SOURCE LINE, not the phrase: the standfirst also names the Rules, so a
+     dropped source note passed this test until it asked for the citation. */
+  assert.match(gText, /Stage percentages: Housing Developers Rules[^\n]*as at \d{4}-\d{2}-\d{2}/,
+    'the percentages are quoted without the citation and version they came from');
+});
+
+test('all three pages render from the shared mapping and offer the copy', () => {
+  for (const [file, call, tool, title] of [
+    ['components/Ledger.jsx', 'costLedger(shareValues', 'cost', 'the ledger'],
+    ['components/Planner.jsx', 'planResult(shareValues)', 'plan', 'the assessment'],
+    ['components/Progressive.jsx', 'progressiveResult(shareValues)', 'progressive', 'the ladder'],
+  ]) {
+    const src = code(...file.split('/'));
+    assert.ok(src.includes(call), `${file} computes its own figures instead of the shared mapping`);
+    assert.match(src, new RegExp(`\\{canEmail && <EmailReport tool="${tool}" hash=\\{shareHash\\} title="${title}" />\\}`),
+      `${file} has no emailed copy, or renders it where nothing can send`);
+  }
+  for (const [page, comp] of [['app/cost/page.jsx', 'Ledger'], ['app/plan/page.jsx', 'Planner'], ['app/progressive/page.jsx', 'Progressive']]) {
+    assert.match(code(...page.split('/')), /canEmail=\{mailConfigured\(\)\}/, `${page} does not ask whether email works`);
+  }
+  const route = code('app', 'api', 'report', 'route.js');
+  for (const tool of ['cost', 'plan', 'progressive']) {
+    assert.ok(new RegExp(`\\b${tool}: \\{`).test(route), `/api/report cannot render the ${tool} report`);
+  }
+});
+
+test('no page still promises that nothing is ever sent anywhere', () => {
+  for (const f of ['components/Ledger.jsx', 'components/Planner.jsx']) {
+    const src = code(...f.split('/'));
+    assert.doesNotMatch(src, /Nothing here is sent anywhere|nothing on this page is saved or sent anywhere/,
+      `${f} promises nothing is sent while offering to email a copy`);
+    assert.match(src, /unless you ask for the emailed copy|unless you ask for\s*\n?\s*the emailed copy/,
+      `${f} stopped naming the one thing that does leave the browser`);
+  }
 });

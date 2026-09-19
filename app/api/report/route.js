@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server';
 import { configured as mailConfigured, send } from '../../../lib/email.js';
 import { MAX_BODY, ipOf, isBot, makeThrottle, readJson } from '../../../lib/formguard.js';
-import { COST_SHARE, COST_DEFAULTS, decodeShare } from '../../../lib/share.js';
+import {
+  COST_SHARE, COST_DEFAULTS, PLAN_SHARE, PLAN_DEFAULTS,
+  PROGRESSIVE_SHARE, PROGRESSIVE_DEFAULTS, decodeShare,
+} from '../../../lib/share.js';
 import { renderCostReport } from '../../../lib/report/cost.js';
+import { renderPlanReport } from '../../../lib/report/plan.js';
+import { renderProgressiveReport } from '../../../lib/report/progressive.js';
 import { rentFor, recordByHref } from '../../../lib/data/query.js';
 import { agent } from '../../../lib/agent.js';
 
@@ -42,6 +47,11 @@ const byAddress = makeThrottle({ windowMs: 24 * 60 * 60 * 1000, max: 5 });
 
 const TOOLS = {
   cost: { schema: COST_SHARE, defaults: COST_DEFAULTS, path: '/cost', render: renderCostReport },
+  plan: { schema: PLAN_SHARE, defaults: PLAN_DEFAULTS, path: '/plan', render: renderPlanReport },
+  progressive: {
+    schema: PROGRESSIVE_SHARE, defaults: PROGRESSIVE_DEFAULTS, path: '/progressive',
+    render: renderProgressiveReport,
+  },
 };
 
 export async function POST(req) {
