@@ -50,6 +50,13 @@ const BAR = {
   band: 8,        // sales before a storey band gets a published median
   side: 3,        // sales on each side before one BUILDING contributes a ratio
   group: 15,      // sales on each side before a town/district gets its own ratio
+  /* Within ONE building the 8-sale bar starves every band — a block files a
+     handful of 4-room sales a year across five bands. Three is the same bar
+     `side` already applies to a building's own low/high split. */
+  unitBand: 3,
+  /* Buildings that must contribute before a pooled band is published. A
+     "within-building" curve resting on two blocks is two blocks. */
+  curveUnits: 5,
 };
 
 /* HDB bands are three storeys wide, URA's are five, so the low/high cuts are
@@ -100,6 +107,66 @@ function within(units) {
 
 const usable = (e, bar) => e.lo.length >= bar && e.hi.length >= bar;
 
+/**
+ * A floor curve built the way `within` is built: from each building compared
+ * with ITSELF, then pooled.
+ *
+ * ── WHY THIS EXISTS WHEN `bands` ALREADY DOES ─────────────────────────────
+ * `bands` is the median psf per storey band across a whole town, and this
+ * file's own header says why that is the dishonest one: the blocks tall enough
+ * to have a 13th floor are the newer ones, so the upper bands are a younger,
+ * longer-leased product and the curve reads their lease as their height. Ang
+ * Mo Kio's 4 ROOM bands run 530 → 576 psf across floors 1–12, a sane 9% over
+ * eleven storeys, and then print 866 at floors 13–15. A 50% step in one band.
+ *
+ * `within` already fixes that — but only as a single low/high RATIO, and a
+ * two-point pair cannot place floor 9 between them without inventing the
+ * shape. So `storeyCurve` in lib/blindspot/measure.js went on reading `bands`,
+ * and a comparable filed at 532 psf on a high floor was being restated to 352
+ * to stand beside a tenth-floor home.
+ *
+ * This is the missing middle: every band, not just two, and still measured
+ * inside one building.
+ *
+ * ── THE NORMALISATION, AND WHAT IT COSTS ──────────────────────────────────
+ * Each building's band medians are divided by that building's OWN median psf,
+ * which removes the estate, the lease, the location and the flat model in one
+ * move because all four are shared by every band of one block. The published
+ * numbers are therefore RATIOS around 1.0 and not prices — which is all
+ * adjustForFloor needs, since it only ever divides one point by another.
+ *
+ * The cost: a block whose sales happen to be mostly high-floor has a high own
+ * median, so its ratios sit low. Pooling across at least five buildings is
+ * what absorbs that, and `n` travels with every band so a thin one is visible.
+ */
+function curveOf(units) {
+  const byBand = new Map();
+  for (const e of units) {
+    const own = med(e.rows.map(r => r.psf));
+    if (!(own > 0)) continue;
+    const g = new Map();
+    for (const r of e.rows) {
+      const b = g.get(r.range) || { mid: r.mid, psf: [] };
+      b.psf.push(r.psf); g.set(r.range, b);
+    }
+    const bands = [...g].filter(([, b]) => b.psf.length >= BAR.unitBand);
+    /* One band is a building with no vertical spread to report. It says
+       nothing about what a floor is worth and must not be pooled as though
+       it did. */
+    if (bands.length < 2) continue;
+    for (const [range, b] of bands) {
+      const acc = byBand.get(range) || { mid: b.mid, ratios: [] };
+      acc.ratios.push(med(b.psf) / own);
+      byBand.set(range, acc);
+    }
+  }
+  const out = [...byBand]
+    .filter(([, a]) => a.ratios.length >= BAR.curveUnits)
+    .sort((a, b) => a[1].mid - b[1].mid)
+    .map(([range, a]) => [range, a.mid, Math.round(med(a.ratios) * 10000) / 10000, a.ratios.length]);
+  return out.length >= 3 ? out : null;
+}
+
 function build({ rows, cut, groupOf, typeOf, unitOf }) {
   const sales = rows
     .map(r => ({ ...r, mid: midOf(r.range) }))
@@ -141,6 +208,10 @@ function build({ rows, cut, groupOf, typeOf, unitOf }) {
       n: e.rows.length,
       psf: Math.round(med(e.rows.map(r => r.psf))),
       bands,
+      /* Ratios, not prices — see curveOf. Null when too few buildings in this
+         town carry sales on two different floors, which is a real state and
+         not a gap to fill from the confounded table. */
+      curve: curveOf([...byUnit.values()].filter(u => u.group === e.group && u.type === e.type)),
       within: within(clear.filter(u => u.group === e.group && u.type === e.type)),
       spread: usable(e, BAR.group) ? r1(med(e.hi) / med(e.lo) - 1) : null,
     };

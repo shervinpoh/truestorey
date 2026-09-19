@@ -412,18 +412,70 @@ test('a floor band is read from either vendor’s way of writing one', async () 
 
 test('a floor curve that does not rise is refused, not applied', async () => {
   const { storeyCurve } = await import('../lib/blindspot/measure.js');
-  // Fifteen of the sixty private district curves fall rather than rise —
-  // District 05 reads S$2,104 psf across floors 1-5 and S$2,046 across 16-20.
-  // That is a thin sample, not a market where height is worth less, and
-  // adjusting a comparable DOWNWARD for being higher would put the artefact
-  // into the reader's percentile as though it were about their home.
-  const d5 = storeyCurve({ kind: 'PRIVATE', district: '05' }, 'Apartment');
-  assert.equal(d5, null, 'a falling curve must not be used');
-  // Where it does rise it is used, and only ever the local one.
-  const bishan = storeyCurve({ kind: 'HDB', town: 'BISHAN' }, '5 ROOM');
-  assert.equal(bishan.scope, 'local');
-  assert.equal(bishan.where, 'BISHAN');
-  assert.ok(bishan.points.at(-1).psf > bishan.points[0].psf);
+  const { readFileSync: rf } = await import('node:fs');
+  const d = JSON.parse(rf(new URL('../data/storey.json', import.meta.url), 'utf8'));
+
+  /**
+   * Asserted over EVERY curve rather than against one named district.
+   *
+   * This test used to pin District 05 Apartment, whose town bands fall — 2,104
+   * psf across floors 1-5 against 2,046 across 16-20 — as its example of a
+   * refusal. That is a thin sample and not a market where height is worth
+   * less, and adjusting a comparable DOWNWARD for being higher would put the
+   * artefact into the reader's percentile as though it were about their home.
+   *
+   * The principle held; the example stopped being one. District 05 now
+   * resolves on the within-building basis, which rises 4.9% across eight bands
+   * — because the town-level fall was the confound and not the market. A test
+   * that names a row of a rebuilt dataset breaks when the data improves, which
+   * is the opposite of what it is for. So the rule is asserted over the whole
+   * table instead, and it cannot be satisfied by an accident of one key.
+   */
+  let checked = 0;
+  for (const [side, kind, keyName] of [['hdb', 'HDB', 'town'], ['private', 'PRIVATE', 'district']]) {
+    for (const [key, types] of Object.entries(d[side].groups)) {
+      for (const type of Object.keys(types)) {
+        const c = storeyCurve({ kind, [keyName]: key }, type);
+        if (!c) continue;
+        checked++;
+        assert.ok(c.points.at(-1).psf > c.points[0].psf,
+          `${kind} ${key} ${type} returned a curve that does not rise (${c.basis})`);
+        assert.equal(c.scope, 'local', 'only the local curve may be used');
+        assert.equal(c.where, key);
+        assert.ok(c.points.length >= 3, 'two points cannot place a floor between them');
+      }
+    }
+  }
+  assert.ok(checked > 50, `only ${checked} curves checked; the walk is not finding the table`);
+});
+
+/**
+ * The town bands are confounded by vintage — the blocks tall enough to have a
+ * 13th floor are the newer ones, so their upper bands read lease as height.
+ * Ang Mo Kio's 4 ROOM bands claim 90.4% from the bottom of the town to the
+ * top; measured inside buildings, floors 1-12 are worth 2.0%. Where the honest
+ * basis exists it has to win, or the confounded one is still what is running.
+ */
+test('the within-building curve is preferred over the town bands', async () => {
+  const { storeyCurve } = await import('../lib/blindspot/measure.js');
+  const { readFileSync: rf } = await import('node:fs');
+  const d = JSON.parse(rf(new URL('../data/storey.json', import.meta.url), 'utf8'));
+
+  let preferred = 0;
+  for (const [side, kind, keyName] of [['hdb', 'HDB', 'town'], ['private', 'PRIVATE', 'district']]) {
+    for (const [key, types] of Object.entries(d[side].groups)) {
+      for (const [type, holder] of Object.entries(types)) {
+        if (!holder.curve || holder.curve.length < 3) continue;
+        const pts = holder.curve.map(r => r[2]);
+        if (!(pts.at(-1) > pts[0])) continue;   // a falling honest curve is refused too
+        const c = storeyCurve({ kind, [keyName]: key }, type);
+        assert.equal(c?.basis, 'within-building',
+          `${kind} ${key} ${type} has a usable within-building curve but used ${c?.basis}`);
+        preferred++;
+      }
+    }
+  }
+  assert.ok(preferred > 20, `only ${preferred} within-building curves were preferred`);
 });
 
 test('the national curve is never used to adjust a floor', async () => {
@@ -442,8 +494,31 @@ test('adjusting to a higher floor changes the answer, and says it did', async ()
   const ask = { href: '/hdb/bishan/242-bishan-st-22', askPrice: 1_100_000, areaSqft: 1292 };
   const low = analyse({ ...ask, floor: 2 });
   const high = analyse({ ...ask, floor: 20 });
-  assert.ok(low.detail.price.scored.percentile > high.detail.price.scored.percentile,
-    'the same ask must rank lower against comparables lifted to a high floor');
+  /**
+   * ── WHY THIS ASSERTS ON THE MEDIAN AND NOT ON A STRICT PERCENTILE ────────
+   * It used to read `low.percentile > high.percentile`, and that balanced the
+   * whole test on five dollars.
+   *
+   * The ask is 851 psf. On the storey.json built 14 Sep the top comparable
+   * lifted to floor 20 came to 855, so one sale sat above the ask and the
+   * percentile read 0.800. Rebuild the same file from a refreshed hdb.json and
+   * that comparable comes to 850 — the ask is now above all five, the
+   * percentile SATURATES at 1.000 at both floors, and a strict inequality
+   * between two 1.000s fails.
+   *
+   * Nothing about the adjustment changed: same basis, same cohort, median
+   * still lifted 717 → 818, still 5 of 5 moved. A percentile has a ceiling and
+   * an ask outside its cohort pins to it, so a strict comparison between two
+   * of them is a coin flip decided by whichever sale happens to be top.
+   *
+   * The median is the quantity the adjustment actually moves, so that is what
+   * is asserted. The percentile claim is kept in its honest form — the same
+   * ask can never rank HIGHER against comparables that were lifted.
+   */
+  assert.ok(high.detail.price.scored.median > low.detail.price.scored.median,
+    'lifting comparables to a higher floor must raise the cohort they form');
+  assert.ok(low.detail.price.scored.percentile >= high.detail.price.scored.percentile,
+    'the same ask cannot rank higher against comparables that were lifted');
   assert.equal(high.detail.price.scored.adjusted.where, 'BISHAN');
   assert.ok(high.detail.price.scored.adjusted.moved > 0);
   // And the comparables keep what they actually filed alongside.
