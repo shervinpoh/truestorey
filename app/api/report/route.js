@@ -112,5 +112,12 @@ export async function POST(req) {
     console.error('report send failed:', sent?.error || 'no transport');
     return NextResponse.json({ error: 'The email could not be sent. Nothing was saved.' }, { status: 502 });
   }
+  /* ── THE PROVIDER'S ID IS THE ONLY HANDLE ON A DELIVERY ──────────────────
+     Accepted is not delivered: Resend answers with an id and the message can
+     still bounce, or land in spam, after the request is over. The first real
+     send arrived nowhere and there was nothing to look up, because this line
+     did not exist. The id and the tool only — never the address, which this
+     route promises to store nowhere, and a log is storage. */
+  console.log(`report sent · tool=${body.tool} · resend=${sent.id || 'no id'}`);
   return NextResponse.json({ ok: true });
 }

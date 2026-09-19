@@ -145,6 +145,12 @@ test('the route will not send before it checks it can, and guards the rest', () 
   assert.match(src, /readJson\(req, \{ max: MAX_BODY \}\)/, 'no body cap');
   assert.doesNotMatch(src, /writeContact|consentFields|upsertWatch/,
     'this route stores nobody — a CRM write here needs its own consent wording first');
+  /* Accepted is not delivered. The first real send came back 200 with an id and
+     arrived in no inbox, and nothing had been written down to look up. */
+  assert.match(src, /console\.log\(`report sent · tool=\$\{body\.tool\} · resend=\$\{sent\.id \|\| 'no id'\}`\)/,
+    'a send leaves no provider id in the log, so a missing email cannot be traced');
+  assert.doesNotMatch(src, /console\.(log|error)\([^)]*\bemail\b/,
+    'the recipient address is written to a log — this route promises to store it nowhere');
 });
 
 test('the guards are one implementation, shared with the lead form', () => {
