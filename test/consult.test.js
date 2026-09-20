@@ -953,3 +953,49 @@ test('a private lookup is scored out of the same total as an HDB one', async () 
     assert.strictEqual(s.max, full, `${rec.label} was scored out of ${s.max}, not ${full} — a factor is silently skipped`);
   }
 });
+
+/**
+ * The panel's affordability form must ask who the loan is from.
+ *
+ * lib/calc/plan.js has taken `hdbLoan` since 30 Aug 2026 and the panel's own
+ * /api/plan route passes it through — but the page never sent it, so every
+ * lookup was silently assessed as a bank loan and carried a 5% cash floor
+ * CPF cannot cover. On a S$820,000 flat that is S$16,000 of cash a buyer was
+ * told they needed and did not.
+ *
+ * This reads the page source the same way test/motion.test.js does: Node does
+ * not strip JSX or HTML, and a transform would cost more than the
+ * three-dependency rule is worth.
+ */
+test('the panel asks who the loan is from, and sends the answer', () => {
+  const ui = fs.readFileSync(new URL('../scripts/consult-ui.html', import.meta.url), 'utf8');
+  assert.match(ui, /id="ploan"/, 'no "Loan from" control on the affordability form');
+  assert.match(ui, /hdbLoan:\s*\$\('#ploan'\)\.value === 'hdb'/, 'the control exists but its answer is never sent');
+  /* Gated: plan.js ignores hdbLoan unless propertyType is HDB, so leaving it
+     visible on a private lookup offers a choice that changes nothing — the
+     exact failure components/Planner.jsx records in its own comment. */
+  assert.match(ui, /loanfromwrap'\)\.hidden = !isHdb/, 'the control is not gated to HDB flats');
+});
+
+test('the two loan types differ by the cash floor and nothing else', async () => {
+  /* HDB's concessionary LTV was cut 80% -> 75% on 20 Aug 2024 and now sits
+     level with the banks. If a future edit reintroduces an LTV difference —
+     85% is the figure people reach for, and it was last correct in 2022 —
+     this fails. */
+  const { plan } = await import('../lib/calc/plan.js');
+  const base = {
+    price: 820000,
+    applicants: [{ fixedIncome: 7600, age: 30 }, { fixedIncome: 4800, age: 29 }],
+    cashAvailable: 80000, cpfAvailable: 180000, propertyType: 'HDB',
+  };
+  const bank = plan({ ...base, hdbLoan: false });
+  const hdb = plan({ ...base, hdbLoan: true });
+
+  assert.equal(bank.ltv.rate, hdb.ltv.rate, 'an LTV difference between HDB and bank has been reintroduced');
+  assert.equal(bank.ltv.rate, 0.75);
+  assert.equal(bank.loan, hdb.loan, 'the loan ceiling must not move with who lends');
+  assert.equal(hdb.cashFloor, 0);
+  assert.ok(bank.cashFloor > 0);
+  assert.ok(bank.cashNeeded > hdb.cashNeeded,
+    'the HDB loan must need less cash, or the floor is not being applied');
+});

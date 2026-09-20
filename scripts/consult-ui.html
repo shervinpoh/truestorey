@@ -236,6 +236,7 @@ label.opt.disabled{opacity:.5;cursor:not-allowed}
       <div><label for="cash">Cash available</label><input id="cash" inputmode="numeric"></div>
       <div><label for="cpf">CPF OA available</label><input id="cpf" inputmode="numeric"></div>
       <div><label for="loans">Existing housing loans</label><select id="loans"><option value="0">none</option><option value="1">one</option><option value="2">two or more</option></select></div>
+      <div id="loanfromwrap"><label for="ploan">Loan from</label><select id="ploan"><option value="bank">A bank loan</option><option value="hdb">HDB concessionary loan</option></select></div>
     </div>
     <div class="actions"><button class="go" id="runplan">Work it out</button></div>
     <div id="planout"></div>
@@ -703,7 +704,18 @@ function prefillCalcs() {
     $('#ptype').value = t; $('#stype').value = t;
   }
 }
-$('#ptype').addEventListener('change', e => { e.target.dataset.touched = '1'; });
+function syncLoanFrom() {
+  /* An HDB concessionary loan exists for HDB flats only — an EC from a
+     developer is bank financing on both sides of its MOP. plan.js already
+     gates on propertyType, so leaving the control visible would offer a
+     choice that changes nothing, which is the failure the site's own planner
+     note records. */
+  const isHdb = $('#ptype').value === 'HDB';
+  $('#loanfromwrap').hidden = !isHdb;
+  if (!isHdb) $('#ploan').value = 'bank';
+}
+$('#ptype').addEventListener('change', e => { e.target.dataset.touched = '1'; syncLoanFrom(); });
+syncLoanFrom();
 for (const id of ['#planbox', '#procbox']) $(id).addEventListener('toggle', prefillCalcs);
 
 $('#runplan').addEventListener('click', async () => {
@@ -712,6 +724,12 @@ $('#runplan').addEventListener('click', async () => {
     price: num('#pprice'), propertyType: $('#ptype').value, profile: $('#pprofile').value,
     propertyCount: Number($('#pcount').value), monthlyDebts: num('#debts'),
     cashAvailable: num('#cash'), cpfAvailable: num('#cpf'), existingLoans: Number($('#loans').value),
+    /* Decides the CASH FLOOR, not the ceiling: HDB's LTV levelled with the
+       banks at 75% on 20 Aug 2024. An HDB concessionary loan has no cash
+       floor, a bank loan on the same flat needs 5% of the price in cash that
+       CPF cannot cover however large the OA balance is. Worth S$16,000 on a
+       S$820,000 flat, and the panel was silently assuming bank. */
+    hdbLoan: $('#ploan').value === 'hdb',
     applicants: [
       { fixedIncome: num('#inc1'), variableIncome: num('#var1'), age: num('#age1') || 35 },
       { fixedIncome: num('#inc2'), variableIncome: num('#var2'), age: num('#age2') || 35 },
@@ -728,6 +746,9 @@ $('#runplan').addEventListener('click', async () => {
       <dt>income counted</dt><dd>${money(a.totalIncomeCounted)}/mo${body.applicants.some(x => x.variableIncome) ? ' — variable income haircut applied' : ''}</dd>
       <dt>ltv</dt><dd>${(100 * p.ltv.rate).toFixed(0)}% · ${esc(p.ltv.why)}</dd>
       <dt>downpayment</dt><dd>${money(p.downpayment)} — cash ${money(p.cashTowardsDown)}, CPF ${money(p.cpfTowardsDown)}${p.cashFloor ? ` (cash floor ${money(p.cashFloor)})` : ''}</dd>
+      ${body.propertyType === 'HDB' ? `<dt>loan from</dt><dd>${body.hdbLoan
+        ? '<b>HDB concessionary</b> — no cash floor, so CPF OA can carry the whole downpayment'
+        : '<b>A bank</b> — 5% of the price must be cash, which CPF cannot cover however large the OA balance'}<span class="meta"> · both are 75% LTV since 20 Aug 2024</span></dd>` : ''}
       <dt>duties</dt><dd>${money(p.dutyTotal)}</dd>
       <dt>cash needed</dt><dd class="mono"><b>${money(p.cashNeeded)}</b></dd>
     </dl>
