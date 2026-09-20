@@ -903,3 +903,53 @@ test('REALIS transactions that appear in two exports are counted once', async ()
   assert.strictEqual(r.duplicates, 1);
   assert.strictEqual(r.stacks, 1);
 });
+
+/* ── the two holes that fell entirely on private ────────────────────────── */
+
+/**
+ * leaseRemaining returns Infinity for freehold, the check asked
+ * Number.isFinite, and the BEST possible lease state fell through to "could
+ * not measure" — so a freehold condo was scored out of 9 instead of 14 and
+ * penalised by omission. Private carries almost all the freehold stock, so
+ * the bug landed entirely on private.
+ */
+test('freehold scores full on lease, and still runs', async () => {
+  const { score, FACTORS } = await import('../lib/consult/score.js');
+  const { recordByHref } = await import('../lib/data/query.js');
+  const rec = recordByHref('/condo/1919');
+  if (!rec) return;
+  const lease = score(rec).factors.find(f => f.key === 'lease');
+  assert.strictEqual(lease.ran, true, 'freehold fell through to "could not measure"');
+  assert.strictEqual(lease.points, FACTORS.lease.max, 'no lease running down is the top of this scale');
+  assert.match(lease.finding, /freehold/i);
+});
+
+/**
+ * The supply factor counted HDB flats reaching their fifth year, so every
+ * private lookup scored nothing and lost two points of DENOMINATOR. Competing
+ * supply is the same question for a condo, asked of URA's pipeline instead.
+ */
+test('private gets a supply factor rather than a hole', async () => {
+  const { score } = await import('../lib/consult/score.js');
+  const { recordByHref } = await import('../lib/data/query.js');
+  const rec = recordByHref('/condo/the-sail-marina-bay');
+  if (!rec) return;
+  const s = score(rec);
+  const sup = s.factors.find(f => f.key === 'supply');
+  assert.strictEqual(sup.ran, true, 'private still has no supply factor');
+  assert.match(sup.finding, /pipeline/i);
+  /* It is ranked against other districts, not against an invented denominator —
+     district housing stock is not held here. */
+  assert.match(sup.finding, /against a spread of|Nothing in the URA pipeline/);
+});
+
+test('a private lookup is scored out of the same total as an HDB one', async () => {
+  const { score, FACTORS } = await import('../lib/consult/score.js');
+  const { recordByHref } = await import('../lib/data/query.js');
+  const full = Object.values(FACTORS).reduce((a, f) => a + f.max, 0);
+  for (const h of ['/condo/1919', '/condo/the-sail-marina-bay', '/hdb/punggol/271a-punggol-walk']) {
+    const rec = recordByHref(h); if (!rec) continue;
+    const s = score(rec);
+    assert.strictEqual(s.max, full, `${rec.label} was scored out of ${s.max}, not ${full} — a factor is silently skipped`);
+  }
+});

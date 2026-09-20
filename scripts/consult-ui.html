@@ -170,6 +170,7 @@ label.opt.disabled{opacity:.5;cursor:not-allowed}
     <a href="#/scan" data-page="scan">Scan</a>
     <a href="#/find" data-page="find">Find</a>
     <a href="#/development" data-page="development">Development</a>
+    <a href="#/land" data-page="land">Land</a>
     <a href="#/compare" data-page="compare">Compare</a>
     <a href="#/data" data-page="data">Data</a>
     <a href="#/briefing" data-page="briefing">Briefing</a>
@@ -192,6 +193,7 @@ label.opt.disabled{opacity:.5;cursor:not-allowed}
       <div class="row">
         <div><label for="area">Floor area (sqft)</label><input id="area" inputmode="numeric"></div>
         <div><label for="floor">Storey</label><input id="floor" inputmode="numeric" placeholder="optional"></div>
+        <div><label for="stack">Stack</label><input id="stack" placeholder="private, REALIS only"></div>
         <div><label for="price">Asking price (S$)</label><input id="price" inputmode="numeric" placeholder="optional"></div>
         <div><label for="years">Hold (years)</label>
           <select id="years"><option>3</option><option>5</option><option selected>7</option><option>10</option></select></div>
@@ -414,6 +416,21 @@ $1.28M
   </section>
   <div id="devout"></div>
 </section>
+
+<section class="page" id="page-land" hidden>
+  <section class="panel">
+    <h2>What a launch has to price at</h2>
+    <p class="lede">A new launch is priced off its land, not off the resales beside it. URA publishes what every GLS site was awarded for; this joins those awards to what the project on them actually launched at, and measures everything in between — construction, finance, marketing and profit — instead of taking it from a cost guide.</p>
+    <div class="row">
+      <div><label for="lland">Land price (S$ psf ppr)</label><input id="lland" inputmode="numeric" placeholder="e.g. 1323"></div>
+      <div><label for="lask">Launch asking (S$ psf)</label><input id="lask" inputmode="numeric" placeholder="optional"></div>
+      <div><label for="lharm">Floor-area rules</label>
+        <select id="lharm"><option value="1" selected>Harmonised (GLS tender from 1 Sep 2022)</option><option value="0">Pre-harmonisation</option></select></div>
+    </div>
+    <div class="actions"><button class="go" id="lrun">Work it out</button></div>
+  </section>
+  <div id="landout"></div>
+</section>
 </div>
 
 <script type="module">
@@ -481,6 +498,9 @@ $('#run').addEventListener('click', async () => {
       href: chosen,
       areaSqft: Number($('#area').value),
       floor: Number($('#floor').value) || null,
+      /* The unit-number suffix, e.g. "05" from #12-05. Priced only where a
+         REALIS export covers the project; ignored everywhere else. */
+      stack: String($('#stack').value || '').trim() || null,
       price: Number(String($('#price').value).replace(/[^0-9.]/g, '')) || null,
       years: Number($('#years').value),
       clientSafe: safeMode,
@@ -527,10 +547,33 @@ function render(r) {
       </dl>`));
   }
 
+  /* The stack premium. Shown beside the range and never inside it — the
+   estimate is backtested and this is not, and folding an unmeasured term
+   into a measured one spends the accuracy that is the whole claim. */
+  if (r.stack) out.push(panel('What its stack is worth', r.stack.ran ? `
+  <p class="big ${r.stack.premium > 0 ? 'good' : r.stack.premium < 0 ? 'bad' : ''}">${r.stack.premium > 0 ? '+' : ''}${(100 * r.stack.premium).toFixed(1)}%</p>
+  <p class="note"><b>${esc(r.stack.says)}</b></p>
+  <p class="note">Stack <span class="mono">${esc(r.stack.stack)}</span> levels to <b>${r.stack.levelledPsf}</b> psf against the project's <b>${r.stack.projectLevelledPsf}</b>.
+    ${r.estimate?.ok && r.estimate.band ? `Shifting the range above by it gives
+      <b>${Math.round(r.estimate.band.psfLow * (1 + r.stack.premium))}\u2013${Math.round(r.estimate.band.psfHigh * (1 + r.stack.premium))}</b> psf —
+      <span class="meta">yours to apply or ignore.</span>` : `<span class="meta">The estimate above did not run, so there is nothing to shift.</span>`}</p>
+  <div class="scroll"><table>
+    <tr><th>unit</th><th class="num">storey</th><th class="mono">month</th><th class="num">sqm</th><th class="num">psf filed</th><th class="num">restated</th><th class="num">levelled</th></tr>
+    ${r.stack.sales.map(x => `<tr><td class="mono">${esc(x.unit)}</td><td class="num">${x.floor ?? '—'}</td>
+      <td class="mono">${esc(x.month || '—')}</td><td class="num">${x.areaSqm ?? '—'}</td>
+      <td class="num">${x.psf}</td><td class="num">${x.psfAdj}</td><td class="num"><b>${x.psfLevel}</b></td></tr>`).join('')}
+  </table></div>
+  ${r.stack.heightNetted ? '' : `<div class="warnbox">Height could not be netted out of this premium — too few stacks in the project have sold on two different floors. Some of the figure above is the storeys this stack happened to sell on, not its position.</div>`}
+  ${r.stack.possiblyTwoTowers ? `<div class="warnbox">These sales span more floors than one tower plausibly has, so this unit number may be shared by two stacks in two towers. Nothing in a REALIS export distinguishes them.</div>` : ''}
+  <p class="prov">This is NOT inside the estimate above. The estimate is backtested — every component switched off and measured over rolling origins — and a REALIS snapshot carries no history to backtest against, so this term is published on its own line for you to apply or not. Facing, corner-or-corridor, outlook and noise are what it prices, together, without any of them being named. Source: REALIS export · ${esc(r.stack.version)}</p>`
+  : `<div class="warnbox">${esc(r.stack.why)}</div>
+     <p class="prov">A stack premium needs a unit number and a licensed REALIS export covering the project. Import one on the Data page.</p>`));
+
   /* the three tests */
   if (r.residual?.ok) {
     const R = r.residual, warn = /premium/.test(R.verdict.code);
-    out.push(panel('Against the asking price', `
+
+  out.push(panel('Against the asking price', `
       <dl class="kv">
         <dt>asking</dt><dd class="mono">${R.asking.psf} psf · ${money(R.asking.price)}</dd>
         <dt>estimate</dt><dd class="mono">${R.estimate.psf} psf — asking is <b>${pc(R.gap.pct)}</b> (${money(Math.abs(R.gap.dollars))} ${R.gap.pct > 0 ? 'above' : 'below'})</dd>
@@ -612,12 +655,20 @@ function render(r) {
   }
 
   /* provenance + export */
+  /* Silent truncation reads as completeness. A client-safe report that looks
+     identical to a full one is one nobody trusts the mode of — and, worse,
+     one you cannot tell apart at a glance before sending it. */
+  if (r.clientSafe && r.withheld?.length) out.push(panel('Withheld from this copy', `
+    <p class="note">This is the client-safe copy. <b>${r.withheld.length}</b> section(s) were removed before it reached this page, so they are absent from the PDF and the download too:</p>
+    ${r.withheld.map(w => `<div class="flag"><b>withheld</b><span>${esc(w)}</span></div>`).join('')}
+    <p class="prov">The analysis is not hidden because it is wrong — it is the working, and it goes to a client in your words or not at all. What remains is the band, its evidence and its measured error: what comparable homes actually transacted at, and how often an estimate built this way has missed. Turn client-safe off to see the rest.</p>`));
+
   out.push(panel('Source and method', `
     <p class="prov">
       ${esc(r.record.label)} · ${esc(r.record.kind)}${r.record.town ? ' · ' + esc(r.record.town) : ''}<br>
       AVM ${esc(r.estimate.version || '—')}${r.estimate.error ? ' · error table ' + esc(r.estimate.error.builtAt || '') : ''}<br>
       Sources: HDB Resale Flat Prices (data.gov.sg, Singapore Open Data Licence v1.0) · URA Data Service · SLA leasehold relativity table<br>
-      Generated ${esc(r.generatedAt)}${r.clientSafe ? ' · CLIENT-SAFE: the point estimate is withheld' : ''}
+      Generated ${esc(r.generatedAt)}${r.clientSafe ? ` · CLIENT-SAFE: the point estimate and ${r.withheld?.length || 0} other section(s) are withheld` : ''}
     </p>
     <div class="warnbox">An indicative range from recorded transactions and the details given. <b>Not an HDB, bank or licensed valuer's valuation.</b> Final sale price, loan amount and official valuation may differ.</div>
     <div class="actions">
@@ -787,6 +838,33 @@ function renderDev(p) {
     <p class="note"><b>${esc(p.floors.says)}</b></p>
     <p class="prov">This is the development's own floor premium, not the town or district curve the valuation uses. Where they disagree, this one is about this building and the other is about its neighbourhood.</p>`
     : `<div class="warnbox">${esc(p.floors.why)}</div>`));
+
+  /* Stacks. The one thing a REALIS export buys that no public feed can: a
+     unit number, which pins facing, corner-or-corridor, outlook and noise
+     all at once. Only rendered for private projects, and only ever with the
+     sales it is built from shown underneath it. */
+  if (p.stacks) out.push(panel('Stack by stack', p.stacks.ok ? `
+    <p class="note">${p.stacks.transactions} unit-numbered sales · ${p.stacks.stacksScored} of ${p.stacks.stacksSeen} stacks cleared three sales${p.stacks.thin ? ` · ${p.stacks.thin} too thin to score` : ''} · restated to <span class="mono">${esc(p.stacks.restatedTo || '—')}</span>${p.stacks.heightNetted ? ` and levelled to storey <span class="mono">${p.stacks.levelledToFloor}</span>` : ''} against a project median of <b>${p.stacks.projectLevelledPsf}</b> psf.</p>
+    ${p.stacks.heightNetted ? '' : `<div class="warnbox">Height could not be netted out — too few stacks here have sold on two different floors. A stack that happened to sell high reads as a premium position in the table below when it is only a tall sample.</div>`}
+    <div class="scroll"><table>
+      <tr><th>stack</th><th class="num">sales</th><th class="num">floors</th><th class="num">median sqm</th><th class="num">median psf</th><th class="num">levelled</th><th class="num">vs project</th></tr>
+      ${p.stacks.stacks.map(t => `<tr>
+        <td class="mono"><b>${esc(t.stack)}</b>${t.possiblyTwoTowers ? ' <span class="err" title="These sales span more floors than one tower plausibly has, so this number may be shared by two stacks in two towers.">⚠</span>' : ''}</td>
+        <td class="num">${t.n}</td>
+        <td class="num mono">${t.floorLow ?? '—'}\u2013${t.floorHigh ?? '—'}</td>
+        <td class="num">${t.medianAreaSqm ?? '—'}</td>
+        <td class="num">${t.medianPsf}</td>
+        <td class="num">${t.levelledPsf}</td>
+        <td class="num"><b class="${t.premium > 0.02 ? 'good' : t.premium < -0.02 ? 'bad' : ''}">${t.premium > 0 ? '+' : ''}${(100 * t.premium).toFixed(1)}%</b></td>
+      </tr>`).join('')}
+    </table></div>
+    <p class="note"><b>${esc(p.stacks.says)}</b></p>
+    ${p.stacks.floorPremium.ran
+      ? `<p class="note">${esc(p.stacks.floorPremium.says)}</p>`
+      : `<div class="warnbox">${esc(p.stacks.floorPremium.why)}</div>`}
+    <p class="prov">Units in one stack sit directly above each other, so they share orientation, position on the floor plate, outlook and noise exposure. A stack's premium prices those four together without any of them being estimated — which is why this table is the reason a licensed export is worth importing, and why nothing on the public site can produce it. Every psf is restated to one quarter on the same index the valuation uses, so a stack that last sold in 2021 is not read as cheap. Source: REALIS export, imported on the Data page.</p>`
+    : `<div class="warnbox">${esc(p.stacks.reason)}</div>
+       <p class="prov">A stack analysis needs unit numbers, and unit numbers come only from a licensed REALIS export. Import one on the Data page and this panel fills in.</p>`));
 
   out.push(panel('Year by year', `
     <div class="scroll"><table>
@@ -1244,7 +1322,106 @@ $('#docompare').addEventListener('click', async () => {
   <p class="prov">Each column is priced on its own evidence and its own cohort. Nothing is averaged across them, and a score is not a ranking — the 1km school band is ballot priority and never a place, and every distance is straight-line.</p></div>`;
 });
 
-const PAGES = ['valuation', 'scan', 'development', 'find', 'compare', 'data', 'briefing'];
+/* ── land ────────────────────────────────────────────────────────────────
+   A launch is priced off its land. Everything between the two — construction,
+   finance, marketing, profit — is MEASURED from past launches here rather
+   than taken from a cost guide, because a cost guide arrives as a range for a
+   specification that is not the one being priced, and the margin is a guess
+   on top. See lib/consult/breakeven.js. */
+let landLoaded = false;
+async function loadLand(force) {
+  if (landLoaded && !force) return;
+  const land = Number($('#lland').value) || 0;
+  const ask = Number(String($('#lask').value).replace(/[^0-9.]/g, '')) || 0;
+  const harm = $('#lharm').value;
+  const r = await fetch('/api/land?land=' + land + '&asking=' + ask + '&harmonised=' + harm).then(x => x.json());
+  landLoaded = true;
+  if (!r.ok) { $('#landout').innerHTML = `<div class="panel"><div class="warnbox">${esc(r.reason)}</div></div>`; return; }
+
+  const out = [];
+  const A = r.accuracy;
+
+  if (r.implied?.ok) {
+    const I = r.implied, As = r.assessed;
+    out.push(panel('What this land implies', `
+      <div class="big">${I.psf} psf</div>
+      <div class="band">${I.low}–${I.high} psf · the p90 band from ${A.trials} held-out launches</div>
+      <p class="note"><b>${esc(I.says)}</b></p>
+      <dl class="kv">
+        <dt>land, as awarded</dt><dd><b>${I.landPsfPpr}</b> psf per plot ratio <span class="meta">URA prices land per square foot of GROSS floor area</span></dd>
+        <dt>what the land contributes</dt><dd><b>${I.landComponent}</b> psf <span class="meta">the fitted coefficient applied — no efficiency is assumed</span></dd>
+        <dt>everything else</dt><dd><b>${I.nonLand}</b> psf <span class="meta">construction, finance, marketing and profit — measured, not assumed</span></dd>
+        <dt>drift</dt><dd>${I.driftPerYear} psf a year on the non-land side</dd>
+        <dt>rules</dt><dd><b>${esc(I.regime)}</b> <span class="meta">fitted on ${I.fit.n} launches, ${esc(I.fittedFrom || '')} to ${esc(I.fittedTo || '')}</span></dd>
+      </dl>
+      ${I.extrapolated ? `<div class="warnbox">This is <b>${I.extrapolated} month(s)</b> past the last launch the model has seen, so the drift term is extrapolated rather than interpolated.
+        It runs at <b>${I.driftPerYear} psf a year</b>, but resampling the ${I.fit.n} launches it is fitted on puts that between
+        <b>${I.bandParts.driftPerYearLow}</b> and <b>${I.bandParts.driftPerYearHigh}</b>. The band above is widened for it:
+        ±${I.bandParts.modelError} psf is the model's own error and +${I.bandParts.driftHigh} / −${I.bandParts.driftLow} psf is not knowing the drift.
+        Out here most of that width is one number, not anything about this site.</div>` : ''}`));
+
+    if (As?.ok) out.push(panel('Against the asking price', `
+      <div class="verdict ${As.code === 'in line' ? '' : 'warnv'}">
+        <div class="code">${esc(As.code)}</div>
+        <p class="note">${esc(As.says)}</p>
+      </div>
+      <p class="prov">A launch is priced as a book — this is its median, not any one unit. The spread around it is the stack and the floor, which is what Valuation and Development are for.</p>`));
+  }
+
+  out.push(panel('The formula', `
+    <p class="mono note">launch psf = <b>${Math.round(r.fit.intercept)}</b> + <b>${r.fit.land.toFixed(3)}</b> × land psf ppr + <b>${r.fit.perMonth.toFixed(2)}</b> × months since ${esc(r.fit.epoch)}</p>
+    <p class="note meta">Fitted on <b>${r.fit.n}</b> ${esc(r.fit.regime)} launches${r.fit.from ? `, ${esc(r.fit.from)} to ${esc(r.fit.to)}` : ''}. The pre-harmonisation fit, kept for reading an older launch back, is ${Math.round(r.pooledFit.intercept)} + ${r.pooledFit.land.toFixed(3)} × land + ${r.pooledFit.perMonth.toFixed(2)} × months on ${r.pooledFit.n} launches.</p>
+    <p class="note">The intercept is the non-land cost of a square foot of saleable area. It is not taken from BCA or a consultancy — it is what developers' own launch prices imply, which is the only version of that number nobody has to be trusted for.</p>
+    <p class="note">The land coefficient sits above 1 because URA prices land per square foot of <b>gross</b> floor area and a condominium sells less than its GFA as strata area. How much less is <b>not</b> asserted: the coefficient carries that conversion and whatever margin is taken on the land, and nothing here separates them.</p>
+    <div class="test"><h3>How wrong this is likely to be</h3>
+    <p class="note">Half of held-out launches came in within <b>${(100 * A.mdape).toFixed(1)}%</b>, nine in ten within <b>${(100 * A.p90).toFixed(1)}%</b>, worst <b>${(100 * A.worst).toFixed(1)}%</b>. Measured over ${A.trials} launches by ${esc(A.method)}. In-sample R² ${A.r2.toFixed(3)} on the ${r.fit.n} launches the live fit is built from.</p>
+    <p class="note meta">Rolling origin is the only test that means anything on a three-parameter fit over two dozen points. The time term is in the model because it beat a flat multiple, a flat dollar gap and land alone on exactly this test — not because construction inflation is a thing one would expect to find.</p>
+    ${r.fit.drift ? `<p class="note">The drift is the load-bearing term and the least pinned one. Dropping it costs real accuracy, so it stays. But resampling the ${r.fit.n} launches ${r.fit.drift.resamples.toLocaleString()} times puts it between <b>${Math.round(12 * r.fit.drift.perMonthLow)}</b> and <b>${Math.round(12 * r.fit.drift.perMonthHigh)}</b> psf a year against a central ${Math.round(12 * r.fit.perMonth)} — a seven-fold range, and ${(100 * r.fit.drift.shareNotPositive).toFixed(0)}% of resamples say there is no drift at all. That uncertainty is what widens the band on anything launching past ${esc(r.fit.to)}, and it is the weakest joint in this whole model.</p>` : ''}</div>`));
+
+  const H = r.harmonisation;
+  if (H) out.push(panel('GFA harmonisation', `
+    <p class="note">${esc(H.effect)}</p>
+    <p class="note">The rules bind <b>GLS sites launched for sale from ${esc(H.from)}</b>, which is an observable date in URA's own tender file — so every launch here is assigned by reading it rather than by inferring it. <b>${H.counts.harmonised}</b> of the joined launches are post-harmonisation and <b>${H.counts.pre}</b> are not.</p>
+    ${H.headToHead?.pooled && H.headToHead?.harmonised ? `
+    <div class="test"><h3>Why the regimes are fitted apart</h3>
+    <p class="note">Predicting the same held-out harmonised launches: a fit on <b>all</b> launches misses by <b>${(100 * H.headToHead.pooled.mdape).toFixed(1)}%</b>, a fit on <b>harmonised launches only</b> by <b>${(100 * H.headToHead.harmonised.mdape).toFixed(1)}%</b>, over ${H.headToHead.harmonised.trials} trials.</p>
+    <p class="note meta">A dummy variable inside one pooled fit does not recover this — "harmonised" and "launched later" correlate at r=0.73 in this sample, so the dummy simply absorbs the drift and comes out near zero. Splitting the fit is what separates them. The live model is the harmonised one because every site still to launch is in that regime.</p></div>` : ''}
+    <p class="prov">${esc(H.source)}</p>`));
+
+  const P = r.pipeline;
+  if (P?.ok) out.push(panel('What is coming, and at what price it has to come', `
+    <p class="note">${esc(P.says)}</p>
+    <div class="scroll"><table>
+      <tr><th>awarded</th><th>planning area</th><th>site</th><th>rules</th><th class="num">land $psf ppr</th><th class="num">implied launch</th></tr>
+      ${P.sites.map(x => `<tr><td class="mono">${esc(x.award)}</td><td>${esc(x.planningArea || '—')}</td>
+        <td class="meta">${esc(x.site)}${x.sameStreetAs ? `<br><span class="mono" style="font-size:var(--t-micro)">second parcel beside ${esc(x.sameStreetAs)}</span>` : ''}</td>
+        <td class="mono">${x.harmonised ? 'harmonised' : '<span class="err">pre-harm</span>'}</td><td class="num">${x.landPsfPpr}</td>
+        <td class="num"><b>${x.impliedPsf ?? '—'}</b> <span class="meta">${x.low ?? ''}–${x.high ?? ''}</span></td></tr>`).join('')}
+    </table></div>
+    <p class="prov">A site with nothing selling on its street yet. Every price is what that land implies <b>if it launched today</b>; a launch later carries the drift on top, which is stated rather than folded in. Matching is on the street name exactly. A site whose street already carries a launch is kept only when its award is <b>later</b> than that launch's — a second parcel beside a project that has already priced, which is the most useful reference there is, rather than the same parcel reappearing because the join failed.</p>`));
+
+  out.push(panel('Every launch this was measured on', `
+    <div class="scroll"><table>
+      <tr><th>launch</th><th>project</th><th>seg</th><th>rules</th><th class="num">land</th><th class="num">launched at</th><th class="num">land implied</th><th class="num">gap</th></tr>
+      ${r.observations.map(o => `<tr><td class="mono">${esc(o.launch)}</td><td>${esc(o.project)}</td>
+        <td class="mono">${esc(o.segment || '—')}</td><td class="mono">${o.harmonised ? 'new' : 'old'}</td><td class="num">${o.landPsfPpr}</td>
+        <td class="num"><b>${o.launchPsf}</b></td><td class="num">${o.implied ?? '—'}</td>
+        <td class="num"><b class="${o.gap > 0.05 ? 'bad' : o.gap < -0.05 ? 'good' : ''}">${o.gap == null ? '—' : pc(o.gap)}</b></td></tr>`).join('')}
+    </table></div>
+    <p class="note">A positive gap is a launch priced <b>above</b> what its land implied — the developer took more than the recent norm, or the site carried a cost the land price does not show. A negative gap is one priced to move, or land bought well.</p>
+    <p class="prov">Each launch is the median of its first ${r.window.launchWindowMonths} months of new sales, and needs ${r.window.minLaunchSales} of them. Dropped: <b>${r.dropped.censored}</b> already selling when the transaction data begins (${esc(r.window.dataStart)}) — reading their first filed row as a launch would price a mid-life project against land bought years earlier; <b>${r.dropped.ambiguous}</b> where one street carried two awards, because picking either is wrong about half the time and looks exactly like being right; <b>${r.dropped.thin}</b> with too few launch-year sales.</p>`));
+
+  out.push(panel('What this cannot see', `
+    <p class="note">Measured bias by segment, not corrected for — three CCR launches is too thin to correct on, and a correction fitted to three points is a decoration:</p>
+    ${Object.entries(r.segmentBias).map(([k, v]) => `<div class="flag"><b>${esc(k)} ${v.n}</b><span>the model runs ${v.meanResidual > 0 ? 'under' : 'over'} by ${(100 * Math.abs(v.meanResidual)).toFixed(1)}% here</span></div>`).join('')}
+    <p class="prov">A site's own economics are invisible to this: a difficult basement, a conservation facade, an unusually generous unit mix, a long marketing period. All of them land in the gap column and none is observable from a land price. This says what a launch price implies and what land implies a price must be — never whether a launch will sell.<br>
+    ${r.sources.map(esc).join(' · ')}<br>${esc(r.version)} · built ${esc(r.builtAt)}</p>`));
+
+  $('#landout').innerHTML = out.join('');
+}
+$('#lrun').addEventListener('click', () => loadLand(true));
+
+const PAGES = ['valuation', 'scan', 'development', 'land', 'find', 'compare', 'data', 'briefing'];
 function route() {
   const want = (location.hash.replace('#/', '') || 'valuation');
   const page = PAGES.includes(want) ? want : 'valuation';
@@ -1254,6 +1431,7 @@ function route() {
   }
   if (page === 'scan') loadScan();
   if (page === 'find') loadFeed();
+  if (page === 'land') loadLand();
   if (page === 'data') loadStatus();
   if (page === 'briefing') { if (!briefingLoaded) loadBriefing(); loadReading(); }
 }

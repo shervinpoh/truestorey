@@ -56,12 +56,60 @@ test('the emailed report can open the rent index it quotes', () => {
   assert.ok(listed('/api/report').has('rents.json'));
 });
 
+/**
+ * The omission this repo has now made three times: a data file is gitignored,
+ * and left out of outputFileTracingExcludes. @vercel/nft reads the DISK, so
+ * the file is absent from the index and present in the bundle — which for
+ * data/realis/ and data/listings/ would put licensed, unpublishable
+ * transactions into a public deployment artifact, a CEA PG 02-11 s6 problem
+ * before it is a 250MB one. Nothing about it is visible in a diff, in a build
+ * log, or on the live site. It is only ever found by looking.
+ *
+ * So it is checked mechanically instead of remembered.
+ */
+test('every gitignored path under data/ is also excluded from tracing', () => {
+  const ignore = readFileSync(new URL('../.gitignore', import.meta.url), 'utf8')
+    .split('\n').map(l => l.trim())
+    .filter(l => l && !l.startsWith('#') && !l.startsWith('!'))
+    .filter(l => l.replace(/^\//, '').startsWith('data/'))
+    .map(l => l.replace(/^\//, '').replace(/\/$/, ''));
+  assert.ok(ignore.length >= 5, 'the .gitignore data/ block should not be empty — has it moved?');
+
+  const excl = excludedPaths();
+
+  for (const ig of ignore) {
+    const covered = excl.some(e => e === ig || e === ig + '/**' || (e.endsWith('/**') && ig.startsWith(e.slice(0, -3) + '/')));
+    assert.ok(covered,
+      `.gitignore holds "${ig}" and outputFileTracingExcludes does not cover it. `
+      + `The tracer reads the disk, not the index — add './${ig}' (or './${ig}/**' for a directory) `
+      + 'to next.config.mjs in this commit.');
+  }
+});
+
+/**
+ * The excludes array, read from the source.
+ *
+ * Bounded on the PROPERTY declarations, not on the bare identifiers: the doc
+ * comment above the config names both of them in prose, and slicing on the
+ * bare word cut at byte 214 — before the array. Every exclude check below
+ * then ran against an empty set and passed by asserting nothing, silently,
+ * for as long as that comment has been there.
+ */
+function excludedPaths() {
+  const a = config.indexOf('outputFileTracingExcludes:');
+  const b = config.indexOf('outputFileTracingIncludes:');
+  assert.ok(a > -1 && b > a, 'the two tracing maps could not be located in next.config.mjs');
+  const block = config.slice(a, b);
+  const out = [...block.matchAll(/'\.\/(data\/[^']+)'/g)].map(m => m[1]);
+  assert.ok(out.length > 10, `only ${out.length} excludes parsed — the check is not reading the array`);
+  return out;
+}
+
 test('nothing is both excluded and required', () => {
   // The excludes exist to stop 155MB of ingest output riding into every
   // function. Excluding something a request opens is the same bug wearing the
   // opposite mask.
-  const ex = new Set([...config.slice(0, config.indexOf('outputFileTracingIncludes'))
-    .matchAll(/'\.\/data\/([^']+)'/g)].map(m => m[1]));
+  const ex = new Set(excludedPaths().map(p => p.replace(/^data\//, '')));
   for (const route of ['/api/ai/blindspot', '/api/record', '/api/rent', '/compare', '/api/search'])
     for (const f of listed(route))
       assert.ok(!ex.has(f), `${route} needs data/${f} and it is excluded`);

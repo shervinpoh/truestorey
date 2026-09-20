@@ -65,6 +65,17 @@ const nextConfig = {
       // and never served — nothing under app/ may import the layer that reads
       // them (test/consult-boundary.test.js).
       './data/.realis.json',
+      // The RAW exports themselves, as dropped in before import. Both of these
+      // directories were gitignored and left out of this list, which is the
+      // mistake the note at the top of this block already records twice: the
+      // tracer reads the DISK. An agent with a year of REALIS on his laptop
+      // would have shipped every licensed transaction into a public bundle,
+      // which is a CEA PG 02-11 s6 problem long before it is a size one.
+      './data/realis/**',
+      './data/listings/**',
+      // The land-to-launch fit. Consult-only: nothing under app/ may import
+      // lib/consult (test/consult-boundary.test.js), so no route reads it.
+      './data/breakeven.json',
       // The island-wide scan's cached result, read only by scripts/ and the
       // local consult panel. Never by a route.
       './data/.scan.json',

@@ -36,6 +36,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { search, recordByHref } from '../lib/data/query.js';
 import { estimate, clientSafe } from '../lib/consult/avm.js';
+import { redact } from '../lib/consult/redact.js';
 import { residual } from '../lib/consult/residual.js';
 import { score } from '../lib/consult/score.js';
 import { outlook } from '../lib/consult/outlook.js';
@@ -50,6 +51,8 @@ import { sizeCheck, parseListings, importListings, archiveListingUpload, parseRe
 import { dataStatus } from '../lib/consult/status.js';
 import { LEVERS, rateScenario, VERSION as TRANSMISSION_VERSION, REVIEWED as TRANSMISSION_REVIEWED } from '../lib/consult/transmission.js';
 import { developmentProfile } from '../lib/consult/development.js';
+import { stackProfile, stackAdjust } from '../lib/consult/stacks.js';
+import { impliedLaunch, assessLaunch, pipeline as landPipeline, model as breakevenModel } from '../lib/consult/breakeven.js';
 import { loadReading, refreshReading, readingList, markOpened, SOURCES as READING_SOURCES } from '../lib/consult/reading.js';
 import { summarise, signals } from '../lib/consult/listings.js';
 
@@ -158,17 +161,26 @@ const server = http.createServer(async (req, res) => {
       const years = Number(body.years) > 0 ? Number(body.years) : 7;
 
       const est = estimate(rec, { areaSqft, floor });
+      /* A unit number turns four unobservable attributes into one measured
+         premium — but only for a private project a REALIS export covers, and
+         only ever as its own line beside the estimate. See stackAdjust. */
+      const stackRes = rec.kind !== 'HDB' && body.stack
+        ? stackAdjust(rec.label, body.stack) : null;
       const out = {
         record: { href: rec.href, label: rec.label, kind: rec.kind, town: rec.town || null },
         input: { areaSqft, floor, price, years },
         estimate: body.clientSafe && est.ok ? clientSafe(est) : est,
+        stack: stackRes,
         clientSafe: Boolean(body.clientSafe),
         score: score(rec),
         residual: price ? residual(rec, { asking: price, areaSqft, floor }) : null,
         outlook: outlook(rec, { areaSqft, floor, years, price, since: body.since || null }),
         generatedAt: new Date().toISOString(),
       };
-      return json(res, 200, out);
+      /* Default-deny, applied to the whole report rather than to the one
+         field somebody remembered. Both export buttons serialise the rendered
+         page, so anything that reaches the browser reaches the client. */
+      return json(res, 200, body.clientSafe ? redact(out) : out);
     }
 
     /**
@@ -290,7 +302,47 @@ const server = http.createServer(async (req, res) => {
        of lib/consult/development.js for why those are different operations. */
     if (url.pathname === '/api/development') {
       const p = developmentProfile(url.searchParams.get('href') || '');
+      /* Stacks come from a licensed REALIS export and exist for private
+         projects only — an HDB block has no stack in the sense that matters,
+         because its units do not sit above each other by unit number. The
+         profile stays usable when no export has been imported: the panel
+         prints the reason instead of the table. */
+      if (p.ok && p.identity?.kind !== 'HDB') p.stacks = stackProfile(p.identity.label);
       return json(res, p.ok ? 200 : 404, p);
+    }
+
+    /**
+     * ── LAND ────────────────────────────────────────────────────────────
+     * What a launch has to price at, given what its land cost. The non-land
+     * side is measured from past launches rather than taken from a cost
+     * guide — see lib/consult/breakeven.js for why that is the honest way
+     * round, and scripts/build-breakeven.mjs for what would make it wrong.
+     */
+    if (url.pathname === '/api/land') {
+      const m = breakevenModel();
+      if (!m) return json(res, 404, { ok: false, reason: 'No breakeven model has been built. Run `npm run build:breakeven`.' });
+      const land = Number(url.searchParams.get('land'));
+      const asking = Number(url.searchParams.get('asking'));
+      /* Default to the current regime: a land price being priced today is
+         almost always a harmonised site. */
+      const harmonised = url.searchParams.get('harmonised') !== '0';
+      return json(res, 200, {
+        ok: true,
+        version: m.version, builtAt: m.builtAt,
+        fit: m.fit, pooledFit: m.pooledFit, harmonisation: m.harmonisation,
+        accuracy: m.accuracy, segmentBias: m.segmentBias,
+        window: m.window, dropped: m.dropped, sources: m.sources,
+        /* Every joined launch, actual against what its land implied at the
+           time. This is the track record AND the finding: it is the only
+           view here that says which launches were priced aggressively. */
+        observations: m.observations.map(o => {
+          const imp = impliedLaunch({ landPsfPpr: o.landPsfPpr, when: o.launch });
+          return { ...o, implied: imp.ok ? imp.psf : null, gap: imp.ok ? o.launchPsf / imp.psf - 1 : null };
+        }),
+        pipeline: landPipeline(),
+        implied: land > 0 ? impliedLaunch({ landPsfPpr: land, harmonised }) : null,
+        assessed: land > 0 && asking > 0 ? assessLaunch({ landPsfPpr: land, askingPsf: asking, harmonised }) : null,
+      });
     }
 
     /**
