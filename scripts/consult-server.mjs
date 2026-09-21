@@ -168,7 +168,12 @@ const server = http.createServer(async (req, res) => {
       const stackRes = rec.kind !== 'HDB' && body.stack
         ? stackAdjust(rec.label, body.stack) : null;
       const out = {
-        record: { href: rec.href, label: rec.label, kind: rec.kind, town: rec.town || null },
+        /* District and tenure travel too: the client document's header line
+           reads "1,044 sqft · storey 18 · District 09 · Freehold", and it
+           was printing the first two only because the payload stopped there. */
+        record: { href: rec.href, label: rec.label, kind: rec.kind, town: rec.town || null,
+                  district: rec.district || null,
+                  tenure: [...new Set((rec.recent || []).map(x => x.tenure).filter(Boolean))][0] || null },
         input: { areaSqft, floor, price, years },
         estimate: body.clientSafe && est.ok ? clientSafe(est) : est,
         stack: stackRes,

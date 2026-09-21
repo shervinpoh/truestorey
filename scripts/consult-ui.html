@@ -9,6 +9,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+#docwrap{position:fixed;inset:0;z-index:90;background:var(--paper);display:flex;flex-direction:column}
+.docbar{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--surface)}
+.docttl{flex:1;font-family:"IBM Plex Mono",monospace;font-size:var(--t-micro);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+#docframe{flex:1;width:100%;border:0;background:#fff}
+@media print{body>*{display:none!important}#docwrap{position:static;display:block}.docbar{display:none!important}}
+
 /* Follows the rules in CLAUDE.md: warm ground with a real surface above it,
    --acc for interface and --acc-lit ONLY for data that is live or selected,
    3px on a control and 8px on a panel, five type steps and no sixth. */
@@ -740,17 +746,18 @@ function render(r) {
     </p>
     <div class="warnbox">An indicative range from recorded transactions and the details given. <b>Not an HDB, bank or licensed valuer's valuation.</b> Final sale price, loan amount and official valuation may differ.</div>
     <div class="actions">
-      <button class="ghost" onclick="window.print()">Export as PDF</button>
-      <button class="ghost" id="dl">Download this report</button>
-    </div>`));
+      <button class="go" id="clientdoc">Open the client report</button>
+      <button class="ghost" id="dl">Download it</button>
+    </div>
+    <p class="prov">The client report is a document, not this page: one property, the range, the sales under it, and what it is not. Everything on this screen that is your working — the score, the verdict, the outlook, the weights — stays here.</p>`));
 
   $('#out').innerHTML = out.join('');
+  $('#clientdoc').addEventListener('click', () => openReport(r));
   $('#dl').addEventListener('click', () => {
-    const doc = '<!doctype html><meta charset="utf-8"><title>' + esc(r.record.label) + '</title>' +
-      '<style>' + [...document.querySelectorAll('style')].map(s => s.textContent).join('') + '</style>' +
-      '<div class="wrap">' + $('#out').innerHTML + '</div>';
+    /* The same document, saved. It used to be this page's innerHTML with the
+       app's stylesheet glued on — a screenshot of a working surface. */
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([doc], { type: 'text/html' }));
+    a.href = URL.createObjectURL(new Blob([reportDocument(r)], { type: 'text/html' }));
     a.download = (r.record.label || 'report').replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.html';
     a.click();
   });
@@ -1590,6 +1597,201 @@ async function loadPrivateScan(force) {
   if (force) reveal($('#psout'));
 }
 for (const id of ['#psdist', '#psby', '#pstenure', '#psmin']) $(id).addEventListener('change', () => loadPrivateScan(true));
+
+/* ── the client document ─────────────────────────────────────────────────
+   Not the page. Both export buttons used to serialise `#out`, which is a
+   working surface — collapsible panels, provenance footnotes, mono labels,
+   every intermediate figure the analyst wanted while deciding. Handed to a
+   client it reads as a screen someone printed, because that is what it was.
+
+   This builds a document instead: one property, one figure, the evidence
+   under it, what it is not, and a signature block. Same data, nothing added,
+   most of it left out. It opens in its own window so the print is the
+   DOCUMENT rather than the app around it. */
+const REPORT_CSS = `
+@page{size:A4;margin:18mm 16mm}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:#1a1a1a;font-family:"Source Sans 3",system-ui,sans-serif;font-size:11pt;line-height:1.55}
+.doc{max-width:190mm;margin:0 auto;padding:14mm 10mm}
+h1,h2{font-family:Archivo,system-ui,sans-serif;font-variation-settings:"wdth" 88;margin:0}
+.lbl{font-family:"IBM Plex Mono",monospace;font-size:8pt;letter-spacing:.14em;text-transform:uppercase;color:#6b6b6b}
+header{border-bottom:2px solid #164F52;padding-bottom:10mm;margin-bottom:9mm}
+h1{font-size:23pt;line-height:1.1;margin:3mm 0 2mm}
+.facts{font-family:"IBM Plex Mono",monospace;font-size:9pt;color:#4a4a4a}
+.headline{margin:0 0 8mm}
+.range{font-family:"IBM Plex Mono",monospace;font-size:21pt;font-weight:500;color:#164F52;line-height:1.15;margin:2mm 0 1mm}
+.psf{font-family:"IBM Plex Mono",monospace;font-size:11pt;color:#4a4a4a}
+section{margin:0 0 8mm;page-break-inside:avoid}
+h2{font-size:12pt;padding-bottom:2mm;border-bottom:1px solid #d8d6d0;margin-bottom:4mm}
+p{margin:0 0 3mm}
+table{width:100%;border-collapse:collapse;font-size:9.5pt}
+th{font-family:"IBM Plex Mono",monospace;font-size:7.5pt;letter-spacing:.1em;text-transform:uppercase;color:#6b6b6b;text-align:left;padding:0 3mm 2mm 0;border-bottom:1px solid #d8d6d0;font-weight:400}
+td{padding:2.2mm 3mm 2.2mm 0;border-bottom:1px solid #eceae5;vertical-align:top}
+td.n,th.n{text-align:right}
+.mono{font-family:"IBM Plex Mono",monospace}
+.kv{display:grid;grid-template-columns:42mm 1fr;gap:2mm 4mm;margin:0}
+.kv dt{font-family:"IBM Plex Mono",monospace;font-size:8.5pt;letter-spacing:.06em;text-transform:uppercase;color:#6b6b6b;padding-top:.6mm}
+.kv dd{margin:0}
+.callout{border-left:3px solid #164F52;padding:3mm 0 3mm 5mm;margin:0 0 4mm;background:#f7f6f3}
+.limits li{margin-bottom:2mm}
+footer{border-top:1px solid #d8d6d0;margin-top:10mm;padding-top:5mm;font-size:9pt;color:#4a4a4a;page-break-inside:avoid}
+footer b{color:#1a1a1a}
+.fine{font-size:8.5pt;color:#6b6b6b;margin-top:3mm;line-height:1.5}
+@media print{.doc{padding:0}.noprint{display:none}}
+.noprint{display:none}
+.noprint button{font:500 10pt/1 "Source Sans 3",sans-serif;padding:9px 14px;border:1px solid #164F52;background:#164F52;color:#fff;border-radius:3px;cursor:pointer}
+.noprint button.ghost{background:#fff;color:#164F52}
+`;
+
+function reportDocument(r) {
+  const e = r.estimate, I = r.input, R = r.record;
+  const d = new Date(r.generatedAt);
+  const when = d.toLocaleDateString('en-SG', { day: 'numeric', month: 'long', year: 'numeric' });
+  const sqft = n => Number(n).toLocaleString('en-SG');
+
+  const facts = [
+    I.areaSqft ? sqft(I.areaSqft) + ' sqft' : null,
+    I.floor ? 'storey ' + I.floor : null,
+    R.district ? 'District ' + String(R.district).padStart(2, '0') : (R.town || null),
+    R.tenure || null,
+    R.kind === 'HDB' ? 'HDB' : null,
+  ].filter(Boolean).join('  ·  ');
+
+  /* The comparables, trimmed to what a client can check: when, how big, what
+     it fetched. The weights, index factors and level multipliers are the
+     analyst's working and stay out. */
+  /* This development's own sales first, then the nearest others, each block
+     newest first. The estimator ranks by weight, which is right for the
+     arithmetic and wrong for a reader: a client wants to see THIS building
+     before anyone else's, and burying its own sales under four strangers
+     reads as evasion even when the maths is sound. */
+  const sorted = [...(e.comparables || [])].sort((a, b) => {
+    const own = (x) => (x.href === R.href ? 0 : 1);
+    return own(a) - own(b) || (a.distanceM ?? 0) - (b.distanceM ?? 0) || String(b.month).localeCompare(String(a.month));
+  });
+  const SHOWN = 14;
+  const comps = sorted.slice(0, SHOWN).map(c => {
+    const sqft = c.areaSqm ? Math.round(c.areaSqm * 10.7639) : null;
+    /* URA files a price; where a comparable did not carry one through, it is
+       the filed psf times the filed area and nothing cleverer. */
+    const price = c.price || (sqft && c.psfFiled ? Math.round(sqft * c.psfFiled) : null);
+    const here = c.href === R.href;
+    return `<tr${here ? ' style="background:#f7f6f3"' : ''}>
+      <td class="mono">${esc(c.month || '')}</td>
+      <td>${here ? '<b>' + esc(c.label || '') + '</b>' : esc(c.label || '')}${here ? '' : c.distanceM ? ` <span style="color:#8a8a8a">${Math.round(c.distanceM)}m</span>` : ''}</td>
+      <td class="n">${sqft ? sqft.toLocaleString('en-SG') : '—'}</td>
+      <td class="n mono">${Math.round(c.psfFiled ?? c.psf)}</td>
+      <td class="n">${price ? money(price) : '—'}</td></tr>`;
+  }).join('');
+
+  const err = e.error
+    ? `<p>Half of lookups built this way came within <b>${(100 * e.error.medianPct).toFixed(1)}%</b> of the eventual price, and nine in ten within <b>${(100 * e.error.p90Pct).toFixed(1)}%</b> — measured over ${e.error.trials.toLocaleString()} sales held out of the calculation.</p>`
+    : `<p>The error of this method has not been measured for this kind of property, and an unmeasured error is not a small one.</p>`;
+
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>${esc(R.label)} — indicative range</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>${REPORT_CSS}</style></head><body>
+<div class="noprint">
+  <button onclick="window.print()">Print or save as PDF</button>
+  <button class="ghost" onclick="window.close()">Close</button>
+</div>
+<div class="doc">
+<header>
+  <div class="lbl">Indicative range · prepared ${esc(when)}</div>
+  <h1>${esc(R.label)}</h1>
+  <div class="facts">${esc(facts)}</div>
+</header>
+
+${e.ok ? `
+<div class="headline">
+  <div class="lbl">What comparable homes actually transacted at</div>
+  <div class="range">${money(e.band.priceLow)} &ndash; ${money(e.band.priceHigh)}</div>
+  <div class="psf">${e.band.psfLow}&ndash;${e.band.psfHigh} psf${!r.clientSafe && e.psf ? `  ·  midpoint ${e.psf} psf` : ''}</div>
+</div>
+
+<section>
+  <h2>What this figure is</h2>
+  <p>This is the weighted middle half of what <b>comparable homes actually sold for</b> — restated${I.floor ? ` onto storey ${I.floor}` : ''} and into one quarter's money so that sales from different months and different heights can sit beside each other.</p>
+  <p>It is not a percentage either side of a guess, and it is not a confidence interval: no statistical distribution was assumed, so none is claimed. Every sale it rests on is listed below and can be checked against URA's own record.</p>
+</section>
+
+<section>
+  <h2>What it rests on</h2>
+  <dl class="kv">
+    <dt>Comparable sales</dt><dd>${e.evidence.sample}${e.evidence.fromAddress ? ` — ${e.evidence.fromAddress} at this address, ${e.evidence.fromNearby} nearby` : ''}</dd>
+    <dt>Property type</dt><dd>${esc(e.evidence.flatType || '—')}</dd>
+    <dt>Size range used</dt><dd>${e.evidence.areaFromSqm ? Math.round(e.evidence.areaFromSqm * 10.7639).toLocaleString('en-SG') + '–' + Math.round(e.evidence.areaToSqm * 10.7639).toLocaleString('en-SG') + ' sqft' : '—'}</dd>
+    ${e.indexed?.ran !== false ? `<dt>Restated to</dt><dd>${esc(e.indexed.asOfQuarter)} <span style="color:#6b6b6b">(${esc(e.indexed.series.label)})</span></dd>` : ''}
+    <dt>Period covered</dt><dd>${esc(e.evidence.period?.from || '')} to ${esc(e.evidence.period?.to || '')}</dd>
+  </dl>
+</section>
+
+<section>
+  <h2>How wrong this is likely to be</h2>
+  ${err}
+  ${Number.isFinite(e.evidence.ownShare) && e.evidence.ownShare < 0.6 ? `<div class="callout"><p style="margin:0"><b>${Math.round(100 * e.evidence.ownShare)}% of this figure comes from sales in this development itself</b>; the rest from comparable homes nearby. A development with few recent sales of this size is harder to price, and this range should be treated as the weaker kind.</p></div>` : ''}
+</section>
+
+<section>
+  <h2>The sales it rests on</h2>
+  <table><thead><tr><th>Month</th><th>Development</th><th class="n">Size (sqft)</th><th class="n">psf</th><th class="n">Price</th></tr></thead>
+  <tbody>${comps}</tbody></table>
+  <p class="fine">${(e.comparables || []).length > SHOWN ? `Showing ${SHOWN} of ${e.comparables.length} sales used — this development first, then the nearest others. ` : ''}Prices are as filed with URA; psf is the filed figure before any restatement.</p>
+</section>
+` : `<section><h2>No range could be produced</h2><p>${esc(e.reason || 'Not enough comparable evidence.')}</p></section>`}
+
+<section class="limits">
+  <h2>What this is not</h2>
+  <ul>
+    <li>It is <b>not a valuation</b>. A valuation is a licensed valuer's opinion for a lender or a court, and this is not one.</li>
+    <li>It cannot see inside the unit — condition, renovation, layout, what it faces, what it hears, or what the neighbours are like. Those are settled at a viewing, not in a dataset.</li>
+    <li>It describes what <b>has</b> transacted. It is not a forecast, and it carries no view on where prices go next.</li>
+    <li>A specific unit can sell above or below this range for reasons entirely proper to it.</li>
+  </ul>
+</section>
+
+<footer>
+  <b>Shervin Poh</b> &nbsp;·&nbsp; CEA Reg. No. R066925H &nbsp;·&nbsp; Huttons Asia Pte Ltd
+  <div class="fine">
+    Prepared ${esc(when)}. Source: URA Data Service — private residential transactions${R.kind === 'HDB' ? ', and HDB resale prices via data.gov.sg (Singapore Open Data Licence v1.0)' : ''}; URA private residential property price index via SingStat. Figures are derived from publicly filed transactions and carry the errors stated above.
+    ${r.clientSafe && r.withheld?.length ? `<br>This copy omits the analyst's working: ${r.withheld.map(w => esc(String(w).toLowerCase())).join('; ')}.` : ''}
+  </div>
+</footer>
+</div></body></html>`;
+}
+
+/**
+ * Shown in an overlay, not a pop-up.
+ *
+ * window.open was blocked on the first try, and a client report that depends
+ * on a browser setting is one that fails in front of the client. An iframe
+ * carries the document's own stylesheet without it leaking into the app or
+ * the app's leaking into it, and printing the iframe prints the DOCUMENT —
+ * which is the whole point of having built one.
+ */
+function openReport(r) {
+  document.getElementById('docwrap')?.remove();
+  const wrap = document.createElement('div');
+  wrap.id = 'docwrap';
+  wrap.innerHTML = `<div class="docbar">
+      <span class="docttl">Client report &mdash; ${esc(r.record.label)}</span>
+      <button class="go" id="docprint">Print or save as PDF</button>
+      <button class="ghost" id="docclose">Close</button>
+    </div><iframe id="docframe" title="Client report"></iframe>`;
+  document.body.appendChild(wrap);
+  const f = wrap.querySelector('#docframe');
+  f.srcdoc = reportDocument(r);
+  wrap.querySelector('#docclose').addEventListener('click', () => wrap.remove());
+  wrap.querySelector('#docprint').addEventListener('click', () => {
+    f.contentWindow.focus();
+    f.contentWindow.print();
+  });
+  /* Escape closes it, because a full-screen overlay with no keyboard way out
+     is a trap the first time the mouse is somewhere else. */
+  const esc2 = ev => { if (ev.key === 'Escape') { wrap.remove(); removeEventListener('keydown', esc2); } };
+  addEventListener('keydown', esc2);
+}
 
 const PAGES = ['valuation', 'scan', 'development', 'land', 'find', 'compare', 'data', 'briefing'];
 function route() {
