@@ -14,8 +14,13 @@ import { rebuildRealis } from '../lib/consult/imports.js';
 
 const r = rebuildRealis();
 if (!r.ok) {
-  console.error(`${r.reason}\n\nExport from REALIS and drop the CSV into data/realis/. The folder and the\n`
-    + 'index are gitignored — licensed data never enters the repository.');
+  console.error(`${r.reason}\n`);
+  console.error('  The folder now exists. Copy an export into it and run this again:\n');
+  console.error('    cp ~/Downloads/<your-export>.csv data/realis/ && npm run ingest:realis\n');
+  console.error('  The export MUST include the "Unit No" column. Without it this is the free URA');
+  console.error('  feed with extra steps — the unit number is what pins facing, corner, outlook');
+  console.error('  and noise, and it is the only reason a licensed export earns its fee.\n');
+  console.error('  The folder and the index are gitignored; licensed data never enters the repo.');
   process.exit(1);
 }
 for (const p of r.perFile) {
