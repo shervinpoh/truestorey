@@ -279,6 +279,25 @@ label.opt.disabled{opacity:.5;cursor:not-allowed}
     <p class="prov" id="scanmeta"></p>
     <div id="scanout"></div>
   </section>
+
+  <section class="panel">
+    <h2>Condominiums against their own district</h2>
+    <p class="lede">Every condominium resale priced against what its district says a home of that size, tenure, remaining lease and storey should fetch. <b>The same farming list, for private.</b> What is left after all of that is the part the fit was never given — address, build, outlook — so read it as a map of which buildings carry a premium, not as a list of mispricings.</p>
+    <div class="row">
+      <div><label for="psdist">District</label><select id="psdist"><option value="">all</option></select></div>
+      <div><label for="psby">Rank by</label><select id="psby">
+        <option value="gap">Where it sits against its district</option>
+        <option value="drift">How far it has moved against its district</option>
+      </select></div>
+      <div><label for="pstenure">Tenure</label><select id="pstenure">
+        <option value="">any</option><option value="fh">freehold</option><option value="lh">leasehold</option>
+      </select></div>
+      <div><label for="psmin">Minimum resales</label><select id="psmin">
+        <option value="0">8 (the floor)</option><option value="15">15</option><option value="30">30</option>
+      </select></div>
+    </div>
+    <div id="psout"></div>
+  </section>
 </section>
 
 <section class="page" id="page-find" hidden>
@@ -439,6 +458,54 @@ const $ = s => document.querySelector(s);
 const money = n => 'S$' + Number(n).toLocaleString('en-SG', { maximumFractionDigits: 0 });
 const pc = n => (n > 0 ? '+' : '') + (100 * n).toFixed(1) + '%';
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+/**
+ * Read a numeric field the way a person types one.
+ *
+ * "1,323" is how anybody writes a land price and how every figure on this
+ * page is PRINTED, so it is what gets pasted back in. Number("1,323") is NaN,
+ * which fell through to 0 and the tool then computed nothing and said nothing
+ * — the Land page looked like a dead button, and the valuation form's floor
+ * area had the same hole. Defined once here because it was already written
+ * twice inside two handlers while three fields read raw, which is the shape
+ * every duplicated-implementation bug in this repo has had.
+ */
+const toNum = v => Number(String(v ?? '').replace(/[^0-9.]/g, '')) || 0;
+const num = id => toNum($(id).value);
+/**
+ * Whether this reader has asked not to be moved.
+ *
+ * The site has lib/../Motion.jsx's still() for this and test/motion.test.js
+ * fails if any viewport movement there stops asking. The panel is standalone
+ * vanilla JS and cannot import it, so it gets its own — and every scroll below
+ * goes through it. Read at call time, not once at load, because a reader can
+ * change the setting without reloading a tool they keep open all day.
+ */
+const still = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
+const reveal = el => el.scrollIntoView({ behavior: still() ? 'auto' : 'smooth', block: 'start' });
+/**
+ * Fetch JSON, or say why not.
+ *
+ * A bare `fetch(...).then(r => r.json())` on a route the running server does
+ * not have gets "Not found" as plain text, throws on the parse, and the
+ * rejection goes nowhere — the page simply does not change and the button
+ * looks broken. That is exactly what a stale server process looks like from
+ * the outside, and it cost an evening: the panel reads its HTML from disk on
+ * every request, so an edit to the page appears immediately while the ROUTES
+ * stay as they were when node started. New page, old API, silent failure.
+ */
+async function getJson(url, opts) {
+  let res;
+  try { res = await fetch(url, opts); }
+  catch (e) { throw new Error(`Could not reach the panel server — is it still running? (${e.message})`); }
+  const text = await res.text();
+  try { return JSON.parse(text); }
+  catch {
+    if (res.status === 404) {
+      throw new Error(`This page is newer than the server running it: ${url.split('?')[0]} does not exist in the process that started up. Stop it with Ctrl-C and run \`npm run consult\` again.`);
+    }
+    throw new Error(`${res.status} from ${url.split('?')[0]} — ${text.slice(0, 120)}`);
+  }
+}
 
 let chosen = null, summary = null, safeMode = false;
 
@@ -497,12 +564,12 @@ $('#run').addEventListener('click', async () => {
   try {
     const body = {
       href: chosen,
-      areaSqft: Number($('#area').value),
-      floor: Number($('#floor').value) || null,
+      areaSqft: num('#area'),
+      floor: num('#floor') || null,
       /* The unit-number suffix, e.g. "05" from #12-05. Priced only where a
          REALIS export covers the project; ignored everywhere else. */
       stack: String($('#stack').value || '').trim() || null,
-      price: Number(String($('#price').value).replace(/[^0-9.]/g, '')) || null,
+      price: num('#price') || null,
       years: Number($('#years').value),
       clientSafe: safeMode,
     };
@@ -687,7 +754,7 @@ function render(r) {
     a.download = (r.record.label || 'report').replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.html';
     a.click();
   });
-  $('#out').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  reveal($('#out'));
 }
 
 
@@ -697,7 +764,7 @@ function render(r) {
    answering them in one blob is how a reader stops being able to tell which
    number came from where. */
 function prefillCalcs() {
-  const asking = Number(String($('#price').value).replace(/[^0-9.]/g, '')) || null;
+  const asking = num('#price') || null;
   if (asking) { if (!$('#pprice').value) $('#pprice').value = asking; if (!$('#sprice').value) $('#sprice').value = asking; }
   if (summary && !$('#ptype').dataset.touched) {
     const t = summary.kind === 'HDB' ? 'HDB' : 'PRIVATE';
@@ -719,7 +786,6 @@ syncLoanFrom();
 for (const id of ['#planbox', '#procbox']) $(id).addEventListener('toggle', prefillCalcs);
 
 $('#runplan').addEventListener('click', async () => {
-  const num = id => Number(String($(id).value).replace(/[^0-9.]/g, '')) || 0;
   const body = {
     price: num('#pprice'), propertyType: $('#ptype').value, profile: $('#pprofile').value,
     propertyCount: Number($('#pcount').value), monthlyDebts: num('#debts'),
@@ -760,7 +826,6 @@ $('#runplan').addEventListener('click', async () => {
 });
 
 $('#runproc').addEventListener('click', async () => {
-  const num = id => Number(String($(id).value).replace(/[^0-9.]/g, '')) || 0;
   const body = {
     salePrice: num('#sprice'), outstandingLoan: num('#sloan'), cpfPrincipal: num('#scpf'),
     yearsHeld: num('#syears'), propertyType: $('#stype').value,
@@ -920,7 +985,7 @@ function renderDev(p) {
     Every figure above is this development compared with itself over its own filed transactions. It is not a valuation of any unit in it — for that, use Valuation.</p>`));
 
   $('#devout').innerHTML = out.join('');
-  $('#devout').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  reveal($('#devout'));
 }
 
 
@@ -1003,10 +1068,10 @@ async function loadBriefing() {
 }
 
 $('#rrun').addEventListener('click', async () => {
-  const n = id => Number(String($(id).value).replace(/[^0-9.]/g, '')) || 0;
-  const inc = n('#rinc');
-  const body = { loan: n('#rloan'), tenureYears: n('#rten'), from: n('#rfrom'), to: n('#rto'),
-    monthlyDebts: n('#rdebt'), propertyType: $('#rtype').value,
+
+  const inc = num('#rinc');
+  const body = { loan: num('#rloan'), tenureYears: num('#rten'), from: num('#rfrom'), to: num('#rto'),
+    monthlyDebts: num('#rdebt'), propertyType: $('#rtype').value,
     applicants: inc ? [{ fixedIncome: inc, age: 35 }] : [] };
   const r = await fetch('/api/briefing/scenario', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(x => x.json());
   if (!r.ok) { $('#rout').innerHTML = `<p class="err">${esc(r.reason)}</p>`; return; }
@@ -1252,7 +1317,7 @@ $('#doparse').addEventListener('click', async () => {
   </table></div><p class="prov">Correct anything wrong before screening. An overstated floor area understates the psf, which reads as a discount and ranks first.</p></div>`;
   $('#parsed').addEventListener('input', e => {
     const el = e.target; if (!el.dataset.f) return;
-    parsed[Number(el.dataset.i)][el.dataset.f] = Number(String(el.value).replace(/[^0-9.]/g, '')) || null;
+    parsed[Number(el.dataset.i)][el.dataset.f] = toNum(el.value) || null;
   });
   $('#doscreen').hidden = false;
 });
@@ -1309,7 +1374,7 @@ function drawList() {
     <input data-i="${i}" data-f="price" value="${c.price ?? ''}" style="width:120px" inputmode="numeric" placeholder="price">
     <button data-rm="${i}" title="remove">×</button></div>`).join('');
   $('#clist').querySelectorAll('input').forEach(el => el.addEventListener('input', () => {
-    cmp[Number(el.dataset.i)][el.dataset.f] = Number(String(el.value).replace(/[^0-9.]/g, '')) || null;
+    cmp[Number(el.dataset.i)][el.dataset.f] = toNum(el.value) || null;
   }));
   $('#clist').querySelectorAll('button[data-rm]').forEach(b => b.addEventListener('click', () => {
     cmp.splice(Number(b.dataset.rm), 1); drawList();
@@ -1352,15 +1417,26 @@ $('#docompare').addEventListener('click', async () => {
 let landLoaded = false;
 async function loadLand(force) {
   if (landLoaded && !force) return;
-  const land = Number($('#lland').value) || 0;
-  const ask = Number(String($('#lask').value).replace(/[^0-9.]/g, '')) || 0;
+  const land = num('#lland');
+  const ask = num('#lask');
   const harm = $('#lharm').value;
-  const r = await fetch('/api/land?land=' + land + '&asking=' + ask + '&harmonised=' + harm).then(x => x.json());
+  let r;
+  try { r = await getJson('/api/land?land=' + land + '&asking=' + ask + '&harmonised=' + harm); }
+  catch (e) { $('#landout').innerHTML = `<div class="panel"><div class="warnbox">${esc(e.message)}</div></div>`; return; }
   landLoaded = true;
   if (!r.ok) { $('#landout').innerHTML = `<div class="panel"><div class="warnbox">${esc(r.reason)}</div></div>`; return; }
 
   const out = [];
   const A = r.accuracy;
+
+  /* Say why there is no answer. The button fired, the request went out and
+     the page re-rendered identically, which reads as a broken control — and
+     was reported as one. A tool that declines must say it declined. */
+  if (!land) {
+    out.push(panel('Nothing to work out yet', `
+      <div class="warnbox">Enter a land price in dollars per square foot per plot ratio — the figure URA publishes when a site is awarded. Everything below is the model itself and does not depend on it.</div>
+      <p class="prov">If you have the tender price and the site's GFA instead, the psf ppr is the price divided by the GFA in square feet. The sites in the table below already carry theirs.</p>`));
+  }
 
   if (r.implied?.ok) {
     const I = r.implied, As = r.assessed;
@@ -1439,8 +1515,79 @@ async function loadLand(force) {
     ${r.sources.map(esc).join(' · ')}<br>${esc(r.version)} · built ${esc(r.builtAt)}</p>`));
 
   $('#landout').innerHTML = out.join('');
+  /* Only on an explicit click — scrolling the page on first open would move
+     the ground under someone who navigated here to read the pipeline. */
+  if (force) reveal($('#landout'));
 }
 $('#lrun').addEventListener('click', () => loadLand(true));
+/* Enter submits. A number field with a button beside it that ignores Enter is
+   a small thing that makes a tool feel unfinished. */
+for (const id of ['#lland', '#lask']) $(id).addEventListener('keydown', e => { if (e.key === 'Enter') loadLand(true); });
+
+/* ── private scan ────────────────────────────────────────────────────────
+   Two separate findings share this panel, and keeping them apart is the
+   whole point: a district's MOVE is the market story, a project's LEVEL is
+   its address, and a project's move against its own district is measured,
+   published and honestly noise. See lib/consult/privatescan.js. */
+let psLoaded = false;
+async function loadPrivateScan(force) {
+  if (psLoaded && !force) return;
+  const q = new URLSearchParams({
+    district: $('#psdist').value, by: $('#psby').value,
+    tenure: $('#pstenure').value, min: $('#psmin').value,
+  });
+  let r;
+  try { r = await getJson('/api/private-scan?' + q); }
+  catch (e) { $('#psout').innerHTML = `<div class="warnbox">${esc(e.message)}</div>`; return; }
+  psLoaded = true;
+  if (!r.ok) { $('#psout').innerHTML = `<div class="warnbox">${esc(r.reason || 'Not built.')}</div>`; return; }
+
+  const D = r.districts, P = r.projects;
+  if (!$('#psdist').dataset.filled) {
+    $('#psdist').insertAdjacentHTML('beforeend',
+      [...D.rows].sort((a, b) => a.district.localeCompare(b.district))
+        .map(d => `<option value="${esc(d.district)}">D${esc(d.district)}</option>`).join(''));
+    $('#psdist').dataset.filled = '1';
+  }
+
+  const pc = (x, d = 1) => (x == null ? '—' : (x > 0 ? '+' : '') + (100 * x).toFixed(d) + '%');
+  const out = [];
+
+  out.push(panel('How each district has moved, and what size costs there', `
+    <p class="note"><b>${esc(D.says)}</b></p>
+    <div class="scroll"><table>
+      <tr><th>district</th><th class="num">resales</th><th class="num">median psf</th><th class="num">moved</th><th class="num">psf per 10% larger unit</th><th class="num">fit</th></tr>
+      ${D.rows.map(d => `<tr>
+        <td class="mono">D${esc(d.district)}</td><td class="num">${d.n.toLocaleString()}</td>
+        <td class="num">${d.medianPsf}</td>
+        <td class="num"><b class="${d.drift > 0.02 ? 'good' : d.drift < -0.02 ? 'bad' : ''}">${pc(d.drift)}</b></td>
+        <td class="num">${pc(d.per10PctLarger, 2)}</td>
+        <td class="num ${d.weakFit ? 'err' : 'meta'}">${d.r2.toFixed(2)}${d.weakFit ? ' ⚠' : ''}</td></tr>`).join('')}
+    </table></div>
+    <p class="note">${esc(D.sizeSays || '')}</p>
+    <p class="prov">"Moved" is the district's own change against the national price index across the window, with size, tenure, remaining lease, storey and property type held constant — so it is the part that is about this district and not about the market. The last column is how much of a district's psf the fit explains; a district marked <span class="err">⚠</span> is barely described by these five things (D04 is Sentosa Cove) and its projects are kept out of the ranking below rather than ranked against districts the fit describes well.</p>`));
+
+  out.push(panel(P.by === 'drift' ? 'Moved furthest against its own district' : 'Where each project sits against its district', `
+    <p class="note">${esc(P.says)}</p>
+    ${P.by === 'drift' ? `<div class="warnbox">${esc(P.driftBehaviour.says)}</div>` : ''}
+    <div class="scroll"><table>
+      <tr><th>project</th><th>D</th><th class="num">resales</th><th class="num">median psf</th><th class="num">median sqm</th><th>tenure</th>
+        <th class="num">level</th><th class="num">moved</th><th class="num">spread</th></tr>
+      ${P.rows.map(p => `<tr>
+        <td>${esc(p.project)}</td><td class="mono">${esc(p.district)}</td>
+        <td class="num">${p.n}</td><td class="num">${p.medianPsf}</td><td class="num">${p.medianAreaSqm}</td>
+        <td class="mono">${p.freehold ? 'freehold' : (p.medianRemaining ?? '—') + 'y'}</td>
+        <td class="num"><b class="${p.gap > 0.05 ? 'good' : p.gap < -0.05 ? 'bad' : ''}">${pc(p.gap)}</b></td>
+        <td class="num">${pc(p.driftVsDistrict)}</td>
+        <td class="num meta">±${pc(p.spread)}</td></tr>`).join('')}
+    </table></div>
+    <p class="note meta">${P.total.toLocaleString()} project(s) qualify${P.hidden ? ` · ${P.hidden} kept out because their district's fit explains too little` : ''}. A project needs ${P.basis.minProjectSales} resales before it gets a position at all.</p>
+    <p class="prov"><b>Level</b> is where the project persistently trades against its district, everything measurable held constant. It is durable — ${P.persistence.projects} projects, early half against late half, r=${P.persistence.r?.toFixed(2)} — and it is mostly address and build quality, which is exactly why it persists. <b>Moved</b> is what is left after its district's own move is taken out, and across ${P.driftBehaviour.projects} projects it predicts the next period at r=${P.driftBehaviour.r?.toFixed(2)}: it describes what happened and forecasts nothing. <b>Spread</b> is the scatter within the project — a wide one means the fit does not describe its units well whatever the average says. Resale only; a developer's launch price is not a second-hand comparable. Restated to ${esc(D.restatedTo || '')}.</p>`));
+
+  $('#psout').innerHTML = out.join('');
+  if (force) reveal($('#psout'));
+}
+for (const id of ['#psdist', '#psby', '#pstenure', '#psmin']) $(id).addEventListener('change', () => loadPrivateScan(true));
 
 const PAGES = ['valuation', 'scan', 'development', 'land', 'find', 'compare', 'data', 'briefing'];
 function route() {
@@ -1450,7 +1597,7 @@ function route() {
   for (const a of document.querySelectorAll('#nav a')) {
     if (a.dataset.page === page) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   }
-  if (page === 'scan') loadScan();
+  if (page === 'scan') { loadScan(); loadPrivateScan(); }
   if (page === 'find') loadFeed();
   if (page === 'land') loadLand();
   if (page === 'data') loadStatus();

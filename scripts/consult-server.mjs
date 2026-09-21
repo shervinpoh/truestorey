@@ -53,6 +53,7 @@ import { LEVERS, rateScenario, VERSION as TRANSMISSION_VERSION, REVIEWED as TRAN
 import { developmentProfile } from '../lib/consult/development.js';
 import { stackProfile, stackAdjust } from '../lib/consult/stacks.js';
 import { impliedLaunch, assessLaunch, pipeline as landPipeline, model as breakevenModel } from '../lib/consult/breakeven.js';
+import { districts as privateDistricts, projects as privateProjects } from '../lib/consult/privatescan.js';
 import { loadReading, refreshReading, readingList, markOpened, SOURCES as READING_SOURCES } from '../lib/consult/reading.js';
 import { summarise, signals } from '../lib/consult/listings.js';
 
@@ -309,6 +310,25 @@ const server = http.createServer(async (req, res) => {
          prints the reason instead of the table. */
       if (p.ok && p.identity?.kind !== 'HDB') p.stacks = stackProfile(p.identity.label);
       return json(res, p.ok ? 200 : 404, p);
+    }
+
+    /**
+     * The private half of the farming list. Condominium resales only, each
+     * district fitted on its own sales — see lib/consult/privatescan.js for
+     * what each number is and, more importantly, what it is not.
+     */
+    if (url.pathname === '/api/private-scan') {
+      const d = privateDistricts();
+      if (!d.ok) return json(res, 404, d);
+      const p = privateProjects({
+        district: url.searchParams.get('district') || null,
+        by: url.searchParams.get('by') === 'drift' ? 'drift' : 'gap',
+        freehold: url.searchParams.get('tenure') === 'fh' ? true
+          : url.searchParams.get('tenure') === 'lh' ? false : null,
+        minSales: Number(url.searchParams.get('min')) || 0,
+        limit: 60,
+      });
+      return json(res, 200, { ok: true, districts: d, projects: p });
     }
 
     /**

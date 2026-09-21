@@ -36,6 +36,7 @@
     "build:storey": "node scripts/build-storey.mjs",
     "build:guides": "node scripts/build-guides.mjs",
     "ingest:rental": "node --env-file-if-exists=.env.local scripts/ingest-rental.mjs",
+    "build:private-scan": "node scripts/build-private-scan.mjs",
     "build:breakeven": "node scripts/build-breakeven.mjs",
     "build:yield": "node scripts/build-yield.mjs",
     "ingest:boundaries": "node scripts/ingest-boundaries.mjs",

@@ -999,3 +999,47 @@ test('the two loan types differ by the cash floor and nothing else', async () =>
   assert.ok(bank.cashNeeded > hdb.cashNeeded,
     'the HDB loan must need less cash, or the floor is not being applied');
 });
+
+/**
+ * Every numeric field in the panel reads through one helper.
+ *
+ * The Land page looked like a dead button because `1,323` — how a land price
+ * is written, and how this panel PRINTS every figure it produces — became
+ * NaN, fell through to 0, and the tool computed nothing and said nothing.
+ * The valuation form's floor area had the identical hole. The cause was five
+ * separate implementations of "read a number from a field", three of which
+ * stripped punctuation and two of which did not.
+ *
+ * Read from source, the way test/motion.test.js does: Node does not strip
+ * HTML and a transform would cost more than the three-dependency rule.
+ */
+test('no numeric field in the panel reads a value without stripping punctuation', () => {
+  const ui = fs.readFileSync(new URL('../scripts/consult-ui.html', import.meta.url), 'utf8');
+  const body = ui.slice(ui.indexOf('<script'));
+
+  /* One definition, and it is the shared one. */
+  const defs = [...body.matchAll(/replace\(\/\[\^0-9\.\]\/g/g)];
+  assert.equal(defs.length, 1, `${defs.length} implementations of the numeric reader; there must be exactly one (toNum)`);
+  assert.match(body, /const toNum = v =>/);
+  assert.match(body, /const num = id => toNum\(\$\(id\)\.value\)/);
+
+  /* And nothing reads a field raw. Selects hold digit-only values and are
+     exempt; a free-text field is not. */
+  const RAW_OK = new Set(['#years', '#pcount', '#loans']);
+  for (const m of body.matchAll(/Number\(\$\('(#[a-z0-9]+)'\)\.value\)/g)) {
+    assert.ok(RAW_OK.has(m[1]),
+      `${m[1]} is read with Number() and no stripping — type "1,323" into it and the tool silently computes nothing`);
+  }
+});
+
+test('the panel honours prefers-reduced-motion on every scroll it performs', () => {
+  /* The site has Motion.jsx's still() and test/motion.test.js guards it. The
+     panel is standalone vanilla JS and cannot import it, so it carries its
+     own — and a raw scrollIntoView here would bypass it silently. */
+  const ui = fs.readFileSync(new URL('../scripts/consult-ui.html', import.meta.url), 'utf8');
+  const body = ui.slice(ui.indexOf('<script'));
+  assert.match(body, /const still = \(\) => window\.matchMedia/);
+  assert.match(body, /const reveal = el => el\.scrollIntoView/);
+  const raw = [...body.matchAll(/scrollIntoView/g)];
+  assert.equal(raw.length, 1, 'every viewport movement must go through reveal(), which asks first');
+});

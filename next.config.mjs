@@ -73,6 +73,9 @@ const nextConfig = {
       // which is a CEA PG 02-11 s6 problem long before it is a size one.
       './data/realis/**',
       './data/listings/**',
+      // The private farming list. Consult-only, like the land fit — nothing
+      // under app/ may import lib/consult (test/consult-boundary.test.js).
+      './data/private-scan.json',
       // The land-to-launch fit. Consult-only: nothing under app/ may import
       // lib/consult (test/consult-boundary.test.js), so no route reads it.
       './data/breakeven.json',
