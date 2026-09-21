@@ -1,38 +1,38 @@
 {
  "version": "2026-09-breakeven-v1",
- "builtAt": "2026-09-20T16:06:04.191Z",
+ "builtAt": "2026-09-21T12:22:54.333Z",
  "fit": {
-  "intercept": 685.291389695059,
-  "land": 1.6307693954966413,
-  "perMonth": 10.80623534821354,
+  "intercept": 684.7478349003122,
+  "land": 1.631203546032108,
+  "perMonth": 10.794857532793781,
   "epoch": "2025-08",
   "regime": "harmonised",
   "n": 17,
   "from": "2024-10",
   "to": "2026-07",
-  "r2": 0.9271849919804283,
+  "r2": 0.9271266752621453,
   "drift": {
    "resamples": 4000,
-   "perMonthLow": 2.455532230232505,
-   "perMonthHigh": 17.96186722808088,
-   "shareNotPositive": 0.02125
+   "perMonthLow": 2.1989446853710253,
+   "perMonthHigh": 18.066496460886565,
+   "shareNotPositive": 0.02
   }
  },
  "pooledFit": {
-  "intercept": 773.5550125226993,
-  "land": 1.5272882449355765,
-  "perMonth": 7.424416957220251,
+  "intercept": 773.0705574379895,
+  "land": 1.5276773039381837,
+  "perMonth": 7.420492628530679,
   "epoch": "2025-04",
   "regime": "pooled",
   "n": 24,
   "from": "2022-05",
   "to": "2026-07",
-  "r2": 0.877179964103952,
+  "r2": 0.8771421863041404,
   "drift": {
    "resamples": 4000,
-   "perMonthLow": 2.820061884371428,
-   "perMonthHigh": 11.641590275034302,
-   "shareNotPositive": 0.0065
+   "perMonthLow": 2.7612461810118933,
+   "perMonthHigh": 11.601842114511529,
+   "shareNotPositive": 0.01075
   }
  },
  "harmonisation": {
@@ -47,39 +47,39 @@
   "headToHead": {
    "pooled": {
     "trials": 9,
-    "mdape": 0.029139002460701457,
+    "mdape": 0.029142199000327763,
     "p90": 0.09930330392492413,
     "worst": 0.09930330392492413
    },
    "harmonised": {
     "trials": 9,
-    "mdape": 0.0187299410465747,
-    "p90": 0.09854502312343187,
-    "worst": 0.09854502312343187
+    "mdape": 0.018608193430507947,
+    "p90": 0.09865959232113636,
+    "worst": 0.09865959232113636
    }
   }
  },
  "accuracy": {
   "method": "rolling origin — fit on everything launched earlier, predict the next",
   "trials": 9,
-  "mdape": 0.0187299410465747,
-  "p90": 0.09854502312343187,
-  "worst": 0.09854502312343187,
-  "r2": 0.9271849919804283,
+  "mdape": 0.018608193430507947,
+  "p90": 0.09865959232113636,
+  "worst": 0.09865959232113636,
+  "r2": 0.9271266752621453,
   "scoredOn": "harmonised launches, by a fit on harmonised launches"
  },
  "segmentBias": {
   "RCR": {
    "n": 10,
-   "meanResidual": 0.02027443343827372
+   "meanResidual": 0.02015019433645363
   },
   "OCR": {
    "n": 11,
-   "meanResidual": -0.004020392622889298
+   "meanResidual": -0.003981280589985022
   },
   "CCR": {
    "n": 3,
-   "meanResidual": 0.017458194476953234
+   "meanResidual": 0.01754619048459358
   }
  },
  "window": {
@@ -88,7 +88,7 @@
   "minLaunchSales": 10
  },
  "dropped": {
-  "censored": 19,
+  "censored": 20,
   "ambiguous": 1,
   "thin": 1,
   "behindALaunch": 0
@@ -358,7 +358,7 @@
    "winner": "COHL Singapore Pte. Limited and CSC Land Group (Singapore) Pte. Ltd.",
    "bids": 3,
    "launch": "2025-11",
-   "launchSales": 155,
+   "launchSales": 161,
    "tenderLaunched": "2018-06-28",
    "harmonised": false,
    "landPsfPpr": 1002,
@@ -373,7 +373,7 @@
    "winner": "SNC2 Realty Pte. Ltd., Apex Asia Alpha Investment Two Pte. Ltd., Soon Li Heng Civil Engineering Pte Ltd and Kay Lim Realty Pte. Ltd.",
    "bids": 2,
    "launch": "2026-01",
-   "launchSales": 207,
+   "launchSales": 211,
    "tenderLaunched": "2024-06-13",
    "harmonised": true,
    "landPsfPpr": 1020,
@@ -388,11 +388,11 @@
    "winner": "GLL B Pte. Ltd.",
    "bids": 5,
    "launch": "2026-03",
-   "launchSales": 430,
+   "launchSales": 431,
    "tenderLaunched": "2024-10-17",
    "harmonised": true,
    "landPsfPpr": 1420,
-   "launchPsf": 3230
+   "launchPsf": 3231
   },
   {
    "project": "TENGAH GARDEN RESIDENCES",
@@ -403,7 +403,7 @@
    "winner": "Intrepid Investments Pte. Ltd., CSC Land Group (Singapore) Pte. Ltd. and GuocoLand (Singapore) Pte. Ltd.",
    "bids": 3,
    "launch": "2026-04",
-   "launchSales": 862,
+   "launchSales": 863,
    "tenderLaunched": "2024-06-13",
    "harmonised": true,
    "landPsfPpr": 821,
@@ -418,11 +418,11 @@
    "winner": "CNQC Realty (Bloomsbury) Pte. Ltd., Forsea Residence Pte. Ltd. and Hoovasun Holding Pte. Ltd.",
    "bids": 3,
    "launch": "2026-05",
-   "launchSales": 221,
+   "launchSales": 222,
    "tenderLaunched": "2024-11-26",
    "harmonised": true,
    "landPsfPpr": 1037,
-   "launchPsf": 2481
+   "launchPsf": 2479
   },
   {
    "project": "DUNEARN HOUSE",
@@ -433,7 +433,7 @@
    "winner": "CSC Land Group (Singapore) Pte. Ltd., Sekisui House, Ltd. and Frasers Property Phoenix II Pte. Ltd.",
    "bids": 9,
    "launch": "2026-07",
-   "launchSales": 228,
+   "launchSales": 233,
    "tenderLaunched": "2025-04-08",
    "harmonised": true,
    "landPsfPpr": 1410,
@@ -448,7 +448,7 @@
    "winner": "Kingsford Huray Development Pte Ltd",
    "bids": 2,
    "launch": "2026-07",
-   "launchSales": 282,
+   "launchSales": 285,
    "tenderLaunched": "2024-10-17",
    "harmonised": true,
    "landPsfPpr": 920,
