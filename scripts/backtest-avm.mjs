@@ -154,6 +154,15 @@ for (const t of trials) {
     index,
     useIndex: !off('index'),
     unionRungs: !off('union'),
+    /* --off levels ablates the building-level restatement. NOTE: the levels
+       in data/private-scan.json are fitted on the WHOLE window, so a trial
+       predicting a mid-window sale sees a level partly formed by sales after
+       it. The improvement below is therefore optimistic. It is reported
+       because the direction is still informative, and because the level
+       persists at r=0.72 between halves — which is the separate evidence
+       that it is usable forward at all. A leak-free version needs the level
+       refitted as of each trial's cutoff. */
+    useLevels: !off('levels'),
     ...(MIN_EFF !== null ? { minEffectiveN: Number(MIN_EFF) } : {}),
     weights: off('weights') ? FLAT : undefined,
   });
