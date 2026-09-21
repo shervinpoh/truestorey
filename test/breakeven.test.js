@@ -283,3 +283,31 @@ test('the drift is kept because dropping it is worse, not because it looks tidy'
     'a drift interval this tight would be suspicious on 17 launches');
   assert.ok(d.shareNotPositive < 0.2, 'if a fifth of resamples say no drift, it should not be in the model');
 });
+
+test('every launch in the table is scored under the rules it was built under', () => {
+  /* The route that feeds the observations table omitted the regime flag, so
+     the seven pre-harmonisation launches were measured against the
+     harmonised fit — the precise error the two-fit split exists to prevent,
+     reintroduced one layer up. Checked here rather than in the route because
+     this is the invariant, wherever it is called from. */
+  const pre = M.observations.filter(o => !o.harmonised);
+  assert.ok(pre.length >= 3, 'no pre-harmonisation launches to check');
+  for (const o of pre) {
+    const right = impliedLaunch({ landPsfPpr: o.landPsfPpr, when: o.launch, harmonised: false });
+    const wrong = impliedLaunch({ landPsfPpr: o.landPsfPpr, when: o.launch, harmonised: true });
+    assert.notEqual(right.psf, wrong.psf, 'the two fits agree, so this test proves nothing');
+    assert.equal(forProject(o.project).implied, right.psf,
+      `${o.project} is a pre-harmonisation launch scored on the harmonised fit`);
+  }
+});
+
+test('a gap inside the model own error is not presented as a finding', () => {
+  /* The table coloured a gap at ±5% while the measured p90 is ±9.9%. That
+     invites reading the error bar as a mispricing, which is the one thing a
+     tool built on a published error must not do. */
+  const ui = fs.readFileSync(new URL('../scripts/consult-ui.html', import.meta.url), 'utf8');
+  assert.match(ui, /o\.gap > A\.p90 \? 'bad' : o\.gap < -A\.p90 \? 'good'/,
+    'the observations table is not thresholding on the measured p90');
+  assert.match(ui, /in the noise/);
+  assert.ok(!/o\.gap > 0\.05/.test(ui), 'an arbitrary 5% threshold is still in the page');
+});

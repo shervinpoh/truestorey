@@ -356,7 +356,11 @@ const server = http.createServer(async (req, res) => {
            time. This is the track record AND the finding: it is the only
            view here that says which launches were priced aggressively. */
         observations: m.observations.map(o => {
-          const imp = impliedLaunch({ landPsfPpr: o.landPsfPpr, when: o.launch });
+          /* Each launch read back against the rules it was BUILT under. The
+             regime flag was missing here, so the seven pre-harmonisation
+             launches were being scored on the harmonised fit — which is the
+             exact mistake the two-fit split exists to prevent. */
+          const imp = impliedLaunch({ landPsfPpr: o.landPsfPpr, when: o.launch, harmonised: o.harmonised });
           return { ...o, implied: imp.ok ? imp.psf : null, gap: imp.ok ? o.launchPsf / imp.psf - 1 : null };
         }),
         pipeline: landPipeline(),
