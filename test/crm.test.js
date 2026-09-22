@@ -100,6 +100,12 @@ test('the sheet row is translated to the live addContacts contract', () => {
   assert.ok(!('dncChecked' in out), 'the website is making a DNC claim without a check');
 });
 
+test('a cold Apps Script write is not abandoned after the row was committed', () => {
+  const transport = readFileSync(path.join(process.cwd(), 'lib/crm.js'), 'utf8');
+  assert.match(transport, /AbortSignal\.timeout\(25000\)/,
+    'the CRM timeout is back below the measured cold-start write time');
+});
+
 /**
  * Apps Script answers HTTP 200 with the error in the BODY. An unauthorised
  * secret comes back as 200 carrying {error:'unauthorised'}, and the lead route
