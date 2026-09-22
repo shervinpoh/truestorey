@@ -2631,6 +2631,44 @@ sup.cite a:hover{text-decoration:underline}
 .idxpair{display:flex;flex-wrap:wrap;gap:26px 40px;align-items:flex-end;margin:2px 0 0}
 .idxpair .big{margin:0}
 .idxpair .meta{margin:2px 0 0}
+
+/* Historic whole-price cohorts belong after the market index, not among the
+   homepage's calls to action. The control makes one local question at a time. */
+.quantum{margin-top:32px;padding-top:28px;border-top:1px solid var(--line)}
+.quantum h2{font-size:clamp(27px,3vw,35px);letter-spacing:-.035em;line-height:1.12;margin:8px 0 10px}
+.quantum>.hint{max-width:68ch}
+.quantum-market{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 18px}
+.quantum-market button{border:1px solid var(--edge);border-radius:var(--r1);background:var(--card);
+ color:var(--ink);padding:10px 13px;font:600 var(--t-small)/1.3 "Source Sans 3",sans-serif;cursor:pointer}
+.quantum-market button[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:var(--paper)}
+.quantum-market button:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+.quantum-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.quantum-controls label{display:block;min-width:0}
+.quantum-controls .filtn{display:block;margin-bottom:6px}
+.quantum-controls select{display:block;width:100%;padding:12px 13px;border:1px solid var(--edge);
+ border-radius:var(--r1);background:var(--card);color:var(--ink);font:var(--t-body)/1.35 "Source Sans 3",sans-serif}
+.quantum-controls select:disabled{opacity:.58}
+.quantum-selection{margin:25px 0 8px;font-size:var(--t-body)}
+.quantum-years{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.quantum-years li{display:grid;grid-template-columns:120px minmax(0,1.5fr) minmax(0,1fr) 105px;
+ align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.quantum-years li>div{min-width:0}
+.quantum-years .lab{display:block;margin-bottom:3px}
+.quantum-years b{font-family:"IBM Plex Mono",monospace;font-size:var(--t-small);font-weight:500}
+.quantum-year,.quantum-count{font-size:var(--t-small)}
+.quantum-year small{display:block;margin-top:2px;color:var(--ink2);font-size:.86em}
+.quantum-count{text-align:right;color:var(--ink2);white-space:nowrap}
+.quantum .prov{margin-top:14px}
+@media(max-width:640px){
+  .quantum-controls{grid-template-columns:1fr}
+  .quantum-years li{grid-template-columns:1fr 1fr;gap:10px 14px}
+  .quantum-year{grid-column:1/-1;font-weight:600}
+  .quantum-count{text-align:left;align-self:end}
+}
+@media(max-width:480px){
+  .quantum-years li{grid-template-columns:1fr;gap:8px}
+  .quantum-year{grid-column:auto}
+}
 .chartline{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .bars{position:relative}
 .chartcmp{display:inline-flex;align-items:center;gap:6px;margin-left:12px;color:var(--ink2)}

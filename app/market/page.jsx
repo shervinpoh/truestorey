@@ -1,16 +1,18 @@
 import Link from 'next/link';
-import { hdbIndex, sora, mop, getIndex, ppi } from '../../lib/data/query.js';
+import { hdbIndex, sora, mop, getIndex, ppi, quantum } from '../../lib/data/query.js';
 import Masthead from '../../components/Masthead.jsx';
 import MarketView from '../../components/MarketView.jsx';
+import QuantumView from '../../components/QuantumView.jsx';
 
 export const metadata = {
-  title: 'Singapore property market — HDB resale price index and mortgage rates | Truestorey',
-  description: 'Where the HDB resale index actually sits, and what SORA is doing to mortgage rates. Government figures, with the date they were taken. Free, no sign-up.',
+  title: 'Singapore property market — indices and recorded sale prices | Truestorey',
+  description: 'HDB and private property price indices, and the whole prices buyers actually paid by town or region, size and year. Government figures with source and period.',
   alternates: { canonical: '/market' },
 };
 
 export default function Page() {
   const idx = hdbIndex(), rates = sora(), m = mop(), i = getIndex();
+  const paid = quantum();
 
   /* ── THE OTHER HALF OF THE PAGE, FINALLY ────────────────────────────────
      NEXT.md has said since 4 Sep that the URA private index data was in and
@@ -26,7 +28,7 @@ export default function Page() {
      keeps 60 quarters of private-only history out of the payload. */
   const priv = ppi();
   const privBy = new Map((priv?.series?.all?.points || []).map(p => [p.quarter, p.index]));
-  const privateSeries = privBy.size
+  const privateSeries = privBy.size && idx?.points?.length
     ? idx.points.map(p => ({ quarter: p.quarter, index: privBy.get(p.quarter) ?? null }))
     : null;
   const privateMeta = privBy.size
@@ -37,7 +39,7 @@ export default function Page() {
   return (
     <main className="shell">
       <Masthead crumbs={[{ href: '/', label: 'Home' }]} title="How the market actually sits"
-        sub="Two numbers move everything else: what resale prices are doing, and what borrowing costs. Both here, both sourced, both dated." />
+        sub="The index shows direction. Filed sales show what buyers paid. Explore the price history by place and floor area, with the source and period beside every figure." />
       {/* NO PageFigure HERE, and that is the finding rather than an omission.
           MarketView already opens with 202.8 under its own label, so adding
           the block above it printed the same number twice within 200px —
@@ -52,7 +54,14 @@ export default function Page() {
             HTML, every block back to 1986 serialised twice, so that the supply
             panel could print two totals and a year range. Same bug /mop had. */}
         <MarketView idx={idx} rates={rates} priv={privateSeries} privMeta={privateMeta}
-          mop={m && { totals: m.totals, generatedForYear: m.generatedForYear }} />
+          mop={m && { totals: m.totals, generatedForYear: m.generatedForYear }}>
+          {paid ? <QuantumView data={paid} /> : (
+          <p className="hint" style={{ marginTop: 28 }}>
+            The by-year filed-price cohorts are unavailable until the transaction build runs.
+            No price is inferred from the index above.
+          </p>
+          )}
+        </MarketView>
         {!idx && !rates && (
           <div className="warn">
             <p style={{marginTop:0}}><b>Market data not downloaded yet.</b> In Terminal:</p>

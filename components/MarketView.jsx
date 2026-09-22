@@ -13,7 +13,7 @@ const qLabel = q => q.replace('-Q', ' Q');
  * The "how's the market" answer. Two series, both government-sourced, both
  * carrying the date they were taken — no figure appears without its provenance.
  */
-export default function MarketView({ idx, rates, mop, priv = null, privMeta = null }) {
+export default function MarketView({ idx, rates, mop, priv = null, privMeta = null, children }) {
   const [span, setSpan] = useState(20);   // quarters shown
 
   // A rate is only "live" if it was actually fetched recently. MAS goes down for
@@ -26,6 +26,8 @@ export default function MarketView({ idx, rates, mop, priv = null, privMeta = nu
   return (
     <>
       {idx && <IndexPanel idx={idx} priv={priv} privMeta={privMeta} />}
+
+      {children}
 
       {rates && (() => {
         const pts = rates.points.slice(-180);
@@ -71,6 +73,10 @@ export default function MarketView({ idx, rates, mop, priv = null, privMeta = nu
           </div>
         );
       })()}
+
+      {!rates && <p className="hint" style={{ marginTop: 28 }}>
+        The SORA rate feed is unavailable in this data refresh, so no mortgage rate is shown.
+      </p>}
 
       {mop && (
         <div style={{marginTop:30,paddingTop:22,borderTop:'1px solid var(--line)'}}>

@@ -10,7 +10,7 @@ export const maxDuration = 60;
  *
  * WHY THE STRUCTURAL QUESTION IS ANSWERED AS A QUESTION.
  *
- * Layout efficiency and which way a unit faces are both readable from a plan.
+ * Layout observations and which way a unit faces are both readable from a plan.
  * Whether a wall is load-bearing is not: that lives in the structural drawings
  * and in a qualified person's assessment, and a floor plan simply does not
  * carry it. The failure mode is not an inaccurate report — it is somebody
@@ -33,7 +33,7 @@ Return ONLY JSON matching this shape:
 {
   "isFloorPlan": boolean,
   "unitType": string,
-  "spatialHealth": { "score": number (1-10, 10 = very efficient), "basis": string },
+  "spatialHealth": { "basis": string },
   "layout": [ { "observation": string, "impact": string } ],
   "facing": { "reading": string, "confidence": "high" | "medium" | "low" | "cannot tell", "note": string },
   "wallsToAskAbout": [ { "where": string, "whyItMatters": string, "askYourQP": string, "confidence": "medium" | "low" | "cannot tell" } ],
@@ -46,6 +46,7 @@ Hard rules:
 - Confidence on a wall entry is never "high". If you cannot tell, say "cannot tell".
 - Orientation: only report a facing if the plan actually shows a north arrow or a compass. Otherwise set confidence to "cannot tell" and say the plan carries no orientation marking. Do not infer it from anything else.
 - Never estimate what the unit is worth, what renovation would cost, or what rent it would fetch.
+- Do not assign a layout score, percentage, rating or any other number. Describe what is visible instead.
 - Never say "undervalued", "bargain", "best deal", "expert" or "specialist".
 - "cannotTell" must list what the image genuinely does not show. An empty array means the image answered everything, which is almost never true.
 - If the image is not a floor plan or an interior, set isFloorPlan false and leave the rest empty.
@@ -95,6 +96,15 @@ export async function POST(req) {
       ...w,
       confidence: w?.confidence === 'high' ? 'medium' : (w?.confidence || 'cannot tell'),
     }));
+  }
+
+  // The earlier schema invited a model-made 1–10 "efficiency" score. Even if a
+  // provider keeps returning that shape, only its prose observation may leave
+  // this route. A score needs a published formula and measurable inputs.
+  if (parsed.spatialHealth && typeof parsed.spatialHealth === 'object') {
+    parsed.spatialHealth = {
+      basis: typeof parsed.spatialHealth.basis === 'string' ? parsed.spatialHealth.basis : '',
+    };
   }
 
   return NextResponse.json({

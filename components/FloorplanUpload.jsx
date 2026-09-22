@@ -83,9 +83,8 @@ export default function FloorplanUpload() {
           {result.spatialHealth && (
             <div className="storeygrid">
               <div className="storeycard">
-                <span className="filtn">Layout efficiency</span>
-                <b className="statnum">{result.spatialHealth.score}<em style={{ fontSize: '1.1rem', fontStyle: 'normal', color: 'var(--mute)' }}> / 10</em></b>
-                <p className="hint">{result.spatialHealth.basis}</p>
+                <span className="filtn">What the layout suggests</span>
+                <p>{result.spatialHealth.basis || 'The plan did not provide enough detail for a layout observation.'}</p>
               </div>
               <div className="storeycard">
                 <span className="filtn">Which way it faces</span>
