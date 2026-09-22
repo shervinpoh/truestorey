@@ -25,7 +25,7 @@ import { worthLooking, emptyLine } from '../lib/address.js';
  * could not help. A search is now only empty once a request has come back
  * empty, which is a different question from "we have not asked yet".
  */
-export default function Search({ autoFocus = false }) {
+export default function Search({ autoFocus = false, destination = 'record' }) {
   const router = useRouter();
   const [q, setQ] = useState('');
   const [sugg, setSugg] = useState([]);
@@ -83,7 +83,12 @@ export default function Search({ autoFocus = false }) {
   const go = href => {
     setBusy(true); setOpen(false);
     track(EVENTS.SEARCH_PICK, { q: q.trim(), href });
-    router.push(href);
+    /* The homepage starts the flagship check. Search elsewhere still opens
+       the public record. A string mode keeps the server-to-client prop
+       serialisable; passing a routing function here would not. */
+    router.push(destination === 'blindspot'
+      ? `/blindspot?from=${encodeURIComponent(href)}`
+      : href);
   };
 
   function key(e) {
@@ -104,7 +109,10 @@ export default function Search({ autoFocus = false }) {
           onBlur={() => setTimeout(() => setOpen(false), 120)}
           onKeyDown={key}
           role="combobox" aria-expanded={open && sugg.length > 0}
-          aria-controls="sug" aria-autocomplete="list" aria-label="Search a block or project"
+          aria-controls="sug" aria-autocomplete="list"
+          aria-label={destination === 'blindspot'
+            ? 'Choose a block or project for Blindspot'
+            : 'Search a block or project'}
           aria-activedescendant={open && ai >= 0 && sugg[ai] ? `sug-${ai}` : undefined} />
         {open && sugg.length > 0 && (
           <ul className="sug" id="sug" role="listbox">

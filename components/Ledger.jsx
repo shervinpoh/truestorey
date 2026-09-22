@@ -10,6 +10,7 @@ import Downside from './Downside.jsx';
 import Scenarios from './Scenarios.jsx';
 import ShareResult, { OpenedFromLink } from './ShareResult.jsx';
 import EmailReport from './EmailReport.jsx';
+import ResultBridge from './ResultBridge.jsx';
 import useShareLink from './useShareLink.js';
 import { COST_SHARE, COST_LABELS, COST_DEFAULTS as DEFAULTS } from '../lib/share.js';
 
@@ -329,6 +330,23 @@ export default function Ledger({ indices = {}, canEmail = false }) {
               <div><span>CPF to refund</span><b className="mono">{f(r.cpf.total)}</b></div>
               <div><span>Loan still owing</span><b className="mono">{f(r.holding.outstanding)}</b></div>
             </div>
+            <dl className="resultguide" aria-label="How to use this result">
+              <div>
+                <dt>What changed it</dt>
+                <dd>The hurdle combines the loan still owing, CPF to refund, selling costs and
+                  every dollar of cash you have put in.</dd>
+              </div>
+              <div>
+                <dt>What this cannot know</dt>
+                <dd>The eventual sale price. Maintenance, tax, insurance and renovation are also
+                  absent because no public per-property figure exists.</dd>
+              </div>
+              <div className="resultnext">
+                <dt>Next useful step</dt>
+                <dd><a href="#downside">Test this hurdle against the historical record &rarr;</a>
+                  <span>Every {num(r.yearsHeld)}-year window in the published index. No forecast.</span></dd>
+              </div>
+            </dl>
             <ShareResult tool="cost" title="What owning it actually costs — Truestorey" url={shareUrl} />
           </div>
         </aside>
@@ -472,13 +490,16 @@ export default function Ledger({ indices = {}, canEmail = false }) {
           not the unlock. Absent entirely when the server cannot send. */}
       {canEmail && <EmailReport tool="cost" hash={shareHash} title="the ledger" />}
 
+      <ResultBridge tool="ownership-cost ledger" nextHref="/tools?calc=sell#quick"
+        nextLabel="Check the dates that affect a sale" />
+
       <p className="prov" style={{ marginTop: 22 }}>
         {r.sources.map(s => `${s.name} (effective ${s.effective})`).join(' · ')}
         {' · '}CPF refund rule:{' '}
         <a href="https://www.cpf.gov.sg/service/article/how-much-do-i-need-to-refund-to-my-cpf-account-if-i-am-selling-my-whole-property"
            target="_blank" rel="noopener noreferrer">CPF Board</a>
-        {' · '}nothing on this page is saved, and nothing leaves your browser unless you ask for
-        the emailed copy — which is written from your figures and stored nowhere.
+        {' · '}nothing on this page is saved. Your figures leave the browser only if you ask for
+        the emailed copy, which is written from them and stored nowhere; the WhatsApp handoff includes no figures.
       </p>
 
       <h2 className="sh" style={{ marginTop: 26 }}><span>The rest of it</span></h2>

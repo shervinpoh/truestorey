@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Masthead from '../../components/Masthead.jsx';
 import Tools from '../../components/Tools.jsx';
 import { RATES_REVIEWED } from '../../lib/calc/constants.js';
-import { SITUATIONS, situationTools } from '../../lib/nav.js';
+import { SITUATIONS } from '../../lib/nav.js';
 
 export const metadata = {
   title: 'Tools — start from what you are trying to work out | Truestorey',
@@ -27,8 +27,9 @@ export const metadata = {
  * choices and one outcome; the menu looked broken because it was.
  *
  * Each situation has its own route now (app/tools/[situation]) and this page
- * is the overview: three named cards, three recommendations each, and a way
- * through to the full page for whichever one is true of the reader.
+ * is the overview. It names the three paths and lets the next page recommend
+ * the tools. Showing those recommendations here as well made the overview a
+ * second copy of every path it linked to.
  *
  * ── THE FULL INDEX STAYS ───────────────────────────────────────────────────
  * Below, complete, subdued, and still the thing the sitemap and the footer
@@ -43,33 +44,22 @@ export default async function Page({ searchParams }) {
   return (
     <main className="shell">
       <Masthead crumbs={[{ href: '/', label: 'Home' }]} title="Tools"
-        sub="Start from the question you actually have. Everything here is free, none of it asks for an email, and every figure shows the rate it used and when that rate was last checked." />
+        sub="Start from the question you actually have. Every answer is free with no email required; longer reports can be emailed after you have read them. Every figure shows the rate it used and when that rate was last checked." />
 
       <section className="pane">
         <h2 className="sh"><span>What are you trying to work out?</span></h2>
-        <div className="situations">
-          {SITUATIONS.map(s => {
-            const sit = situationTools(s.id);
-            return (
-              <div className="sit" key={s.id} id={s.id}>
-                <h3><Link href={s.href}>{s.label}</Link></h3>
-                <p className="sitsub">{s.sub}</p>
-                <ul className="sitlist">
-                  {sit.primaryItems.map(i => (
-                    <li key={i.href}>
-                      <Link href={i.href}>
-                        <span className="n">{i.plain}</span>
-                        <span className="s">{i.get}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-                <p className="sitall"><Link href={s.href}>
-                  Everything for {s.label.replace(/^I(&rsquo;|')?m /, '').replace(/^I /, '')} &rarr;
-                </Link></p>
-              </div>
-            );
-          })}
+        <p className="lede">Choose the sentence that is true now. The next page gives you three
+          useful starting points—not the entire catalogue.</p>
+        <div className="toolpaths">
+          {SITUATIONS.map((s, i) => (
+            <Link className="toolpath" href={s.href} key={s.id} id={s.id}>
+              <span className="lab">Path 0{i + 1}</span>
+              <h3>{s.label}</h3>
+              <p>{s.sub}</p>
+              <span className="toolpath-flow">{s.flow.join(' → ')}</span>
+              <b>Show me where to start <span aria-hidden="true">→</span></b>
+            </Link>
+          ))}
         </div>
       </section>
 
@@ -77,21 +67,32 @@ export default async function Page({ searchParams }) {
           /tools?calc=sell and dropped the reader at the top of this page, in
           front of the three situation cards — one of which is the page they had
           just come from. It read as being sent back where they started. */}
-      <section className="pane" id="quick">
-        <h2 className="sh"><span>Quick answers</span></h2>
-        <p className="lede">
-          Four short ones that need a figure and nothing else. Each has its own link, so you can
-          send someone straight to the stamp duty answer rather than to this page.
-        </p>
-        <Tools ratesReviewed={RATES_REVIEWED} asked={asked} />
+      <section className="pane">
+        <details className="tooldrawer" id="quick" open={Boolean(asked)}>
+          <summary>
+            <span><span className="lab">Four short calculators</span>
+              <b>Get a quick answer from one figure</b></span>
+            <span className="drawersub">Selling dates, borrowing, stamp duty and loan interest</span>
+          </summary>
+          <div className="tooldrawer-body">
+            <p className="lede">
+              Each has its own link, so you can send someone straight to the answer rather than
+              to this page.
+            </p>
+            <Tools ratesReviewed={RATES_REVIEWED} asked={asked} />
+          </div>
+        </details>
       </section>
 
       <section className="pane">
-        <h2 className="sh"><span>Every tool, in full</span></h2>
-        <p className="lede">
-          The complete list, including the specialist ones no situation above recommends.
-        </p>
-        <ul className="idx">
+        <details className="tooldrawer">
+          <summary>
+            <span><span className="lab">Complete index</span>
+              <b>Browse every tool</b></span>
+            <span className="drawersub">Including specialist tools not recommended in the three paths</span>
+          </summary>
+          <div className="tooldrawer-body">
+            <ul className="idx">
           <li><Link href="/plan"><span className="n">Can I afford it</span>
             <span className="s">TDSR, the LTV ceiling, the downpayment, the cash CPF cannot cover, and both stamp duties — chained, not four separate answers</span></Link></li>
           <li><Link href="/progressive"><span className="n">Buying off the plan</span>
@@ -114,10 +115,10 @@ export default async function Page({ searchParams }) {
             <span className="s">Measured within a building, not across the country</span></Link></li>
           <li><Link href="/yield"><span className="n">Rental yields</span>
             <span className="s">Filed rents over filed prices, matched on unit size. Gross, and clear about it</span></Link></li>
-        </ul>
+            </ul>
 
-        <h2 className="sh" style={{ marginTop: 22 }}><span>And the lookups behind them</span></h2>
-        <ul className="idx">
+            <h3 className="sh" style={{ marginTop: 22 }}><span>The lookups behind them</span></h3>
+            <ul className="idx">
           <li><Link href="/map"><span className="n">The price map</span>
             <span className="s">Every block and project in Singapore by psf, labelled by town</span></Link></li>
           <li><Link href="/mop"><span className="n">Which flats can start selling, by town</span>
@@ -126,16 +127,9 @@ export default async function Page({ searchParams }) {
             <span className="s">The proceeds waterfall sits on every block page, with your block&apos;s own numbers in it</span></Link></li>
           <li><Link href="/guides"><span className="n">All four guides</span>
             <span className="s">Stamp duties, financing, decoupling, renting — complete, nothing gated</span></Link></li>
-        </ul>
-      </section>
-
-      <section className="pane">
-        <div className="note">
-          <b>All of it is free, and that is the position rather than an introductory offer.</b> The
-          equivalent lookups on the competitor site — the price map, HDB by town, HDB by block,
-          condos, landed, transactions and comps — are all behind a paid tier. These are the same
-          seven, given away.
-        </div>
+            </ul>
+          </div>
+        </details>
       </section>
     </main>
   );

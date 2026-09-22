@@ -41,27 +41,43 @@ const src = stripComments(
   readFileSync(path.join(process.cwd(), 'components', 'RecordView.jsx'), 'utf8'));
 
 test('a single filed sale is not called a range, a median or a spread', () => {
-  for (const label of ['Observed range', 'Median price', 'Spread, low to high']) {
-    const i = src.indexOf(label);
-    assert.notEqual(i, -1, `"${label}" is gone — this test needs rewriting, not deleting`);
-    /* Each must sit on the many-sales side of a decision about rv.n. Looking
-       backwards is enough: the guard is written just above the label. */
-    const before = src.slice(Math.max(0, i - 420), i);
-    assert.match(before, /rv\.n === 1/,
-      `"${label}" renders without asking whether there is more than one sale`);
-  }
+  assert.match(src, /rv\.n === 1 \? 'The one filed sale' : 'Observed range'/,
+    'the range label no longer distinguishes one sale from a distribution');
+
+  const branch = src.match(/rv\.n === 1\s*\? <>([\s\S]*?)<\/>\s*: <>/);
+  assert.ok(branch, 'could not find the one-sale rendering branch');
+  assert.match(branch[1], /one filed transaction/,
+    'the one-sale evidence is no longer described as one transaction');
+  const copy = branch[1].replace(/\{[^}]*\}/g, '');
+  assert.doesNotMatch(copy, /range|median|spread/i,
+    'one filed sale is again being described with a distribution statistic');
 });
 
 test('the transaction count is not pluralised on one', () => {
-  assert.match(src, /Filed transaction\{rv\.n === 1 \? '' : 's'\}/,
-    'the count reads "1 Filed transactions" again');
+  assert.match(src, /one filed transaction/,
+    'the one-sale branch no longer uses a singular transaction label');
+  assert.match(src, /\{rv\.n\} filed transactions/,
+    'the many-sale branch no longer says how many filings support it');
 });
 
 test('a spread of zero is not printed as a finding', () => {
-  const i = src.indexOf('Spread, low to high');
-  const around = src.slice(Math.max(0, i - 420), i + 60);
-  assert.match(around, /kpinone/,
-    'a one-sale record prints a computed 0% spread, which reads as a tight market');
+  assert.match(src, /const spread = rv\.n === 1\s*\? null\s*:/,
+    'a one-sale record computes a 0% spread, which reads as a tight market');
+  const branch = src.match(/rv\.n === 1\s*\? <>([\s\S]*?)<\/>\s*: <>([\s\S]*?)<\/>\}/);
+  assert.ok(branch, 'could not find both record-summary branches');
+  assert.doesNotMatch(branch[1], /\{spread\}/,
+    'the one-sale branch prints a spread even though none can be measured');
+  assert.match(branch[2], /\{spread\}% low to high/,
+    'the many-sale branch no longer explains the observed spread');
+});
+
+test('the first screen does not repeat the same filed figures in a KPI strip', () => {
+  assert.doesNotMatch(src, /className="kpi3"/,
+    'the record summary again repeats price, count and spread beneath the same evidence');
+  assert.doesNotMatch(src, /<p className="meta">/,
+    'a second metadata line again repeats the masthead and summary');
+  assert.match(src, /className="r record-range"/,
+    'the supporting evidence is no longer consolidated beside the headline figure');
 });
 
 test('the note under the list does not promise a spread that is not there', () => {

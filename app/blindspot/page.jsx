@@ -18,7 +18,7 @@ export default function Page() {
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
         title="Blindspot"
         sub="Six things worth checking before you commit, counted against filed transactions. Free, no sign-up, and the rubric is printed below so you can check the arithmetic." />
-      <ToolIntro href="/blindspot" />
+      <ToolIntro href="/blindspot" compact />
       <ToolUse id="blindspot" />
 
       <section className="pane">
@@ -27,61 +27,51 @@ export default function Page() {
         </Suspense>
       </section>
 
-      <section className="pane">
-        <h2 className="sh"><span>The rubric</span></h2>
-        <p className="hint">
-          This is the whole formula. Nothing else contributes to the score, and a language model
-          never assigns a point — it only writes the paragraph around figures that are already
-          fixed. Same inputs, same score, every time.
-        </p>
+      <details className="pane methoddetails">
+        <summary>
+          <span><span className="lab">How the points work</span>
+            <b>See the exact scoring rubric</b></span>
+          <span>Every point is fixed by a published rule. A language model never assigns one.</span>
+        </summary>
+        <div className="methoddetails-body">
+          <p className="hint">
+            This is the whole formula. Nothing else contributes to the score. Same inputs,
+            same points, every time.
+          </p>
         {/* .tablewrap, not .tw — `.tw` is the town-tile button, which brought a
             tile background and its teal --heat wash along with it. */}
-        <div className="tablewrap">
-          <table className="bandtable rubric">
-            <thead>
-              <tr><th scope="col">Check</th><th scope="col">Worth</th><th scope="col">Source</th></tr>
-            </thead>
-            <tbody>
-              {Object.values(CHECKS).map(c => (
-                <tr key={c.key}>
-                  <th scope="row">{c.title}</th>
-                  <td className="mono">up to {c.max}</td>
-                  <td style={{ whiteSpace: 'normal', textAlign: 'left' }}>{c.source}</td>
+          <div className="tablewrap">
+            <table className="bandtable rubric">
+              <thead>
+                <tr><th scope="col">Check</th><th scope="col">Worth</th><th scope="col">Source</th></tr>
+              </thead>
+              <tbody>
+                {Object.values(CHECKS).map(c => (
+                  <tr key={c.key}>
+                    <th scope="row">{c.title}</th>
+                    <td className="mono">up to {c.max}</td>
+                    <td style={{ whiteSpace: 'normal', textAlign: 'left' }}>{c.source}</td>
+                  </tr>
+                ))}
+                <tr>
+                  <th scope="row"><b>Everything</b></th>
+                  <td className="mono"><b>{totalPossible()}</b></td>
+                  <td>Rubric {RUBRIC_VERSION}</td>
                 </tr>
-              ))}
-              <tr>
-                <th scope="row"><b>Everything</b></th>
-                <td className="mono"><b>{totalPossible()}</b></td>
-                <td>Rubric {RUBRIC_VERSION}</td>
-              </tr>
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </section>
+      </details>
 
-      <section className="pane">
-        <div className="note">
-          <b>Higher means more to check. It is not a rating.</b> A property scoring 2 is not
-          &ldquo;better&rdquo; than one scoring 6 — it means fewer of these four specific things
-          were flagged. There are plenty of ways for a home to be wrong for you that no public
-          dataset can see.
-        </div>
-        <div className="note">
-          <b>A check that cannot run scores nothing, and says so.</b> It is never counted as zero
-          risk. If two of the six checks have no data, the score is out of what the other four
-          could measure, and the page prints which ones were missing.
-        </div>
-        <div className="note">
-          <b>Nothing here is a valuation.</b> The price check starts with sales filed at the same
-          address. When an HDB block is too thin, it uses a printed cohort of nearby flats with the
-          same type, similar floor area and similar lease — a distribution with every comparable
-          shown, not a verdict. This site does not publish an opinion of what a home is worth.
-        </div>
-        <div className="note">
-          <b>Then there is everything public data cannot see.</b> The lease, the CPF position, the
-          renovation, the neighbour, the reason the seller is selling. That is the part that needs
-          a person, and it is the only thing on this site worth asking for your name.
-        </div>
+      <section className="pane reading-guide">
+        <h2 className="sh"><span>How to read the result</span></h2>
+        <dl>
+          <div><dt>More points</dt><dd>More to check—not a worse home and not a rating.</dd></div>
+          <div><dt>Not measured</dt><dd>Not a pass. A check without enough data scores nothing and is named.</dd></div>
+          <div><dt>Price evidence</dt><dd>An observed range with every comparable shown, never a valuation.</dd></div>
+          <div><dt>Beyond the data</dt><dd>Condition, renovation, neighbours and the seller&rsquo;s circumstances still need a person.</dd></div>
+        </dl>
       </section>
 
       <section className="pane">

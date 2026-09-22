@@ -29,20 +29,29 @@ import { itemFor } from '../lib/nav.js';
  * inputs are illustrative can carry a S$1.6m stranger's number away as their
  * own. Pass the noun for whatever the page has prefilled.
  */
-export default function ToolIntro({ href, example = null }) {
+export default function ToolIntro({ href, example = null, compact = false }) {
   const t = itemFor(href);
   if (!t?.use) return null;
+  const words = (
+    <dl>
+      <div><dt>Use this when</dt><dd>{t.use}</dd></div>
+      <div><dt>You will need</dt><dd>{t.need}</dd></div>
+      <div><dt>You will get</dt><dd>{t.get}</dd></div>
+    </dl>
+  );
+  if (compact) return (
+    <details className="toolintro compact">
+      <summary><span>Before you start</span><b>What you need and what this returns</b></summary>
+      <div className="toolintro-body">{words}</div>
+    </details>
+  );
   return (
     <div className="toolintro">
-      <dl>
-        <div><dt>Use this when</dt><dd>{t.use}</dd></div>
-        <div><dt>You will need</dt><dd>{t.need}</dd></div>
-        <div><dt>You will get</dt><dd>{t.get}</dd></div>
-      </dl>
+      {words}
       {example && (
         <p className="egnote">
-          <b>The {example} below are an example.</b> Replace them with yours — nothing is saved
-          and nothing is sent anywhere.
+          <b>The {example} below are an example.</b> Replace them with yours. The calculation stays
+          in this browser unless you deliberately share or request a copy.
         </p>
       )}
     </div>

@@ -5,11 +5,11 @@ import { still } from './Motion.jsx';
 /**
  * A record page's own table of contents, pinned under the global nav.
  *
- * These pages run to five or six thousand pixels: the figures, the fork, the
- * monthly chart, every filed sale, the floor premium, what is within reach,
- * the proceeds waterfall. All of it is worth having and none of it is worth
- * scrolling past to find the one part you came for. So the sections name
- * themselves, and the bar says which one you are in.
+ * These pages run to five or six thousand pixels. The first version named
+ * every module in this bar and reached eleven chips; finding a section meant
+ * exploring the navigation before exploring the page. This bar now carries
+ * the main landmarks only. Deeper modules still have real headings and ids,
+ * but the table of contents does not need to reproduce the whole page.
  *
  * ONLY SECTIONS THAT EXIST. RecordPage passes the ids it is about to render:
  * a block with no Tower View data has no #floor, and a link that scrolls

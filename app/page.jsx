@@ -1,9 +1,8 @@
 import EditorialImage from '../components/EditorialImage.jsx';
-import { editorialAsset } from '../lib/editorial-assets.js';
 import Link from 'next/link';
-import { catalogue, hdbIndex, allUrls, archive, allTowns, projects, boundaries, getIndex, storey } from '../lib/data/query.js';
+import { catalogue, hdbIndex, allUrls, allTowns, projects, boundaries, getIndex, storey } from '../lib/data/query.js';
 import { feed } from '../lib/articles.js';
-import { NAV, SITUATIONS } from '../lib/nav.js';
+import { SITUATIONS } from '../lib/nav.js';
 import { ogForHome } from '../lib/og.js';
 import Search from '../components/Search.jsx';
 import WhoBuilt from '../components/WhoBuilt.jsx';
@@ -57,7 +56,6 @@ export default async function Home() {
      so a Supabase outage costs the writing, not the homepage. */
   const posts = await feed();
   const idx = hdbIndex();
-  const arch = archive();
   const urls = allUrls().urls || [];
 
   if (cat.missing || (!cat.hasHdb && !cat.hasPrivate)) {
@@ -135,61 +133,25 @@ export default async function Home() {
     source: st.source?.hdb, period: st.source?.period,
   } : null;
 
-  const allTools = NAV.find(g => g.group === 'Tools').items.filter(i => i.href !== '/tools');
-  // The homepage is a route into the product, not a second /tools. Printing
-  // every tool here made eleven equal 118px cards before the archive and the
-  // rest of the writing, with no clue which six answer the common buyer and
-  // owner decisions. `home` is explicit in the shared nav so adding a tool
-  // never promotes it here by accident; every tool still lives in the menu,
-  // footer, sitemap and the full index.
-  const tools = allTools.filter(i => i.home);
   const num = n => n.toLocaleString('en-SG');
 
   return (
     <main className="shell wide home-atlas">
-      <div className="home-edition">
-        <span>Singapore property, openly</span>
-        <span>Free to use. No account needed.</span>
-      </div>
       <section className="hero">
         <div className="herosay">
-          {floorFinding ? (
-            <>
-              <h1>{floorFinding.mostly
-                ? 'Most of a high-floor premium isn’t the height.'
-                : 'What a high floor is worth, inside the building.'}</h1>
-              <p className="sub">Across Singapore, 4-room flats on floors {floorFinding.cut.hi} and up
-                sold for <b>{floorFinding.pooled}% more</b> per square foot than floors{' '}
-                <span style={{ whiteSpace: 'nowrap' }}>1–{floorFinding.cut.lo}</span>. Compare a block with <i>itself</i> — same building, same
-                lease, same address — and it is <b>{floorFinding.within}%</b>. The rest is which
-                blocks the high floors are in. In {floorFinding.neg} of {floorFinding.blocks} blocks
-                the high floor sold for <i>less</i>.{' '}
-                <Link href="/floors">How that is measured →</Link>
-              </p>
-              <p className="prov">{floorFinding.source} · <span style={{ whiteSpace: 'nowrap' }}>{floorFinding.period?.from}–{floorFinding.period?.to}</span>
-                {' · '}median psf · {num(floorFinding.sales)} sales of 4-room flats · {floorFinding.blocks} blocks
-                with {floorFinding.side}+ sales at each end</p>
-            </>
-          ) : (
-            <>
-              <h1>A clearer view of <span>Singapore property.</span></h1>
-              <p className="sub">Start with what was actually paid. Explore the transactions,
-                understand the costs, and see the source behind every figure.</p>
-            </>
-          )}
+          <p className="hero-product lab">Singapore property, openly · free, no account</p>
+          <h1>Blindspot.<span>Before you fall for the home, see what the records know.</span></h1>
+          <p className="sub">I compare the asking price with filed sales and surface the lease, resale,
+            land and planning questions worth asking before a viewing.</p>
           <div className="herosearch">
-            <h2 className="sh"><span>Find a block or project</span></h2>
-            <Search />
-            <div className="home-browse">
-              <span className="lab">Or explore</span>
-              <Link href="/hdb">HDB towns ↗</Link>
-              <Link href="/condo">Condominiums ↗</Link>
-              <Link href="/landed">Landed homes ↗</Link>
-            </div>
+            <p className="lab">Start with a block or project</p>
+            <Search destination="blindspot" />
+            <p className="searchpromise">Select the property, enter its asking price and size, and take
+              the questions the public records raise into your viewing.</p>
           </div>
         </div>
         <div className="heromap">
-          <div className="atlas-heading"><span className="lab">The property atlas</span>
+          <div className="atlas-heading"><span className="lab">The island, drawn from filed resales</span>
             <Link href="/map" aria-label="Explore the full property map">Explore map ↗</Link></div>
           <IslandMap areas={boundaries().areas} towns={towns}
             plotted={urls.length} source={`${cat.hdbSource} · ${cat.hdbPeriod?.from}–${cat.hdbPeriod?.to}`} compact />
@@ -208,42 +170,48 @@ export default async function Home() {
           {' / '}{cat.privateSource} · {cat.privatePeriod?.from}–{cat.privatePeriod?.to}</p>
       </div>
 
+      {floorFinding && (
+        <section className="home-finding" aria-labelledby="finding-title">
+          <div>
+            <p className="lab">Original analysis · the proof behind the tool</p>
+            <h2 id="finding-title">{floorFinding.mostly
+              ? 'Most of a high-floor premium isn’t the height.'
+              : 'What a high floor is worth, inside the building.'}</h2>
+          </div>
+          <div>
+            <p>Across Singapore, 4-room flats on floors {floorFinding.cut.hi} and up sold for{' '}
+              <b>{floorFinding.pooled}% more</b> per square foot than floors{' '}
+              <span style={{ whiteSpace: 'nowrap' }}>1–{floorFinding.cut.lo}</span>. Inside the same block,
+              it was <b>{floorFinding.within}%</b>. In {floorFinding.neg} of {floorFinding.blocks} blocks,
+              the higher floors sold for less. <Link href="/floors">See how that is measured →</Link></p>
+            <p className="prov"><b>Source</b> · {floorFinding.source} ·{' '}
+              <span style={{ whiteSpace: 'nowrap' }}>{floorFinding.period?.from}–{floorFinding.period?.to}</span>
+              {' · '}median psf · {num(floorFinding.sales)} sales · {floorFinding.blocks} blocks with{' '}
+              {floorFinding.side}+ sales at each end</p>
+          </div>
+        </section>
+      )}
+
       <section className="home-section home-decisions">
-        <div className="home-section-heading"><div><p className="lab">Your next move</p>
-          <h2>Start with your question.</h2></div><Link href="/tools">All {allTools.length} tools ↗</Link></div>
+        <div className="home-section-heading"><div><p className="lab">Find → read → work out</p>
+          <h2>The next step depends on where you are.</h2>
+          <p className="section-intro">An address opens the evidence. Your situation decides which numbers
+            are useful after that.</p></div><Link href="/tools">Browse every tool ↗</Link></div>
         <div className="decision-grid">
           {SITUATIONS.map((s, i) => (
             <Link href={s.href} className="decision-link" key={s.id}>
-              <span className="decision-symbol" aria-hidden="true">{['↗', '⇄', '⌕'][i]}</span>
-              <h3>{s.label}</h3><p>{s.sub}</p><span className="decision-go">See where to start <span aria-hidden="true">→</span></span>
+              <span className="decision-symbol" aria-hidden="true">0{i + 1}</span>
+              <h3>{s.label}</h3><p>{s.sub}</p>
+              <ol className="decision-flow">
+                {s.flow.map(step => <li key={step}>{step}</li>)}
+              </ol>
+              <span className="decision-go">Follow this path <span aria-hidden="true">→</span></span>
             </Link>
           ))}
         </div>
       </section>
 
-      <section className="home-section home-perspectives">
-        <div className="home-section-heading"><div><p className="lab">Look a little closer</p>
-          <h2>There’s more to a home than its price.</h2></div><Link href="/guides">Explore the guides ↗</Link></div>
-        <div className="perspective-grid">
-          {[
-            { subject: 'sun', label: 'Light & orientation', title: 'The part a price can’t show.',
-              text: 'See what a floor plan shows about light, orientation and layout—and what it leaves out.', href: '/floorplan', cta: 'Read a floor plan' },
-            { subject: 'lease', label: 'Time & tenure', title: 'The years that come with the keys.',
-              text: 'Explore how remaining tenure changes the published leasehold relativity.', href: '/lease', cta: 'Explore the lease table' },
-            { subject: 'land', label: 'Land & supply', title: 'Before a home, there was a tender.',
-              text: 'Trace government land awards back to the bids that were actually filed.', href: '/land', cta: 'See the land awards' },
-          ].map(p => (
-            <article className="perspective" key={p.subject}>
-              <Link href={p.href}>
-                <EditorialImage post={editorialAsset(p.subject, p.slug || p.href || '')} className="perspective-image" />
-                <div className="perspective-copy"><p className="lab">{p.label}</p><h3>{p.title}</h3>
-                  <p>{p.text}</p><span className="perspective-go">{p.cta} <span aria-hidden="true">↗</span></span></div>
-              </Link>
-            </article>
-          ))}
-        </div>
-        <p className="prov illustration-caption">Truestorey editorial illustrations · conceptual scenes, not actual properties or sites.</p>
-      </section>
+      <WhoBuilt />
 
       {lead && (
         <section className="home-section home-editorial">
@@ -281,24 +249,6 @@ export default async function Home() {
         </section>
       )}
 
-      <section className="home-section home-toolbox">
-        <div className="home-section-heading"><div><p className="lab">The working tools</p>
-          <h2>Make the numbers make sense.</h2></div><Link href="/tools">Browse every tool ↗</Link></div>
-        <div className="deck">{tools.map(t => <Link className="deckcard" key={t.href} href={t.href}>
-          <span className="n">{t.label}<span aria-hidden="true">↗</span></span><span className="b">{t.blurb}</span>
-        </Link>)}</div>
-      </section>
-
-      {arch?.entries?.length > 0 && <section className="home-section home-archive">
-        <div className="home-section-heading"><div><p className="lab">Policy & data</p><h2>Go straight to the source.</h2></div>
-          <Link href="/archive">The full archive ↗</Link></div>
-        <div className="arch">{arch.entries.slice(0,3).map((e,i) => <div className="arow" key={e.date+i}>
-          <span className="d mono">{e.date}</span><div><div className="t">{e.url
-            ? <a href={e.url} target="_blank" rel="noopener noreferrer">{e.title} ↗</a> : e.title}</div>
-            {e.summary && <div className="s">{e.summary}</div>}</div><span className="src">{e.source}</span>
-        </div>)}</div>
-      </section>}
-      <WhoBuilt />
     </main>
   );
 }

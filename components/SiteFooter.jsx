@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { NAV } from '../lib/nav.js';
+import { NAV, SITUATIONS } from '../lib/nav.js';
 
 /**
  * The footer.
@@ -13,8 +13,12 @@ import { NAV } from '../lib/nav.js';
  * be on every page, sat alone in the emptiest part of the design, which is
  * where the eye has already stopped.
  *
- * So: the same list the nav renders, in columns. Thirteen thousand pages that
- * previously linked almost nowhere now each link to every section.
+ * The first replacement copied the ENTIRE nav into columns. That solved the
+ * empty ending and created a second site directory on every page: twelve tool
+ * links in the footer immediately after /tools had deliberately hidden that
+ * inventory behind three situations. The footer now keeps the hubs and those
+ * same three paths. Every individual route remains in /tools and the sitemap;
+ * a page ending should offer direction, not reproduce the sitemap visually.
  *
  * Deliberately NOT here: dataset freshness. It would have to be read from
  * data/index.json, and this component renders inside the root layout, which
@@ -30,11 +34,22 @@ import { NAV } from '../lib/nav.js';
 export default function SiteFooter({
   name, cea, agency, lic, phone,
 }) {
+  const lookups = NAV.find(g => g.group === 'Look up').items.filter(i =>
+    ['/map', '/hdb', '/condo', '/landed'].includes(i.href));
+  const tools = [NAV.find(g => g.group === 'Tools').items.find(i => i.href === '/tools'), ...SITUATIONS];
+  const read = NAV.find(g => g.group === 'Read').items;
+  const groups = [
+    { group: 'Look up', items: lookups },
+    { group: 'Tools', items: tools },
+    { group: 'Read', items: read.filter(i => i.top) },
+  ];
+  const how = read.filter(i => !i.top);
+
   return (
     <footer className="site">
       <div className="shell wide">
         <nav className="fnav" aria-label="Footer">
-          {NAV.map(g => (
+          {groups.map(g => (
             <div className="fcol" key={g.group}>
               <span className="lab">{g.group}</span>
               <ul>
@@ -53,6 +68,10 @@ export default function SiteFooter({
               the source and the period printed beside every figure.</p>
             <p className="ffree">Free to use. No sign-up, no account, no cookies.</p>
           </div>
+        </nav>
+
+        <nav className="fsecondary" aria-label="How this site works">
+          {how.map(l => <Link href={l.href} key={l.href}>{l.label}</Link>)}
         </nav>
 
         {/* CEA PG 02-11 s7.1 — particulars required on every page. Do not remove. */}

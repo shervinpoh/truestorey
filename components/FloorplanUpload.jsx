@@ -1,5 +1,5 @@
 'use client';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 /**
  * Reading a floor plan.
@@ -21,6 +21,10 @@ export default function FloorplanUpload() {
   const [error, setError] = useState('');
   const input = useRef(null);
 
+  /* Object URLs survive until they are explicitly released. Replacing a plan
+     should not leave every previous image resident for the rest of the visit. */
+  useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
+
   async function send(file) {
     if (!file) return;
     if (file.size > 6 * 1024 * 1024) { setError('That image is over 6MB — try a smaller export.'); setState('error'); return; }
@@ -40,17 +44,26 @@ export default function FloorplanUpload() {
   return (
     <>
       <div className="drop"
+        aria-busy={state === 'reading'}
         onDragOver={e => e.preventDefault()}
         onDrop={e => { e.preventDefault(); send(e.dataTransfer.files?.[0]); }}>
         <input ref={input} type="file" accept="image/png,image/jpeg,image/webp" hidden
           onChange={e => send(e.target.files?.[0])} />
         {preview
           ? <img src={preview} alt="The plan you uploaded" className="dropimg" />
-          : <p className="hint" style={{ margin: 0 }}>Drop a floor plan here, or choose a file. PNG, JPEG or WebP, up to 6MB.</p>}
-        <button type="button" className="mapopt" style={{ marginTop: 14 }}
+          : <div className="floorplan-empty">
+              <span className="lab">Start with the image you were sent</span>
+              <h2>Upload the floor plan.</h2>
+              <p>A screenshot is fine. PNG, JPEG or WebP, up to 6MB.</p>
+            </div>}
+        <button type="button" className="cta floorplan-choose"
           onClick={() => input.current?.click()} disabled={state === 'reading'}>
-          {state === 'reading' ? 'Reading…' : preview ? 'Try another' : 'Choose a file'}
+          {state === 'reading' ? 'Reading the plan…' : preview ? 'Choose another plan' : 'Choose a floor plan'}
         </button>
+        <p className="floorplan-privacy">Read once, then discarded. No upload history.</p>
+        <p className="vh" role="status" aria-live="polite">
+          {state === 'reading' ? 'Reading the floor plan. The result will appear below.' : ''}
+        </p>
       </div>
 
       {error && <div className="warn" style={{ marginTop: 18 }}><p style={{ margin: 0 }}>{error}</p></div>}
@@ -62,7 +75,11 @@ export default function FloorplanUpload() {
       )}
 
       {result?.isFloorPlan && (
-        <div style={{ marginTop: 26 }}>
+        <div className="floorplan-result" style={{ marginTop: 26 }}>
+          <div className="result-heading">
+            <span className="lab">What the image supports</span>
+            <h2>The plan, separated from the assumptions.</h2>
+          </div>
           {result.spatialHealth && (
             <div className="storeygrid">
               <div className="storeycard">

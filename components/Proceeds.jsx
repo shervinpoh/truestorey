@@ -29,7 +29,7 @@ import MoneyInput from './MoneyInput.jsx';
 
 /** The sale-proceeds waterfall. Re-anchors whenever the median it is given moves. */
 const STORE = 'truestorey.proceeds.v1';
-const DEFAULTS = { loan: 180000, cpf: 150000, yrs: 12, fee: 2 };
+const DEFAULTS = { loan: 180000, cpf: 150000, cpfInterest: '', yrs: 12, fee: 2 };
 
 /**
  * Someone comparing three flats should type their loan and CPF once, not three
@@ -45,6 +45,7 @@ function loadSaved() {
     const num = (x, d) => (Number.isFinite(+x) && +x >= 0 ? +x : d);
     return {
       loan: num(v.loan, DEFAULTS.loan), cpf: num(v.cpf, DEFAULTS.cpf),
+      cpfInterest: v.cpfInterest === '' ? '' : num(v.cpfInterest, ''),
       yrs: num(v.yrs, DEFAULTS.yrs), fee: num(v.fee, DEFAULTS.fee),
     };
   } catch { return DEFAULTS; }
@@ -54,6 +55,7 @@ export default function Proceeds({ median, onEngage }) {
   const [sp, setSp]   = useState(Math.round((median||0)/1000)*1000);
   const [loan, setLoan] = useState(DEFAULTS.loan);
   const [cpf, setCpf]   = useState(DEFAULTS.cpf);
+  const [cpfInterest, setCpfInterest] = useState(DEFAULTS.cpfInterest);
   const [yrs, setYrs]   = useState(DEFAULTS.yrs);
   const [fee, setFee]   = useState(DEFAULTS.fee);
   const [restored, setRestored] = useState(false);
@@ -63,18 +65,19 @@ export default function Proceeds({ median, onEngage }) {
   // Read after mount so the server and client render the same markup first.
   useEffect(() => {
     const v = loadSaved();
-    setLoan(v.loan); setCpf(v.cpf); setYrs(v.yrs); setFee(v.fee);
+    setLoan(v.loan); setCpf(v.cpf); setCpfInterest(v.cpfInterest); setYrs(v.yrs); setFee(v.fee);
     const changed = Object.keys(DEFAULTS).some(k => v[k] !== DEFAULTS[k]);
     setRestored(changed);
   }, []);
 
   // Persist on change. Wrapped because storage throws in some private modes.
   useEffect(() => {
-    try { localStorage.setItem(STORE, JSON.stringify({ loan, cpf, yrs, fee })); } catch {}
-  }, [loan, cpf, yrs, fee]);
+    try { localStorage.setItem(STORE, JSON.stringify({ loan, cpf, cpfInterest, yrs, fee })); } catch {}
+  }, [loan, cpf, cpfInterest, yrs, fee]);
 
   function reset() {
-    setLoan(DEFAULTS.loan); setCpf(DEFAULTS.cpf); setYrs(DEFAULTS.yrs); setFee(DEFAULTS.fee);
+    setLoan(DEFAULTS.loan); setCpf(DEFAULTS.cpf); setCpfInterest(DEFAULTS.cpfInterest);
+    setYrs(DEFAULTS.yrs); setFee(DEFAULTS.fee);
     setRestored(false);
     try { localStorage.removeItem(STORE); } catch {}
   }
@@ -89,19 +92,19 @@ export default function Proceeds({ median, onEngage }) {
     outstandingLoan: loan,
     cpfPrincipal: cpf,
     yearsHeld: yrs,
+    cpfAccruedInterestOverride: cpfInterest,
     agentFeePct: fee,
     propertyType: 'HDB',
   });
   const accrued = r.cpfAccruedInterest;
   const agent   = r.agentFee + r.legalFees;
-  const cash    = r.cashInHand;
-  // A shortfall is not a zero-width segment, it is the whole point. The bar
-  // shows where the money went, so when there is none left it shows only the
-  // things that consumed it and the total below carries the negative.
-  const short   = cash < 0;
-  const seg = (short ? [] : [[cash,'w5']])
-    .concat([[loan,'w1'],[cpf,'w2'],[accrued,'w3'],[agent,'w4']]);
-  const barBase = short ? (loan + cpf + accrued + agent) : sp;
+  const cash    = r.cashProceedsAtMarketValue;
+  const short   = r.nonCpfCompletionShortfall > 0;
+  // Every segment is money the sale can actually distribute. A required CPF
+  // refund larger than the remaining proceeds is described below the bar; it
+  // must not be drawn as though the seller paid it from cash.
+  const seg = short ? [] : [[cash,'w5'],[loan,'w1'],[r.cpfRefundFromProceeds,'w2'],[agent,'w4']];
+  const barBase = sp;
 
   return (
     <>
@@ -114,8 +117,7 @@ export default function Proceeds({ median, onEngage }) {
       <div className="wfkey">
         <div><b style={{background:'var(--w5)'}} />Cash</div>
         <div><b style={{background:'var(--w1)'}} />Loan</div>
-        <div><b style={{background:'var(--w2)'}} />CPF principal</div>
-        <div><b style={{background:'var(--w3)'}} />CPF interest</div>
+        <div><b style={{background:'var(--w2)'}} />CPF refund from proceeds</div>
         <div><b style={{background:'var(--w4)'}} />Fees</div>
       </div>
 
@@ -129,7 +131,7 @@ export default function Proceeds({ median, onEngage }) {
           of — "roughly this much loan left, roughly this much CPF in it" —
           which is exactly what a slider is for and a text box is not. Years
           held and the agent fee stay typed: those are facts, not ranges. */}
-      <div className="f2">
+      <div className="f2 proceedsdetail">
         <div><span className="lab">Outstanding loan</span>
           <MoneyInput value={loan} ariaLabel="Outstanding loan" slider
             min={0} max={Math.max(Math.round(sp * 1.1), 100000)} step={5000}
@@ -139,9 +141,20 @@ export default function Proceeds({ median, onEngage }) {
             min={0} max={Math.max(Math.round(sp * 1.1), 100000)} step={5000}
             onChange={v=>{touch();setCpf(v)}} /></div>
       </div>
-      <div className="f2">
-        <div><span className="lab">Years held</span><input type="number" value={yrs} onChange={e=>setYrs(+e.target.value||0)} /></div>
-        <div><span className="lab">Agent fee %</span><input type="number" step="0.25" value={fee} onChange={e=>setFee(+e.target.value||0)} /></div>
+      <div className="f2 proceedsdetail">
+        <div><span className="lab">CPF accrued interest, if known</span>
+          <MoneyInput value={cpfInterest} ariaLabel="CPF accrued interest, if known" min={0}
+            emptyIsBlank
+            max={Math.max(Math.round(sp * 1.1), 100000)} step={1000}
+            onChange={v=>{touch();setCpfInterest(v)}} />
+          <p className="hint">Use the “What happens if” figure in your CPF Home ownership dashboard. Leave blank to estimate it.</p></div>
+        <div><span className="lab">Years since CPF was first used</span><input type="number" min="0" step="0.5"
+          disabled={cpfInterest !== ''} value={yrs} onChange={e=>setYrs(Math.max(0, +e.target.value||0))} />
+          <p className="hint">Used only for the estimate when accrued interest is blank.</p></div>
+      </div>
+      <div className="f2 proceedsdetail">
+        <div><span className="lab">Agent fee %</span><input type="number" min="0" max="10" step="0.25"
+          value={fee} onChange={e=>setFee(Math.min(10, Math.max(0, +e.target.value||0)))} /></div>
       </div>
 
       {restored && (
@@ -154,19 +167,26 @@ export default function Proceeds({ median, onEngage }) {
       <div style={{marginTop:18}}>
         <Row label="Sale price" v={sp} />
         <Row label="Outstanding loan" v={-loan} />
-        <Row label="CPF principal refund" v={-cpf} sub="Back into your CPF, not lost" />
-        <Row label="CPF accrued interest" v={-accrued} sub={`CPF OA rate, compounded over ${yrs} years`} />
         <Row label={`Agent fee (${fee}% + GST) and legal`} v={-agent} />
+        <Row label={r.cpfAccruedInterestEstimated ? 'Estimated required CPF refund' : 'Required CPF refund entered'}
+          v={-(cpf + accrued)} sub={r.cpfAccruedInterestEstimated ? 'Principal plus a rough accrued-interest estimate' : 'Principal plus the accrued interest you entered'} />
+        <Row label="CPF refund available from these proceeds" v={-r.cpfRefundFromProceeds} sub="Returns to CPF; it is not a selling expense" />
         <div className={`row tot${short ? ' neg' : ''}`}>
-          <span>{short ? 'Shortfall to bring on completion' : 'Cash in hand'}</span>
-          <span>{f(Math.abs(cash))}</span>
+          <span>{short ? 'Shortfall before any CPF refund' : 'Cash proceeds if sold at market value'}</span>
+          <span>{f(short ? r.nonCpfCompletionShortfall : cash)}</span>
         </div>
       </div>
 
-      <div className="note">
-        <b>{f(cpf + accrued)} returns to your CPF</b>, not your pocket — still yours, and it can fund the
-        next purchase. The accrued interest alone is {f(accrued)}, and it grows every year you hold.
-        HDB concessionary loan interest is 2.6% p.a.; CPF Ordinary Account accrues at 2.5%.
+      <div className={r.cpfRefundGap > 0 ? 'warn' : 'note'}>
+        {r.cpfRefundGap > 0 ? <>
+          <b>These proceeds are {f(r.cpfRefundGap)} below the required CPF refund.</b>{' '}
+          If the home is sold at market value, CPF Board says you generally refund only what remains after
+          the housing loan; that CPF gap is not automatically cash you bring. If it is sold below market value,
+          CPF may require a cash top-up. Option monies also form part of the proceeds.</> : <>
+          <b>{f(cpf + accrued)} returns to your CPF</b>, not your pocket — still yours, and it can fund the
+          next purchase. The accrued interest alone is {f(accrued)}.</>}
+        {' '}<a href="https://www.cpf.gov.sg/service/article/how-much-do-i-need-to-refund-to-my-cpf-account-if-i-am-selling-my-whole-property">
+          CPF Board’s market-value rule</a> · CPF OA interest 2.5% p.a.
       </div>
     </>
   );

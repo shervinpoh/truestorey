@@ -33,6 +33,17 @@ test('SSD uses the legacy 3-year schedule for pre-Jul-2025 purchases', () => {
   assert.strictEqual(r.regime, 'legacy');
   assert.strictEqual(r.rate, 0); // held > 3 years
 });
+test('SSD changes tier on the calendar anniversary, including across a leap year', () => {
+  assert.strictEqual(ssd(1_000_000, '2025-07-07', '2026-07-06').rate, 0.16);
+  assert.strictEqual(ssd(1_000_000, '2025-07-07', '2026-07-07').rate, 0.12);
+  assert.strictEqual(ssd(1_000_000, '2025-07-07', '2029-07-07').rate, 0);
+  assert.strictEqual(ssd(1_000_000, '2024-02-29', '2025-02-27').rate, 0.12);
+  assert.strictEqual(ssd(1_000_000, '2024-02-29', '2025-02-28').rate, 0.08);
+});
+test('SSD follows IRAS dollar rounding and minimum duty', () => {
+  assert.strictEqual(ssd(1_000_009, '2025-07-07', '2026-07-06').total, 160_001);
+  assert.strictEqual(ssd(1, '2025-07-07', '2026-07-06').total, 1);
+});
 test('CPF accrued interest compounds', () => {
   assert.ok(cpfAccruedInterest(150_000, 12) > 45_000);
 });
@@ -72,6 +83,26 @@ test('a sale that cannot cover its debts returns a negative, not zero', () => {
     'negative equity that they walk away with nothing');
   assert.ok(p.cashInHand < -150_000,
     'the shortfall should reflect loan, CPF refund, accrued interest and fees');
+});
+
+test('a CPF refund gap is separated from cash genuinely needed at completion', () => {
+  const p = saleProceeds({
+    salePrice: 700_000, outstandingLoan: 400_000, cpfPrincipal: 350_000,
+    yearsHeld: 8, agentFeePct: 2, propertyType: 'HDB',
+  });
+  assert.equal(p.cashProceedsAtMarketValue, 0);
+  assert.equal(p.nonCpfCompletionShortfall, 0);
+  assert.ok(p.cpfRefundGap > 0);
+  assert.ok(p.cpfRefundFromProceeds > 0);
+  assert.equal(p.cpfRefundFromProceeds + p.cpfRefundGap, p.cpfTotalReturned);
+});
+
+test('an entered CPF accrued-interest figure replaces the rough lump estimate', () => {
+  const p = saleProceeds({ salePrice: 700_000, cpfPrincipal: 150_000, yearsHeld: 12,
+    cpfAccruedInterestOverride: 21_345 });
+  assert.equal(p.cpfAccruedInterest, 21_345);
+  assert.equal(p.cpfAccruedInterestEstimated, false);
+  assert.equal(p.cpfTotalReturned, 171_345);
 });
 
 test('the proceeds figures come from the constants, not from literals', () => {
@@ -219,4 +250,78 @@ test('the bar cannot cover the input being typed into', () => {
     'the page no longer reserves room for the pinned bar');
   assert.match(css, /\.planform input,\.planform select,\.seg button\{scroll-margin-bottom:76px\}/,
     'a focused input can scroll to where the bar covers it');
+});
+
+/**
+ * A result is not finished when it has only printed a number. The reader also
+ * needs to know what moved it, where the arithmetic stops, and what to do with
+ * it next. Compact answers keep this inside the sticky summary; denser ones
+ * put it immediately below at full width rather than creating a nested scroll
+ * region in a result taller than the viewport.
+ */
+test('the main calculators finish the answer with context and one next step', () => {
+  const pairs = [
+    ['components/Planner.jsx', 'budget-market'],
+    ['components/Ledger.jsx', 'downside'],
+    ['components/Progressive.jsx', 'construction-heading'],
+    ['components/LeaseView.jsx', 'lease-evidence'],
+  ];
+  for (const [f, target] of pairs) {
+    const src = readSrc(join(process.cwd(), f), 'utf8');
+    assert.equal((src.match(/className="resultguide(?:\s[^\"]*)?"/g) || []).length, 1,
+      `${f} does not keep one explanation with its headline result`);
+    for (const label of ['What changed it', 'What this cannot know', 'Next useful step']) {
+      assert.ok(src.includes(label), `${f} omits “${label}” from the result hierarchy`);
+    }
+    assert.ok(src.includes(`href="#${target}"`),
+      `${f}'s next step does not lead to the evidence it names`);
+  }
+});
+
+test('the affordability answer is conditional on the inputs, not a verdict', () => {
+  const src = readSrc(join(process.cwd(), 'components', 'Planner.jsx'), 'utf8');
+  assert.match(src, /Answer on these inputs/,
+    'the page again makes the reader compare the price and cap to infer an answer');
+  assert.match(src, /price \{clears \? 'clears' : 'does not clear'\} the rules and funds you entered/,
+    'the answer is no longer explicitly tied to the entered figures');
+  assert.match(src, /bank[^<]*approval or valuation/i,
+    'the planner does not name the lender decision it cannot make');
+});
+
+test('every result-guide anchor exists on the same page', () => {
+  const planner = readSrc(join(process.cwd(), 'components', 'Planner.jsx'), 'utf8');
+  const ledger = readSrc(join(process.cwd(), 'components', 'Ledger.jsx'), 'utf8');
+  const downside = readSrc(join(process.cwd(), 'components', 'Downside.jsx'), 'utf8');
+  const progressive = readSrc(join(process.cwd(), 'components', 'Progressive.jsx'), 'utf8');
+  const construction = readSrc(join(process.cwd(), 'components', 'ConstructionStudy.jsx'), 'utf8');
+  const lease = readSrc(join(process.cwd(), 'components', 'LeaseView.jsx'), 'utf8');
+  assert.match(planner, /id="budget-market"/);
+  assert.match(ledger, /href="#downside"/);
+  assert.match(downside, /id="downside"/);
+  assert.match(progressive, /href="#construction-heading"/);
+  assert.match(construction, /id="construction-heading"/);
+  assert.match(lease, /href="#lease-evidence"/);
+  assert.match(lease, /id="lease-evidence"/);
+});
+
+test('new-build and lease results name the unknown instead of implying a forecast', () => {
+  const progressive = readSrc(join(process.cwd(), 'components', 'Progressive.jsx'), 'utf8');
+  const lease = readSrc(join(process.cwd(), 'components', 'LeaseView.jsx'), 'utf8');
+  assert.match(progressive, /developer[^<]*notices will arrive/i,
+    'the new-build result implies a construction calendar it does not have');
+  assert.match(progressive, /interest-only before TOP/i,
+    'the new-build result hides the bank-package assumption');
+  assert.match(lease, /not a market forecast/i,
+    'the lease schedule again reads as a prediction');
+});
+
+test('every compact calculator explains its boundary and gives one next action', () => {
+  const src = readSrc(join(process.cwd(), 'components', 'Tools.jsx'), 'utf8');
+  for (const label of [
+    'Understand the HDB selling date', 'Understand the private-property selling date',
+    'Understand your borrowing estimate', 'Understand the stamp-duty result',
+    'Understand your repayment',
+  ]) assert.match(src, new RegExp(`aria-label="${label}"`));
+  assert.match(src, /Which HDB classification or scheme/);
+  assert.match(src, /\[5, 'Unclassified \/ Standard'\].*\[10, 'Plus \/ Prime'\].*\[20, 'Fresh Start'\]/s);
 });

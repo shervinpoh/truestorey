@@ -22,7 +22,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   const a = agent();
   return (
-    <html lang="en">
+    /* The pre-paint script below may add data-theme before React hydrates. It
+       is the intended difference between the server tree and the first client
+       tree, not an unknown mismatch; acknowledge it at the element whose one
+       attribute can differ so dark-mode navigation does not raise an overlay. */
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* Before the body paints, or the reader who chose dark gets a white
             flash on every navigation — which is the one thing choosing dark is

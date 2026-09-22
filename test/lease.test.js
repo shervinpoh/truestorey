@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { relativity, annualDecay, curve, parseRemaining, LEASE_TABLE } from '../lib/calc/lease.js';
 
 /* All ninety-nine rows, or it is not the table. */
@@ -63,4 +65,17 @@ test('the source names both SLA and the paper it was transcribed from', () => {
   assert.match(LEASE_TABLE.reproducedUrl, /^https:\/\/ink\.library\.smu\.edu\.sg\//);
   assert.match(LEASE_TABLE.note, /rather than fetched from SLA/);
   assert.match(LEASE_TABLE.transcribed, /^\d{4}-\d{2}-\d{2}$/);
+});
+
+/* "Latest" is meaningful on a quarterly index and false on a static lease
+ * schedule. The idle readout follows the years the reader selected instead of
+ * presenting the one-year endpoint as though it were the current answer. */
+test('the lease charts default to the selected lease, never a fake latest point', () => {
+  const view = readFileSync(join(process.cwd(), 'components', 'LeaseView.jsx'), 'utf8');
+  const chart = readFileSync(join(process.cwd(), 'components', 'Chart.jsx'), 'utf8');
+  assert.match(view, /defaultIndex=\{99 - years\}/);
+  assert.match(view, /idleLabel="selected lease/);
+  assert.match(view, /idleLabel="nearest filed lease band/);
+  assert.match(chart, /const fallback = defaultIndex == null/);
+  assert.match(chart, /<em>\{idleLabel\}<\/em>/);
 });

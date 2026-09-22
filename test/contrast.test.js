@@ -19,6 +19,7 @@ import { readFileSync } from 'node:fs';
  * editorial page into a spreadsheet.
  */
 const css = readFileSync(new URL('../app/globals.css', import.meta.url), 'utf8');
+const layout = readFileSync(new URL('../app/layout.jsx', import.meta.url), 'utf8');
 
 /** Read a custom property straight out of :root, so the test tracks the file. */
 function token(name) {
@@ -118,6 +119,13 @@ const darkBlock = (() => {
   assert.ok(m, 'the dark palette is gone from globals.css');
   return m[1];
 })();
+
+test('the pre-paint dark attribute is an acknowledged hydration difference', () => {
+  assert.match(layout, /<html\s+lang="en"\s+suppressHydrationWarning>/,
+    'the theme script changes <html> before hydration and React will report it as an error');
+  assert.match(layout, /document\.documentElement\.setAttribute\('data-theme','dark'\)/,
+    'the no-flash dark-theme script moved — review whether suppression is still needed');
+});
 
 function darkToken(name) {
   const m = new RegExp(`--${name}\\s*:\\s*(#[0-9A-Fa-f]{6})`).exec(darkBlock);

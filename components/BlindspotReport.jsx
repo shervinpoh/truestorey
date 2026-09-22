@@ -7,6 +7,8 @@ import { f, num } from './fmt.js';
 import { titleCase } from '../lib/name.js';
 import { Figure, still } from './Motion.jsx';
 import MoneyInput from './MoneyInput.jsx';
+import { viewingQuestions } from '../lib/blindspot/viewing.js';
+import ResultBridge from './ResultBridge.jsx';
 
 /**
  * Blindspot — six checks, one score, every point traceable.
@@ -80,6 +82,7 @@ export default function BlindspotReport() {
 
   const ready = picked && Number(price) > 0 && Number(area) > 0;
   const psf = ready ? Math.round(Number(price) / Number(area)) : null;
+  const canBack = Boolean(from && picked?.href === from);
 
   async function run(e) {
     e.preventDefault();
@@ -122,8 +125,8 @@ export default function BlindspotReport() {
             <div className="mapfocus" style={{ marginTop: 0 }}>
               <b>{titleCase(picked.label)}</b>
               <span className="mono">{picked.sub} · {num(picked.n)} filed</span>
-              {from && <Link href={from}>← Back to the property</Link>}
-              <button type="button" className="linkish" style={{ marginLeft: from ? 0 : 'auto' }}
+              {canBack && <Link href={from}>← Back to the property</Link>}
+              <button type="button" className="linkish" style={{ marginLeft: canBack ? 0 : 'auto' }}
                 onClick={() => { setPicked(null); setQ(''); setReport(null); setState('idle'); setPrefill('idle'); }}>
                 Change
               </button>
@@ -153,40 +156,54 @@ export default function BlindspotReport() {
           )}
         </div>
 
-        <div className="planform" style={{ marginTop: 16 }}>
-          <label><span>What it is being asked for</span>
-            {/* The slider appears once there is a figure to move. Before that
-                there is nothing for a thumb to point at, and a range control
-                sitting at zero next to an empty box reads as a broken field. */}
-            <MoneyInput value={price} onChange={setPrice} emptyIsBlank
-              slider={price !== '' && price != null}
-              min={100000} max={8000000} step={10000}
-              placeholder="S$1,250,000" ariaLabel="What it is being asked for" /></label>
-          <label><span>Floor area, sq ft</span>
-            <input type="number" step="10" value={area} onChange={e => setArea(e.target.value)} placeholder="1292" /></label>
-          {/* Optional, and it changes the answer more than anything else here:
-              adjusting comparables to the reader's own floor moved Blk 242
-              Bishan from "above every comparable" on the second storey to the
-              80th percentile on the twentieth. Left blank, the comparables are
-              used exactly as filed and the report says so. */}
-          <label><span>Floor <small>(optional)</small></span>
-            <input type="number" step="1" min="1" max="70" value={floor}
-              onChange={e => setFloor(e.target.value)} placeholder="e.g. 12" /></label>
-          <label><span>Which is</span>
-            <input readOnly value={psf ? `$${f(psf).replace('S$', '')} psf` : '—'} tabIndex={-1}
-              style={{ background: 'var(--sunk)', color: 'var(--mute)' }} /></label>
-        </div>
+        {picked && (
+          <div className="blindspot-listing">
+            <div className="blindspot-stephead">
+              <span className="lab">Asking price and floor area</span>
+              <p>Enter the price and size shown in the listing. Nothing is uploaded or published.</p>
+            </div>
+            <div className="planform" style={{ marginTop: 16 }}>
+              <label><span>Asking price</span>
+                {/* The slider appears once there is a figure to move. Before that
+                    there is nothing for a thumb to point at, and a range control
+                    sitting at zero next to an empty box reads as a broken field. */}
+                <MoneyInput value={price} onChange={setPrice} emptyIsBlank
+                  slider={price !== '' && price != null}
+                  min={100000} max={8000000} step={10000}
+                  placeholder="e.g. S$1,250,000" ariaLabel="Asking price" /></label>
+              <label><span>Floor area, sq ft</span>
+                <input type="number" step="10" value={area} onChange={e => setArea(e.target.value)} placeholder="e.g. 1,292" /></label>
+              {/* Optional, and it changes the answer more than anything else here:
+                  adjusting comparables to the reader's own floor moved Blk 242
+                  Bishan from "above every comparable" on the second storey to the
+                  80th percentile on the twentieth. Left blank, the comparables are
+                  used exactly as filed and the report says so. */}
+              <label><span>Floor <small>(optional)</small></span>
+                <input type="number" step="1" min="1" max="70" value={floor}
+                  onChange={e => setFloor(e.target.value)} placeholder="e.g. 12" /></label>
+              <label><span>Asking price per sq ft</span>
+                <input readOnly value={psf ? `$${f(psf).replace('S$', '')} psf` : '—'} tabIndex={-1}
+                  style={{ background: 'var(--sunk)', color: 'var(--mute)' }} /></label>
+            </div>
 
-        {/* This was a .ghost — a small grey outline button, visually quieter
-            than the three inputs above it. The primary action of the site's
-            flagship tool cannot be the least prominent thing in its own form. */}
-        <button type="submit" className="cta" disabled={!ready || state === 'loading'}>
-          {state === 'loading' ? 'Checking…' : 'Run the checks'}
-        </button>
+            {/* This was a .ghost — a small grey outline button, visually quieter
+                than the three inputs above it. The primary action of the site's
+                flagship tool cannot be the least prominent thing in its own form. */}
+            <button type="submit" className="cta" disabled={!ready || state === 'loading'}>
+              {state === 'loading' ? 'Checking public records…' : 'Run the six checks'}
+            </button>
+            <p className="blindspot-status" role="status" aria-live="polite">
+              {state === 'loading'
+                ? 'Reading filed sales, lease, liquidity, supply, land and planning records.'
+                : ready
+                  ? 'Ready. The same inputs always produce the same points.'
+                  : 'Add the asking price and floor area to continue. Floor is optional.'}
+            </p>
+          </div>
+        )}
         {!picked && prefill !== 'loading' && (
           <p className="hint" style={{ marginTop: 12 }}>
-            Start by naming a block or project above — the checks are all measured
-            against what has actually been filed at that address.
+            Only the address is needed for this step. The asking price and floor area come next.
           </p>
         )}
       </form>
@@ -244,21 +261,29 @@ function Result({ report, boxRef }) {
               <i key={i} className={i < r.points ? 'on' : ''} />
             ))}
           </div>
-          {r.skipped.length > 0 && (
+          {(r.skipped.length > 0 || r.notApplicable?.length > 0) && (
             <p className="hint" style={{ margin: '12px 0 0' }}>
-              Out of {r.points + (r.max - r.points)} possible points across{' '}
-              <b>{r.checks.length} of {r.checks.length + r.skipped.length} checks</b>. {r.skipped.length} could not run — listed below,
-              and not counted either way.
+              {r.max} possible points across <b>{r.checks.length} applicable checks that ran</b>.
+              {r.skipped.length > 0 && ` ${r.skipped.length} could not run and added no points.`}
+              {r.notApplicable?.length > 0 && ` ${r.notApplicable.length} does not apply to this property and is excluded.`}
             </p>
           )}
         </div>
       </div>
+
+      {r.notApplicable?.length > 0 && (
+        <div className="note" style={{ marginTop: 16 }}>
+          {r.notApplicable.map(c => <p key={c.key} style={{ margin: 0 }}><b>{c.title} is not scored.</b>{' '}{c.reason}</p>)}
+        </div>
+      )}
 
       {r.summary && (
         <div className="note" style={{ marginTop: 20 }}>
           {r.summary.split(/\n\n+/).map((p, i) => <p key={i} style={{ margin: i ? '10px 0 0' : 0 }}>{p}</p>)}
         </div>
       )}
+
+      <ViewingBrief report={r} />
 
       <h2 className="sh" style={{ marginTop: 26 }}><span>What each check found</span></h2>
       {r.checks.map(c => (
@@ -310,18 +335,49 @@ function Result({ report, boxRef }) {
         {r.disclaimer}
       </p>
 
-      <div className="mapfocus" style={{ marginTop: 22 }}>
-        {/* "Want this run properly?" read as an admission that what the reader
-            had just been shown was run improperly. It was describing the LIMIT
-            of public data and landed as a confession. */}
-        <b>Next: what the purchase would cost</b>
-        <span>Six checks is what public data alone can answer. Your CPF, your
-          timeline and the actual condition of the unit are in none of it.</span>
-        <Link href={`/plan?price=${r.input.askPrice || ''}&from=${encodeURIComponent(r.record.href)}`}>
-          Price the purchase →
-        </Link>
-      </div>
+      <ResultBridge tool="Blindspot report"
+        nextHref={`/plan?price=${r.input.askPrice || ''}&from=${encodeURIComponent(r.record.href)}`}
+        nextLabel="Price the purchase"
+        body="The report can read filed transactions and nearby supply. It cannot see this unit’s condition, facing, noise or seller’s position. Tell me what you saw; I’ll tell you which question I would press first." />
     </div>
+  );
+}
+
+function ViewingBrief({ report }) {
+  const questions = viewingQuestions(report);
+  const state = status => status === 'flagged'
+    ? 'Flagged above'
+    : status === 'skipped'
+      ? 'Not measured'
+      : status === 'context'
+        ? 'Worth confirming'
+        : 'Only in person';
+
+  return (
+    <section className="viewingbrief" aria-labelledby="viewing-brief-title">
+      <div className="viewingbrief-head">
+        <div>
+          <span className="lab">What I would ask next</span>
+          <h2 id="viewing-brief-title">Take these into the viewing.</h2>
+        </div>
+        <p>The points come from public records. These are the gaps to resolve in person;
+          they do not add or remove points.</p>
+      </div>
+      <ol>
+        {questions.map((q, i) => (
+          <li key={q.key}>
+            <span className="viewingbrief-num" aria-hidden="true">0{i + 1}</span>
+            <div>
+              <div className="viewingbrief-label">
+                <span className="lab">{q.label}</span>
+                <span className={`viewingbrief-state ${q.status}`}>{state(q.status)}</span>
+              </div>
+              <p>{q.question}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </section>
   );
 }
 

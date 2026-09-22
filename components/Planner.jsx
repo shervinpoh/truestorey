@@ -12,6 +12,7 @@ import ShareResult, { OpenedFromLink } from './ShareResult.jsx';
 import useShareLink from './useShareLink.js';
 import { PLAN_SHARE, PLAN_LABELS, PLAN_DEFAULTS as D } from '../lib/share.js';
 import EmailReport from './EmailReport.jsx';
+import ResultBridge from './ResultBridge.jsx';
 
 /**
  * TDSR, BSD and ABSD as one answer.
@@ -87,7 +88,7 @@ function FromProperty({ href }) {
     return (
       <p className="hint" style={{ marginTop: 0 }}>
         {failed ? <>Prefilled from <a href={href}>{href}</a>.</> : 'Loading the property…'}
-        {' '}Change anything below — nothing is saved and nothing is sent.
+        {' '}Change anything below — the calculation stays in this browser unless you choose to share it.
       </p>
     );
   }
@@ -216,7 +217,7 @@ function MarketWithin({ market, cap }) {
   const noun = market.label, nouns = market.plural, unit = market.unit;
 
   return (
-    <div className="within">
+    <div className="within" id="budget-market">
       <h2 className="sh">
         <span>Where a median {unit} is inside {money(cap)}</span>
         <span>{within.length} of {items.length} {nouns}</span>
@@ -411,6 +412,7 @@ export default function Planner({ markets = {}, budget = null, initial = {}, can
 
   const market = type === 'HDB' ? markets.HDB : type.startsWith('EC') ? markets.EC : markets.PRIVATE;
   const priceMax = maxPriceFor(type);
+  const clears = Number.isFinite(cap) && price <= cap && r.shortfall <= 0;
 
   /* ── switching what you are buying has to move the price with it ──────────
      The cap is per type, and it was applied to the SLIDER only. Set a private
@@ -535,6 +537,10 @@ export default function Planner({ markets = {}, budget = null, initial = {}, can
         {/* The answer, kept in view while the inputs above it move. */}
         <aside className="plansummary" aria-label="Your result">
           <div className="plansumin">
+            <div className="resultstate">
+              <span className="lab">Answer on these inputs</span>
+              <b>This {money(price)} price {clears ? 'clears' : 'does not clear'} the rules and funds you entered.</b>
+            </div>
             <div className="plansumfig">
               <span className="lab">Cash you need on the day</span>
               <Figure value={r.cashNeeded} format={money} />
@@ -556,6 +562,23 @@ export default function Planner({ markets = {}, budget = null, initial = {}, can
               <div><span>Limited by</span><b>{r.limitedBy}</b></div>
               <div><span>Downpayment</span><b className="mono">{money(r.downpayment)}</b></div>
             </div>
+            <dl className="resultguide" aria-label="How to use this result">
+              <div>
+                <dt>What changed it</dt>
+                <dd>The loan is capped by <b>{r.limitedBy}</b>. Cash needed is the part of the
+                  downpayment CPF does not cover, plus BSD, ABSD and mortgage duty.</dd>
+              </div>
+              <div>
+                <dt>What this cannot know</dt>
+                <dd>The bank&rsquo;s approval or valuation. If it values the home below the price,
+                  the gap can add cash this page has not counted.</dd>
+              </div>
+              <div className="resultnext">
+                <dt>Next useful step</dt>
+                <dd><a href="#budget-market">See where this cap reaches &rarr;</a>
+                  <span>Filed medians first, then the cheaper quartile by home size.</span></dd>
+              </div>
+            </dl>
             <ShareResult tool="plan" title="What you can afford — Truestorey" url={shareUrl} />
           </div>
         </aside>
@@ -594,6 +617,9 @@ export default function Planner({ markets = {}, budget = null, initial = {}, can
           unlock. Absent entirely when the server cannot send. */}
       {canEmail && <EmailReport tool="plan" hash={shareHash} title="the assessment" />}
 
+      <ResultBridge tool="affordability assessment" nextHref="/blindspot"
+        nextLabel="Check one actual home in Blindspot" />
+
       <p className="prov" style={{ marginTop: 22 }}>
         TDSR {pc(r.assumptions.tdsrLimit)}
         {r.assumptions.msrLimit ? ` · MSR ${pc(r.assumptions.msrLimit)}` : ' · MSR does not apply to this purchase'} ·
@@ -602,8 +628,8 @@ export default function Planner({ markets = {}, budget = null, initial = {}, can
         {SOURCES.bsd.name} · {SOURCES.absd.name} · rates last reviewed {RATES_REVIEWED}
         {LTV_REVIEWED ? ` · LTV reviewed ${LTV_REVIEWED}` : ' · LTV not yet reviewed'}<br />
         This plans a purchase from figures you typed. It does not value any property, and it is not
-        financial advice. Nothing here leaves your browser unless you ask for the emailed copy —
-        which is written from your figures and stored nowhere.
+        financial advice. Your figures leave the browser only if you ask for the emailed copy —
+        which is written from them and stored nowhere. The WhatsApp handoff includes no figures.
       </p>
     </>
   );

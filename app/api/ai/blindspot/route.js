@@ -29,6 +29,7 @@ Hard rules:
 - Never state or imply what a property is worth. Never use "undervalued", "overvalued", "bargain", "best deal", "expert" or "specialist".
 - Never say the score means the property is good or bad. It counts things worth checking.
 - Where a check did not run, say plainly that it was not measured. Never imply that means there is no risk.
+- An inapplicable check is different from a missing measurement. Do not call it unmeasured or a passed check.
 - Two short paragraphs maximum. Plain British English. No headings, no bullet points, no markdown.
 - Write for an owner or buyer, not for an agent.`;
 
@@ -61,6 +62,7 @@ export async function POST(req) {
       askingPsf: report.input.askingPsf,
       checksThatRan: report.checks.map(c => ({ check: c.title, points: `${c.points}/${c.max}`, finding: c.finding })),
       checksNotRun: report.skipped.map(s => s.title),
+      checksNotApplicable: report.notApplicable.map(s => ({ check: s.title, reason: s.reason })),
     };
     const out = await claude(SYSTEM, [{
       role: 'user',

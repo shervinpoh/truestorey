@@ -51,11 +51,14 @@ test('touch gestures stay inside the control they started in', () => {
  * and every row becomes a number with no name on it. min() keeps the floor
  * wherever there is room for it and drops it where there is not.
  */
-/* The land trail's table is seven columns of different natures — two company
-   names, three figures that must not wrap, a date — and no phone holds it.
-   Scrolling it sideways is the design, and .bidtable is the same table under a
-   second class. They are named here so the omission reads as considered. */
-const WIDE_BY_DESIGN = new Set(['.landtable', '.bidtable']);
+/* The land trail and nearby-sales tables have too many columns to fit at 320px.
+   Nearby sales keeps its identifying column sticky, so scrolling never leaves
+   a row of anonymous figures. These exceptions must stay explicit. */
+const WIDE_BY_DESIGN = new Set(['.landtable', '.bidtable', '.nstable']);
+
+test('wide nearby tables keep the identifying column visible', () => {
+  assert.match(css, /\.nstable th:first-child,\.nstable td:first-child\{[^}]*position:sticky;left:0/);
+});
 
 test('no table sets a fixed min-width wider than a phone', () => {
   for (const m of css.matchAll(/(\.[\w.-]*table[\w.-]*)\{([^}]*)\}/g)) {

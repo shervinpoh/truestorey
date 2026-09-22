@@ -123,16 +123,20 @@ export default function Amenities({ near, manifest }) {
           )}
 
           <div className="note">
-            <b>A band is priority, not a place — and this is an indication, not MOE&apos;s answer.</b>{' '}
-            MOE measures home to school in a straight line, which is what is measured here. But it
-            measures to the school&apos;s <em>land boundary</em> and this measures to the school&apos;s
-            single registered coordinate, so a large campus reads as further away than MOE would find
-            it. It also measures from the address on your child&apos;s registration, not from the
-            block. A school near the line can fall either side of it once MOE measures it, and an
-            oversubscribed school still ballots within a band. For the official category for a
-            specific address, use{' '}
+            <b>The 1km band gives ballot priority, not a school place.</b>{' '}
+            These distances are an indication. Check your address&apos;s official category with{' '}
             <a href="https://www.onemap.gov.sg/" target="_blank" rel="noopener noreferrer">OneMap&apos;s
             SchoolQuery</a>.
+            {/* The endpoint difference matters at the 1km line, but the full
+                method should not interrupt the nearby-school list on a phone. */}
+            <details className="amfold">
+              <summary>How this distance differs from MOE&apos;s</summary>
+              <p>MOE measures in a straight line to the school&apos;s <em>land boundary</em> from the
+                address on your child&apos;s registration. This site measures from the block to the
+                school&apos;s single registered coordinate. A large campus can therefore read as
+                further away here, and a school near the line can fall on either side when MOE
+                measures it. An oversubscribed school still ballots within a band.</p>
+            </details>
           </div>
         </>
       )}

@@ -121,24 +121,26 @@ export default function FloorView({ storey }) {
           </div>
 
           {rec.bands?.length > 0 && (
-            <table className="bandtable">
-              <caption className="hint" style={{ captionSide: 'bottom', textAlign: 'left', marginTop: 10 }}>
-                Median psf by storey band, {activeType}, {label}. Bands with fewer than{' '}
-                {storey.bars.band} filed sales are left out entirely.
-              </caption>
-              <thead>
-                <tr><th scope="col">Storeys</th><th scope="col">Median psf</th><th scope="col">Filed sales</th></tr>
-              </thead>
-              <tbody>
-                {rec.bands.map(([range, , psf, n]) => (
-                  <tr key={range}>
-                    <th scope="row" className="mono">{range}</th>
-                    <td><span className="barwrap"><span className="bar" style={{ width: `${Math.round((psf / max) * 100)}%` }} /></span><span className="mono">{f(psf)}</span></td>
-                    <td className="mono">{num(n)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="tablewrap">
+              <table className="bandtable">
+                <caption className="hint" style={{ captionSide: 'bottom', textAlign: 'left', marginTop: 10 }}>
+                  Median psf by storey band, {activeType}, {label}. Bands with fewer than{' '}
+                  {storey.bars.band} filed sales are left out entirely.
+                </caption>
+                <thead>
+                  <tr><th scope="col">Storeys</th><th scope="col">Median psf</th><th scope="col">Filed sales</th></tr>
+                </thead>
+                <tbody>
+                  {rec.bands.map(([range, , psf, n]) => (
+                    <tr key={range}>
+                      <th scope="row" className="mono">{range}</th>
+                      <td><span className="barwrap"><span className="bar" style={{ width: `${Math.round((psf / max) * 100)}%` }} /></span><span className="mono">{f(psf)}</span></td>
+                      <td className="mono">{num(n)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </>
       )}

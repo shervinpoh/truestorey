@@ -57,7 +57,8 @@ export default function Storey({ data, label }) {
       <h2 className="sh"><span>What the floor is worth</span></h2>
 
       {types.length > 1 && (
-        <div className="seg" role="group" aria-label="Flat type">
+        <div className={`seg storeytypes${types.length === 4 ? ' four' : ''}`}
+          role="group" aria-label="Flat type">
           {types.map(t => (
             <button key={t} aria-pressed={t === active} onClick={() => setType(t)}>{t}</button>
           ))}
@@ -120,23 +121,25 @@ export default function Storey({ data, label }) {
             newest ones will show a steeper climb than height alone buys. The two figures above are
             the ones that hold a building constant.
           </p>
-          <table className="bandtable">
-            <thead>
-              <tr><th scope="col">Storeys</th><th scope="col">Median psf</th><th scope="col">Filed sales</th></tr>
-            </thead>
-            <tbody>
-              {g.bands.map(([range, , psf, n]) => {
-                const w = Math.round((psf / Math.max(...g.bands.map(b => b[2]))) * 100);
-                return (
-                  <tr key={range}>
-                    <th scope="row" className="mono">{range}</th>
-                    <td><span className="barwrap"><span className="bar" style={{ width: `${w}%` }} /></span><span className="mono">{f(psf)}</span></td>
-                    <td className="mono">{num(n)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div className="tablewrap">
+            <table className="bandtable">
+              <thead>
+                <tr><th scope="col">Storeys</th><th scope="col">Median psf</th><th scope="col">Filed sales</th></tr>
+              </thead>
+              <tbody>
+                {g.bands.map(([range, , psf, n]) => {
+                  const w = Math.round((psf / Math.max(...g.bands.map(b => b[2]))) * 100);
+                  return (
+                    <tr key={range}>
+                      <th scope="row" className="mono">{range}</th>
+                      <td><span className="barwrap"><span className="bar" style={{ width: `${w}%` }} /></span><span className="mono">{f(psf)}</span></td>
+                      <td className="mono">{num(n)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </>
       )}
 

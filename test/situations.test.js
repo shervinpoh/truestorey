@@ -42,6 +42,36 @@ test('no situation reveals more than three recommended starts', () => {
   }
 });
 
+test('every homepage path explains its sequence in three plain steps', () => {
+  for (const s of SITUATIONS) {
+    assert.equal(s.flow?.length, 3, `${s.id} does not have a three-step path`);
+    for (const step of s.flow) {
+      assert.doesNotMatch(step, JARGON, `${s.id} flow step: ${step}`);
+    }
+  }
+});
+
+test('every guided path makes one personal first move before offering alternatives', () => {
+  const starts = new Set();
+  for (const s of SITUATIONS) {
+    assert.match(s.firstMove || '', /^I /, `${s.id} has no first-person starting rationale`);
+    assert.ok(s.firstMove.length > 70, `${s.id} first move does not explain why it comes first`);
+    assert.ok(s.primary[0], `${s.id} has no first tool`);
+    starts.add(s.primary[0]);
+  }
+  assert.equal(starts.size, SITUATIONS.length,
+    'two paths lead with the same tool, so one recommendation is probably generic');
+
+  const page = readFileSync(new URL('../app/tools/[situation]/page.jsx', import.meta.url), 'utf8');
+  assert.match(page, /My first move/, 'the personal recommendation is not rendered');
+  assert.match(page, /primaryItems\.slice\(1\)/,
+    'the first tool is repeated as an equal-weight option below its recommendation');
+  assert.doesNotMatch(page, /<p className="lede"[^>]*>\{s\.intro\}/,
+    'the path repeats its masthead summary before the first action');
+  assert.match(page, /Open \{s\.primaryItems\[0\]\.label\}/,
+    'the first button does not name the tool it opens');
+});
+
 /* ── no jargon in the choosing path ────────────────────────────────────────── */
 
 test('a situation can be chosen without knowing a property acronym', () => {
@@ -71,6 +101,42 @@ test('every tool says what it is for, what it needs and what it gives', () => {
       assert.ok(t[field].length > 12, `${t.href} ${field}: is too short to say anything`);
     }
   }
+});
+
+test('Blindspot asks for listing figures only after a property is chosen', () => {
+  const src = readFileSync(new URL('../components/BlindspotReport.jsx', import.meta.url), 'utf8');
+  assert.match(src, /\{picked && \([\s\S]*?className="blindspot-listing"/,
+    'asking price and floor area are front-loaded before the property step');
+  assert.doesNotMatch(src, /Add the listing|Blindspot progress|Step 2/,
+    'the form has regained a misleading upload step or unnecessary progress strip');
+  assert.match(src, /Nothing is uploaded or published/,
+    'the asking-price step no longer explains what happens to the listing figures');
+  assert.match(src, /placeholder="e\.g\. S\$1,250,000"/,
+    'the blank asking-price field looks prefilled instead of showing an example');
+  assert.match(src, /placeholder="e\.g\. 1,292"/,
+    'the blank floor-area field looks prefilled instead of showing an example');
+});
+
+test('/tools does not promise that optional report email is absent', () => {
+  const page = readFileSync(new URL('../app/tools/page.jsx', import.meta.url), 'utf8');
+  assert.doesNotMatch(page, /none of it asks for an email/i,
+    'the tools index denies the optional report-email control rendered by the calculators');
+  assert.match(page, /Every answer is free with no email required/,
+    'the corrected copy stopped protecting the no-gate promise');
+  assert.match(page, /emailed after you have read them/,
+    'the optional copy is not distinguished from an email wall');
+});
+
+test('lead paragraphs are prose, not the retired homepage grid', () => {
+  const css = readFileSync(new URL('../app/globals.css', import.meta.url), 'utf8');
+  const rule = css.match(/\.lede\{([^}]*)\}/)?.[1] || '';
+  assert.ok(rule, 'the shared lead paragraph has no style');
+  assert.doesNotMatch(rule, /display\s*:\s*grid/,
+    'ordinary lead paragraphs are split into the retired two-column homepage module');
+  assert.doesNotMatch(rule, /border-(top|bottom)/,
+    'ordinary lead paragraphs draw structural rules already supplied by their section');
+  assert.match(rule, /max-width\s*:\s*70ch/,
+    'lead paragraphs can run too wide to read comfortably');
 });
 
 test('a claim in a plain label is not stronger than the tool', () => {
@@ -125,7 +191,7 @@ test('a quick calculator link lands on the calculator, not the top of /tools', (
     assert.match(href, new RegExp(`calc=${q.id}`), `${q.id} lost its tab`);
   }
   const page = readFileSync(new URL('../app/tools/page.jsx', import.meta.url), 'utf8');
-  assert.match(page, /<section className="pane" id="quick">/,
+  assert.match(page, /id="quick"/,
     'the anchor the links point at does not exist, so they land at the top anyway');
 });
 

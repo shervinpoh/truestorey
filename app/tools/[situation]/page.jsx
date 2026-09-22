@@ -55,11 +55,25 @@ export default async function Page({ params }) {
       <SituationSeen id={s.id} />
 
       <section className="pane">
-        <p className="lede" style={{ maxWidth: '68ch' }}>{s.intro}</p>
+        {/* A guided route still failed if its three recommendations arrived at
+            equal weight: the reader had simply traded a twelve-item menu for a
+            three-item one. The masthead already says which situation this is,
+            so repeating its long introduction here pushed the first action
+            below the fold on a phone. The first item is the opinionated move;
+            the other two remain close without competing with it. */}
+        <article className="situation-first">
+          <span className="lab">My first move</span>
+          <h2>{s.primaryItems[0].plain}</h2>
+          <p>{s.firstMove}</p>
+          <p className="situation-get"><b>You will get:</b> {s.primaryItems[0].get}</p>
+          <Link className="situation-cta" href={s.primaryItems[0].href}>
+            Open {s.primaryItems[0].label} <span aria-hidden="true">→</span>
+          </Link>
+        </article>
 
-        <h2 className="sh" style={{ marginTop: 22 }}><span>Start here</span></h2>
+        <h2 className="sh situation-next"><span>Then, if you need them</span></h2>
         <ul className="idx">
-          {s.primaryItems.map(i => (
+          {s.primaryItems.slice(1).map(i => (
             <li key={i.href}>
               <Link href={i.href}>
                 <span className="n">{i.plain}</span>

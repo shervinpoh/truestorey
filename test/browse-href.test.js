@@ -73,15 +73,25 @@ test('every tool in the nav is listed on /tools', async () => {
 });
 
 test('the homepage is a deliberate route into the tools, not a second index', async () => {
-  const { NAV } = await import('../lib/nav.js');
+  const { SITUATIONS } = await import('../lib/nav.js');
   const { readFileSync } = await import('node:fs');
   const page = readFileSync(new URL('../app/page.jsx', import.meta.url), 'utf8');
-  const tools = NAV.find(g => /tool/i.test(g.group))?.items.filter(t => t.href !== '/tools') || [];
-  const featured = tools.filter(t => t.home);
-  assert.ok(featured.length >= 4 && featured.length <= 6,
-    `the homepage should feature four to six decisions, not ${featured.length} equal tools`);
-  assert.match(page, /allTools\.filter\(i => i\.home\)/,
-    'the homepage no longer uses the curated tool set from the shared nav');
+  assert.match(page, /SITUATIONS\.map/,
+    'the homepage no longer routes by the visitor’s situation');
+  assert.doesNotMatch(page, /NAV\.find\([^\n]+Tools/,
+    'the homepage has become a second inventory of every tool');
+  assert.equal(SITUATIONS.length, 3,
+    'the homepage doorway should stay small enough to understand at a glance');
+});
+
+test('the homepage address starts Blindspot instead of opening an unexplained record', async () => {
+  const { readFileSync } = await import('node:fs');
+  const page = readFileSync(new URL('../app/page.jsx', import.meta.url), 'utf8');
+  const search = readFileSync(new URL('../components/Search.jsx', import.meta.url), 'utf8');
+  assert.match(page, /<Search destination="blindspot"/,
+    'the flagship search no longer says where the selected property should go');
+  assert.match(search, /destination === 'blindspot'[\s\S]*?\/blindspot\?from=\$\{encodeURIComponent\(href\)\}/,
+    'the homepage selection no longer carries the public record into Blindspot');
 });
 
 test('a property record carries its identity into Blindspot, not an invented asking price', async () => {
@@ -94,6 +104,22 @@ test('a property record carries its identity into Blindspot, not an invented ask
     'Blindspot no longer resolves the public record carried in its URL');
   assert.doesNotMatch(record, /\/blindspot\?[^`]*price=/,
     'a record median is being passed to Blindspot as though it were an asking price');
+  assert.match(blindspot, /from && picked\?\.href === from/,
+    'changing to another property leaves a back link pointing at the original record');
+});
+
+test('a property record asks the visitor\'s purpose and leads buyers into Blindspot', async () => {
+  const { readFileSync } = await import('node:fs');
+  const record = readFileSync(new URL('../components/RecordPage.jsx', import.meta.url), 'utf8');
+  const fork = record.slice(record.indexOf('function Fork'));
+  assert.match(fork, /What are you here to work out\?/,
+    'the record page no longer frames its actions around the visitor\'s question');
+  assert.match(fork, /I&rsquo;m thinking of buying it[\s\S]*?I own it/,
+    'the buyer and owner paths are no longer plainly named');
+  const blindspot = fork.indexOf('/blindspot?from=');
+  const plan = fork.indexOf('href={planHref}');
+  assert.ok(blindspot !== -1 && plan !== -1 && blindspot < plan,
+    'the buyer path no longer leads with the site\'s signature Blindspot check');
 });
 
 test('the sitemap is driven by the nav rather than a second list', async () => {

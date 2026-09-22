@@ -26,6 +26,9 @@ export default function RecordView({ rec, attribution = [], onType, afterSummary
 
   const types = rec.flatTypes || rec.propertyTypes || [];
   const rv = (rtype && rec.byType?.[rtype]) ? { ...rec, ...rec.byType[rtype] } : rec;
+  const spread = rv.n === 1
+    ? null
+    : Math.round(((rv.maxPsf - rv.minPsf) / rv.medianPsf) * 100);
   const recent = rtype
     ? (rec.recent || []).filter(t => (t.flatType || t.propertyType) === rtype)
     : (rec.recent || []);
@@ -87,7 +90,7 @@ export default function RecordView({ rec, attribution = [], onType, afterSummary
       {/* The median leads and the range sits beside it. Someone arriving from
           a search wants one number; the range is what stops that number being
           mistaken for a valuation, so the two must stay together. */}
-      <div className="figwrap">
+      <div className="figwrap record-figure">
         <div>
           <span className="lab">Median, per square foot</span>
           <div className="big">{Number(rv.medianPsf).toLocaleString('en-SG')}<small> psf</small></div>
@@ -104,30 +107,16 @@ export default function RecordView({ rec, attribution = [], onType, afterSummary
             when a check cannot run. */}
         <div className="figside">
           <span className="lab">{rv.n === 1 ? 'The one filed sale' : 'Observed range'}</span>
-          <div className="r">
+          <div className="r record-range">
             {rv.n === 1
-              ? <>${Number(rv.medianPsf).toLocaleString('en-SG')} psf<br />
-                  {fk(rv.medianPrice)}, once</>
-              : <>${Number(rv.minPsf).toLocaleString('en-SG')} — ${Number(rv.maxPsf).toLocaleString('en-SG')} psf<br />
-                  {fk(rv.medianPrice)} median price</>}
+              ? <><b>S${Number(rv.medianPsf).toLocaleString('en-SG')} psf</b>
+                  <span>{fk(rv.medianPrice)} · one filed transaction</span></>
+              : <><b>S${Number(rv.minPsf).toLocaleString('en-SG')} — S${Number(rv.maxPsf).toLocaleString('en-SG')} psf</b>
+                  <span>{rv.n} filed transactions · {spread}% low to high</span>
+                  <span>{fk(rv.medianPrice)} median filed price</span></>}
           </div>
         </div>
       </div>
-      {/* Only what the standfirst does NOT already say.
-          This line used to repeat it almost word for word — the masthead read
-          "7 filed resale transactions · Ang Mo Kio · 51 years 11 months of
-          lease left" and then this read "Ang Mo Kio · lease to 2078 · 51 years
-          11 months left · 7 filed transactions", four hundred pixels below on
-          desktop and a third of the first screen on a phone. Two of its three
-          facts were already on the page.
-          What is genuinely only here: the year the lease ends, and a
-          transaction count that moves when the type filter does. */}
-      <p className="meta">{[
-        rec.kind === 'HDB'
-          ? `Lease to ${rec.leaseCommence + 99}`
-          : (Array.isArray(rec.tenure) ? 'Mixed tenure' : rec.tenure),
-        `${rv.n} filed transaction${rv.n === 1 ? '' : 's'}${rtype ? ` in ${rtype.toLowerCase()}` : ''}`,
-      ].filter(Boolean).join(' · ')}</p>
 
       {types.length > 1 && (
         <div className="seg" style={{marginTop:12}}>
@@ -146,19 +135,6 @@ export default function RecordView({ rec, attribution = [], onType, afterSummary
           {rec.yoy>=0?'▲':'▼'} {Math.abs(rec.yoy).toFixed(1)}% vs 12 months ago
         </span>
       )}
-
-      <div className="kpi3">
-        <div><div className="v">{fk(rv.medianPrice)}</div>
-          <span className="lab">{rv.n === 1 ? 'Filed price' : 'Median price'}</span></div>
-        <div><div className="v">{rv.n}</div>
-          <span className="lab">Filed transaction{rv.n === 1 ? '' : 's'}</span></div>
-        {/* A spread of 0% is not a narrow market, it is one sale. The cell
-            says so rather than printing a number that reads as a finding. */}
-        <div><div className="v">{rv.n === 1
-          ? <span className="kpinone">&mdash;</span>
-          : `${Math.round(((rv.maxPsf - rv.minPsf) / rv.medianPsf) * 100)}%`}</div>
-          <span className="lab">{rv.n === 1 ? 'No range from one sale' : 'Spread, low to high'}</span></div>
-      </div>
 
       {rec.source && (
         <p className="prov">{rec.source} · {rec.period?.from} to {rec.period?.to} · accessed {rec.accessedAt}</p>
@@ -255,9 +231,12 @@ export default function RecordView({ rec, attribution = [], onType, afterSummary
       </div>
 
       {attribution.length > 0 && (
-        <div style={{marginTop:14,paddingTop:10,borderTop:'1px solid var(--line2)'}}>
-          {attribution.map((a,i)=><span className="lab" key={i} style={{display:'block'}}>{a}</span>)}
-        </div>
+        <details className="licence-details">
+          <summary>Dataset licences and attribution</summary>
+          <div>
+            {attribution.map((a,i)=><span className="lab" key={i}>{a}</span>)}
+          </div>
+        </details>
       )}
     </>
   );

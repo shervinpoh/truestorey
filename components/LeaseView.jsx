@@ -6,6 +6,7 @@ import Chart from './Chart.jsx';
 import { Figure } from './Motion.jsx';
 import MoneyInput from './MoneyInput.jsx';
 import Row from './PlanRow.jsx';
+import ResultBridge from './ResultBridge.jsx';
 
 /**
  * The leasehold relativity table, and what it costs to hold.
@@ -38,6 +39,14 @@ export default function LeaseView({ observed = null }) {
   // is arithmetic on a published factor, not a valuation of anything.
   const impliedFreehold = pct ? (v / (pct / 100)) : null;
   const yearCost = impliedFreehold && decay ? impliedFreehold * (decay / 100) : null;
+  const observedIndex = useMemo(() => {
+    if (!observed?.bands?.length) return null;
+    return observed.bands.reduce((best, band, index) => {
+      const [lo, hi] = String(band.band).split('–').map(Number);
+      const distance = years < lo ? lo - years : years > hi ? years - hi : 0;
+      return distance < best.distance ? { index, distance } : best;
+    }, { index: 0, distance: Infinity }).index;
+  }, [observed, years]);
 
   return (
     <>
@@ -89,6 +98,25 @@ export default function LeaseView({ observed = null }) {
         </aside>
       </div>
 
+      <dl className="resultguide resultguide-wide" aria-label="How to use this result">
+        <div>
+          <dt>What changed it</dt>
+          <dd>The {years}-year row sets the lease at <b>{pct?.toFixed(1) ?? '—'}% of freehold</b>.
+            To price one year, the tool converts your {money(v)} input to that freehold equivalent,
+            then applies the table&rsquo;s {decay?.toFixed(2) ?? '—'}-point fall.</dd>
+        </div>
+        <div>
+          <dt>What this cannot know</dt>
+          <dd>What a buyer will pay, or the effect of the block, floor, town or condition. This is
+            a government schedule, not a market forecast.</dd>
+        </div>
+        <div className="resultnext">
+          <dt>Next useful step</dt>
+          <dd><a href="#lease-evidence">Inspect the full table and filed evidence &darr;</a>
+            <span>The published curve first; HDB resale bands below it when available.</span></dd>
+        </div>
+      </dl>
+
       {/* ── THE ANSWER FOLLOWS YOU BELOW 900px ────────────────────────────
           Below the two-column breakpoint the aside goes static and the answer
           leaves the screen while the reader is still changing the assumptions
@@ -105,11 +133,13 @@ export default function LeaseView({ observed = null }) {
         <span><i className="lab">One more year</i> <b className="mono">{yearCost == null ? "—" : money(yearCost)}</b></span>
       </div>
 
-      <h2 className="sh" style={{ marginTop: 26 }}>
+      <h2 className="sh" id="lease-evidence" style={{ marginTop: 26 }}>
         <span>The table</span><span>99 years, as a share of freehold</span>
       </h2>
       <Chart
         points={pts} format={n => n.toFixed(1)} unit="% of freehold" height={150}
+        defaultIndex={99 - years}
+        idleLabel="selected lease — point at the chart to read any year"
         ariaLabel="Leasehold value as a percentage of freehold value, from 99 years remaining down to 1." />
 
       <div className="plansteps" style={{ marginTop: 18 }}>
@@ -144,6 +174,8 @@ export default function LeaseView({ observed = null }) {
           <Chart
             points={observed.bands.map(b => ({ label: `${b.band} yrs left`, value: b.medianPsf }))}
             format={n => `$${Math.round(n).toLocaleString('en-SG')}`} unit=" psf" height={130}
+            defaultIndex={observedIndex}
+            idleLabel="nearest filed lease band — point at the chart to read any band"
             ariaLabel={`Median filed price per square foot by remaining lease, across ${observed.n} transactions.`} />
           {/* The confound, stated first rather than in a footnote. Without it
               this chart reads as a measurement of lease decay, which it is not. */}
@@ -170,6 +202,10 @@ export default function LeaseView({ observed = null }) {
         publish the table at any URL findable on {LEASE_TABLE.transcribed}. All 99 rows are present
         and rise with the term.
       </p>
+
+      <ResultBridge tool="lease calculator" nextHref="/blindspot"
+        nextLabel="Check the lease beside the other Blindspot checks"
+        body="A schedule cannot see the block, floor, condition or likely buyer pool. Tell me the home and your likely holding period; I’ll tell you which lease assumption I would verify first." />
 
       <h2 className="sh" style={{ marginTop: 26 }}><span>The rest of it</span></h2>
       <ul className="idx">

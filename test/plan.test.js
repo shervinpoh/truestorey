@@ -128,11 +128,34 @@ test('the SSD schedule is chosen by the purchase date, not the sale date', () =>
   assert.ok(after.currentRate > before.currentRate, 'nine days apart, materially different bills');
 });
 
+test('the private sale timeline uses calendar anniversaries for every SSD step', () => {
+  const r = sellTimeline({ propertyType: 'PRIVATE', purchaseDate: new Date('2025-07-07'),
+    price: 1_000_000, today: new Date('2026-07-07') });
+  assert.equal(r.currentRate, 0.12);
+  assert.equal(r.schedule[0].passed, true);
+  assert.equal(r.schedule[1].current, true);
+  assert.equal(r.freeFrom.toISOString().slice(0, 10), '2029-07-07');
+});
+
 test('HDB still answers with a date', () => {
   const r = sellTimeline({ propertyType: 'HDB', purchaseDate: new Date('2022-03-15'), keyCollectionDate: new Date('2022-03-15'), today: new Date('2026-08-24') });
   assert.equal(r.kind, 'HDB');
   assert.equal(r.canSellNow, false);
   assert.ok(r.nextEvent, 'an owner inside MOP has a date ahead of them');
+});
+
+test('HDB selling dates use the selected classification and calendar anniversary', () => {
+  const base = { propertyType: 'HDB', purchaseDate: new Date('2024-02-29'),
+    keyCollectionDate: new Date('2024-02-29'), today: new Date('2029-02-27') };
+  const standard = sellTimeline({ ...base, mopYears: 5 });
+  const plus = sellTimeline({ ...base, mopYears: 10 });
+  const fresh = sellTimeline({ ...base, mopYears: 20 });
+  assert.equal(standard.events[0].date.toISOString().slice(0, 10), '2029-02-28');
+  assert.equal(standard.canSellNow, false);
+  assert.equal(plus.mopYears, 10);
+  assert.equal(fresh.mopYears, 20);
+  assert.ok(plus.events[0].date > standard.events[0].date);
+  assert.ok(fresh.events[0].date > plus.events[0].date);
 });
 
 /* ── the repayment schedule ──────────────────────────────────────────────── */
@@ -179,6 +202,27 @@ test('a zero-rate loan divides evenly and costs no interest', () => {
   const a = amortise({ principal: 240_000, annualRate: 0, years: 20 });
   assert.equal(a.instalment, 1000);
   assert.equal(a.totalInterest, 0);
+});
+
+test('cleared, non-finite and negative-rate inputs cannot produce a repayment quote', () => {
+  const valid = { principal: 487_500, annualRate: 0.026, years: 25, extraMonthly: 0 };
+  for (const key of Object.keys(valid)) {
+    for (const value of ['', ' ', null, NaN, Infinity]) {
+      assert.equal(amortise({ ...valid, [key]: value }), null, `${key}: ${value}`);
+    }
+  }
+  assert.equal(amortise({ ...valid, annualRate: -0.02 }), null);
+});
+
+test('annual repayment totals retain precision until display rounding', () => {
+  const a = amortise({ principal: 487_500, annualRate: 0.026, years: 25, extraMonthly: 300 });
+  assert.ok(Math.abs(a.byYear.reduce((sum, y) => sum + y.principal, 0) - 487_500) < 0.01);
+  assert.equal(Math.round(a.byYear.reduce((sum, y) => sum + y.interest, 0)), a.totalInterest);
+});
+
+test('a payment that leaves debt at the schedule limit cannot look like full repayment', () => {
+  const a = amortise({ principal: 240_000, annualRate: 0, years: 20, extraMonthly: -750 });
+  assert.equal(a.impossible, true);
 });
 
 /**

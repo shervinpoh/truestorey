@@ -15,9 +15,9 @@ import { useRef, useState } from 'react';
  *
  * WHAT THIS DOES INSTEAD. The value under the pointer is printed above the
  * chart in the readout, at full size, as you move. Nothing is hidden behind a
- * hover delay and nothing needs a tooltip. Move away and it falls back to the
- * latest bar, so the readout always says something true rather than going
- * blank.
+ * hover delay and nothing needs a tooltip. Move away and it falls back to a
+ * caller-chosen bar — or the latest bar for a real time series — so the
+ * readout always says something true rather than going blank.
  *
  * POINTER POSITION, NOT PER-BAR HOVER. With 146 quarters a bar is under three
  * pixels wide, and hover targets that small are a lottery. The index is
@@ -49,6 +49,8 @@ export default function Chart({
   height = 118,
   markFrom = null,             // index: start of a highlighted span
   markTo = null,               // index: end of a highlighted span
+  defaultIndex = null,         // non-time series can choose the meaningful idle bar
+  idleLabel = 'latest — point at the chart to read any bar',
   ariaLabel,
 }) {
   const [at, setAt] = useState(null);          // hovered/focused index, or null
@@ -66,8 +68,12 @@ export default function Chart({
   const yOf = v => 100 - (8 + ((v - mn) / span) * 88);
   const cmpAt = i => (compare && Number.isFinite(compare[i]?.value) ? compare[i].value : null);
 
-  // Falls back to the latest bar so the readout is never empty.
-  const cur = at == null ? n - 1 : at;
+  // A lease curve has no "latest" point. Let a caller choose the bar that
+  // corresponds to the reader's input while time series retain the last bar.
+  const fallback = defaultIndex == null
+    ? n - 1
+    : Math.max(0, Math.min(n - 1, Math.round(defaultIndex)));
+  const cur = at == null ? fallback : at;
   const p = points[cur];
 
   const fromIdx = markFrom == null ? null : Math.max(0, Math.min(n - 1, markFrom));
@@ -100,7 +106,7 @@ export default function Chart({
             <i aria-hidden="true" />{compareLabel} <b>{format(cmpAt(cur))}{unit}</b>
           </span>
         )}
-        {at == null && <em>latest — point at the chart to read any bar</em>}
+        {at == null && <em>{idleLabel}</em>}
       </p>
 
       <div
@@ -121,7 +127,7 @@ export default function Chart({
             className={[
               i === cur ? 'on' : '',
               inSpan(i) ? 'span' : '',
-              i === n - 1 && at == null ? 'last' : '',
+              i === fallback && at == null ? 'last' : '',
             ].filter(Boolean).join(' ')}
             style={{ height: (8 + ((q.value - mn) / span) * 88) + '%' }}
           />

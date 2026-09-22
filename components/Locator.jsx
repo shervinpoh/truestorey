@@ -139,7 +139,7 @@ export default function Locator({ area, points = [], here, label, town }) {
              ring for free. A map you can walk block to block is the whole
              point of calling the thing an atlas. */
           <a key={p.href} href={p.href}>
-            <title>{p.label}{Number.isFinite(p.psf) ? ` — S$${Math.round(p.psf)} psf` : ' — no filed median'}</title>
+            <title>{`${p.label}${Number.isFinite(p.psf) ? ` — S$${Math.round(p.psf)} psf` : ' — no filed median'}`}</title>
             <circle cx={x(p.lon)} cy={y(p.lat)} r={shaded ? 4 : 2.4}
               className={shaded && bandOf(p.psf, breaks) !== null ? 'near banded' : 'near'}
               {...(shaded && bandOf(p.psf, breaks) !== null

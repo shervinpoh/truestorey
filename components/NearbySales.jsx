@@ -89,35 +89,39 @@ export default function NearbySales({ data, label }) {
             here.</>}
         </p>
 
-        <table className="nstable">
-          <thead>
-            <tr>
-              <th scope="col">{hdb ? 'Block' : 'Project'}</th>
-              <th scope="col" className="r">Away</th>
-              <th scope="col">Filed</th>
-              <th scope="col">{hdb ? 'Storey' : 'Floor'}</th>
-              <th scope="col" className="r">Size</th>
-              <th scope="col" className="r">PSF</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r, k) => (
-              <tr key={k}>
-                <td><Link href={r.href}>{titleCase(r.label)}</Link></td>
-                <td className="r mono">{r.m}m</td>
-                <td className="mono">{r.month}</td>
-                {/* The floor BAND, because that is what URA and HDB publish.
-                    A unit number is not in either feed, and the only route to
-                    one is a licence this site does not hold. */}
-                <td className="mono">
-                  {r.floor && r.floor !== '-' ? String(r.floor).replace(' TO ', '–') : '—'}
-                </td>
-                <td className="r mono">{num(r.areaSqm)} sqm</td>
-                <td className="r mono">${num(r.psf)}</td>
+        <p className="ns-tablehint">Scroll sideways to see the date, storey, size and psf →</p>
+        <div className="tablewrap" role="region" tabIndex={0}
+          aria-label="Nearby filed sales table; scroll sideways to see all columns">
+          <table className="nstable">
+            <thead>
+              <tr>
+                <th scope="col">{hdb ? 'Block' : 'Project'}</th>
+                <th scope="col" className="r">Away</th>
+                <th scope="col">Filed</th>
+                <th scope="col">{hdb ? 'Storey' : 'Floor'}</th>
+                <th scope="col" className="r">Size</th>
+                <th scope="col" className="r">PSF</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rows.map((r, k) => (
+                <tr key={k}>
+                  <td><Link href={r.href}>{titleCase(r.label)}</Link></td>
+                  <td className="r mono">{r.m}m</td>
+                  <td className="mono">{r.month}</td>
+                  {/* The floor BAND, because that is what URA and HDB publish.
+                      A unit number is not in either feed, and the only route to
+                      one is a licence this site does not hold. */}
+                  <td className="mono">
+                    {r.floor && r.floor !== '-' ? String(r.floor).replace(' TO ', '–') : '—'}
+                  </td>
+                  <td className="r mono">{num(r.areaSqm)} sqm</td>
+                  <td className="r mono">${num(r.psf)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
         <p className="hint">
           {rows.length < band.indexed

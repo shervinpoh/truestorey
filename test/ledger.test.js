@@ -95,14 +95,14 @@ test('the longer it is held, the more of the refund is interest', () => {
 });
 
 test('SSD follows the purchase date, and vanishes when the schedule runs out', () => {
-  // Bought 2021 — legacy three-year schedule, so year 3 still bites and year 5
-  // does not. Getting this from the SALE date is the error this library was
-  // written to avoid.
-  assert.equal(ledger({ ...base, yearsHeld: 3 }).exit.ssd.rate, 0.04);
+  // Bought 2021 — legacy three-year schedule. The rate still applies before
+  // the third anniversary and is zero on the anniversary itself.
+  assert.equal(ledger({ ...base, yearsHeld: 2.9 }).exit.ssd.rate, 0.04);
+  assert.equal(ledger({ ...base, yearsHeld: 3 }).exit.ssd.rate, 0);
   assert.equal(ledger({ ...base, yearsHeld: 5 }).exit.ssd.rate, 0);
-  // Bought after 4 Jul 2025 — four-year schedule, so year 4 still bites.
-  const later = ledger({ ...base, purchaseDate: '2025-08-01', yearsHeld: 4 });
-  assert.ok(later.exit.ssd.rate > 0, 'the 2025 regime runs to four years');
+  // Bought after 4 Jul 2025 — the same calendar rule at the fourth anniversary.
+  assert.ok(ledger({ ...base, purchaseDate: '2025-08-01', yearsHeld: 3.9 }).exit.ssd.rate > 0);
+  assert.equal(ledger({ ...base, purchaseDate: '2025-08-01', yearsHeld: 4 }).exit.ssd.rate, 0);
 });
 
 test('an HDB flat is governed by MOP, not by SSD, and says which', () => {

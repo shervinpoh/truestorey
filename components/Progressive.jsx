@@ -12,6 +12,7 @@ import ShareResult, { OpenedFromLink } from './ShareResult.jsx';
 import useShareLink from './useShareLink.js';
 import { PROGRESSIVE_SHARE, PROGRESSIVE_LABELS, PROGRESSIVE_DEFAULTS as D } from '../lib/share.js';
 import EmailReport from './EmailReport.jsx';
+import ResultBridge from './ResultBridge.jsx';
 
 /**
  * The progressive payment ladder for a home still under construction.
@@ -158,9 +159,36 @@ export default function Progressive({ canEmail = false }) {
               <div><span>Instalment at TOP</span><b className="mono">{money(r.monthlyAtTop)}</b></div>
               <div><span>Once fully drawn</span><b className="mono">{money(r.monthlyFinal)}</b></div>
             </div>
-            <ShareResult tool="progressive" title="Paying for a home still being built — Truestorey" url={shareUrl} />
           </div>
         </aside>
+      </div>
+
+      {/* This answer already has two large figures and three supporting rows.
+          Putting the explanation inside its 300px sticky column made the
+          result 1,062px tall in a 720px viewport. The same hierarchy follows
+          immediately below, but uses the page width instead of creating a
+          nested scroll region inside the answer. */}
+      <dl className="resultguide resultguide-wide" aria-label="How to use this result">
+        <div>
+          <dt>What changed it</dt>
+          <dd>The LTV leaves <b>{pc(1 - ltv)}</b> of the price to cash and CPF. The{' '}
+            <b>{pc(fee)} booking fee</b> is cash-only; your buyer profile and property count
+            set {money(duty.total)} of stamp duty.</dd>
+        </div>
+        <div>
+          <dt>What this cannot know</dt>
+          <dd>When the developer&rsquo;s notices will arrive, or whether your bank charges a fully
+            amortising payment or interest-only before TOP. Your project agreement may also carry
+            approved modifications.</dd>
+        </div>
+        <div className="resultnext">
+          <dt>Next useful step</dt>
+          <dd><a href="#construction-heading">Walk through the nine payment stages &uarr;</a>
+            <span>See when your funds end, the bank begins and the instalment climbs.</span></dd>
+        </div>
+      </dl>
+      <div className="resultshare-wide">
+        <ShareResult tool="progressive" title="Paying for a home still being built — Truestorey" url={shareUrl} />
       </div>
 
       {/* ── THE ANSWER FOLLOWS YOU BELOW 900px ────────────────────────────
@@ -231,6 +259,9 @@ export default function Progressive({ canEmail = false }) {
 
       {/* After the answer, never in front of it. Absent when nothing can send. */}
       {canEmail && <EmailReport tool="progressive" hash={shareHash} title="the ladder" />}
+
+      <ResultBridge tool="progressive-payment calculator" nextHref="/plan"
+        nextLabel="Put the full purchase through the budget check" />
 
       <h2 className="sh" style={{ marginTop: 26 }}><span>The rest of it</span></h2>
       <ul className="idx">

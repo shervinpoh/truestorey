@@ -3,24 +3,25 @@
    place. Bright teal remains a plotted or selected data value. */
 .home-atlas{max-width:1224px;padding-inline:32px}
 body:has(.home-atlas) .gnav .in{max-width:1224px;padding-inline:32px}
-.home-edition{display:flex;justify-content:space-between;gap:16px;padding:24px 0 0;
- font:var(--t-micro)/1.5 "IBM Plex Mono",monospace;color:var(--mute);text-transform:uppercase;letter-spacing:.08em}
-.home-atlas .hero{grid-template-columns:minmax(0,1.06fr) minmax(0,1fr);gap:48px;padding:44px 0 38px;align-items:start}
-.home-atlas .herosay{padding-top:12px}
-.home-atlas .hero h1{font-size:clamp(40px,5.25vw,68px);max-width:15ch;line-height:.98;letter-spacing:-.047em;margin-bottom:24px;text-wrap:initial}
+.home-atlas .hero{grid-template-columns:minmax(0,1.06fr) minmax(0,1fr);gap:48px;padding:46px 0 38px;align-items:center}
+.home-atlas .herosay{padding-top:0}
+.hero-product{margin:0 0 13px;color:var(--acc-ink)}
+.home-atlas .hero h1{font-size:clamp(40px,5vw,62px);max-width:16ch;line-height:.98;letter-spacing:-.047em;margin-bottom:18px;text-wrap:initial}
 .home-atlas .hero h1 span{display:block;color:var(--acc-ink)}
 :root[data-theme="dark"] .home-atlas .hero h1 span{color:var(--ink2)}
-.home-atlas .hero .sub{font-size:var(--t-lead);max-width:43ch;line-height:1.5}
-.home-atlas .herosearch{margin-top:32px}
-.home-atlas .herosearch .sh{border:0;margin-bottom:12px;padding:0}
+.home-atlas .hero .sub{font-size:var(--t-body);max-width:48ch;line-height:1.5}
+.home-atlas .herosearch{margin-top:26px}
+.home-atlas .herosearch>.lab{display:block;margin:0 0 7px;color:var(--mute)}
+.searchpromise{font-size:var(--t-small);line-height:1.55;color:var(--ink2);max-width:54ch;margin:10px 0 0}
 .home-atlas .herosearch .sbox input{font-family:"Source Sans 3",sans-serif;letter-spacing:0;padding:18px 19px;box-shadow:var(--lift)}
-.home-browse{display:flex;align-items:center;gap:15px;flex-wrap:wrap;margin-top:15px}
-.home-browse a{font-size:var(--t-small);text-decoration:none;border-bottom:1px solid var(--line)}
-.home-browse a:hover{border-color:var(--ink)}
 .home-atlas .heromap{padding:22px 24px 18px;border:1px solid var(--line);border-radius:var(--r2);background:var(--sunk)}
 .atlas-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .atlas-heading a{font-size:var(--t-small);font-weight:600;text-decoration:none}
 .home-atlas .islandsvg{margin:22px 0 18px;background:transparent;box-shadow:none}
+.home-atlas .iarea.lit{animation-duration:.9s;animation-delay:calc(var(--d,0ms) * 1.35)}
+.home-atlas .heromap:is(:hover,:focus-within) .iarea.lit{animation-name:ilitReplay}
+@keyframes ilitReplay{0%{opacity:0;fill:var(--line)} 38%{opacity:1;fill:var(--line)} 100%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.home-atlas .iarea.lit,.home-atlas .heromap:is(:hover,:focus-within) .iarea.lit{animation:none}}
 .home-atlas .islandkey{margin-top:0}
 .home-atlas .islandprov{font-size:var(--t-micro);letter-spacing:0;line-height:1.55;margin-top:15px}
 .home-atlas .islandnone{margin-bottom:0}
@@ -34,16 +35,30 @@ body:has(.home-atlas) .gnav .in{max-width:1224px;padding-inline:32px}
 .home-evidence .proof dt{font:500 clamp(19px,2.1vw,28px)/1.2 "IBM Plex Mono",monospace;letter-spacing:-.045em}
 .home-evidence .proof dd{letter-spacing:0;text-transform:none;max-width:22ch;margin-top:7px}
 .evidence-source{grid-column:1/-1;margin:0;letter-spacing:0}
+.home-finding{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr);gap:28px 56px;
+ padding:32px 0;border-bottom:1px solid var(--line)}
+.home-finding .lab{margin:0 0 10px}
+.home-finding h2{font-size:clamp(27px,3.2vw,39px);line-height:1.06;letter-spacing:-.04em;max-width:18ch}
+.home-finding>div:last-child>p:first-child{font-size:var(--t-body);line-height:1.65;color:var(--ink2);margin:0;max-width:57ch}
+.home-finding>div:last-child>p:first-child b{color:var(--ink)}
+.home-finding .prov{margin:16px 0 0;letter-spacing:0;line-height:1.55}
+.home-finding .prov b{font-weight:500;color:var(--ink2)}
 .home-section{padding:48px 0 0}
 .home-section-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:23px}
 .home-section-heading .lab{margin:0 0 10px}
 .home-section-heading h2{font-size:clamp(25px,3vw,34px);letter-spacing:-.035em;line-height:1.1}
+.section-intro{font-size:var(--t-body);line-height:1.55;color:var(--ink2);max-width:55ch;margin:11px 0 0}
 .home-section-heading>a{font-size:var(--t-small);white-space:nowrap;text-decoration:none;border-bottom:1px solid var(--edge);padding-bottom:3px}
 .decision-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 .decision-link{position:relative;display:flex;flex-direction:column;padding:23px 24px 20px;background:var(--card);border:1px solid var(--line);border-radius:var(--r2);text-decoration:none}
-.decision-symbol{font-family:"IBM Plex Mono",monospace;font-size:28px;color:var(--ink2);margin-bottom:14px;line-height:1}
+.decision-symbol{font-family:"IBM Plex Mono",monospace;font-size:var(--t-micro);color:var(--mute);margin-bottom:14px;line-height:1;letter-spacing:.08em}
 .decision-link h3{font-size:var(--t-lead);line-height:1.2;max-width:22ch}
-.decision-link p{font-size:var(--t-body);line-height:1.5;color:var(--ink2);margin:12px 0 22px;max-width:34ch}
+.decision-link p{font-size:var(--t-body);line-height:1.5;color:var(--ink2);margin:12px 0 15px;max-width:34ch}
+.decision-flow{list-style:none;counter-reset:flow;margin:0 0 20px;padding:0;border-top:1px solid var(--line2)}
+.decision-flow li{counter-increment:flow;position:relative;padding:9px 0 9px 28px;border-bottom:1px solid var(--line2);
+ font-size:var(--t-small);line-height:1.4;color:var(--ink2)}
+.decision-flow li:before{content:counter(flow);position:absolute;left:0;top:9px;font-family:"IBM Plex Mono",monospace;
+ font-size:var(--t-micro);color:var(--mute)}
 .decision-go{margin-top:auto;font-size:var(--t-small);font-weight:600;display:flex;justify-content:space-between}
 .decision-link:hover{border-color:var(--edge);box-shadow:var(--lift)}
 .perspective-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
@@ -76,7 +91,7 @@ body:has(.home-atlas) .gnav .in{max-width:1224px;padding-inline:32px}
 .home-atlas .deckcard .n>span{font-size:var(--t-body);color:var(--mute)}
 .home-atlas .deckcard .b{font-size:var(--t-small);margin-top:10px;max-width:36ch;line-height:1.5}
 .home-atlas .deckcard:hover{background:var(--sunk)}
-.home-atlas .whobuilt{margin-top:48px;padding:26px 28px;border-left:0;border-radius:var(--r2);background:var(--sunk)}
+.home-atlas .whobuilt{margin:48px 0 0;padding:26px 28px;border-left:0;border-radius:var(--r2);background:var(--sunk)}
 .home-atlas .whobuilt .wsay{max-width:78ch}
 .home-atlas a:focus-visible{outline:2px solid var(--acc);outline-offset:5px}
 
@@ -85,8 +100,6 @@ body:has(.home-atlas) .gnav .in{max-width:1224px;padding-inline:32px}
  .home-atlas .hero{gap:28px;grid-template-columns:1fr 1fr}
  .home-atlas .heromap{padding-inline:18px}
  .home-atlas .hero .sub{font-size:var(--t-body)}
- .home-browse{gap:9px 14px}
- .home-browse .lab{width:100%}
  .home-evidence{grid-template-columns:1fr 3fr}
  .home-evidence .proof{gap:16px}
  .home-evidence .proof>div{padding-left:16px}
@@ -96,14 +109,11 @@ body:has(.home-atlas) .gnav .in{max-width:1224px;padding-inline:32px}
  .home-atlas{padding-inline:20px}
  body:has(.home-atlas) .gnav .in{padding-inline:20px}
  .home-atlas .herosay{padding-top:0}
- .home-edition{padding-top:20px;font-size:var(--t-micro);letter-spacing:0}
- .home-edition>span:last-child{max-width:16ch;text-align:right}
  .home-atlas .hero{grid-template-columns:1fr;padding-top:28px;gap:28px}
  .home-atlas .hero h1{font-size:clamp(40px,8.5vw,62px);max-width:16ch;margin-bottom:18px}
  .home-atlas .hero h1 span{max-width:15ch}
  .home-atlas .herosearch{margin-top:24px}
  .home-atlas .hero .sub{max-width:48ch}
- .home-browse .lab{width:auto}
  .home-atlas .heromap{padding:18px 20px}
  .home-atlas .islandsvg{margin:18px 0 12px}
  .home-evidence{grid-template-columns:1fr;gap:18px;padding-top:22px}
@@ -113,13 +123,15 @@ body:has(.home-atlas) .gnav .in{max-width:1224px;padding-inline:32px}
  .home-evidence .proof{gap:10px}
  .home-evidence .proof dt{font-size:clamp(15px,4.1vw,23px)}
  .home-evidence .proof dd{font-size:var(--t-micro);line-height:1.4}
+ .home-finding{grid-template-columns:1fr;gap:15px;padding:28px 0}
+ .home-finding h2{font-size:30px;max-width:22ch}
  .home-section{padding-top:38px}
  .home-section-heading{gap:15px;align-items:flex-start}
  .home-section-heading>a{font-size:var(--t-small);white-space:normal;flex:0 0 88px;line-height:1.4;text-align:right}
  .home-section-heading h2{font-size:28px}
  .decision-grid{grid-template-columns:1fr;gap:10px}
  .decision-link{padding:19px 20px 17px 67px}
- .decision-symbol{position:absolute;top:20px;left:20px;font-size:24px}
+ .decision-symbol{position:absolute;top:22px;left:20px;font-size:var(--t-micro)}
  .decision-link p{margin:8px 0 15px;max-width:none}
  .decision-link h3{max-width:none}
  .perspective-grid{grid-template-columns:1fr;gap:27px}
@@ -132,4 +144,4 @@ body:has(.home-atlas) .gnav .in{max-width:1224px;padding-inline:32px}
  .home-atlas .deckcard{padding:20px}
  .home-atlas .whobuilt{padding:22px;margin-top:38px}
 }
-@media print{.home-atlas{max-width:none}.home-atlas .heromap{break-inside:avoid}.perspective-grid{grid-template-columns:repeat(3,1fr)}.perspective-image{aspect-ratio:4/3}.home-section{break-inside:avoid}.home-edition{display:none}}
+@media print{.home-atlas{max-width:none}.home-atlas .heromap{break-inside:avoid}.perspective-grid{grid-template-columns:repeat(3,1fr)}.perspective-image{aspect-ratio:4/3}.home-section{break-inside:avoid}}

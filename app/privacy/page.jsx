@@ -38,9 +38,10 @@ export default function Page() {
           <li><b>No user agent, no screen fingerprint.</b> Only a coarse phone / tablet / desktop
             class, from the window width.</li>
           <li><b>No third-party analytics.</b> No Google Analytics, no tag manager, no pixels.</li>
-          <li><b>Nothing you type into a calculator.</b> A price, a salary, a loan, a floor area,
-            an address you are researching &mdash; none of it leaves your browser. The tools run
-            entirely on your device.</li>
+          <li><b>Nothing you type into a calculator is collected by default.</b> A price, a salary,
+            a loan, a floor area or an address stays in your browser while the tool runs. If you
+            deliberately request an emailed copy, the figures needed to write it are sent once and
+            not stored. A shared result stays inside the link you choose to send.</li>
         </ul>
 
         <h2 className="sh"><span>What is recorded</span></h2>

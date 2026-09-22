@@ -40,13 +40,15 @@ import { EVENTS } from '../lib/analytics.js';
  * transaction, the range note — and appending the fork after all of that put
  * it nine hundred pixels down, which is the burial it exists to fix.
  *
- * The owner's side stops at the numbers. It ends on the proceeds waterfall and
- * the SSD guide and does not route into the enquiry form: a form at the end of
- * a funnel that begins "I own this property" is a lead-capture flow wearing a
- * calculator's clothes, and this site's whole argument is that the figures are
- * free. The form stays where it already was, at the bottom, reached by someone
- * who has read the page rather than by someone who followed a path into it.
- * It now has its own pane so it cannot read as the last step of the waterfall.
+ * The owner's side stops at the evidence. It ends on the proceeds waterfall
+ * and one relevant context link — this block's MOP where that evidence exists,
+ * otherwise the SSD guide — and does not route into the enquiry form: a form
+ * at the end of a funnel that begins "I own this property" is a lead-capture
+ * flow wearing a calculator's clothes, and this site's whole argument is that
+ * the figures are free. The form stays where it already was, at the bottom,
+ * reached by someone who has read the page rather than by someone who followed
+ * a path into it. It now has its own pane so it cannot read as the last step of
+ * the waterfall.
  *
  * The proceeds waterfall re-anchors when the flat-type filter moves, so the
  * slider is never centred on a median that is no longer on screen.
@@ -65,17 +67,16 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
   const hasNear = Boolean(near);
   const hasSales = Boolean(sales);
   const hasSun = Boolean(sun);
+  /* The bar is a set of landmarks, not a second rendering of the whole page.
+     Eleven chips made the navigation itself something a reader had to explore,
+     and the final ones were hidden behind a horizontal edge on ordinary
+     desktop widths. The deeper modules still name themselves in the page. */
   const sectionIds = [
     'overview',
-    rec.series?.length > 1 && 'history',
     rec.recent?.length > 0 && 'transactions',
     hdb && mop && 'mop',
-    locator && 'place',
     hasFloor && 'floor',
-    hasNear && 'nearby',
-    hasSales && 'nearbysales',
-    hasSun && 'sun',
-    land && 'land',
+    hasNear ? 'nearby' : (locator && 'place'),
     'proceeds',
   ].filter(Boolean);
 
@@ -114,8 +115,8 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
         <RecordView rec={rec} attribution={attribution}
           onType={(t, rv) => setMedian(rv.medianPrice)}
           afterSummary={
-            <Fork price={price} planHref={planHref} href={rec.href}
-              hdb={hdb} hasFloor={hasFloor} hasNear={hasNear} />
+            <Fork planHref={planHref} href={rec.href}
+              hdb={hdb} hasMop={Boolean(mop)} />
           } />
       </section>
 
@@ -133,6 +134,15 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
         <section className="pane" id="place">
           <Locator {...locator} label={titleCase(rec.label)} town={titleCase(rec.town)} />
         </section>
+      )}
+
+      {(hasFloor || hasNear || hasSales || hasSun || land) && (
+        <header className="record-chapter">
+          <p className="lab">Deeper checks</p>
+          <h2>What changes from one home to the next.</h2>
+          <p>Floor, surroundings, nearby sales, afternoon sun and the history of the land—shown
+            only where the public record carries enough to say something.</p>
+        </header>
       )}
 
       {hasFloor && <div id="floor"><Storey data={storey} label={titleCase(rec.label)} /></div>}
@@ -182,7 +192,7 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
           not a CRM existed to write to, took a reader's name and address, and
           answered with a 503 telling them to WhatsApp instead. The address had
           already been collected by then — the same objection that deleted the
-          mobile field. CRM_WEBHOOK_URL and CRM_WEBHOOK_SECRET were never set
+          mobile field. The Property CRM transport variables were never set
           in production, so that is what every reader who used it got. */}
       {canCapture && (
         <section className="pane">
@@ -216,43 +226,34 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
 }
 
 /** The two questions, and where on this page each one is answered. */
-function Fork({ price, planHref, href, hdb, hasFloor, hasNear }) {
+function Fork({ planHref, href, hdb, hasMop }) {
   return (
     <div className="forkwrap">
-      <h2 className="sh"><span>Which of these are you</span></h2>
+      <h2 className="sh"><span>What are you here to work out?</span></h2>
       <div className="fork">
         <div className="forkcol">
-          <span className="lab">I&rsquo;m considering buying this</span>
+          <span className="lab">I&rsquo;m thinking of buying it</span>
           <ul>
-            <li><a href={planHref}>
-              <b>What it costs on the day, at ${price.toLocaleString('en-SG')}</b>
-              <span>Loan, downpayment, the cash CPF cannot cover, and both stamp duties</span></a></li>
             <li><a href={`/blindspot?from=${encodeURIComponent(href)}`}>
-              <b>Run six checks before you commit</b>
-              <span>The asking price, nearby MOP supply, land coming, and what could be built next door</span></a></li>
-            {hasFloor && <li><a href="#floor">
-              <b>What a higher floor is worth here</b>
-              <span>Measured within this building, not across the country</span></a></li>}
-            {hasNear && <li><a href="#nearby">
-              <b>What is within reach of it</b>
-              <span>Schools, stations and shops, at straight-line distance</span></a></li>}
-            <li><a href={`/compare?a=${encodeURIComponent(href)}&from=${encodeURIComponent(href)}`}>
-              <b>Put it beside another block</b>
-              <span>Two or three side by side, in a link you can send to whoever else is deciding</span></a></li>
+              <b>Run Blindspot on the asking price</b>
+              <span>Six checks against the filed record. You add the actual price and floor area.</span></a></li>
+            <li><a href={planHref}>
+              <b>See what the purchase needs upfront</b>
+              <span>The filed median starts as an example. Replace it with the asking price.</span></a></li>
           </ul>
         </div>
         <div className="forkcol">
-          <span className="lab">I own this</span>
+          <span className="lab">I own it</span>
           <ul>
             <li><a href="#proceeds">
               <b>What a sale would actually net</b>
               <span>Every deduction in order, with CPF taken back before you see a cent</span></a></li>
-            <li><a href="/guides/absd-tdsr-ssd">
-              <b>What selling early costs</b>
-              <span>Seller&rsquo;s Stamp Duty by year held, and the rules behind it</span></a></li>
-            {hdb && <li><a href={`/mop?from=${encodeURIComponent(href)}`}>
-              <b>Which flats can start selling, and when</b>
-              <span>Blocks reaching their fifth year, by town and year</span></a></li>}
+            {hdb && hasMop ? <li><a href="#mop">
+              <b>See this block&rsquo;s MOP context</b>
+              <span>Its earliest possible fifth year and the filings held after the previous wave.</span></a></li>
+              : <li><a href="/guides/absd-tdsr-ssd">
+                <b>Check what selling early costs</b>
+                <span>Seller&rsquo;s Stamp Duty by year held, and the rules behind it.</span></a></li>}
           </ul>
         </div>
       </div>

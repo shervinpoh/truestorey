@@ -49,7 +49,7 @@ const EXCLUDED = new Set(['balcony', 'ledge']);
 const ROOM_TINT = ['230,90,80', '70,150,200', '120,190,110', '240,180,70', '170,120,200',
   '90,200,195', '235,140,180', '150,160,90', '200,110,60', '110,130,220'];
 
-export default function PlanStudio() {
+export default function PlanStudio({ hdbNotes = null }) {
   const [img, setImg] = useState(null);
   const [parse, setParse] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -270,6 +270,16 @@ export default function PlanStudio() {
             shifts every dimension by roughly 2%, which is 70mm on a 3.5 metre bedroom. This is not
             a survey, and nothing here has been checked by a person.
           </div>
+          {hdbNotes && (
+            <div className="note method" style={{ marginTop: 12 }}>
+              <b>If you took the area off an HDB transaction, read HDB&rsquo;s own note first.</b>{' '}
+              The filed floor area is not always the area drawn on the plan, and this model is
+              scaled entirely from that figure. HDB publishes this with the data:
+              <span className="prov" style={{ display: 'block', marginTop: 8, whiteSpace: 'pre-line' }}>
+                {hdbNotes}
+              </span>
+            </div>
+          )}
         </figure>
       )}
     </div>

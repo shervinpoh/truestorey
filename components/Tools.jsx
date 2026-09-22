@@ -75,11 +75,14 @@ export default function Tools({ ratesReviewed, asked = null }) {
         {tab === 'loan' && <Mortgage />}
       </div>
       <p className="prov" style={{ marginTop: 26 }}>
+        {tab === 'loan' ? <>Source: your loan amount, rate, term and extra payment. Monthly amortisation,
+          with the same rate throughout the term. Figures rounded to the nearest dollar.</> : <>
         Rates last reviewed {ratesReviewed}. TDSR {pc(TDSR_LIMIT)} · MSR {pc(MSR_LIMIT)} ·
         stress rate {pc(STRESS_TEST_RATE)}.<br />
         {SOURCES.bsd.name} (effective {SOURCES.bsd.effective}) · {SOURCES.absd.name} (effective {SOURCES.absd.effective}) ·
         {' '}{SOURCES.ssd.name} (effective {SOURCES.ssd.effective}).<br />
         These are calculations against published rates, not advice, and not a substitute for IRAS or your banker.
+        </>}
       </p>
     </>
   );
@@ -88,6 +91,7 @@ export default function Tools({ ratesReviewed, asked = null }) {
 /* ───────────────────────────── when can I sell ─────────────────────────── */
 function Sell() {
   const [kind, setKind] = useState('HDB');
+  const [mopYears, setMopYears] = useState(5);
   const [date, setDate] = useState('2022-03-15');
   const [price, setPrice] = useState(1800000);
 
@@ -100,9 +104,10 @@ function Sell() {
         purchaseDate: d,
         keyCollectionDate: kind === 'HDB' ? d : null,
         price: kind === 'HDB' ? null : Number(price) || null,
+        mopYears,
       });
     } catch { return null; }
-  }, [kind, date, price]);
+  }, [kind, date, price, mopYears]);
 
   return (
     <>
@@ -120,16 +125,24 @@ function Sell() {
              no id needed — and clicking the words now focuses the input. */}
         <label>
           <span className="lab" style={{ display: 'block', marginBottom: 6 }}>
-            {kind === 'HDB' ? 'Date you collected keys' : 'Date you bought it'}
+            {kind === 'HDB' ? 'Legal completion date' : 'Acquisition date — usually OTP acceptance'}
           </span>
           <input type="date" value={date} onChange={e => setDate(e.target.value)} />
         </label>
         {kind === 'HDB' && (
           <p className="hint" style={{ marginTop: 8 }}>
-            MOP runs five years from key collection, not from the option date and not from completion.
+            Use the completion date recorded by HDB, rather than the booking or application date.
           </p>
         )}
       </div>
+
+      {kind === 'HDB' && <div className="fld" style={{ marginTop: 14 }}>
+        <span className="lab">Which HDB classification or scheme?</span>
+        <div className="seg" style={{ marginTop: 6 }}>
+          {[[5, 'Unclassified / Standard'], [10, 'Plus / Prime'], [20, 'Fresh Start']].map(([years, label]) =>
+            <button key={years} aria-pressed={mopYears === years} onClick={() => setMopYears(years)}>{label}</button>)}
+        </div>
+      </div>}
 
       {kind === 'PRIVATE' && (
         <div className="fld" style={{ marginTop: 14 }}>
@@ -164,6 +177,15 @@ function Sell() {
           <div className="note"><b>A date is not a recommendation.</b> Being allowed to sell and it being
             a good moment to sell are different questions — the second depends on how many other flats in
             your block reach the same point at the same time.</div>
+          <dl className="resultguide" aria-label="Understand the HDB selling date">
+            <div><dt>What changed it</dt><dd>The selected <b>{res.mopYears}-year MOP</b> is counted from the legal
+              completion date you entered.</dd></div>
+            <div><dt>What this cannot know</dt><dd>HDB excludes periods when you did not physically occupy the flat.
+              SERS and ownership changes can follow different rules, so HDB’s recorded date is definitive.</dd></div>
+            <div className="resultnext"><dt>Next useful step</dt><dd>
+              <a href="https://www.hdb.gov.sg/managing-my-home/selling-a-flat/eligibility">Check HDB’s recorded MOP in My Flat →</a>
+            </dd></div>
+          </dl>
         </div>
       )}
     </>
@@ -188,10 +210,10 @@ function Private({ res }) {
           <div className="big" style={{ fontSize: 'clamp(1.8rem,6vw,2.9rem)' }}>Today</div>
         </div>
         <div className="figside">
-          <span className="lab">{res.free ? 'And it costs nothing' : 'But it costs'}</span>
+          <span className="lab">{res.free ? 'No seller’s stamp duty' : 'Seller’s stamp duty today'}</span>
           <div className="r">
             {res.free
-              ? 'There is no minimum holding period on private property, and you are past the SSD window. Nothing is owed on a sale.'
+              ? 'You are past the SSD window, so this calculation shows no seller’s stamp duty. Loan repayment, CPF refunds and selling fees still need to be accounted for.'
               : <>There is no minimum holding period on private property — you could sell a condo the
                 afternoon you got the keys. What you would pay for going now is{' '}
                 <b>{money(res.currentCost)}</b> in SSD, at {pc(res.currentRate)} of the sale price.
@@ -242,6 +264,15 @@ function Private({ res }) {
         <b>A date is not a recommendation.</b> Waiting out an SSD band only pays if the price holds
         while you wait. That is a separate question and this tool does not answer it.
       </div>
+      <dl className="resultguide" aria-label="Understand the private-property selling date">
+        <div><dt>What changed it</dt><dd>The acquisition date selects the three- or four-year SSD schedule.
+          The price you entered turns today’s rate into a dollar amount.</dd></div>
+        <div><dt>What this cannot know</dt><dd>IRAS generally uses the accepted OTP or sale agreement date,
+          and the higher of sale price or market value. Exemptions, remissions and part-shares need separate checking.</dd></div>
+        <div className="resultnext"><dt>Next useful step</dt><dd>
+          <a href="/cost">See what the sale must clear beyond SSD →</a>
+        </dd></div>
+      </dl>
     </div>
   );
 }
@@ -252,6 +283,9 @@ function Afford() {
   const [variable, setVariable] = useState(0);
   const [age, setAge] = useState(35);
   const [debts, setDebts] = useState(500);
+  const valid = [income, variable, age, debts].every(v => String(v).trim() !== '' && Number.isFinite(Number(v)))
+    && Number(income) >= 0 && Number(variable) >= 0 && Number(debts) >= 0
+    && Number(age) >= 21 && Number(age) <= 70;
 
   const res = useMemo(() => affordability({
     applicants: [{ fixedIncome: Number(income) || 0, variableIncome: Number(variable) || 0, age: Number(age) || 35 }],
@@ -279,15 +313,15 @@ function Afford() {
           ))}
       </div>
       <p className="hint" style={{ margin: '8px 0 0' }}>
-        {kind === 'HDB' ? 'MSR and TDSR both apply, over 25 years.'
-          : kind === 'EC_DEVELOPER' ? 'Bought from the developer, an EC is assessed on MSR as well as TDSR — over 30 years, because it is private property.'
-          : kind === 'EC_RESALE' ? 'Past its MOP an EC is private for financing: TDSR only, over 30 years.'
-          : 'TDSR only, over 30 years. MSR does not apply to private property.'}
+        {kind === 'HDB' || kind === 'EC_DEVELOPER'
+          ? 'Both the housing repayment limit (MSR) and total debt limit (TDSR) apply.'
+          : 'The total debt limit (TDSR) applies; the housing repayment limit (MSR) does not.'}
+        {' '}The assessed term depends on your age and property type.
       </p>
       <div className="f2">
         <label><span className="lab">Fixed monthly income</span><input type="number" value={income}
           onChange={e => setIncome(e.target.value)} min="0" step="500" /></label>
-        <label><span className="lab">Variable income</span><input type="number" value={variable}
+        <label><span className="lab">Average variable income per month</span><input type="number" value={variable}
           onChange={e => setVariable(e.target.value)} min="0" step="500" /></label>
         <label><span className="lab">Age</span><input type="number" value={age}
           onChange={e => setAge(e.target.value)} min="21" max="70" /></label>
@@ -295,15 +329,18 @@ function Afford() {
           onChange={e => setDebts(e.target.value)} min="0" step="100" /></label>
       </div>
 
+      {!valid ? <p className="hint" role="status">Fill every field with a non-negative amount and an age from 21 to 70.
+        Enter 0 if you have no variable income or other commitments.</p> : <>
       <div className="figwrap" style={{ marginTop: 26 }}>
         <div>
-          <span className="lab">Maximum loan, assessed</span>
+          <span className="lab">Loan ceiling from income alone</span>
           <div className="big">{money(res.maxLoan)}</div>
         </div>
         <div className="figside">
-          <span className="lab">Binding limit</span>
+          <span className="lab">What limits the loan</span>
           <div className="r">
-            {res.bindingConstraint} · {money(res.maxMonthlyRepayment)}/month<br />
+            {res.bindingConstraint === 'MSR' ? 'Housing repayment limit (MSR)' : 'Total debt limit (TDSR)'}<br />
+            {money(Math.max(0, res.maxMonthlyRepayment))}/month available for this loan<br />
             over {res.tenureYears} years
           </div>
         </div>
@@ -316,9 +353,17 @@ function Afford() {
         <div><div className="v">{pc(res.assessedAtRate)}</div><span className="lab">Stress rate used</span></div>
       </div>
 
-      <div className="note"><b>{res.note}</b> Variable income is counted at
-        {' '}{pc(1 - VARIABLE_INCOME_HAIRCUT)} of its value, which is how a bank treats it. This is one
-        applicant only — add a co-applicant and both the income and the age calculation change.</div>
+      <dl className="resultguide" aria-label="Understand your borrowing estimate">
+        <div><dt>What went into the answer</dt><dd>The assessment counts <b>{money(res.totalIncomeCounted)} a month</b>:
+          fixed income plus {pc(1 - VARIABLE_INCOME_HAIRCUT)} of variable income. It tests repayments at{' '}
+          {pc(res.assessedAtRate)} over {res.tenureYears} years.
+          {res.tdsrCapacity < 0 && <> Your other commitments already exceed the modelled total-debt allowance
+            by {money(-res.tdsrCapacity)} a month.</>}</dd></div>
+        <div><dt>What still needs checking</dt><dd>This is for one applicant. The purchase price, loan-to-value limit,
+          existing housing loans, available cash and CPF, and lender assessment can reduce what you can borrow.</dd></div>
+        <div className="resultnext"><dt>Next useful step</dt><dd><a href="/plan">Work out the purchase budget and upfront funds →</a></dd></div>
+      </dl>
+      </>}
     </>
   );
 }
@@ -333,6 +378,7 @@ function Duty() {
   const [profile, setProfile] = useState('SC');
   const [count, setCount] = useState(1);
   const [bought, setBought] = useState('2024-06-01');
+  const validPrice = String(price).trim() !== '' && Number.isFinite(Number(price)) && Number(price) > 0;
 
   const amount = Number(price) || 0;
   const b = useMemo(() => bsd(amount), [amount]);
@@ -349,6 +395,7 @@ function Duty() {
         </label>
       </div>
 
+      {!validPrice && <p className="hint" role="status">Enter a price above zero to calculate stamp duty.</p>}
       <h2 className="sh" style={{ marginTop: 24 }}><span>Buying</span><span>BSD + ABSD</span></h2>
       <div className="seg" style={{ marginTop: 12 }}>
         {PROFILES.map(([k, label]) => (
@@ -388,13 +435,13 @@ function Duty() {
               reads off bsd(), absd() and ssd() against the real return values,
               so a rename in either direction goes red instead of quiet. */}
           <span className="lab">Total stamp duty on purchase</span>
-          <div className="big">{money(b.total + (a ? a.total : 0))}</div>
+          <div className="big">{validPrice && a ? money(b.total + a.total) : '—'}</div>
         </div>
         <div className="figside">
           <span className="lab">Made up of</span>
           <div className="r">
-            BSD {money(b.total)}<br />
-            ABSD {a ? `${money(a.total)} at ${pc(a.rate)}` : '—'}
+            BSD {validPrice ? money(b.total) : '—'}<br />
+            ABSD {validPrice && a ? `${money(a.total)} at ${pc(a.rate)}` : '—'}
           </div>
         </div>
       </div>
@@ -411,7 +458,7 @@ function Duty() {
           <input type="date" value={bought} onChange={e => setBought(e.target.value)} />
         </label>
       </div>
-      {s && (
+      {s && validPrice && (
         <>
           <div className="figwrap" style={{ marginTop: 20 }}>
             <div>
@@ -434,6 +481,15 @@ function Duty() {
             you bought, not on when you sell — this uses the one in force on your purchase date.</div>
         </>
       )}
+      <dl className="resultguide" aria-label="Understand the stamp-duty result">
+        <div><dt>What changed it</dt><dd>The higher of price or market value sets the base. Buyer profile and
+          property count set ABSD; acquisition date selects the SSD schedule.</dd></div>
+        <div><dt>What this cannot know</dt><dd>FTA treatment, remission eligibility, exemptions, part-shares or
+          whether IRAS will use a higher market value. Those can materially change the bill.</dd></div>
+        <div className="resultnext"><dt>Next useful step</dt><dd>
+          <a href="/plan">Put the duties inside the full purchase budget →</a>
+        </dd></div>
+      </dl>
     </>
   );
 }
@@ -456,30 +512,37 @@ function Mortgage() {
   const [rate, setRate] = useState(2.6);
   const [years, setYears] = useState(25);
   const [extra, setExtra] = useState(0);
+  const valid = [amount, rate, years, extra].every(v => String(v).trim() !== '' && Number.isFinite(Number(v)))
+    && Number(amount) > 0 && Number(rate) >= 0 && Number(years) >= 1 && Number(years) <= 40
+    && Number.isInteger(Number(years)) && Number(extra) >= 0;
 
   const a = useMemo(
-    () => amortise({ principal: Number(amount), annualRate: Number(rate) / 100, years: Number(years), extraMonthly: Number(extra) }),
-    [amount, rate, years, extra]);
+    () => valid ? amortise({ principal: Number(amount), annualRate: Number(rate) / 100, years: Number(years), extraMonthly: Number(extra) }) : null,
+    [amount, rate, years, extra, valid]);
   const saving = useMemo(
-    () => (Number(extra) > 0
+    () => (valid && Number(extra) > 0
       ? extraPaymentSaving({ principal: Number(amount), annualRate: Number(rate) / 100, years: Number(years), extraMonthly: Number(extra) })
       : null),
-    [amount, rate, years, extra]);
+    [amount, rate, years, extra, valid]);
+  const higherRate = useMemo(() => valid ? amortise({ principal: Number(amount),
+    annualRate: (Number(rate) + 1) / 100, years: Number(years) }) : null,
+  [amount, rate, years, valid]);
 
   return (
     <>
       <div className="planform">
         <label><span>Loan amount</span>
-          <input type="number" step="10000" value={amount} onChange={e => setAmount(e.target.value)} /></label>
+          <input type="number" min="1" step="any" value={amount} onChange={e => setAmount(e.target.value)} /></label>
         <label><span>Interest rate, % a year</span>
-          <input type="number" step="0.05" value={rate} onChange={e => setRate(e.target.value)} /></label>
+          <input type="number" min="0" step="any" value={rate} onChange={e => setRate(e.target.value)} /></label>
         <label><span>Over how many years</span>
-          <input type="number" step="1" value={years} onChange={e => setYears(e.target.value)} /></label>
+          <input type="number" min="1" max="40" step="1" value={years} onChange={e => setYears(e.target.value)} /></label>
         <label><span>Paying extra each month</span>
-          <input type="number" step="100" value={extra} onChange={e => setExtra(e.target.value)} /></label>
+          <input type="number" min="0" step="any" value={extra} onChange={e => setExtra(e.target.value)} /></label>
       </div>
 
-      {!a ? <p className="hint" style={{ marginTop: 18 }}>Enter a loan amount and a term.</p>
+      {!a ? <p className="hint" role="status" style={{ marginTop: 18 }}>Enter a positive loan amount, a term of 1–40 whole years,
+        and a rate and extra payment of zero or more. Fill every field; enter 0 if you are not paying extra.</p>
         : a.impossible ? (
         <div className="warn" style={{ marginTop: 18 }}>
           <p style={{ margin: 0 }}>
@@ -491,11 +554,11 @@ function Mortgage() {
         <>
           <div className="storeygrid" style={{ marginTop: 22 }}>
             <div className="storeycard">
-              <span className="filtn">Every month</span>
-              <b className="statnum">{money(a.instalment)}</b>
+              <span className="filtn">{Number(extra) > 0 ? 'Monthly payment, including extra' : 'Monthly repayment'}</span>
+              <b className="statnum">{money(a.paying)}</b>
               <p className="hint">
-                {Number(extra) > 0 ? <>Plus {money(Number(extra))} extra, so {money(a.paying)} in all. </> : null}
-                {Math.round(a.firstMonthInterestShare * 100)}% of the first instalment is interest.
+                {Number(extra) > 0 ? <>{money(a.instalment)} scheduled + {money(Number(extra))} extra. </> : null}
+                {Math.round(a.firstMonthInterestShare * 100)}% of your first payment goes to interest.
               </p>
             </div>
             <div className="storeycard">
@@ -516,7 +579,23 @@ function Mortgage() {
             </div>
           )}
 
-          <h2 className="sh" style={{ marginTop: 24 }}><span>Year by year</span></h2>
+          <dl className="resultguide" aria-label="Understand your repayment">
+            <div><dt>If the rate were one percentage point higher</dt>
+              <dd>At <b>{(Number(rate) + 1).toFixed(2)}% a year</b>, the scheduled payment would be{' '}
+                <b>{money(higherRate?.instalment)} a month</b> — {money((higherRate?.instalment ?? 0) - a.instalment)} more,
+                before optional extra payments. This compares the same loan and term at two constant rates.</dd></div>
+            <div><dt>What the calculation assumes</dt><dd>The rate stays at {Number(rate)}% for the full term.
+              Extra payments reduce the balance each month. Repricing, fees and prepayment charges are excluded;
+              check your loan package before relying on the saving.</dd></div>
+            <div className="resultnext"><dt>Next useful step</dt><dd>
+              <a href="/plan">Check the loan against your income and purchase budget →</a>
+            </dd></div>
+          </dl>
+
+          <details style={{ marginTop: 24 }}>
+          <summary>See the year-by-year repayment schedule</summary>
+          <p className="hint">Interest, principal repaid and the balance at each year end. Amounts are rounded for display.</p>
+          <div style={{ overflowX: 'auto' }} role="region" aria-label="Year-by-year repayment schedule" tabIndex={0}>
           <table className="bandtable">
             <thead>
               <tr>
@@ -535,13 +614,8 @@ function Mortgage() {
               ))}
             </tbody>
           </table>
-
-          <div className="note" style={{ marginTop: 18 }}>
-            <b>This is the rate you are offered, not the rate you are assessed at.</b> A bank tests
-            whether you could still service the loan at the MAS medium-term floor, which is higher —
-            that is what decides how much you can borrow. What you pay each month is the figure
-            above.
           </div>
+          </details>
         </>
       )}
     </>

@@ -91,8 +91,8 @@ export default async function Page({ searchParams }) {
           CPF and $20,000 in the bank can still fail to complete.
         </div>
         <div className="note">
-          <b>Nothing here is stored or sent.</b> The figures stay in the page. There is no sign-up,
-          no email wall and no saved profile, on this or on any tool on this site.
+          <b>The calculator keeps no profile.</b> Its figures stay in the page unless you deliberately
+          share or request a copy. There is no sign-up and no email wall on this or any other tool.
         </div>
       </section>
 

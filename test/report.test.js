@@ -182,7 +182,8 @@ test('the page stops claiming nothing is ever sent anywhere', () => {
   const src = code('components', 'Ledger.jsx');
   assert.doesNotMatch(src, /nothing on this page is saved or sent anywhere\./,
     'the page promises nothing is sent while offering to email the reader a copy');
-  assert.match(src, /unless you ask for\s*\n?\s*the emailed copy/);
+  assert.match(src, /figures leave the browser only if you ask for\s*\n?\s*the emailed copy/i);
+  assert.match(src, /WhatsApp handoff includes no figures/i);
 });
 
 /* ── THE OTHER TWO REPORTS ───────────────────────────────────────────────────
@@ -274,7 +275,9 @@ test('no page still promises that nothing is ever sent anywhere', () => {
     const src = code(...f.split('/'));
     assert.doesNotMatch(src, /Nothing here is sent anywhere|nothing on this page is saved or sent anywhere/,
       `${f} promises nothing is sent while offering to email a copy`);
-    assert.match(src, /unless you ask for the emailed copy|unless you ask for\s*\n?\s*the emailed copy/,
+    assert.match(src, /figures leave the browser only if you ask for\s*\n?\s*the emailed copy/i,
       `${f} stopped naming the one thing that does leave the browser`);
+    assert.match(src, /WhatsApp handoff includes no figures/i,
+      `${f} does not distinguish a generic handoff from transmitting calculator figures`);
   }
 });

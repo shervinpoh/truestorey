@@ -5,6 +5,7 @@ import path from 'node:path';
 import { score, scoreCheck, CHECKS, BANDS, totalPossible } from '../lib/blindspot/rubric.js';
 import { pricePercentile, nearbyComps, leaseFinding, leaseYearsLeft, tenureKey, supplyInTown, mopCoverage } from '../lib/blindspot/measure.js';
 import { relativity, annualDecay } from '../lib/calc/lease.js';
+import { viewingQuestions } from '../lib/blindspot/viewing.js';
 
 /**
  * The rubric is the reason this tool is allowed to publish a number at all.
@@ -28,6 +29,30 @@ test('a check with no data is skipped, never scored as zero risk', () => {
   assert.equal(partial.max, CHECKS.price.max, 'the denominator must only count checks that ran');
   assert.equal(partial.points, 3);
   for (const s of partial.skipped) assert.ok(s.needs, `${s.key} does not say what it needs`);
+});
+
+test('the viewing brief uses the result without assigning another score', () => {
+  const report = score({ price: 0.95, lease: 75, liquidity: 9, supply: 0.08 });
+  const questions = viewingQuestions(report);
+
+  assert.equal(questions.length, 3);
+  assert.equal(questions[0].key, 'price', 'the strongest flag is not the first question');
+  assert.equal(questions[1].status, 'skipped', 'a check that could not run disappeared from the brief');
+  assert.equal(questions[2].key, 'inside', 'the public-data result forgot the physical unit');
+  for (const q of questions) {
+    assert.ok(q.question.endsWith('?'), `${q.key} is not phrased as a question`);
+    assert.equal('points' in q, false, `${q.key} invented points outside the rubric`);
+  }
+});
+
+test('a zero-point result still produces useful viewing questions', () => {
+  const report = score({ price: 0.2, lease: 9999, liquidity: 9, supply: 0.01, gls: 0, view: 0 },
+    { liquidity: { rate: 9, kind: 'HDB', median: 3.4, quieter: null, sales: 12 } });
+  const questions = viewingQuestions(report);
+
+  assert.deepEqual(questions.map(q => q.key), ['price', 'liquidity', 'inside']);
+  assert.ok(questions.every(q => q.status !== 'flagged'),
+    'a zero-point check was presented as a flag');
 });
 
 test('the denominator is what ran, and the full score needs every check', () => {
@@ -279,8 +304,10 @@ test('MOP supply is not scored against a private home, and says why', async () =
   const { analyse } = await import('../lib/blindspot/analyse.js');
   const priv = analyse({ href: '/condo/perfect-ten', askPrice: 3_200_000, areaSqft: 1076 });
   assert.ok(!priv.checks.some(c => c.key === 'supply'), 'supply must not score a condominium');
-  const skipped = priv.skipped.find(s => s.key === 'supply');
-  assert.match(skipped.needs, /not a measure of supply in the private market/i);
+  assert.ok(!priv.skipped.some(s => s.key === 'supply'), 'inapplicable is not a data failure');
+  const inapplicable = priv.notApplicable.find(s => s.key === 'supply');
+  assert.match(inapplicable.reason, /not private condominiums/i);
+  assert.match(inapplicable.reason, /excluded from the score/i);
 
   // It still scores where it means something.
   const hdb = analyse({ href: '/hdb/bishan/242-bishan-st-22', askPrice: 1_200_000, areaSqft: 1292 });

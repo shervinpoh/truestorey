@@ -105,7 +105,7 @@
  --ink:#ECEEF0; --ink2:#AFB6BD; --mute:#79828B;
  --line:#232830; --line2:#191D22;
  --acc:#22D3DD; --on-acc:#04262A; --acc-soft:#0A2E32; --acc-line:#22D3DD; --acc-ink:#5CE1E8;
- --up:#4BBD8D; --dn:#E8836A; --upS:#0F2620; --dnS:#2A1714;
+ --up:#4BBD8D; --dn:#E8836A; --upS:#0F2620; --dnS:#2A1714; --warn:#E8836A;
  --blue:var(--acc-ink); --bsoft:var(--acc-soft); --bdeep:var(--acc-line); --on-blue:var(--on-acc);
  --w1:#ECEEF0; --w2:#A9AEB2; --w3:#79828B; --w4:#565B5F; --w5:#33383B;
 }
@@ -258,6 +258,15 @@ a{color:var(--ink)}
  .gnav .navrow{display:none}
  .gnav .navmenu{display:block}
 }
+/* A 375px phone cannot carry the wordmark, a useful parent link and a menu
+   that repeats the active group. The parent is the information worth keeping;
+   the menu still says "Menu" and the open panel names every group. At the
+   very narrow 320px edge the arrow keeps its full accessible label while the
+   visible parent name yields to the page breadcrumb immediately below. */
+@media(max-width:420px){
+ .gnav .in{gap:8px;padding-inline:14px}
+ .gnav .navwhere{display:none}
+}
 
 header.mast{padding:30px 0 16px}
 .brand{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
@@ -285,6 +294,10 @@ header.mast{padding:30px 0 16px}
 .big span,.big small{font-size:.24em;font-weight:500;letter-spacing:-.01em;color:var(--mute)}
 .figside{padding-bottom:5px}
 .figside .r{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--t-small);color:var(--ink2);line-height:1.75}
+.record-figure{margin-bottom:16px}
+.record-range b,.record-range span{display:block}
+.record-range b{font-weight:500;color:var(--ink)}
+.record-range span{line-height:1.55}
 /* Rule 4 inverted on a phone. `auto 1fr` gave the side column too little width,
    so "$581 — $745 psf / S$296k median price" wrapped to three lines, and
    `align-items:end` then pinned the figure to the bottom of that taller row —
@@ -355,6 +368,14 @@ header.mast{padding:30px 0 16px}
 .seg button:hover{background:var(--sunk);color:var(--ink)}
 .seg button[aria-pressed="true"]{background:var(--acc);color:var(--on-acc);font-weight:600}
 .seg button:disabled{opacity:.35;cursor:not-allowed}
+/* Four flat types otherwise wrap 3+1 at 320px, making the last choice look
+   detached from the group. Keep all four choices equally sized on that edge. */
+@media(max-width:360px){
+ .storeytypes.four{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .storeytypes.four button{min-width:0;border-bottom:1px solid var(--edge)}
+ .storeytypes.four button:nth-child(even){border-right:0}
+ .storeytypes.four button:nth-last-child(-n+2){border-bottom:0}
+}
 input,textarea,select{width:100%;padding:11px 12px;border:1px solid var(--edge);background:var(--paper);
  color:var(--ink);font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--t-small);-webkit-appearance:none;appearance:none}
 input::placeholder{color:var(--mute)}
@@ -527,9 +548,6 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--ink)
 .txn>div>.lab{display:block;margin-top:1px;line-height:1.3}
 .txn{display:flex;justify-content:space-between;gap:12px;padding:8px 0;
  border-bottom:1px solid var(--line2);font-size:var(--t-small);line-height:1.3}
-/* A KPI cell with nothing to report. --mute, not a zero: a 0% spread reads
-   as a narrow market, and an em dash reads as what it is. */
-.kpi3 .kpinone{color:var(--mute)}
 .txn b{font-weight:600;display:block;font-size:var(--t-small);letter-spacing:-.015em;line-height:1.3}
 /* The count of identical filed sales. --mute on a hairline, not an accent:
    it is a fact about the filing, not live or selected data. */
@@ -556,6 +574,26 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--ink)
 .forkcol a:hover b{box-shadow:inset 0 -2px 0 var(--acc)}
 .forkcol a:hover span{color:var(--ink)}
 @media(max-width:640px){.fork{grid-template-columns:1fr}}
+
+/* A chapter marker, not another card. It tells a reader why the following
+   modules exist and lets the strong record summary remain the page's centre. */
+.record-chapter{margin:42px 0 4px;padding:25px 0 0;border-top:2px solid var(--ink)}
+.record-chapter .lab{margin:0 0 7px}
+.record-chapter h2{font-size:var(--t-display);line-height:1.04;letter-spacing:-.035em;max-width:19ch}
+.record-chapter>p:last-child{font-size:var(--t-body);line-height:1.6;color:var(--ink2);max-width:62ch;margin:11px 0 0}
+
+/* The record already prints the source, period and access date beside its
+   figures. Full licence wording remains on the page for inspection without
+   turning two attribution clauses into the loudest paragraph on a phone. */
+.licence-details{margin:14px 0 0;padding-top:10px;border-top:1px solid var(--line2)}
+.licence-details>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;list-style:none;
+  color:var(--mute);font-size:var(--t-small)}
+.licence-details>summary::-webkit-details-marker{display:none}
+.licence-details>summary:before{content:"+ ";font-family:"IBM Plex Mono",monospace;margin-right:6px}
+.licence-details[open]>summary:before{content:"− "}
+.licence-details>div{padding:3px 0 8px}
+.licence-details .lab{display:block;line-height:1.65;margin-top:6px}
+@media print{.licence-details>summary{display:none}.licence-details>*{display:block!important}}
 /* Two sticky bars above these now, so an anchor has to clear both. */
 /* ── EVERY SECTION, NOT A HAND-KEPT LIST ─────────────────────────────────
    This was six ids typed out, and a record page has ten sections. #nearbysales,
@@ -649,7 +687,10 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 .fcol a:hover{color:var(--ink);box-shadow:inset 0 -2px 0 var(--acc)}
 .fsay p{font-size:var(--t-small);color:var(--ink2);line-height:1.6;margin:8px 0 0;max-width:44ch}
 .fsay .ffree{color:var(--ink);font-weight:600}
-.flegal{display:block;margin:30px 0 0;padding:14px 0 0;border-top:1px solid var(--line2);line-height:1.9}
+.fsecondary{display:flex;gap:9px 22px;flex-wrap:wrap;margin:25px 0 0;padding:13px 0 0;border-top:1px solid var(--line2)}
+.fsecondary a{font-size:var(--t-small);color:var(--ink2);text-decoration:none}
+.fsecondary a:hover{color:var(--ink);box-shadow:inset 0 -2px 0 var(--acc)}
+.flegal{display:block;margin:14px 0 0;padding:14px 0 0;border-top:1px solid var(--line2);line-height:1.9}
 @media(max-width:820px){.fnav{grid-template-columns:1fr 1fr}}
 @media(max-width:440px){.fnav{grid-template-columns:1fr;gap:20px}}
 
@@ -731,6 +772,7 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
    gutter is gone, which reads as a broken layout rather than as a table they
    dragged. */
 .tablewrap{overflow-x:auto;overscroll-behavior-x:contain;margin:0 0 20px}
+.tablewrap:focus-visible{outline:2px solid var(--acc-line);outline-offset:2px}
 .post table{border-collapse:collapse;width:100%;font-size:var(--t-small)}
 .post th{text-align:left;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--t-micro);letter-spacing:.12em;
  text-transform:uppercase;color:var(--mute);font-weight:400;padding:0 12px 7px 0;border-bottom:1px solid var(--ink)}
@@ -926,24 +968,17 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 @media(max-width:480px){.deck{grid-template-columns:1fr}}
 @media(max-width:520px){.deckcard{min-height:96px;padding:14px 14px 15px}}
 
-/* ── homepage lede · the writing, below the data it is built on ────────── */
-.lede{display:grid;grid-template-columns:1.45fr 1fr;gap:0;border-top:2px solid var(--ink);
- border-bottom:1px solid var(--line);margin-top:34px;padding:26px 0}
-/* The article headline is an h2 now. The homepage h1 says what the site is,
-   which is what a first-time reader and a crawler both need from it — an
-   opinion piece's title in that slot said neither. */
-.ledetitle{font-weight:700;font-size:clamp(1.6rem,4.2vw,2.15rem);line-height:1.04;
- letter-spacing:-.04em;margin:12px 0 10px;text-wrap:balance}
-.ledetitle a{color:inherit;text-decoration:none}
-.ledetitle a:hover{box-shadow:inset 0 -4px 0 var(--acc)}
-.ledemain{padding-right:30px;border-right:1px solid var(--line)}
-.ledeside{padding-left:30px}
+/* ── lead prose ───────────────────────────────────────────────────────────
+   .lede once named a two-column homepage editorial module. That module was
+   removed, but the class remained on ordinary <p> elements across Tools,
+   About, Privacy, Methodology, Refusals, Blindspot and the land trail. The
+   stale grid, 2px rule and 34px margin turned each paragraph into a half-width
+   empty layout with duplicate dividers. It is a prose role now: wider and a
+   touch quieter than body copy, without inventing structure around itself. */
+.lede{max-width:70ch;margin:12px 0 0;font-size:var(--t-body);line-height:1.65;color:var(--ink2)}
 .statcard{border:1px solid var(--line);padding:15px 16px}
 .statrow{display:flex;justify-content:space-between;align-items:baseline;margin-top:12px;gap:10px}
 .statnum{font-size:2.1rem;font-weight:800;letter-spacing:-.045em;line-height:1}
-@media(max-width:820px){.lede{grid-template-columns:1fr;padding-bottom:20px}
- .ledemain{padding-right:0;border-right:0;padding-bottom:22px;border-bottom:1px solid var(--line)}
- .ledeside{padding-left:0;padding-top:22px}}
 
 /* ── price map ─────────────────────────────────────────────────────────── */
 .mapwrap{position:relative;margin-top:18px;border:1px solid var(--line);background:var(--card);
@@ -1093,10 +1128,44 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 .plansumfig{margin-bottom:14px}
 .plansumfig .statnum,.plansumfig .big{display:block}
 .plansumfig .hint{margin:6px 0 0;font-size:var(--t-small);line-height:1.5}
+.resultstate{margin:0 0 14px;padding:0 0 12px;border-bottom:1px solid var(--line)}
+.resultstate .lab{display:block;margin-bottom:5px}
+.resultstate b{display:block;font-size:var(--t-body);line-height:1.35;letter-spacing:-.015em}
 .plansumrows{border-top:1px solid var(--line);padding-top:10px}
 .plansumrows div{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:var(--t-small);
  color:var(--ink2)}
 .plansumrows b{color:var(--ink);font-weight:600}
+/* The figure is the answer; these three rows say how to use it. Keeping them
+   inside the sticky summary means the explanation follows the changing number
+   instead of appearing several sections later as another disclaimer block. */
+.resultguide{margin:12px 0 0;padding:0;border-top:1px solid var(--line)}
+.resultguide>div{padding:10px 0;border-bottom:1px solid var(--line2)}
+.resultguide dt{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--t-micro);
+ letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.resultguide dd{margin:4px 0 0;font-size:var(--t-small);line-height:1.48;color:var(--ink2)}
+.resultguide dd b{color:var(--ink);font-weight:600}
+.resultguide .resultnext a{display:block;color:var(--acc-ink);font-weight:700;text-decoration:none}
+.resultguide .resultnext a:hover,.resultguide .resultnext a:focus-visible{text-decoration:underline;
+ text-underline-offset:3px}
+.resultguide .resultnext span{display:block;margin-top:3px;color:var(--mute)}
+/* A dense result cannot carry another three paragraphs inside a 300px sticky
+   rail without becoming taller than the viewport. The hierarchy is unchanged;
+   it simply gets the full measure immediately below the figures. Ruled, not a
+   new card, so it reads as the continuation of the answer. */
+.resultguide.resultguide-wide{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+ margin:20px 0 0;border-bottom:1px solid var(--line)}
+.resultguide-wide>div{padding:13px 16px 14px;border-bottom:0;border-left:1px solid var(--line2)}
+.resultguide-wide>div:first-child{border-left:0;padding-left:0}
+.resultguide-wide>div:last-child{padding-right:0}
+.resultshare-wide{max-width:620px}
+@media(max-width:760px){
+ .resultguide.resultguide-wide{grid-template-columns:1fr}
+ .resultguide-wide>div{padding:11px 0;border-left:0;border-bottom:1px solid var(--line2)}
+ .resultguide-wide>div:last-child{border-bottom:0}
+}
+@media(max-width:520px){
+ .proceedsdetail{grid-template-columns:1fr}
+}
 /* Sending a result on. Under the figures it sends, and quiet: two ghost buttons
    and the one sentence about where the figures go. */
 .shareresult{border-top:1px solid var(--line);margin-top:12px;padding-top:12px}
@@ -1120,6 +1189,37 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 .emailreport-row .cta{width:auto;flex:0 0 auto;padding:13px 20px}
 .emailreport-row .cta[disabled]{opacity:.55;cursor:not-allowed}
 @media(max-width:560px){.emailreport{padding:16px}.emailreport-row .cta{width:100%}}
+
+/* The calculator-to-human handoff is a field note, not another dashboard card.
+   Its narrow vertical mark is the one expressive move: an inspection-margin
+   annotation signed by the licensed person behind the site. Everything else
+   stays in the existing paper, ink and deep-teal system. */
+.resultbridge{display:grid;grid-template-columns:72px minmax(0,1fr);margin:28px 0 4px;
+ border-top:2px solid var(--ink);border-bottom:1px solid var(--ink);background:var(--card)}
+.resultbridge-mark{display:flex;flex-direction:column;justify-content:center;align-items:center;
+ gap:2px;padding:18px 10px;border-right:1px solid var(--line);background:var(--acc);color:white;
+ font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--t-micro);font-weight:500;
+ letter-spacing:.12em;line-height:1.35;writing-mode:vertical-rl;transform:rotate(180deg)}
+.resultbridge-copy{padding:20px 22px 18px;max-width:780px}
+.resultbridge-copy h2{margin:5px 0 8px;font-size:clamp(1.45rem,3vw,2.2rem);line-height:1.06;
+ letter-spacing:-.035em;font-variation-settings:"wdth" 88}
+.resultbridge-copy>p{max-width:62ch;margin:0;color:var(--ink2);line-height:1.55}
+.resultbridge-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin-top:16px}
+.resultbridge-actions .cta{width:auto;margin:0;padding:12px 17px}
+.resultbridge-next{font-weight:700;color:var(--acc-ink);text-decoration:none;padding:10px 0}
+.resultbridge-next:hover,.resultbridge-next:focus-visible{text-decoration:underline;text-underline-offset:3px}
+.resultbridge-copy .resultbridge-privacy{margin-top:10px;font-family:"IBM Plex Mono",ui-monospace,monospace;
+ font-size:var(--t-micro);line-height:1.45;color:var(--mute)}
+@media(max-width:560px){
+ .resultbridge{grid-template-columns:1fr}
+ .resultbridge-mark{writing-mode:horizontal-tb;transform:none;flex-direction:row;justify-content:flex-start;
+  padding:8px 14px;border-right:0;border-bottom:1px solid var(--line)}
+ .resultbridge-copy{padding:17px 16px 16px}
+ .resultbridge-copy h2{font-size:1.6rem}
+ .resultbridge-actions{align-items:stretch;gap:6px}
+ .resultbridge-actions .cta{width:100%;text-align:center}
+ .resultbridge-next{display:block;width:100%}
+}
 
 /* The sticky bottom bar is the small-screen form of the same idea. */
 .planbar{display:none}
@@ -1363,6 +1463,27 @@ input[type=range]:active::-moz-range-thumb{transform:scale(1.15);cursor:grabbing
 /* The score is always rendered with its denominator, and the denominator is
    what actually ran. A bare number here would be the verdict this tool exists
    not to give. */
+.toolsteps{list-style:none;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 20px;padding:0}
+.toolsteps li{display:flex;align-items:center;gap:9px;min-height:44px;padding:8px 3px;
+ border-bottom:2px solid var(--line);color:var(--mute)}
+.toolsteps li>span{display:grid;place-items:center;width:24px;height:24px;border:1px solid var(--line);
+ border-radius:50%;font:var(--t-micro)/1 "IBM Plex Mono",monospace}
+.toolsteps li b{font-size:var(--t-small);font-weight:600}
+.toolsteps li.active{border-color:var(--acc);color:var(--ink)}
+.toolsteps li.active>span{border-color:var(--acc);background:var(--acc);color:var(--on-acc)}
+.toolsteps li.done{border-color:var(--edge);color:var(--ink2)}
+.toolsteps li.done>span{border-color:var(--acc);color:var(--acc-ink)}
+.blindspot-listing{margin-top:20px;padding-top:20px;border-top:1px solid var(--line2)}
+.blindspot-stephead{display:flex;justify-content:space-between;align-items:baseline;gap:20px}
+.blindspot-stephead p{margin:0;font-size:var(--t-small);line-height:1.5;color:var(--ink2);max-width:48ch}
+.blindspot-status{min-height:1.55em;margin:9px 0 0;color:var(--mute);font-size:var(--t-small);line-height:1.55}
+@media(max-width:620px){
+  .toolsteps{gap:5px}
+  .toolsteps li{align-items:flex-start;gap:6px;flex-direction:column}
+  .toolsteps li b{font-size:var(--t-micro);line-height:1.3}
+  .blindspot-stephead{display:block}
+  .blindspot-stephead p{margin-top:6px}
+}
 .scorewrap{display:grid;grid-template-columns:220px 1fr;gap:1px;background:var(--line);
  border:1px solid var(--line);margin-top:18px}
 .scorenum,.scoresay{background:var(--paper);padding:16px 18px 18px}
@@ -1374,6 +1495,35 @@ input[type=range]:active::-moz-range-thumb{transform:scale(1.15);cursor:grabbing
 .scorebar i{flex:1 1 0;height:9px;background:var(--line);display:block}
 .scorebar i.on{background:var(--acc)}
 @media(max-width:640px){.scorewrap{grid-template-columns:1fr}}
+
+/* A report used to stop at the arithmetic, then repeat every check in detail.
+   This bridge turns the strongest flag and one missing measurement into
+   questions for the viewing without pretending those questions are scored
+   evidence. The numbered rows are one brief, not three marketplace cards. */
+.viewingbrief{margin:24px 0 6px;border:1px solid var(--line);border-radius:var(--r2);
+ background:var(--card);overflow:hidden}
+.viewingbrief-head{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);
+ gap:28px;align-items:end;padding:20px 22px;background:var(--sunk)}
+.viewingbrief-head h2{margin:5px 0 0;font-size:clamp(1.45rem,3vw,2rem);line-height:1.06;
+ letter-spacing:-.035em}
+.viewingbrief-head>p{margin:0;max-width:48ch;color:var(--ink2);font-size:var(--t-small);line-height:1.55}
+.viewingbrief ol{list-style:none;margin:0;padding:0 22px}
+.viewingbrief li{display:grid;grid-template-columns:44px minmax(0,1fr);gap:14px;padding:15px 0;
+ border-top:1px solid var(--line2)}
+.viewingbrief-num{font:600 var(--t-small)/1.3 "IBM Plex Mono",ui-monospace,monospace;color:var(--acc-ink)}
+.viewingbrief-label{display:flex;align-items:baseline;justify-content:space-between;gap:14px}
+.viewingbrief-label .lab{color:var(--ink2)}
+.viewingbrief-state{font:var(--t-micro)/1.35 "IBM Plex Mono",ui-monospace,monospace;color:var(--mute);
+ white-space:nowrap}
+.viewingbrief-state.skipped{color:var(--warn)}
+.viewingbrief li p{margin:5px 0 0;max-width:70ch;color:var(--ink);font-size:var(--t-body);line-height:1.5}
+@media(max-width:640px){
+ .viewingbrief-head{grid-template-columns:1fr;gap:10px;padding:18px}
+ .viewingbrief ol{padding:0 18px}
+ .viewingbrief li{grid-template-columns:32px minmax(0,1fr);gap:10px}
+ .viewingbrief-label{display:block}
+ .viewingbrief-state{display:block;margin-top:3px;white-space:normal}
+}
 
 .checkrow{padding:13px 0;border-bottom:1px solid var(--line2)}
 .checkrow .ch{display:flex;gap:12px;align-items:baseline;justify-content:space-between}
@@ -1523,8 +1673,31 @@ sup.cite a:hover{text-decoration:underline}
 .nextq button:before{content:"→";font-family:"IBM Plex Mono",ui-monospace,monospace;
  color:var(--acc);margin-right:9px}
 .nextq button:hover{border-color:var(--acc);color:var(--ink);background:var(--acc-soft)}
-.drop{border:1px dashed var(--line);padding:26px 20px;text-align:center;background:var(--sunk)}
-.dropimg{max-width:100%;max-height:340px;display:block;margin:0 auto;border:1px solid var(--line)}
+.drop{border:1px dashed var(--edge);border-radius:var(--r2);padding:32px 24px;text-align:center;background:var(--sunk)}
+.dropimg{max-width:100%;max-height:420px;display:block;margin:0 auto;border:1px solid var(--line)}
+.floorplan-empty .lab{display:block;margin-bottom:8px}
+.floorplan-empty h2{font-size:var(--t-display);line-height:1.08;letter-spacing:-.035em;margin:0}
+.floorplan-empty p{font-size:var(--t-small);color:var(--ink2);margin:9px 0 0}
+.floorplan-choose.cta{width:auto;min-width:220px;margin-top:18px;padding-inline:24px}
+.floorplan-privacy{font-size:var(--t-micro);color:var(--mute);margin:10px 0 0}
+.floorplan-outcomes{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
+ border:1px solid var(--line);margin-bottom:14px}
+.floorplan-returns{margin-top:24px}
+.floorplan-outcomes>div{display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:baseline;
+ padding:16px;background:var(--card)}
+.floorplan-outcomes span{grid-row:1/3;color:var(--mute);font-size:var(--t-micro)}
+.floorplan-outcomes b{font-size:var(--t-small)}
+.floorplan-outcomes p{font-size:var(--t-small);line-height:1.45;color:var(--ink2);margin:5px 0 0}
+.floorplan-limit{font-size:var(--t-small);line-height:1.55;color:var(--ink2);margin:0 0 17px}
+.floorplan-limit b{color:var(--ink)}
+.floorplan-result>.result-heading{margin:0 0 18px;padding-bottom:18px;border-bottom:2px solid var(--ink)}
+.floorplan-result>.result-heading h2{font-size:var(--t-display);line-height:1.08;letter-spacing:-.035em;
+ margin:7px 0 0;max-width:24ch}
+@media(max-width:620px){
+  .floorplan-outcomes{grid-template-columns:1fr}
+  .drop{padding:27px 18px}
+  .floorplan-choose.cta{width:100%;min-width:0}
+}
 @media(prefers-reduced-motion:reduce){.caret{animation:none}}
 
 /* ── block watch ────────────────────────────────────────────────────────── */
@@ -1549,10 +1722,13 @@ sup.cite a:hover{text-decoration:underline}
  color:var(--mute);text-decoration:none;white-space:nowrap;min-height:44px}
 .backup:hover{color:var(--ink)}
 .backup span{font-size:var(--t-small);line-height:1}
-/* Below the nav's collapse point the three headings become a disclosure and
-   space is tight, so this keeps the arrow and drops nothing else — it is the
-   phone where the breadcrumb being off-screen actually hurts. */
+/* Below the nav's collapse point the three headings become a disclosure. The
+   narrower edge is handled with the menu rules above so this link never makes
+   the header wider than the viewport. */
 @media(max-width:560px){ .backup{margin-left:10px;font-size:var(--t-micro)} }
+@media(max-width:340px){
+ .backup{width:44px;margin-left:0;gap:0;justify-content:center;font-size:0}
+}
 
 /* ── the progressive payment ladder ─────────────────────────────────────── */
 /* A ladder, not a table: the order is the content, and a percentage column
@@ -1773,6 +1949,97 @@ sup.cite a:hover{text-decoration:underline}
 .sitmore li{margin:0 0 6px;font-size:var(--t-small)}
 @media(max-width:820px){ .situations{grid-template-columns:1fr} }
 
+/* /tools is a router, not another inventory. Each path is one target; the
+   recommendations live on the path page, and the complete catalogue stays
+   available below without competing with the first decision. */
+.toolpaths{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}
+.toolpath{display:flex;flex-direction:column;min-height:250px;padding:18px;border:1px solid var(--line);
+  border-radius:var(--r2);background:var(--card);color:inherit;text-decoration:none}
+.toolpath .lab{margin-bottom:10px}
+.toolpath h3{font-size:var(--t-lead);line-height:1.2;margin:0}
+.toolpath p{font-size:var(--t-small);line-height:1.55;color:var(--ink2);margin:9px 0 14px}
+.toolpath-flow{display:block;margin:auto 0 15px;padding:11px 0;border-block:1px solid var(--line2);
+  color:var(--mute);font-size:var(--t-small);line-height:1.55}
+.toolpath>b{display:flex;justify-content:space-between;gap:12px;color:var(--acc-ink);
+  font-size:var(--t-small);font-weight:600}
+.toolpath:hover,.toolpath:focus-visible{border-color:var(--edge);box-shadow:var(--lift)}
+@media(max-width:820px){.toolpaths{grid-template-columns:1fr}.toolpath{min-height:0}}
+
+/* A situation page is advice, not another index. The lead action carries one
+   clear point of view in Shervin's voice; the two follow-ups return to the
+   site's quieter ledger rows. This is deliberately a ruled field rather than
+   a large marketplace card, so it feels editorial rather than promotional. */
+.situation-first{margin-top:0;padding:19px 20px 20px;border:1px solid var(--line);
+  border-left:3px solid var(--acc);border-radius:var(--r2);background:var(--card)}
+.situation-first h2{max-width:28ch;margin:7px 0 8px;font-size:clamp(1.55rem,3vw,2.25rem);
+  line-height:1.08;letter-spacing:-.035em}
+.situation-first>p{max-width:61ch;margin:0;color:var(--ink2);font-size:var(--t-body);line-height:1.6}
+.situation-first .situation-get{margin-top:13px;padding-top:12px;border-top:1px solid var(--line2);
+  font-size:var(--t-small)}
+.situation-get b{color:var(--ink)}
+.situation-cta{display:flex;align-items:center;justify-content:space-between;gap:18px;width:100%;
+  min-height:48px;margin-top:17px;padding:12px 15px;border:1px solid var(--acc);border-radius:var(--r1);
+  background:var(--acc);color:var(--paper);font-size:var(--t-small);font-weight:700;text-decoration:none}
+.situation-cta:hover,.situation-cta:focus-visible{background:var(--acc-hi);border-color:var(--acc-hi)}
+.situation-next{margin-top:26px}
+@media(max-width:560px){
+  .situation-first{padding:17px 16px 18px}
+  .situation-first h2{font-size:1.65rem}
+}
+
+/* Secondary utilities stay reachable and deep-linkable without putting every
+   input and route on the first screen. A native details element keeps this
+   usable with no JavaScript and gives keyboard users a real disclosure. */
+.tooldrawer{border:1px solid var(--line);border-radius:var(--r2);background:var(--card)}
+.tooldrawer>summary{position:relative;display:grid;grid-template-columns:1fr minmax(180px,1fr);gap:12px 34px;
+  align-items:center;min-height:76px;padding:14px 52px 14px 17px;cursor:pointer;list-style:none}
+.tooldrawer>summary::-webkit-details-marker{display:none}
+.tooldrawer>summary:after{content:"+";position:absolute;right:18px;top:50%;transform:translateY(-50%);
+  font:500 var(--t-lead)/1 "IBM Plex Mono",monospace;color:var(--acc-ink)}
+.tooldrawer[open]>summary:after{content:"−"}
+.tooldrawer>summary>span:first-child{display:flex;flex-direction:column;gap:3px}
+.tooldrawer>summary .lab{color:var(--mute)}
+.tooldrawer>summary b{font-size:var(--t-body);line-height:1.25}
+.drawersub{font-size:var(--t-small);line-height:1.45;color:var(--ink2)}
+.tooldrawer[open]>summary{border-bottom:1px solid var(--line2)}
+.tooldrawer-body{padding:17px}
+.tooldrawer-body>.lede:first-child{margin-top:0}
+@media(max-width:620px){
+  .tooldrawer>summary{grid-template-columns:1fr;gap:6px;padding-right:46px}
+  .drawersub{max-width:34ch}
+}
+@media print{
+  .tooldrawer>summary:after{display:none}
+  .tooldrawer>*{display:block!important}
+}
+
+/* Full method and safeguard text stays available without becoming a second
+   introduction before the reader reaches the tool. Native disclosure keeps
+   keyboard and no-JS behaviour, and print opens the content automatically. */
+.methoddetails>summary{position:relative;display:grid;grid-template-columns:minmax(180px,.9fr) minmax(220px,1.1fr);
+ gap:16px 34px;align-items:center;min-height:66px;padding:9px 50px 9px 0;cursor:pointer;list-style:none}
+.methoddetails>summary::-webkit-details-marker{display:none}
+.methoddetails>summary:after{content:"+";position:absolute;right:3px;top:50%;transform:translateY(-50%);
+ font:500 var(--t-lead)/1 "IBM Plex Mono",monospace;color:var(--acc-ink)}
+.methoddetails[open]>summary:after{content:"−"}
+.methoddetails>summary>span:first-child{display:flex;flex-direction:column;gap:4px}
+.methoddetails>summary b{font-size:var(--t-lead);line-height:1.2}
+.methoddetails>summary>span:last-child{font-size:var(--t-small);line-height:1.5;color:var(--ink2)}
+.methoddetails-body{padding:18px 0 4px;border-top:1px solid var(--line2)}
+.methoddetails-body>.hint:first-child{margin-top:0}
+.reading-guide dl{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;margin:14px 0 0}
+.reading-guide dl>div{padding:13px 0;border-top:1px solid var(--line2)}
+.reading-guide dt{font-size:var(--t-small);font-weight:700}
+.reading-guide dd{font-size:var(--t-small);line-height:1.5;color:var(--ink2);margin:4px 0 0}
+@media(max-width:620px){
+  .methoddetails>summary{grid-template-columns:1fr;gap:6px;padding-right:42px}
+  .reading-guide dl{grid-template-columns:1fr}
+}
+@media print{
+  .methoddetails>summary:after{display:none}
+  .methoddetails>*{display:block!important}
+}
+
 /* "Browse every tool" closes the menu's own list, so it reads as the way out
    of the three questions rather than as a fourth question. */
 .navdrop .navall b{color:var(--mute)}
@@ -1797,11 +2064,24 @@ sup.cite a:hover{text-decoration:underline}
 .toolintro dt{font-size:var(--t-micro);letter-spacing:.06em;text-transform:uppercase;color:var(--mute);
   white-space:nowrap;padding-top:2px}
 .toolintro dd{margin:0;font-size:var(--t-small);color:var(--ink2);line-height:1.55}
+.toolintro.compact{padding:0;overflow:hidden}
+.toolintro.compact>summary{position:relative;display:flex;align-items:center;gap:12px 22px;min-height:48px;
+ padding:10px 44px 10px 14px;cursor:pointer;list-style:none}
+.toolintro.compact>summary::-webkit-details-marker{display:none}
+.toolintro.compact>summary:after{content:"+";position:absolute;right:15px;top:50%;transform:translateY(-50%);
+ font:500 var(--t-body)/1 "IBM Plex Mono",monospace;color:var(--acc-ink)}
+.toolintro.compact[open]>summary:after{content:"−"}
+.toolintro.compact>summary span{font:var(--t-micro)/1.3 "IBM Plex Mono",monospace;letter-spacing:.06em;
+ text-transform:uppercase;color:var(--mute);white-space:nowrap}
+.toolintro.compact>summary b{font-size:var(--t-small);font-weight:600}
+.toolintro-body{padding:12px 14px 14px;border-top:1px solid var(--line2)}
 /* Below 560px the label above its sentence: two columns would leave the
    sentence four words wide. */
 @media(max-width:560px){
   .toolintro dl{grid-template-columns:1fr;gap:2px}
   .toolintro dl>div{display:block;margin-bottom:9px}
+  .toolintro.compact>summary{display:block}
+  .toolintro.compact>summary span{display:block;margin-bottom:3px}
 }
 /* --warn, because a prefilled figure that is not yours is exactly "a value
    this page could not know". Green and red stay reserved. */
@@ -2082,7 +2362,7 @@ sup.cite a:hover{text-decoration:underline}
 .nsstat>div{background:var(--card);padding:12px 14px}
 .nsstat>div>b{display:block;font-size:19px;font-weight:600;letter-spacing:-.02em}
 .nsstat .lab{display:block;margin-top:3px}
-.nstable{width:100%;min-width:min(560px,100%);border-collapse:collapse;font-size:var(--t-small);margin:12px 0 8px}
+.nstable{width:100%;min-width:560px;border-collapse:collapse;font-size:var(--t-small);margin:12px 0 8px}
 .nstable th{text-align:left;padding:0 10px 6px 0;font-size:var(--t-micro);letter-spacing:.06em;
   text-transform:uppercase;color:var(--mute);font-weight:600;border-bottom:1px solid var(--line)}
 .nstable td{padding:8px 10px 8px 0;border-bottom:1px solid var(--line2);color:var(--ink2)}
@@ -2090,15 +2370,20 @@ sup.cite a:hover{text-decoration:underline}
 .nstable .r{text-align:right;font-variant-numeric:tabular-nums}
 .nstable a{color:var(--acc);font-weight:600}
 /* Only the project name wraps. A month broken across two lines as "2026-" and
-   "08", and a floor band as "06-" and "10", is unreadable at a glance and was
-   costing more vertical space than the nowrap costs horizontally — the table
-   still fits 375px because the name column absorbs what is left. */
+   "08", and a floor band as "06-" and "10", is unreadable at a glance. Six
+   columns cannot fit a 320px viewport legibly, so the container scrolls. */
 .nstable td:not(:first-child),.nstable th:not(:first-child){white-space:nowrap}
 .nstable td:first-child{min-width:5.5em}
+/* The six-column table needs a sideways swipe on narrow phones. Keep its
+   identifying column in view while the figures move, or a row loses its name. */
+.nstable th:first-child,.nstable td:first-child{position:sticky;left:0;z-index:1;background:var(--card)}
+.ns-tablehint{display:none}
 @media(max-width:640px){
   .nsstat{grid-template-columns:1fr}
   .nstable{font-size:var(--t-small)}
   .nstable td,.nstable th{padding-right:7px}
+  .ns-tablehint{display:block;margin:12px 0 0;font:var(--t-micro)/1.45 "IBM Plex Mono",monospace;
+    color:var(--mute)}
 }
 
 /* A published piece the rules would now refuse. --warn, the "could not be
