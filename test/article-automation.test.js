@@ -36,3 +36,36 @@ test('the daily source brief reports quiet days without forcing an article', () 
   assert.doesNotMatch(gen, /api\/webhook\/article/,
     'the status brief can file content without editorial review');
 });
+
+test('WhatsApp acceptance is not mistaken for delivery outside the 24-hour window', () => {
+  const bot = read('scripts/07_Bot.gs');
+  const art = read('scripts/10_Articles.gs');
+  assert.match(bot, /value\.statuses && value\.statuses\.length/,
+    'delivery and failure callbacks are ignored again');
+  assert.match(bot, /LAST_WA_STATUS/,
+    'the latest Meta delivery state is not retained for diagnosis');
+  assert.match(bot, /p\.waStatus && appKey/,
+    'there is no safe read-only way to verify Meta delivery after a live test');
+  assert.match(bot, /messageId: message && message\.id/,
+    'Graph acceptance still discards the message id needed to match a later callback');
+  assert.match(bot, /LAST_INBOUND_MS[\s\S]*23 \* 60 \* 60 \* 1000/,
+    'the bot sends a doomed free-form text without checking the service window');
+  assert.match(bot, /queuePendingWhatsApp_\(to, body\)/,
+    'the full briefing disappears when a re-entry template is required');
+  assert.match(bot, /truestorey_daily_source_check/,
+    'the proactive send no longer uses the branded approved template');
+  assert.match(bot, /category:\s*'MARKETING'/,
+    'the recurring editorial briefing is submitted under the wrong Meta category');
+  assert.match(bot, /language:\s*\{ code:\s*'en_US' \}/,
+    'template creation and sending can drift onto different locale variants');
+  assert.match(bot, /Reply if you want the full details\./,
+    'the template ends in a variable and risks Meta rejection');
+  assert.match(art, /\? 'accepted:' : 'sent:'\) \+ result\.channel/,
+    'the Articles sheet again claims an accepted Graph request was delivered');
+  assert.match(art, /trackWaDelivery_\(wa\.messageId, subject, message\)/,
+    'an asynchronously rejected WhatsApp notification can silently disappear again');
+  assert.match(bot, /MailApp\.sendEmail\(\{[\s\S]*subject: '\[WhatsApp failed\] '/,
+    'a Meta delivery failure no longer falls back to email');
+  assert.doesNotMatch(bot, /Utilities\.sleep\(1200\)/,
+    'the bot again assumes delivering a template opens the window without a reply');
+});

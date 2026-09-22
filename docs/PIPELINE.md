@@ -91,7 +91,7 @@ hand-edit the blueprint.
 6  HTTP → webhook       file it as a draft
 7  JSON → Parse         the same text again, for the notification
 8  HTTP → Apps Script   "a draft is waiting"
-9  JSON → Parse         require Apps Script to acknowledge delivery
+9  JSON → Parse         require Apps Script to acknowledge acceptance
 ```
 
 Set the schedule (clock icon) to daily, 07:15, and only after a full Run once
@@ -100,7 +100,7 @@ goes green.
 **`scripts/make/truestorey-daily-source-brief.blueprint.json` is the delivery
 monitor.** It has three modules: the same primary-source search, the Apps Script
 `article_brief` route, and a JSON parser that refuses an HTML error page or a
-missing acknowledgement. It runs at 07:05 and always reports what happened. A
+missing acknowledgement. It is scheduled for 07:05 and always reports what happened. A
 `NONE` result becomes a short quiet-day message; it never manufactures or files
 an article. The 07:15 writer remains selective.
 
@@ -169,7 +169,7 @@ errors. Apps Script notification calls follow the ContentService redirect,
 retain the raw response, and end in a JSON parser that requires a structured
 delivery acknowledgement.
 
-The source brief is a separate saved scenario at 07:05. It was added because
+The source brief is a separate saved scenario for 07:05. It was added because
 the writer's correct quiet-day behaviour was indistinguishable from a failed
 WhatsApp notification to the person waiting for the message.
 
@@ -275,8 +275,16 @@ to serve the verification GET.
 Commands added: `/drafts`, `/pub 1`, `/skip 1`. The leads half already exists
 and is better than anything worth replacing it with.
 
-WhatsApp delivery is tried first and email is the operational fallback. The
-Articles tab records `sent:whatsapp`, `sent:email` or `failed` plus the reason.
+WhatsApp delivery is tried first and email is the operational fallback. Meta's
+HTTP 200 means only that Graph accepted the request; delivery arrives later on
+the webhook. The Articles tab therefore records `accepted:whatsapp` or
+`accepted:whatsapp_template`, never `sent:whatsapp`, until there is delivery
+evidence. Version 31 also tracks the accepted message id: a later Meta failure
+emails the original notification, while `delivered` or `read` clears the
+fallback record. A free-form message is never attempted outside the 24-hour
+service window. Instead the branded `truestorey_daily_source_check` template
+carries the useful summary and the full message remains queued until a reply.
+
 The Meta app is still in Development mode on its test number; that is sufficient
 for private owner alerts, not for a public or client-facing WhatsApp launch.
 

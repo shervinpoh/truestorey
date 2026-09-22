@@ -85,7 +85,16 @@ function artNotify_(subject, message) {
   const me = myNumber_();
   let wa = { ok: false, error: 'My WhatsApp Number is blank on Config' };
   if (me) wa = send_(me, message);
-  if (wa.ok) return { ok: true, channel: 'whatsapp' };
+  if (wa.ok) {
+    if (wa.messageId) trackWaDelivery_(wa.messageId, subject, message);
+    return {
+      ok: true,
+      accepted: wa.accepted !== false,
+      channel: wa.channel || 'whatsapp',
+      messageId: wa.messageId || '',
+      warning: wa.warning || ''
+    };
+  }
 
   /* A daily operation must not disappear because Meta is unavailable or the
      customer-service window changed. Email is the explicit fallback already
@@ -106,7 +115,9 @@ function artNotify_(subject, message) {
 }
 
 function artMarkNotification_(sh, rows, result) {
-  const status = result.ok ? 'sent:' + result.channel : 'failed';
+  const status = result.ok
+    ? ((result.accepted && !result.delivered) ? 'accepted:' : 'sent:') + result.channel
+    : 'failed';
   const detail = result.ok ? (result.warning || '') : result.error;
   rows.forEach(function (rowNum) {
     sh.getRange(rowNum, 9, 1, 2).setValues([[status, truncate_(detail, 450)]]);
