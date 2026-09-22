@@ -1693,6 +1693,8 @@ sup.cite a:hover{text-decoration:underline}
 .floorplan-result>.result-heading{margin:0 0 18px;padding-bottom:18px;border-bottom:2px solid var(--ink)}
 .floorplan-result>.result-heading h2{font-size:var(--t-display);line-height:1.08;letter-spacing:-.035em;
  margin:7px 0 0;max-width:24ch}
+.floorplan-next{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;margin-top:18px}
+.floorplan-next .hint{margin:0}
 @media(max-width:620px){
   .floorplan-outcomes{grid-template-columns:1fr}
   .drop{padding:27px 18px}

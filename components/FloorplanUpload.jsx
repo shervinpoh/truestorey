@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
+import { floorplanQuestions } from '../lib/floorplan-questions.js';
 
 /**
  * Reading a floor plan.
@@ -19,6 +20,7 @@ export default function FloorplanUpload() {
   const [state, setState] = useState('idle');
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  const [copyState, setCopyState] = useState('idle');
   const input = useRef(null);
 
   /* Object URLs survive until they are explicitly released. Replacing a plan
@@ -28,7 +30,7 @@ export default function FloorplanUpload() {
   async function send(file) {
     if (!file) return;
     if (file.size > 6 * 1024 * 1024) { setError('That image is over 6MB — try a smaller export.'); setState('error'); return; }
-    setError(''); setResult(null); setState('reading');
+    setError(''); setResult(null); setCopyState('idle'); setState('reading');
     setPreview(URL.createObjectURL(file));
 
     const body = new FormData();
@@ -39,6 +41,17 @@ export default function FloorplanUpload() {
       if (!res.ok) throw new Error(j.error || 'That did not work.');
       setResult(j); setState('done');
     } catch (e) { setError(e.message); setState('error'); }
+  }
+
+  async function copyQuestions() {
+    const text = floorplanQuestions(result?.wallsToAskAbout);
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyState('copied');
+    } catch {
+      setCopyState('failed');
+    }
   }
 
   return (
@@ -131,6 +144,18 @@ export default function FloorplanUpload() {
               <p style={{ marginTop: 4 }}><b>Ask:</b> {w.askYourQP}</p>
             </div>
           )) : <p className="hint">Nothing specific to flag from this plan.</p>}
+
+          {floorplanQuestions(result.wallsToAskAbout) && (
+            <div className="floorplan-next">
+              <button type="button" className="ghost" onClick={copyQuestions}>
+                {copyState === 'copied' ? 'Questions copied' : 'Copy these questions'}
+              </button>
+              <span className="hint" role="status">
+                {copyState === 'failed' ? 'Copy unavailable here. You can select the questions above.' :
+                  copyState === 'copied' ? 'Show them to a qualified person before planning alterations.' : ''}
+              </span>
+            </div>
+          )}
 
           {result.renovationNotes?.length > 0 && (
             <>
