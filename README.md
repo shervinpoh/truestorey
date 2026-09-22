@@ -222,21 +222,30 @@ accepts `+65` and spacing) and `consentBasis`.
 | missing env | 503 and a logged lead, rather than a silent loss |
 | CRM unreachable | 502, full row written to the log so the lead is recoverable |
 
-The real duplicate guard is the mobile check in `crm-webhook.gs`.
+The authoritative duplicate guard is in the live Apps Script import: normalised
+email first, then normalised mobile when one was supplied.
 
 ## CRM wiring
 
-Lead capture writes into your existing **Property CRM** sheet, Contacts tab,
-using the columns already there — including `PDPA Consent`, `Consent Date`,
-`Consent Basis`, `DNC Checked`.
+Lead capture writes into the existing **Property CRM** Apps Script project. Do
+not paste `scripts/crm-webhook.gs` into it: the project already has its only
+`doPost`, in `07_Bot.gs`, and the standalone file is retained as a warning and
+reference implementation only.
 
-1. Open the sheet → Extensions → Apps Script
-2. Paste `scripts/crm-webhook.gs`, change `SECRET`
-3. Deploy → New deployment → Web app → Execute as **me**, access **anyone**
-4. Put the `/exec` URL and secret in `.env.local`
+The live contract is:
 
-It assigns the next `C-XXXX` id continuing your sequence, and skips duplicates
-by mobile number.
+```text
+POST <deployment /exec>?k=<WA_WEBHOOK_KEY>&admin=<APP_KEY>&action=addContacts
+Content-Type: application/json
+body: [contact, ...]
+```
+
+The handler writes Contacts and Pipeline together, deduplicates on normalised
+email first and mobile second, preserves Consent Date and Consent Basis, and
+leaves DNC Checked blank unless a real check is explicitly supplied. Configure
+`CRM_WEBHOOK_URL`, `CRM_WEBHOOK_KEY` and `CRM_ADMIN_KEY`; all three are required
+before any form renders. `npm run preflight` exercises the authenticated route
+with an empty list, so it writes nothing.
 
 ## Where the rates live
 

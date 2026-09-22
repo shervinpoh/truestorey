@@ -299,51 +299,65 @@ function secrets() {
  * somebody uses it.
  *
  * ── THE PROBE WRITES NOTHING, AND THAT IS LOAD-BEARING ────────────────────
- * It posts a DELIBERATELY WRONG secret. scripts/crm-webhook.gs checks the
- * secret before it touches the sheet and answers {error:'unauthorised'}, so a
- * rejection is the success case here: it proves the deployment is live AND
- * that the secret is actually being checked. A live call with the real secret
- * would append a junk row to a real CRM, and "nothing here writes" is the
- * promise at the top of this file.
- *
- * What it cannot prove is that the secret is the RIGHT one. It says so rather
- * than implying otherwise — a probe that overstates what it checked is worse
- * than no probe.
+ * The live Property CRM does not use the standalone scripts/crm-webhook.gs
+ * contract. It authenticates two query parameters, then expects action
+ * addContacts with a JSON array. An EMPTY array exercises the actual handler
+ * and returns its receipt without appending a row. First a wrong key must get
+ * the deliberately opaque `OK`; then the real pair must get addContacts' JSON.
+ * That proves the endpoint, both credentials and the gate without inventing a
+ * junk contact in the real sheet.
  */
 async function crm() {
   const url = val('CRM_WEBHOOK_URL');
-  const secret = val('CRM_WEBHOOK_SECRET');
+  const key = val('CRM_WEBHOOK_KEY');
+  const admin = val('CRM_ADMIN_KEY');
+  const values = { CRM_WEBHOOK_URL: url, CRM_WEBHOOK_KEY: key, CRM_ADMIN_KEY: admin };
+  const present = Object.values(values).filter(Boolean).length;
 
-  if (!url && !secret) {
-    return add(MISS, 'Property CRM', 'CRM_WEBHOOK_URL and CRM_WEBHOOK_SECRET not set here — '
-      + '/api/lead answers 503 and every lead is refused. Set both in Vercel and in .env.local.');
+  if (!present) {
+    return add(MISS, 'Property CRM', 'CRM_WEBHOOK_URL, CRM_WEBHOOK_KEY and CRM_ADMIN_KEY are not '
+      + 'set here — /api/lead answers 503 and every lead is refused.');
   }
-  if (!url || !secret) {
-    return add(BAD, 'Property CRM',
-      `${url ? 'CRM_WEBHOOK_SECRET' : 'CRM_WEBHOOK_URL'} is missing — the other is set, so this `
-      + 'reads as configured and is not. Every lead is refused with a 503.');
+  if (present !== 3) {
+    const missing = Object.entries(values).filter(([, v]) => !v).map(([k]) => k).join(', ');
+    return add(BAD, 'Property CRM', `${missing} missing — partial configuration keeps the form hidden.`);
   }
 
   try {
-    const res = await fetch(url, {
+    const endpoint = (k, a) => {
+      const u = new URL(url);
+      u.searchParams.set('k', k);
+      u.searchParams.set('admin', a);
+      u.searchParams.set('action', 'addContacts');
+      return u;
+    };
+    const post = target => fetch(target, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      // No `row`. Even if a future deployment stopped checking the secret,
-      // there would be nothing here for it to append.
-      body: JSON.stringify({ secret: 'preflight-probe-not-the-real-secret' }),
+      body: JSON.stringify([]),
       redirect: 'follow',
       signal: AbortSignal.timeout(15000),
     });
+    const denied = await post(endpoint('preflight-wrong-key', 'preflight-wrong-admin'));
+    const deniedBody = await denied.text().catch(() => '');
+    if (!denied.ok || deniedBody.trim() !== 'OK') {
+      return add(BAD, 'Property CRM', 'the endpoint did not reject a wrong key in its documented '
+        + `opaque form (${denied.status}: ${brief(deniedBody)})`);
+    }
+
+    const res = await post(endpoint(key, admin));
     const body = await res.text().catch(() => '');
     if (!res.ok) {
-      return add(BAD, 'Property CRM', `the webhook answered HTTP ${res.status} — ${brief(body)}`);
+      return add(BAD, 'Property CRM', `the authenticated probe answered HTTP ${res.status} — ${brief(body)}`);
     }
-    if (/unauthoris|unauthoriz/i.test(body)) {
-      return add(OK, 'Property CRM', `${mask(secret)} · webhook live and checking its secret `
-        + '(this proves it answers, not that your secret matches)');
+    const parsed = (() => { try { return JSON.parse(body); } catch { return null; } })();
+    if (parsed && parsed.added === 0 && Array.isArray(parsed.ids)
+        && parsed.ids.length === 0 && parsed.skipped === 0) {
+      return add(OK, 'Property CRM', `webhook live · both keys accepted (${mask(key)}, ${mask(admin)})`);
     }
-    add(BAD, 'Property CRM', 'the webhook accepted a WRONG secret — anyone who finds the URL can '
-      + `write to the Contacts tab. Set SECRET in the Apps Script. It answered: ${brief(body)}`);
+    add(BAD, 'Property CRM', body.trim() === 'OK'
+      ? 'the deployment answered, but one or both CRM keys do not match its Script Properties'
+      : `the empty addContacts probe returned an unexpected receipt: ${brief(body)}`);
   } catch (e) {
     add(BAD, 'Property CRM', e.name === 'TimeoutError'
       ? 'the webhook did not answer within 15s'

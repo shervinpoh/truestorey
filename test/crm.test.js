@@ -58,10 +58,12 @@ test('preflight asks the CRM whether it answers, and writes nothing doing it', (
   assert.match(body, /async function crm\(\)/, 'the CRM probe is gone');
   assert.match(body, /Promise\.all\(\[supabase\(\), models\(\), crm\(\)\]\)/,
     'the CRM probe is defined but never run');
-  assert.doesNotMatch(body, /secret: val\('CRM_WEBHOOK_SECRET'\)/,
-    'the probe sends the REAL secret, so it will append a junk row to a live CRM');
-  assert.match(body, /secret: 'preflight-probe-not-the-real-secret'/,
-    'the probe no longer sends a deliberately wrong secret');
+  assert.match(body, /body: JSON\.stringify\(\[\]\)/,
+    'the probe sends a contact or an object rather than the empty import list');
+  assert.match(body, /preflight-wrong-key/,
+    'the probe no longer proves that the public endpoint rejects a wrong key');
+  assert.match(body, /endpoint\(key, admin\)/,
+    'the probe does not exercise the real credentials after checking the gate');
 });
 
 /*
@@ -79,7 +81,24 @@ test('no real secret is committed in the webhook template', () => {
 /*
  * ─── the transport ────────────────────────────────────────────────────────
  */
-import { writeContact, consentFields, configured } from '../lib/crm.js';
+import { writeContact, consentFields, configured, toBulkContact } from '../lib/crm.js';
+
+test('the sheet row is translated to the live addContacts contract', () => {
+  const out = toBulkContact({
+    'Full Name': ' A Reader ', Email: 'reader@example.com',
+    'Current Address / Estate': 'Bishan', 'Current Property Type': 'HDB',
+    'PDPA Consent': 'Yes', 'Consent Date': '2026-09-21T10:00:00.000Z',
+    'Consent Basis': 'Explicit web opt-in 2026-08-v2 · email · ip 1.2.3.4',
+    'DNC Checked': '', 'DNC Check Date': '',
+  });
+  assert.strictEqual(out.fullName, 'A Reader');
+  assert.strictEqual(out.estate, 'Bishan');
+  assert.strictEqual(out.currentPropertyType, 'HDB');
+  assert.strictEqual(out.consent, true);
+  assert.strictEqual(out.consentDate, '2026-09-21T10:00:00.000Z');
+  assert.match(out.consentBasis, /2026-08-v2/);
+  assert.ok(!('dncChecked' in out), 'the website is making a DNC claim without a check');
+});
 
 /**
  * Apps Script answers HTTP 200 with the error in the BODY. An unauthorised
@@ -90,14 +109,14 @@ import { writeContact, consentFields, configured } from '../lib/crm.js';
  * Second silent success on this path, found while extracting it. The first was
  * the blank-mobile duplicate above.
  */
-test('a 200 carrying an error in the body is a failure, not a save', async () => {
+test('a 200 without an addContacts receipt is a failure, not a save', async () => {
   process.env.CRM_WEBHOOK_URL = 'https://example.invalid/exec';
-  process.env.CRM_WEBHOOK_SECRET = 'test';
+  process.env.CRM_WEBHOOK_KEY = 'webhook-test';
+  process.env.CRM_ADMIN_KEY = 'admin-test';
   const real = globalThis.fetch;
   globalThis.fetch = async () => ({
     ok: true, status: 200,
-    json: async () => ({ error: 'unauthorised' }),
-    text: async () => '{"error":"unauthorised"}',
+    text: async () => 'OK',
   });
   try {
     const out = await writeContact({ Email: 'a@b.com' });
@@ -108,31 +127,65 @@ test('a 200 carrying an error in the body is a failure, not a save', async () =>
 
 test('a matched duplicate is reported rather than passed off as a write', async () => {
   process.env.CRM_WEBHOOK_URL = 'https://example.invalid/exec';
-  process.env.CRM_WEBHOOK_SECRET = 'test';
+  process.env.CRM_WEBHOOK_KEY = 'webhook-test';
+  process.env.CRM_ADMIN_KEY = 'admin-test';
   const real = globalThis.fetch;
-  globalThis.fetch = async () => ({
-    ok: true, status: 200,
-    json: async () => ({ ok: true, duplicate: true, on: 'Email' }),
-    text: async () => '',
-  });
+  globalThis.fetch = async (url, options) => {
+    assert.strictEqual(url.searchParams.get('k'), 'webhook-test');
+    assert.strictEqual(url.searchParams.get('admin'), 'admin-test');
+    assert.strictEqual(url.searchParams.get('action'), 'addContacts');
+    assert.ok(Array.isArray(JSON.parse(options.body)), 'the Apps Script expects an array');
+    return {
+      ok: true, status: 200,
+      text: async () => JSON.stringify({
+        added: 0, ids: [], skipped: 1,
+        skippedDetail: [{ name: 'A Reader', duplicateOn: 'Email', error: 'duplicate email of Existing Reader' }],
+      }),
+    };
+  };
   try {
     const out = await writeContact({ Email: 'a@b.com' });
     assert.strictEqual(out.ok, true, 'a duplicate is not an error for the reader');
     assert.strictEqual(out.duplicate, true,
       'the caller cannot tell a duplicate from a write, which is how a silent drop hides');
+    assert.strictEqual(out.on, 'Email');
+  } finally { globalThis.fetch = real; }
+});
+
+test('a numeric live receipt confirms the write and returns the contact id', async () => {
+  process.env.CRM_WEBHOOK_URL = 'https://example.invalid/exec';
+  process.env.CRM_WEBHOOK_KEY = 'webhook-test';
+  process.env.CRM_ADMIN_KEY = 'admin-test';
+  const real = globalThis.fetch;
+  globalThis.fetch = async () => ({
+    ok: true, status: 200,
+    text: async () => JSON.stringify({
+      added: 1, ids: ['C-0123 A Reader'], skipped: 0, skippedDetail: [],
+    }),
+  });
+  try {
+    const out = await writeContact({ 'Full Name': 'A Reader', Email: 'a@b.com' });
+    assert.deepStrictEqual(out, { ok: true, id: 'C-0123' });
   } finally { globalThis.fetch = real; }
 });
 
 test('an unconfigured CRM refuses rather than throwing', async () => {
-  const url = process.env.CRM_WEBHOOK_URL, sec = process.env.CRM_WEBHOOK_SECRET;
-  delete process.env.CRM_WEBHOOK_URL; delete process.env.CRM_WEBHOOK_SECRET;
+  const old = {
+    url: process.env.CRM_WEBHOOK_URL,
+    key: process.env.CRM_WEBHOOK_KEY,
+    admin: process.env.CRM_ADMIN_KEY,
+  };
+  delete process.env.CRM_WEBHOOK_URL;
+  delete process.env.CRM_WEBHOOK_KEY;
+  delete process.env.CRM_ADMIN_KEY;
   try {
     assert.strictEqual(configured(), false);
     const out = await writeContact({ Email: 'a@b.com' });
     assert.strictEqual(out.status, 503, 'an unconfigured CRM no longer answers 503');
   } finally {
-    if (url) process.env.CRM_WEBHOOK_URL = url;
-    if (sec) process.env.CRM_WEBHOOK_SECRET = sec;
+    if (old.url) process.env.CRM_WEBHOOK_URL = old.url;
+    if (old.key) process.env.CRM_WEBHOOK_KEY = old.key;
+    if (old.admin) process.env.CRM_ADMIN_KEY = old.admin;
   }
 });
 
@@ -161,8 +214,8 @@ test('no consent without a tick, and a tick always dates itself', () => {
  * ─── a form that cannot store an address must not ask for one ─────────────
  *
  * Follow.jsx settled this for the whole site and RecordPage.jsx repeats the
- * reasoning ten lines above the form that ignored it. CRM_WEBHOOK_URL and
- * CRM_WEBHOOK_SECRET were never set in production, so every reader who filled
+ * reasoning ten lines above the form that ignored it. The CRM variables were
+ * never set in production, so every reader who filled
  * the lead form typed their name and address and got a 503 telling them to
  * WhatsApp instead.
  */
@@ -202,6 +255,16 @@ test('only lib/crm.js builds the consent columns', () => {
   assert.match(lead, /\.\.\.consentFields\(/, 'the lead route no longer uses the shared builder');
   assert.doesNotMatch(lead, /fetch\(process\.env\.CRM_WEBHOOK_URL/,
     'the lead route has its own copy of the CRM transport again');
+});
+
+test('website intent is filed in both CRM taxonomy columns', () => {
+  const lead = readFileSync(path.join(process.cwd(), 'app/api/lead/route.js'), 'utf8');
+  assert.match(lead, /Selling:\s*\{ clientType: 'Resale Seller', intent: 'Sell' \}/,
+    'Selling is no longer translated into the CRM taxonomy');
+  assert.match(lead, /'Client Type': taxonomy\.clientType/,
+    'the website is putting a buying or selling intention into Client Type again');
+  assert.match(lead, /'Intent': taxonomy\.intent/,
+    'the CRM Intent column is no longer populated');
 });
 
 /*

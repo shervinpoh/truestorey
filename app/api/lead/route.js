@@ -27,8 +27,8 @@ import { MAX_BODY, ipOf, isBot, makeThrottle, readJson } from '../../../lib/form
 export { CONSENT_COPY_VERSION };
 export const dynamic = 'force-dynamic';
 
-/* The real guard against a flooded CRM is the duplicate-mobile check in the
-   Apps Script; this is the speed bump in front of it. */
+/* The authoritative duplicate guard is the Apps Script's normalised email,
+   then mobile, check; this is the speed bump in front of it. */
 const throttled = makeThrottle({ windowMs: 60 * 60 * 1000, max: 5 });
 
 export async function POST(req) {
@@ -98,12 +98,19 @@ export async function POST(req) {
      POST rather than a reader. It still answers honestly rather than
      pretending to have saved anything. */
   if (!crmConfigured()) {
-    console.error('CRM_WEBHOOK_URL / CRM_WEBHOOK_SECRET not set — lead not saved:', cleanName, cleanMobile);
+    console.error('CRM webhook URL or query keys not set — lead not saved:', cleanName, cleanMobile);
     return NextResponse.json({ error: 'Could not save. Please WhatsApp instead.' }, { status: 503 });
   }
 
   const now = new Date().toISOString();
   const cap = (s, n) => String(s || '').trim().slice(0, n);
+  const cleanIntent = cap(intent, 40);
+  const taxonomy = {
+    Selling: { clientType: 'Resale Seller', intent: 'Sell' },
+    Buying: { clientType: 'Resale Buyer', intent: 'Buy' },
+    Both: { clientType: 'Resale Seller', intent: 'Sell+Buy (upgrade)' },
+    'Just looking': { clientType: 'Others', intent: 'Unknown' },
+  }[cleanIntent] || { clientType: 'Others', intent: cleanIntent || 'Unknown' };
 
   // Column order matches the Contacts tab of Property CRM.
   const row = {
@@ -111,7 +118,8 @@ export async function POST(req) {
     'Mobile': cleanMobile,
     'Email': cleanEmail,
     'Source': cap(source, 120) || 'Website',
-    'Client Type': cap(intent, 40),
+    'Client Type': taxonomy.clientType,
+    'Intent': taxonomy.intent,
     'Current Property Type': cap(propertyType, 40),
     'Current Address / Estate': cap(addressOrProject, 160),
     'District': cap(district, 10),
