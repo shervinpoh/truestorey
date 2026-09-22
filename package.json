@@ -70,7 +70,8 @@
     "ingest:pipeline": "node --env-file-if-exists=.env.local scripts/ingest-pipeline.mjs",
     "ingest:realis": "node scripts/ingest-realis.mjs",
     "ingest:listings": "node scripts/ingest-listings.mjs",
-    "reading": "node scripts/reading.mjs"
+    "reading": "node scripts/reading.mjs",
+    "make:blueprints": "node scripts/make/gen-blueprint.mjs && node scripts/make/gen-daily-source-brief.mjs"
   },
   "dependencies": {
     "next": "^15.0.0",

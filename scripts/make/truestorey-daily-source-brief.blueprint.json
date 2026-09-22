@@ -1,0 +1,135 @@
+{
+  "name": "Truestorey · daily source brief",
+  "flow": [
+    {
+      "id": 1,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {
+        "handleErrors": true,
+        "useNewZLibDeCompress": true
+      },
+      "mapper": {
+        "ca": "",
+        "qs": [],
+        "url": "https://api.perplexity.ai/chat/completions",
+        "data": "{\"model\":\"sonar\",\"temperature\":0.1,\"max_tokens\":1500,\"search_recency_filter\":\"day\",\"search_domain_filter\":[\"ura.gov.sg\",\"hdb.gov.sg\",\"mas.gov.sg\",\"lta.gov.sg\",\"mnd.gov.sg\",\"iras.gov.sg\",\"cpf.gov.sg\",\"moe.gov.sg\",\"data.gov.sg\",\"singstat.gov.sg\"],\"messages\":[{\"role\":\"system\",\"content\":\"You index Singapore government primary sources. Never return a news report or a publisher summary. Every item must link to the agency document itself.\"},{\"role\":\"user\",\"content\":\"What did Singapore government agencies publish in the last 24 hours that materially affects someone buying, owning or selling residential property here? Consider URA, HDB, MND, MAS, IRAS, CPF, LTA, MOE, SingStat and data.gov.sg.\\n\\nReply with ONE LINE of plain text. No JSON, no line breaks and no double-quote character anywhere. Do not pad the list.\\n\\nEach item is six fields separated by ~ in this order:\\nagency ~ exact title ~ agency URL ~ published date YYYY-MM-DD ~ what changed in one sentence ~ who it affects in one sentence\\n\\nSeparate items with ;; and return at most six. If nothing materially relevant was published, reply with exactly NONE.\"}]}",
+        "gzip": true,
+        "method": "post",
+        "headers": [
+          {
+            "name": "Authorization",
+            "value": "Bearer REPLACE_WITH_PERPLEXITY_KEY"
+          },
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "timeout": "",
+        "useMtls": false,
+        "authPass": "",
+        "authUser": "",
+        "bodyType": "raw",
+        "contentType": "application/json",
+        "serializeUrl": false,
+        "shareCookies": false,
+        "parseResponse": true,
+        "followRedirect": true,
+        "useQuerystring": false,
+        "followAllRedirects": false,
+        "rejectUnauthorized": true
+      },
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {
+        "handleErrors": true,
+        "useNewZLibDeCompress": true
+      },
+      "mapper": {
+        "ca": "",
+        "qs": [
+          {
+            "name": "k",
+            "value": "REPLACE_WITH_WA_WEBHOOK_KEY"
+          }
+        ],
+        "url": "REPLACE_WITH_APPS_SCRIPT_EXEC_URL",
+        "data": "{\"secret\":\"REPLACE_WITH_MAKE_SECRET\",\"kind\":\"article_brief\",\"brief\":\"{{1.data.choices[1].message.content}}\"}",
+        "gzip": true,
+        "method": "post",
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "timeout": "",
+        "useMtls": false,
+        "authPass": "",
+        "authUser": "",
+        "bodyType": "raw",
+        "contentType": "application/json",
+        "serializeUrl": false,
+        "shareCookies": false,
+        "parseResponse": false,
+        "followRedirect": true,
+        "useQuerystring": false,
+        "followAllRedirects": true,
+        "rejectUnauthorized": true
+      },
+      "metadata": {
+        "designer": {
+          "x": 350,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {
+        "type": ""
+      },
+      "mapper": {
+        "json": "{{2.data}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 700,
+          "y": 0
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": true,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "eu1.make.com"
+  }
+}

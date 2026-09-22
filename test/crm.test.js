@@ -62,6 +62,8 @@ test('preflight asks the CRM whether it answers, and writes nothing doing it', (
     'the probe sends a contact or an object rather than the empty import list');
   assert.match(body, /preflight-wrong-key/,
     'the probe no longer proves that the public endpoint rejects a wrong key');
+  assert.match(body, /webhook_key_mismatch/,
+    'Apps Script returns its rejected-key error inside a 200 HTML page, but the probe ignores it');
   assert.match(body, /endpoint\(key, admin\)/,
     'the probe does not exercise the real credentials after checking the gate');
 });

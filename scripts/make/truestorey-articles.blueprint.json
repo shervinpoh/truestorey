@@ -6,7 +6,7 @@
       "module": "http:ActionSendData",
       "version": 3,
       "parameters": {
-        "handleErrors": false,
+        "handleErrors": true,
         "useNewZLibDeCompress": true
       },
       "mapper": {
@@ -52,7 +52,7 @@
       "module": "http:ActionSendData",
       "version": 3,
       "parameters": {
-        "handleErrors": false,
+        "handleErrors": true,
         "useNewZLibDeCompress": true
       },
       "mapper": {
@@ -150,7 +150,7 @@
       "module": "http:ActionSendData",
       "version": 3,
       "parameters": {
-        "handleErrors": false,
+        "handleErrors": true,
         "useNewZLibDeCompress": true
       },
       "mapper": {
@@ -200,7 +200,7 @@
       "module": "http:ActionSendData",
       "version": 3,
       "parameters": {
-        "handleErrors": false,
+        "handleErrors": true,
         "useNewZLibDeCompress": true
       },
       "mapper": {
@@ -263,12 +263,17 @@
       "module": "http:ActionSendData",
       "version": 3,
       "parameters": {
-        "handleErrors": false,
+        "handleErrors": true,
         "useNewZLibDeCompress": true
       },
       "mapper": {
         "ca": "",
-        "qs": [],
+        "qs": [
+          {
+            "name": "k",
+            "value": "REPLACE_WITH_WA_WEBHOOK_KEY"
+          }
+        ],
         "url": "REPLACE_WITH_APPS_SCRIPT_EXEC_URL",
         "data": "{\"secret\":\"REPLACE_WITH_MAKE_SECRET\",\"kind\":\"articles\",\"items\":[{\"id\":\"{{6.data.id}}\",\"title\":\"{{7.title}}\",\"slug\":\"{{6.data.slug}}\",\"category\":\"{{7.category}}\",\"excerpt\":\"{{7.excerpt}}\",\"sources\":[\"{{4.url}}\"]}]}",
         "gzip": true,
@@ -287,15 +292,32 @@
         "contentType": "application/json",
         "serializeUrl": false,
         "shareCookies": false,
-        "parseResponse": true,
+        "parseResponse": false,
         "followRedirect": true,
         "useQuerystring": false,
-        "followAllRedirects": false,
+        "followAllRedirects": true,
         "rejectUnauthorized": true
       },
       "metadata": {
         "designer": {
           "x": 2100,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 9,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {
+        "type": ""
+      },
+      "mapper": {
+        "json": "{{8.data}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 2400,
           "y": 0
         }
       }

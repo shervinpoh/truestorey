@@ -288,7 +288,8 @@ console.log(`\nFiled as a draft: ${row.title}\nRead it at ${SITE}/studio\n`);
    So this posts the same shape Make posts, to the same endpoint, and
    artFromMake_ does the rest — the row lands on the Articles tab, the message
    goes out, and /pub N and /skip N work on a desk piece exactly as they work
-   on a pipeline one. No Apps Script change.
+   on a pipeline one. Its acknowledgement says whether WhatsApp or the email
+   fallback actually accepted the notification.
 
    IT NEVER FAILS THE RUN. The article is filed by the time this is called and
    a notification is not worth losing it over. But it is LOUD when it cannot
@@ -321,14 +322,14 @@ async function notifyBot(filed) {
       }),
       signal: AbortSignal.timeout(15000),
     });
-    /* Apps Script answers 200 with ok_() whatever happens, including when
-       verifyRequest_ rejects the URL key — so a 200 is not evidence a message
-       was sent, and this must not claim it was. The only honest thing to
-       report is that the endpoint answered. */
-    console.log(res.ok
-      ? `  Bot notified — the Apps Script answered ${res.status}. If no message arrives,\n`
-        + '  the ?k= key did not match WA_WEBHOOK_KEY: doPost returns OK and does nothing.'
-      : `  NOT NOTIFIED. The Apps Script answered ${res.status}.`);
+    const reply = await res.json().catch(() => ({}));
+    if (!res.ok || !reply.ok) {
+      console.warn(`  NOT NOTIFIED. Apps Script ${res.status}: ${reply.error || 'no delivery acknowledgement'}.`);
+    } else if (reply.notified) {
+      console.log(`  Bot delivery confirmed via ${reply.channel || 'configured fallback'}.`);
+    } else {
+      console.log(`  Bot acknowledged the article; no new message was needed (${reply.reason || 'duplicate'}).`);
+    }
   } catch (e) {
     console.warn(`  NOT NOTIFIED. ${e.name === 'TimeoutError' ? 'The Apps Script timed out' : e.message}.`);
   }

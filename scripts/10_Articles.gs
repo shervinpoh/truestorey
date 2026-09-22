@@ -20,12 +20,15 @@
       matters from a phone, which is a piece written off a news site rather than
       an agency release — and a link to read the rest.
 
-    THREE HOOKS ARE NEEDED IN 07_Bot.gs. They are listed at the bottom of this
-    file. Nothing works until they are added.
+    07_Bot.gs owns the authenticated article and article_brief routes. This
+    file owns filing, idempotency and delivery evidence.
     ============================================================================ */
 
 const ART_TAB = 'Articles';
-const ART_HEADERS = ['Filed', 'Article ID', 'Slug', 'Title', 'Category', 'Excerpt', 'Sources', 'Status'];
+const ART_HEADERS = [
+  'Filed', 'Article ID', 'Slug', 'Title', 'Category', 'Excerpt', 'Sources', 'Status',
+  'Notification Status', 'Notification Detail'
+];
 
 function artSite_() {
   return String(setting_('Truestorey Site URL', 'https://truestorey.vercel.app')).replace(/\/$/, '');
@@ -40,6 +43,16 @@ function artSheet_() {
     sh.appendRow(ART_HEADERS);
     sh.setFrozenRows(1);
     sh.getRange(1, 1, 1, ART_HEADERS.length).setFontWeight('bold');
+  } else {
+    /* Older copies stopped at Status. Append operational evidence rather than
+       shifting any existing column that /drafts and /pub already read. */
+    const width = Math.max(sh.getLastColumn(), 1);
+    const current = sh.getRange(1, 1, 1, width).getValues()[0].map(String);
+    ART_HEADERS.forEach(function (header) {
+      if (current.indexOf(header) !== -1) return;
+      current.push(header);
+      sh.getRange(1, current.length).setValue(header).setFontWeight('bold');
+    });
   }
   return sh;
 }
@@ -68,33 +81,155 @@ function artPending_() {
 
 /* ─────────────────────────────────────────────────── called by Make, via doPost */
 
+function artNotify_(subject, message) {
+  const me = myNumber_();
+  let wa = { ok: false, error: 'My WhatsApp Number is blank on Config' };
+  if (me) wa = send_(me, message);
+  if (wa.ok) return { ok: true, channel: 'whatsapp' };
+
+  /* A daily operation must not disappear because Meta is unavailable or the
+     customer-service window changed. Email is the explicit fallback already
+     used by the CRM morning briefing. */
+  const to = str_(setting_('Digest Email', '')) || Session.getEffectiveUser().getEmail();
+  if (!to) return { ok: false, error: wa.error + ' | no Digest Email configured' };
+  try {
+    MailApp.sendEmail({
+      to: to,
+      subject: subject,
+      body: String(message || '').replace(/\*/g, '') +
+            '\n\n---\nWhatsApp delivery failed: ' + wa.error
+    });
+    return { ok: true, channel: 'email', warning: wa.error };
+  } catch (err) {
+    return { ok: false, error: wa.error + ' | email fallback: ' + err };
+  }
+}
+
+function artMarkNotification_(sh, rows, result) {
+  const status = result.ok ? 'sent:' + result.channel : 'failed';
+  const detail = result.ok ? (result.warning || '') : result.error;
+  rows.forEach(function (rowNum) {
+    sh.getRange(rowNum, 9, 1, 2).setValues([[status, truncate_(detail, 450)]]);
+  });
+}
+
 /**
- * The row is written BEFORE the message is sent, so a WhatsApp outage costs a
- * notification and never a record. /drafts will still find it tomorrow.
+ * File once, notify until delivery succeeds. Make can safely retry after a
+ * network or Meta failure: Article ID, slug and source URL all identify the
+ * existing row, so the retry never creates a second queue item.
  */
 function artFromMake_(body) {
   const items = (body && body.items) || [];
-  if (!items.length) return;
+  if (!Array.isArray(items) || !items.length) {
+    return { ok: false, error: 'No article items were supplied' };
+  }
 
   const sh = artSheet_();
-  const stamp = Utilities.formatDate(new Date(), 'Asia/Singapore', 'dd/MM/yyyy HH:mm');
-  items.forEach(function (a) {
-    sh.appendRow([stamp, str_(a.id), str_(a.slug), str_(a.title), str_(a.category),
-                  str_(a.excerpt), (a.sources || []).join(' '), 'draft']);
+  const last = sh.getLastRow();
+  const existing = last < 2 ? [] : sh.getRange(2, 1, last - 1, ART_HEADERS.length).getValues();
+  const byKey = {};
+  existing.forEach(function (r, i) {
+    const rowNum = i + 2;
+    [r[1], r[2]].concat(String(r[6] || '').split(/\s+/)).forEach(function (v) {
+      const key = str_(v);
+      if (key) byKey[key] = { rowNum: rowNum, notification: str_(r[8]) };
+    });
   });
 
-  const me = myNumber_();
-  if (!me) return;
+  const stamp = Utilities.formatDate(new Date(), 'Asia/Singapore', 'dd/MM/yyyy HH:mm');
+  const notifyItems = [];
+  const notifyRows = [];
+  let filed = 0, duplicates = 0;
 
-  let m = '*📄 ' + items.length + ' draft' + (items.length === 1 ? '' : 's') + ' filed*\n';
-  items.forEach(function (a, i) {
+  items.forEach(function (a) {
+    const sources = Array.isArray(a.sources) ? a.sources.map(str_).filter(String) : [];
+    const keys = [str_(a.id), str_(a.slug)].concat(sources).filter(String);
+    let hit = null;
+    keys.some(function (key) { hit = byKey[key] || null; return !!hit; });
+
+    if (hit) {
+      duplicates += 1;
+      if (hit.notification.indexOf('sent:') !== 0) {
+        notifyItems.push(a);
+        notifyRows.push(hit.rowNum);
+      }
+      return;
+    }
+
+    sh.appendRow([stamp, str_(a.id), str_(a.slug), str_(a.title), str_(a.category),
+                  str_(a.excerpt), sources.join(' '), 'draft', 'pending', '']);
+    const rowNum = sh.getLastRow();
+    filed += 1;
+    notifyItems.push(a);
+    notifyRows.push(rowNum);
+    keys.forEach(function (key) { byKey[key] = { rowNum: rowNum, notification: 'pending' }; });
+  });
+
+  if (!notifyItems.length) {
+    return { ok: true, filed: filed, duplicates: duplicates, notified: false, reason: 'already_notified' };
+  }
+
+  let m = '*📄 ' + notifyItems.length + ' draft' + (notifyItems.length === 1 ? '' : 's') + ' filed*\n';
+  notifyItems.forEach(function (a, i) {
     m += '\n*' + (i + 1) + '.* ' + (str_(a.title) || '(untitled)') + '\n';
     if (str_(a.excerpt)) m += '_' + str_(a.excerpt) + '_\n';
-    const hosts = (a.sources || []).map(artHost_).filter(String);
+    const hosts = (Array.isArray(a.sources) ? a.sources : []).map(artHost_).filter(String);
     m += 'Source: ' + (hosts.length ? hosts.join(', ') : '⚠️ none recorded') + '\n';
   });
   m += '\nRead them: ' + artSite_() + '/studio\n_/pub 1 to publish · /skip 1 to archive_';
-  send_(me, m);
+
+  const delivered = artNotify_('Truestorey draft waiting', m);
+  artMarkNotification_(sh, notifyRows, delivered);
+  return {
+    ok: delivered.ok,
+    filed: filed,
+    duplicates: duplicates,
+    notified: delivered.ok,
+    channel: delivered.channel || '',
+    error: delivered.error || '',
+    warning: delivered.warning || ''
+  };
+}
+
+/** A daily source check is useful even when the correct result is NONE. */
+function artBriefFromMake_(body) {
+  const raw = truncate_(str_(body && body.brief), 12000);
+  if (!raw) return { ok: false, error: 'Daily source brief was empty' };
+
+  const date = Utilities.formatDate(new Date(), 'Asia/Singapore', 'yyyy-MM-dd');
+  const digest = Utilities.base64EncodeWebSafe(
+    Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, date + '|' + raw)
+  );
+  const props = PropertiesService.getScriptProperties();
+  if (props.getProperty('LAST_ARTICLE_BRIEF_DIGEST') === digest) {
+    return { ok: true, duplicate: true, notified: false };
+  }
+
+  let m = '*🗞 Truestorey source check*\n_' + date + '_\n\n';
+  if (raw.trim().toUpperCase() === 'NONE') {
+    m += 'No material Singapore government property release was found in the last 24 hours.\n\n_No draft was created. This is a valid quiet day, not a failed run._';
+  } else {
+    const items = raw.split(/\s+;;\s+/).slice(0, 6);
+    m += items.length + ' item' + (items.length === 1 ? '' : 's') + ' worth reviewing:\n';
+    items.forEach(function (item, i) {
+      const p = item.split(/\s+~\s+/);
+      m += '\n*' + (i + 1) + ' · ' + (p[0] || 'Agency') + '* — ' + (p[1] || 'Untitled release') + '\n';
+      if (p[4]) m += p[4] + '\n';
+      if (p[2]) m += p[2] + '\n';
+    });
+    m += '\n_The article pipeline separately decides what is strong enough to draft._';
+  }
+
+  const delivered = artNotify_('Truestorey daily source check', truncate_(m, 4000));
+  if (delivered.ok) props.setProperty('LAST_ARTICLE_BRIEF_DIGEST', digest);
+  return {
+    ok: delivered.ok,
+    duplicate: false,
+    notified: delivered.ok,
+    channel: delivered.channel || '',
+    error: delivered.error || '',
+    warning: delivered.warning || ''
+  };
 }
 
 /* ─────────────────────────────────────────────────────────────────── commands */
@@ -157,45 +292,5 @@ function botPublish(to, arg, status) {
     (status === 'published' ? '\n' + artSite_() + '/insights/' + d.slug : ''));
 }
 
-//  ===========================================================================
-//  THE THREE HOOKS — add these to 07_Bot.gs by hand.
-//
-//  Line comments, not a block comment, and that is deliberate: the help text
-//  below contains WhatsApp bold markers, and an asterisk followed by a slash
-//  CLOSES a block comment. Pasted as a block, this file dies with "Invalid or
-//  unexpected token" on the first such line. It did.
-//  ---------------------------------------------------------------------------
-//
-//  1 · In doPost, immediately AFTER the p.action === 'addContacts' block and
-//      BEFORE   const body = JSON.parse(e.postData.contents);   add:
-//
-//        // Make.com filing a Truestorey draft. Its own secret, because the
-//        // deployment is open to anyone (Meta requires that) and this call
-//        // never passes the myNumber_() gate below.
-//        const artSecret = prop_('MAKE_SECRET', false);
-//        const artBody = JSON.parse(e.postData.contents);
-//        if (artBody && artBody.kind === 'articles') {
-//          if (!artSecret || artBody.secret !== artSecret) return ok_();
-//          artFromMake_(artBody);
-//          return ok_();
-//        }
-//
-//      Then change the line below it to reuse what was already parsed:
-//        const body = artBody;
-//
-//  2 · In handleCommand_, in the "daily" group, add:
-//
-//        if (lower === '/drafts')           return botDrafts(from);
-//        if (lower.indexOf('/pub ') === 0)  return botPublish(from, after(5), 'published');
-//        if (lower.indexOf('/skip ') === 0) return botPublish(from, after(6), 'archived');
-//
-//  3 · In botHelp, under the Daily heading, add two lines to the string for
-//      /drafts and /pub. Use the same bold markers the other entries use —
-//      inside a normal string they are harmless; it is only block comments
-//      they break.
-//
-//  ALSO: WA_WEBHOOK_KEY IS SET on this project, so verifyRequest_ rejects any
-//  POST whose URL does not carry the same ?k= value. Make module 8's URL must
-//  end with /exec?k=<WA_WEBHOOK_KEY>. Without it doPost returns OK and does
-//  nothing, Make shows a green tick, and no message ever arrives.
-//  ===========================================================================
+// Hooks are integrated in the live 07_Bot.gs. Keep this file as code, not as a
+// second setup guide; docs/PIPELINE.md owns the operational instructions.

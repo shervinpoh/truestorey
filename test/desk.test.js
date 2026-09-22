@@ -338,16 +338,14 @@ test('a failure to notify is loud and never fails the run', () => {
   assert.match(body, /catch/, 'an unreachable Apps Script would take the run down');
 });
 
-/*
- * Apps Script answers 200 with ok_() whatever happens, including when
- * verifyRequest_ rejects the URL key. A 200 is not evidence a message was
- * sent, and reporting one as a send is how a fortnight of silence looks green.
- */
-test('a 200 from Apps Script is not reported as a delivered message', () => {
+/* HTTP success is transport evidence; reply.ok + reply.notified is delivery. */
+test('Apps Script delivery is claimed only from its structured acknowledgement', () => {
   const fn = /async function notifyBot[\s\S]*?\n\}/.exec(src)[0];
-  assert.doesNotMatch(fn, /Bot notified\s*['"`]/, 'a 200 is being claimed as a delivery');
-  assert.match(fn, /did not match WA_WEBHOOK_KEY/,
-    'the one failure a 200 hides is no longer explained');
+  assert.match(fn, /await res\.json/, 'the response body is not checked');
+  assert.match(fn, /reply\.ok/, 'the Apps Script result is ignored');
+  assert.match(fn, /reply\.notified/, 'an acknowledgement is being confused with delivery');
+  assert.doesNotMatch(fn, /res\.ok\s*\?[^:]*Bot delivery/s,
+    'a 200 alone is being claimed as a delivery');
 });
 
 test('the workflow passes all three, or the desk cannot notify', () => {

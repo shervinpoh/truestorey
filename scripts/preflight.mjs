@@ -302,8 +302,10 @@ function secrets() {
  * The live Property CRM does not use the standalone scripts/crm-webhook.gs
  * contract. It authenticates two query parameters, then expects action
  * addContacts with a JSON array. An EMPTY array exercises the actual handler
- * and returns its receipt without appending a row. First a wrong key must get
- * the deliberately opaque `OK`; then the real pair must get addContacts' JSON.
+ * and returns its receipt without appending a row. First a wrong key must be
+ * refused; then the real pair must get addContacts' JSON. Apps Script web apps
+ * surface an unhandled error as an HTML page with HTTP 200, so the refusal is
+ * proved by its explicit webhook_key_mismatch marker, not the status alone.
  * That proves the endpoint, both credentials and the gate without inventing a
  * junk contact in the real sheet.
  */
@@ -340,9 +342,11 @@ async function crm() {
     });
     const denied = await post(endpoint('preflight-wrong-key', 'preflight-wrong-admin'));
     const deniedBody = await denied.text().catch(() => '');
-    if (!denied.ok || deniedBody.trim() !== 'OK') {
-      return add(BAD, 'Property CRM', 'the endpoint did not reject a wrong key in its documented '
-        + `opaque form (${denied.status}: ${brief(deniedBody)})`);
+    const deniedByCurrentGate = deniedBody.includes('webhook_key_mismatch');
+    const deniedByLegacyGate = deniedBody.trim() === 'OK';
+    if (!deniedByCurrentGate && !deniedByLegacyGate) {
+      return add(BAD, 'Property CRM', 'the endpoint did not reject a wrong key '
+        + `(${denied.status}: ${brief(deniedBody)})`);
     }
 
     const res = await post(endpoint(key, admin));

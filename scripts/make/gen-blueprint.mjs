@@ -218,7 +218,9 @@ const httpMapper = (url, headers, data) => ({
 
 const http = (id, x, url, headers, data, extra = {}) => ({
   id, module: 'http:ActionSendData', version: 3,
-  parameters: { handleErrors: false, useNewZLibDeCompress: true },
+  /* A 503 from Gemini used to be painted green, then surface as "missing
+     json" in the next module. The HTTP status is the failure; preserve it. */
+  parameters: { handleErrors: true, useNewZLibDeCompress: true },
   mapper: httpMapper(url, headers, data),
   metadata: { designer: { x, y: 0 } },
   ...extra,
@@ -286,9 +288,24 @@ const flow = [
   /* Parsed only to get a title and an excerpt for the notification. */
   parseJson(7, 1800, '{{5.data.content[1].text}}'),
 
-  http(8, 2100, 'REPLACE_WITH_APPS_SCRIPT_EXEC_URL',
-    [{ name: 'Content-Type', value: 'application/json' }],
-    notifyBody),
+  Object.assign(
+    http(8, 2100, 'REPLACE_WITH_APPS_SCRIPT_EXEC_URL',
+      [{ name: 'Content-Type', value: 'application/json' }],
+      notifyBody),
+    { mapper: Object.assign(
+      httpMapper('REPLACE_WITH_APPS_SCRIPT_EXEC_URL',
+        [{ name: 'Content-Type', value: 'application/json' }], notifyBody),
+      {
+        qs: [{ name: 'k', value: 'REPLACE_WITH_WA_WEBHOOK_KEY' }],
+        /* Apps Script returns an HTML exception page with HTTP 200. Keep the
+           raw body so module 9, not this optimistic parser, proves it is JSON. */
+        parseResponse: false,
+        followAllRedirects: true,
+      }
+    ) }
+  ),
+
+  parseJson(9, 2400, '{{8.data}}'),
 ];
 
 const blueprint = {
