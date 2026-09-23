@@ -143,16 +143,25 @@ test('/plan and /progressive links survive the round trip, on/off and numbered c
 });
 
 test('a Blindspot link restores the exact property and listing inputs, never a posted score', () => {
-  const inputs = { home: '/hdb/bishan/242-bishan-st-22', price: 1_200_000, area: 1292, floor: 12 };
+  const inputs = { home: '/hdb/bishan/242-bishan-st-22', price: 1_200_000, area: 1292, floor: 12, flatType: '5 ROOM' };
   const hash = '#' + encodeShare(BLINDSPOT_SHARE, inputs);
   assert.deepEqual(blindspotShareInput(hash), { values: inputs });
   assert.ok(!hash.includes('points='), 'a score belongs to the rubric, not the link');
-  assert.equal(blindspotShareInput('#v=1&home=%2Fhdb%2Fbishan%2F242-bishan-st-22&price=1200000').error.length > 0, true,
+  assert.equal(blindspotShareInput('#v=2&home=%2Fhdb%2Fbishan%2F242-bishan-st-22&price=1200000').error.length > 0, true,
     'a missing area must not silently become a default home size');
-  assert.match(blindspotShareInput('#v=1&home=javascript%3Aalert%281%29&price=1200000&area=1292').error,
+  assert.match(blindspotShareInput('#v=2&home=javascript%3Aalert%281%29&price=1200000&area=1292&flatType=5+ROOM').error,
     /could not be read/, 'an invalid property must not be fetched');
-  assert.match(blindspotShareInput('#v=1&home=%2Fhdb%2Fbishan%2F242-bishan-st-22&price=abc&area=1292').error,
+  assert.match(blindspotShareInput('#v=2&home=%2Fhdb%2Fbishan%2F242-bishan-st-22&price=abc&area=1292&flatType=5+ROOM').error,
     /could not be read/, 'a changed asking price must not be guessed');
+  assert.match(blindspotShareInput('#v=2&home=%2Fhdb%2Fbishan%2F242-bishan-st-22&price=1200000&area=1292').error,
+    /could not be read/, 'a link missing its unit type must not run a different price cohort');
+  const privateInputs = { home: '/condo/parc-clematis', price: 2_100_000, area: 950, bedrooms: 3 };
+  assert.deepEqual(blindspotShareInput('#' + encodeShare(BLINDSPOT_SHARE, privateInputs)), { values: privateInputs });
+  assert.match(blindspotShareInput('#v=2&home=%2Fcondo%2Fparc-clematis&price=2100000&area=950&bedrooms=abc').error,
+    /could not be read/, 'an invalid bedroom count must not be silently dropped');
+  const old = blindspotShareInput('#v=1&home=%2Fhdb%2Fbishan%2F242-bishan-st-22&price=1200000&area=1292');
+  assert.equal(old.needsUnit, true, 'an old link restores inputs but cannot silently guess a unit type');
+  assert.equal(old.values.price, 1_200_000);
   assert.equal(blindspotShareInput('#how-to-read'), null, 'an ordinary anchor is not a shared check');
   for (const key of Object.keys(BLINDSPOT_SHARE.fields)) assert.ok(BLINDSPOT_LABELS[key]);
 });

@@ -256,11 +256,11 @@ test('/plan and /progressive emails quote the figures their pages compute', () =
 });
 
 test('a Blindspot email reruns the rubric and preserves every limitation and comparable', () => {
-  const input = { home: '/hdb/bishan/242-bishan-st-22', price: 1_200_000, area: 1292 };
+  const input = { home: '/hdb/bishan/242-bishan-st-22', price: 1_200_000, area: 1292, flatType: '5 ROOM' };
   const now = new Date('2026-09-23T00:00:00Z');
-  const r = analyse({ href: input.home, askPrice: input.price, areaSqft: input.area, now });
+  const r = analyse({ href: input.home, askPrice: input.price, areaSqft: input.area, flatType: input.flatType, now });
   const { text, html } = renderBlindspotReport({
-    values: input, link: 'https://truestorey.vercel.app/blindspot#v=1',
+    values: input, link: 'https://truestorey.vercel.app/blindspot#v=2',
     agent: AGENT, siteUrl: 'https://truestorey.vercel.app', now,
   });
   assert.match(text, new RegExp(`RISK POINTS: ${r.points} of ${r.max}`), 'the email changed the published score');
@@ -272,6 +272,8 @@ test('a Blindspot email reruns the rubric and preserves every limitation and com
   for (const c of r.skipped) assert.ok(text.includes(c.needs), `${c.key} was silently treated as safe`);
   for (const c of r.notApplicable) assert.ok(text.includes(c.reason), `${c.key} became an unmeasured risk`);
   assert.match(text, /FILED COMPARABLES/);
+  assert.match(text, /HDB flat type supplied: 5 ROOM/);
+  assert.match(text, /matched to the 5 ROOM selected from the listing/);
   assert.ok(text.includes(`${r.detail.price.period.from} to ${r.detail.price.period.to}`),
     'the filed evidence has no source period');
   assert.match(text, /TAKE THESE QUESTIONS INTO THE VIEWING/);
@@ -284,14 +286,27 @@ test('a Blindspot email reruns the rubric and preserves every limitation and com
 
 test('a private-home copy says MOP does not apply, not that it passed', () => {
   const out = renderBlindspotReport({
-    values: { home: '/condo/parc-clematis', price: 2_100_000, area: 950 },
-    link: 'https://truestorey.vercel.app/blindspot#v=1',
+    values: { home: '/condo/parc-clematis', price: 2_100_000, area: 950, bedrooms: 3 },
+    link: 'https://truestorey.vercel.app/blindspot#v=2',
     agent: AGENT, siteUrl: 'https://truestorey.vercel.app',
     now: new Date('2026-09-23T00:00:00Z'),
   });
   assert.match(out.text, /NOT APPLICABLE/);
+  assert.match(out.text, /Bedrooms supplied: 3/);
+  assert.match(out.text, /not the bedroom count supplied from the listing/);
   assert.match(out.text, /MOP is the five-year occupation rule for HDB flats, not private condominiums/);
   assert.doesNotMatch(out.text, /MOP.*passed/i);
+});
+
+test('the Blindspot email refuses a missing unit detail instead of guessing it', () => {
+  const base = { link: 'https://truestorey.vercel.app/blindspot#v=2', agent: AGENT,
+    siteUrl: 'https://truestorey.vercel.app' };
+  const hdb = renderBlindspotReport({ ...base,
+    values: { home: '/hdb/bishan/242-bishan-st-22', price: 1_200_000, area: 1292 } });
+  assert.match(hdb.error, /flat type/i);
+  const privateHome = renderBlindspotReport({ ...base,
+    values: { home: '/condo/parc-clematis', price: 2_100_000, area: 950 } });
+  assert.match(privateHome.error, /bedrooms/i);
 });
 
 test('the Blindspot email is never sent for a partial shared link', () => {

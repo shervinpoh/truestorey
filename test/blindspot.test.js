@@ -6,6 +6,8 @@ import { score, scoreCheck, CHECKS, BANDS, totalPossible } from '../lib/blindspo
 import { pricePercentile, nearbyComps, leaseFinding, leaseYearsLeft, tenureKey, supplyInTown, mopCoverage } from '../lib/blindspot/measure.js';
 import { relativity, annualDecay } from '../lib/calc/lease.js';
 import { viewingQuestions } from '../lib/blindspot/viewing.js';
+import { unitDetailError } from '../lib/blindspot/unit.js';
+import { recordByHref } from '../lib/data/query.js';
 
 /**
  * The rubric is the reason this tool is allowed to publish a number at all.
@@ -312,6 +314,34 @@ test('MOP supply is not scored against a private home, and says why', async () =
   // It still scores where it means something.
   const hdb = analyse({ href: '/hdb/bishan/242-bishan-st-22', askPrice: 1_200_000, areaSqft: 1292 });
   assert.ok(hdb.checks.some(c => c.key === 'supply'), 'supply is the point of an HDB report');
+});
+
+test('a buyer-selected HDB flat type drives the price cohort rather than an area guess', async () => {
+  const { analyse } = await import('../lib/blindspot/analyse.js');
+  const href = '/hdb/bishan/275a-bishan-st-24';
+  const rec = recordByHref(href);
+  assert.ok(rec.flatTypes.includes('4 ROOM') && rec.flatTypes.includes('5 ROOM'));
+  assert.match(unitDetailError(rec, {}), /flat type/i);
+  const r = analyse({ href, askPrice: 1_200_000, areaSqft: 1050, flatType: '4 ROOM' });
+  assert.equal(r.input.flatType, '4 ROOM');
+  assert.equal(r.detail.price.flatType, '4 ROOM');
+  assert.match(r.detail.price.flatTypeBasis, /selected from the listing/);
+  for (const cohort of [r.detail.price.same, r.detail.price.wider, r.detail.price.nearby]) {
+    if (cohort) assert.ok(cohort.comparisons.every(s => s.flatType === '4 ROOM'));
+  }
+});
+
+test('a private bedroom count is listing context, not a false sale-data filter', async () => {
+  const { analyse } = await import('../lib/blindspot/analyse.js');
+  const href = '/condo/parc-clematis';
+  const rec = recordByHref(href);
+  assert.match(unitDetailError(rec, {}), /bedrooms/i);
+  assert.equal(unitDetailError(rec, { bedrooms: 3 }), null);
+  const a = analyse({ href, askPrice: 2_100_000, areaSqft: 950, bedrooms: 2 });
+  const b = analyse({ href, askPrice: 2_100_000, areaSqft: 950, bedrooms: 3 });
+  assert.equal(b.input.bedrooms, 3);
+  assert.deepEqual(a.detail.price, b.detail.price, 'URA sales have no bedroom field to filter on');
+  assert.equal(a.points, b.points);
 });
 
 /* ── liquidity ─────────────────────────────────────────────────────────────── */

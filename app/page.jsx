@@ -146,7 +146,7 @@ export default async function Home() {
           <div className="herosearch">
             <p className="lab">Start with a block or project</p>
             <Search destination="blindspot" />
-            <p className="searchpromise">Select the property, enter its asking price and size, and take
+            <p className="searchpromise">Select the property, enter its flat type or bedroom count, asking price and size, and take
               the questions the public records raise into your viewing.</p>
           </div>
         </div>

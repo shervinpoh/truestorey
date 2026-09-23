@@ -12,6 +12,7 @@ import { BLINDSPOT_SHARE, blindspotShareInput, encodeShare } from '../lib/share.
 import ResultBridge from './ResultBridge.jsx';
 import ShareResult from './ShareResult.jsx';
 import EmailReport from './EmailReport.jsx';
+import { HDB_FLAT_TYPES, hdbFlatLabel, unitDetailError } from '../lib/blindspot/unit.js';
 
 /**
  * Blindspot — six checks, one score, every point traceable.
@@ -51,6 +52,8 @@ export default function BlindspotReport({ canEmail = false }) {
   const [prefill, setPrefill] = useState(from ? 'loading' : 'idle');
   const [price, setPrice] = useState('');
   const [area, setArea] = useState('');
+  const [flatType, setFlatType] = useState('');
+  const [bedrooms, setBedrooms] = useState('');
   const [state, setState] = useState('idle');
   const [report, setReport] = useState(null);
   const [error, setError] = useState('');
@@ -86,6 +89,7 @@ export default function BlindspotReport({ canEmail = false }) {
         setPicked({
           href: rec.href,
           label: rec.label,
+          kind: rec.kind,
           n: rec.n,
           sub: rec.kind === 'HDB' ? titleCase(rec.town) : `District ${rec.district}`,
         });
@@ -100,6 +104,17 @@ export default function BlindspotReport({ canEmail = false }) {
         setPrice(String(input.price));
         setArea(String(input.area));
         setFloor(input.floor ? String(input.floor) : '');
+        setFlatType(input.flatType || '');
+        setBedrooms(input.bedrooms ? String(input.bedrooms) : '');
+        if (shared.needsUnit) {
+          setLinkError('This older shared check has no unit type. The other inputs were restored; add the unit detail shown in the listing before running it.');
+          return;
+        }
+        const unitError = unitDetailError(rec, input);
+        if (unitError) {
+          setLinkError(`${unitError} The link's other inputs were restored; confirm the unit detail to continue.`);
+          return;
+        }
         setFromLink(true);
         setState('loading');
         const id = ++requestId.current;
@@ -107,7 +122,8 @@ export default function BlindspotReport({ canEmail = false }) {
         try {
           const result = await getReport({
             href: input.home, askPrice: input.price, areaSqft: input.area,
-            floor: input.floor || null,
+            floor: input.floor || null, flatType: input.flatType || null,
+            bedrooms: input.bedrooms || null,
           }, ctl.signal);
           if (ctl.signal.aborted || id !== requestId.current) return;
           setReport(result);
@@ -142,8 +158,10 @@ export default function BlindspotReport({ canEmail = false }) {
     return () => clearTimeout(t);
   }, [term, picked]);
 
-  const ready = picked && Number(price) > 0 && Number(area) > 0;
-  const psf = ready ? Math.round(Number(price) / Number(area)) : null;
+  const unitReady = picked && !unitDetailError(picked, { flatType, bedrooms });
+  const ready = unitReady && Number(price) > 0 && Number(area) > 0;
+  const psf = Number(price) > 0 && Number(area) > 0
+    ? Math.round(Number(price) / Number(area)) : null;
   const canBack = Boolean(from && picked?.href === from);
 
   function invalidate() {
@@ -153,6 +171,7 @@ export default function BlindspotReport({ canEmail = false }) {
     setReport(null);
     setState('idle');
     setError('');
+    setLinkError('');
     setFromLink(false);
     // After opening a shared check, the address bar still names its original
     // inputs. Once the form changes, leaving that fragment in place would let
@@ -170,7 +189,8 @@ export default function BlindspotReport({ canEmail = false }) {
     try {
       const j = await getReport({
         href: picked.href, askPrice: Number(price), areaSqft: Number(area),
-        floor: floor ? Number(floor) : null,
+        floor: floor ? Number(floor) : null, flatType: flatType || null,
+        bedrooms: bedrooms ? Number(bedrooms) : null,
       });
       if (id !== requestId.current) return;
       setReport(j); setState('done');
@@ -209,7 +229,7 @@ export default function BlindspotReport({ canEmail = false }) {
               <span className="mono">{picked.sub} · {num(picked.n)} filed</span>
               {canBack && <Link href={from}>← Back to the property</Link>}
               <button type="button" className="linkish" style={{ marginLeft: canBack ? 0 : 'auto' }}
-                onClick={() => { invalidate(); setPicked(null); setQ(''); setPrefill('idle'); setFromLink(false); setLinkError(''); }}>
+                onClick={() => { invalidate(); setPicked(null); setQ(''); setFlatType(''); setBedrooms(''); setPrefill('idle'); setFromLink(false); setLinkError(''); }}>
                 Change
               </button>
             </div>
@@ -226,7 +246,7 @@ export default function BlindspotReport({ canEmail = false }) {
                 <ul className="idx" style={{ marginTop: 8 }}>
                   {hits.map(h => (
                     <li key={h.href}>
-                      <button type="button" className="pickrow" onClick={() => { setPicked(h); setHits([]); }}>
+                      <button type="button" className="pickrow" onClick={() => { setPicked(h); setFlatType(''); setBedrooms(''); setHits([]); }}>
                         <span className="n">{titleCase(h.label)}</span>
                         <span className="s mono">{h.sub} · {num(h.n)} filed</span>
                       </button>
@@ -241,8 +261,8 @@ export default function BlindspotReport({ canEmail = false }) {
         {picked && (
           <div className="blindspot-listing">
             <div className="blindspot-stephead">
-              <span className="lab">Asking price and floor area</span>
-              <p>Enter the price and size shown in the listing. Nothing is uploaded or published.</p>
+              <span className="lab">The unit and its asking price</span>
+              <p>Enter the unit details shown in the listing. They are sent to run the check; no listing is published.</p>
             </div>
             <div className="planform" style={{ marginTop: 16 }}>
               <label><span>Asking price</span>
@@ -255,6 +275,17 @@ export default function BlindspotReport({ canEmail = false }) {
                   placeholder="e.g. S$1,250,000" ariaLabel="Asking price" /></label>
               <label><span>Floor area, sq ft</span>
                 <input type="number" step="10" value={area} onChange={e => { setArea(e.target.value); invalidate(); }} placeholder="e.g. 1,292" /></label>
+              {picked.kind === 'HDB' ? (
+                <label><span>HDB flat type</span>
+                  <select value={flatType} required onChange={e => { setFlatType(e.target.value); invalidate(); }}>
+                    <option value="">Choose the listing's flat type</option>
+                    {HDB_FLAT_TYPES.map(t => <option key={t} value={t}>{hdbFlatLabel(t)}</option>)}
+                  </select></label>
+              ) : (
+                <label><span>Bedrooms in this unit</span>
+                  <input type="number" min="1" max="20" step="1" required value={bedrooms}
+                    onChange={e => { setBedrooms(e.target.value); invalidate(); }} placeholder="e.g. 3" /></label>
+              )}
               {/* Optional, and it changes the answer more than anything else here:
                   adjusting comparables to the reader's own floor moved Blk 242
                   Bishan from "above every comparable" on the second storey to the
@@ -263,10 +294,15 @@ export default function BlindspotReport({ canEmail = false }) {
               <label><span>Floor <small>(optional)</small></span>
                 <input type="number" step="1" min="1" max="70" value={floor}
                   onChange={e => { setFloor(e.target.value); invalidate(); }} placeholder="e.g. 12" /></label>
-              <label><span>Asking price per sq ft</span>
-                <input readOnly value={psf ? `$${f(psf).replace('S$', '')} psf` : '—'} tabIndex={-1}
-                  style={{ background: 'var(--sunk)', color: 'var(--mute)' }} /></label>
             </div>
+            {psf && <p className="hint" aria-live="polite" style={{ margin: '10px 0 0' }}>
+              From the asking price and floor area you entered: <b className="mono">{f(psf)} psf</b>.
+            </p>}
+            <p className="hint" style={{ margin: '10px 0 0' }}>
+              {picked.kind === 'HDB'
+                ? 'HDB room type is not the bedroom count. Select the flat type in the listing; the price check uses that exact type.'
+                : 'Bedroom count is from your listing. URA sales do not include bedrooms, so the price check matches on floor area, property type and tenure—not bedroom count.'}
+            </p>
 
             {/* This was a .ghost — a small grey outline button, visually quieter
                 than the three inputs above it. The primary action of the site's
@@ -279,13 +315,13 @@ export default function BlindspotReport({ canEmail = false }) {
                 ? 'Reading filed sales, lease, liquidity, supply, land and planning records.'
                 : ready
                   ? 'Ready. Points follow the published rules and the filed records held today.'
-                  : 'Add the asking price and floor area to continue. Floor is optional.'}
+                  : 'Add the asking price, floor area and unit detail to continue. Floor is optional.'}
             </p>
           </div>
         )}
         {!picked && prefill !== 'loading' && (
           <p className="hint" style={{ marginTop: 12 }}>
-            Only the address is needed for this step. The asking price and floor area come next.
+            Only the address is needed for this step. The flat type or bedroom count, asking price and floor area come next.
           </p>
         )}
       </form>
@@ -304,6 +340,7 @@ function Result({ report, boxRef, canEmail }) {
   const shareHash = encodeShare(BLINDSPOT_SHARE, {
     home: r.record.href, price: r.input.askPrice,
     area: r.input.areaSqft, floor: r.input.floor,
+    flatType: r.input.flatType, bedrooms: r.input.bedrooms,
   });
   /* Checks that contributed at least one point. The weighted total cannot
      be read back into a count, so it is counted here from the checks
@@ -314,6 +351,12 @@ function Result({ report, boxRef, canEmail }) {
   return (
     <div ref={boxRef} style={{ marginTop: 30, scrollMarginTop: 76 }}>
       <h2 className="sh"><span>{titleCase(r.record.label)}</span></h2>
+      <p className="hint" style={{ margin: '7px 0 18px' }}>
+        {r.record.kind === 'HDB'
+          ? <><b>{hdbFlatLabel(r.input.flatType || r.detail?.price?.flatType || 'HDB flat')}</b> · flat type from {r.input.flatType ? 'the listing you entered' : 'filed sales at this block'}</>
+          : <><b>{r.input.bedrooms} bedroom{r.input.bedrooms === 1 ? '' : 's'}</b> · from the listing you entered; URA sale records do not identify bedrooms</>}
+        {' · '}{num(r.input.areaSqft)} sq ft · {f(r.input.askPrice)} asking
+      </p>
 
       <div className="scorewrap">
         <div className="scorenum">
@@ -413,7 +456,7 @@ function Result({ report, boxRef, canEmail }) {
         </>
       )}
 
-      {r.detail?.price && <PriceEvidence price={r.detail.price} />}
+      {r.detail?.price && <PriceEvidence price={r.detail.price} kind={r.record.kind} />}
       {r.detail?.trend && <SizeTrend t={r.detail.trend} />}
 
       {r.detail?.supply?.basis === 'town' && (
@@ -482,7 +525,7 @@ function ViewingBrief({ report }) {
   );
 }
 
-function PriceEvidence({ price }) {
+function PriceEvidence({ price, kind }) {
   const observed = price.observed;
   const scored = price.scored;
   const comps = scored?.comparisons || [];
@@ -504,10 +547,12 @@ function PriceEvidence({ price }) {
         <div className="priceevidence">
           <span className="lab">This block or project</span>
           <p>
-            <b>{num(observed.sample)} filed sale{observed.sample === 1 ? '' : 's'} held</b>, from{' '}
+            <b>{num(observed.sample)} filed sale{observed.sample === 1 ? '' : 's'} held at this address{kind === 'HDB' && ' (all flat types)'}</b>, from{' '}
             {psf(observed.low)} to {psf(observed.high)} between {observed.from} and {observed.to}.
             {' '}The asking price is {psf(observed.asking)}
-            {observed.aboveHighPct != null ? ` — ${above(observed.aboveHighPct)}.` : '.'}
+            {observed.aboveHighPct != null
+              ? ` — ${observed.aboveHighPct >= 100 ? Math.round(observed.aboveHighPct) : observed.aboveHighPct.toFixed(1)}% above the highest filed sale at this address.`
+              : '.'}
           </p>
           <span className="prov">{price.source} · {price.period?.from} to {price.period?.to} · observed range, not a valuation</span>
         </div>
@@ -519,8 +564,9 @@ function PriceEvidence({ price }) {
           {scored.basis === 'nearby' ? (
             <p>
               <b>{num(scored.sample)} comparable sales across {num(scored.blocks)}{' '}
-              {scored.leaseFrom ? 'HDB blocks' : 'nearby projects'} within{' '}
-              {num(Math.round(scored.radiusKm * 1000))}m.</b> Same {titleCase(price.flatType)}, floor area{' '}
+              {scored.leaseFrom ? (scored.blocks === 1 ? 'HDB block' : 'HDB blocks')
+                : (scored.blocks === 1 ? 'nearby project' : 'nearby projects')} within{' '}
+              {num(Math.round(scored.radiusKm * 1000))}m.</b> Same {kind === 'HDB' ? hdbFlatLabel(price.flatType) : titleCase(price.flatType)}, floor area{' '}
               {num(scored.areaFromSqm)}–{num(scored.areaToSqm)} sqm
               {/* HDB blocks are matched on when the lease started; private on
                   tenure, because a freehold and a 99-year unit of the same size
@@ -536,7 +582,7 @@ function PriceEvidence({ price }) {
             </p>
           ) : (
             <p>
-              <b>{num(scored.sample)} sales at this address in the last {scored.months} months.</b>{' '}
+              <b>{num(scored.sample)} {kind === 'HDB' ? hdbFlatLabel(price.flatType) + ' ' : ''}sales at this address in the last {scored.months} months.</b>{' '}
               The filed range was {psf(scored.low)} to {psf(scored.high)}, median {psf(scored.median)}.
               The asking price is <b>{position(scored)}</b>.
               {scored.months > 12 && (
@@ -561,7 +607,7 @@ function PriceEvidence({ price }) {
               {price.floor
                 ? 'The floor curve for this town or district does not rise with height — too thin a sample to adjust with — so the comparables are used exactly as filed.'
                 : 'Comparables are used as filed and not adjusted for storey. Give a floor above and they will be restated on it.'}
-              {scored.basis === 'nearby' && <> Treated as {titleCase(price.flatType)} from{' '}
+              {scored.basis === 'nearby' && <> Treated as {kind === 'HDB' ? hdbFlatLabel(price.flatType) : titleCase(price.flatType)} from{' '}
                 {price.flatTypeBasis}. Distance is straight-line from the searched address.</>}
             </p>
           )}
@@ -593,7 +639,7 @@ function PriceEvidence({ price }) {
                   <tr key={`${c.href}-${c.month}-${c.price}-${i}`}>
                     <th scope="row"><Link href={c.href}>{titleCase(c.label)}</Link></th>
                     <td className="mono">{c.month}</td>
-                    <td>{c.areaSqm ? `${c.areaSqm} sqm` : '—'}{c.storey ? ` · ${c.storey}` : ''}</td>
+                    <td>{kind === 'HDB' && c.flatType ? `${hdbFlatLabel(c.flatType)} · ` : ''}{c.areaSqm ? `${c.areaSqm} sqm` : '—'}{c.storey ? ` · ${c.storey}` : ''}</td>
                     <td className="mono">${num(c.psf)}</td>
                     <td className="mono">{c.distanceM ? `${num(c.distanceM)}m` : 'this block'}</td>
                   </tr>

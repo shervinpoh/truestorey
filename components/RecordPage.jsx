@@ -236,7 +236,7 @@ function Fork({ planHref, href, hdb, hasMop }) {
           <ul>
             <li><a href={`/blindspot?from=${encodeURIComponent(href)}`}>
               <b>Run Blindspot on the asking price</b>
-              <span>Six checks against the filed record. You add the actual price and floor area.</span></a></li>
+              <span>Six checks against the filed record. You add the unit type, actual price and floor area.</span></a></li>
             <li><a href={planHref}>
               <b>See what the purchase needs upfront</b>
               <span>The filed median starts as an example. Replace it with the asking price.</span></a></li>

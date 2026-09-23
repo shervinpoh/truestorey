@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { analyse } from '../../../../lib/blindspot/analyse.js';
+import { recordByHref } from '../../../../lib/data/query.js';
+import { unitDetailError } from '../../../../lib/blindspot/unit.js';
 import { claude, configured } from '../../../../lib/ai/providers.js';
 
 export const dynamic = 'force-dynamic';
@@ -38,10 +40,14 @@ export async function POST(req) {
   try { body = await req.json(); }
   catch { return NextResponse.json({ error: 'Could not read that request.' }, { status: 400 }); }
 
-  const { href, askPrice, areaSqft, floor } = body || {};
+  const { href, askPrice, areaSqft, floor, flatType, bedrooms } = body || {};
   if (!href || typeof href !== 'string') {
     return NextResponse.json({ error: 'Choose a block or project first.' }, { status: 400 });
   }
+  const rec = recordByHref(href);
+  if (!rec) return NextResponse.json({ error: 'No record at that address.' }, { status: 404 });
+  const unitError = unitDetailError(rec, { flatType, bedrooms });
+  if (unitError) return NextResponse.json({ error: unitError }, { status: 400 });
 
   // 1 — the part that is not a model.
   const report = analyse({
@@ -49,6 +55,8 @@ export async function POST(req) {
     askPrice: Number(askPrice) || null,
     areaSqft: Number(areaSqft) || null,
     floor: Number(floor) || null,
+    flatType: rec.kind === 'HDB' ? flatType : null,
+    bedrooms: rec.kind === 'HDB' ? null : Number(bedrooms),
   });
   if (report.error) return NextResponse.json(report, { status: 404 });
 

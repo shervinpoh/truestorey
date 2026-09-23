@@ -109,7 +109,7 @@ test('Blindspot asks for listing figures only after a property is chosen', () =>
     'asking price and floor area are front-loaded before the property step');
   assert.doesNotMatch(src, /Add the listing|Blindspot progress|Step 2/,
     'the form has regained a misleading upload step or unnecessary progress strip');
-  assert.match(src, /Nothing is uploaded or published/,
+  assert.match(src, /sent to run the check; no listing is published/,
     'the asking-price step no longer explains what happens to the listing figures');
   assert.match(src, /placeholder="e\.g\. S\$1,250,000"/,
     'the blank asking-price field looks prefilled instead of showing an example');

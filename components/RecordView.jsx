@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { f, fk, mLabel } from './fmt.js';
 import { titleCase } from '../lib/name.js';
 import { Grow, withTransition } from './Motion.jsx';
+import { hdbFlatLabel } from '../lib/blindspot/unit.js';
 
 /**
  * One block or one project.
@@ -119,6 +120,11 @@ export default function RecordView({ rec, attribution = [], onType, afterSummary
       </div>
 
       {types.length > 1 && (
+        <p className="hint" style={{ margin: '10px 0 0' }}>
+          {rec.kind === 'HDB' ? 'Flat types filed at this block; choose the one relevant to your unit.' : 'Property types filed at this project.'}
+        </p>
+      )}
+      {types.length > 1 && (
         <div className="seg" style={{marginTop:12}}>
           <button aria-pressed={!rtype} onClick={()=>pick(null)}>All</button>
           {types.map(x => (
@@ -127,6 +133,12 @@ export default function RecordView({ rec, attribution = [], onType, afterSummary
             </button>
           ))}
         </div>
+      )}
+      {rec.kind === 'HDB' && types.length === 1 && (
+        <p className="hint" style={{ margin: '10px 0 0' }}>
+          Flat type filed here: <b>{hdbFlatLabel(types[0])}</b>.
+          Confirm the specific unit&rsquo;s type from its listing before running Blindspot.
+        </p>
       )}
 
       {/* YoY is computed across all types — never show it beside a filtered figure. */}
@@ -171,7 +183,10 @@ export default function RecordView({ rec, attribution = [], onType, afterSummary
       {recent.length > 0 && (<>
         <h2 className="sh" id="transactions"><span>The transactions behind those figures</span>
           <span>{recent.length} of {rv.n}</span></h2>
-        <p className="hint" style={{marginTop:10}}>Nothing modelled — these are the filed sales.</p>
+        <p className="hint" style={{marginTop:10}}>
+          Nothing modelled — these are the filed sales.
+          {rec.kind !== 'HDB' && ' URA does not include the number of bedrooms in a sale record.'}
+        </p>
         {/* Eight, then the rest on request. A block with forty filed sales put
             forty rows between the chart and everything below it, and nobody
             reads the twenty-ninth. They are all still here, and still in the
