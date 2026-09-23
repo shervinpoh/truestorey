@@ -20,7 +20,7 @@ import { EVENTS } from '../lib/analytics.js';
  * figures are in the link and that anyone holding it sees them — and that this
  * site never receives them. lib/share.js says why that last part is true.
  */
-export default function ShareResult({ tool, title, url }) {
+export default function ShareResult({ tool, title, url, note = null }) {
   const [state, setState] = useState('idle');   // idle | copied | manual
   const [manual, setManual] = useState('');
   const [canShare, setCanShare] = useState(false);
@@ -71,11 +71,11 @@ export default function ShareResult({ tool, title, url }) {
           <input ref={field} readOnly value={manual} onFocus={e => e.target.select()} />
         </label>
       )}
-      <p className="hint">
+      {note || <p className="hint">
         Your figures travel inside the link, after the <span className="mono">#</span>, which a
         browser never sends to a server — so this site does not receive or store them. Anyone you
         send it to sees the same figures.
-      </p>
+      </p>}
     </div>
   );
 }

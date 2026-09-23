@@ -1495,6 +1495,9 @@ input[type=range]:active::-moz-range-thumb{transform:scale(1.15);cursor:grabbing
 .scorebar i{flex:1 1 0;height:9px;background:var(--line);display:block}
 .scorebar i.on{background:var(--acc)}
 @media(max-width:640px){.scorewrap{grid-template-columns:1fr}}
+.blindspot-keep{margin:20px 0 0;padding:16px 0;border-top:1px solid var(--line2)}
+.blindspot-keep h3{margin:0;font-size:var(--t-lead);line-height:1.25}
+.blindspot-keep .shareresult{border-top:0;margin-top:0;padding-top:10px}
 
 /* A report used to stop at the arithmetic, then repeat every check in detail.
    This bridge turns the strongest flag and one missing measurement into

@@ -100,7 +100,9 @@ test('a property record carries its identity into Blindspot, not an invented ask
   const blindspot = readFileSync(new URL('../components/BlindspotReport.jsx', import.meta.url), 'utf8');
   assert.match(record, /\/blindspot\?from=\$\{encodeURIComponent\(href\)\}/,
     'record pages no longer link into Blindspot with their property identity');
-  assert.match(blindspot, /\/api\/record\?href=\$\{encodeURIComponent\(from\)\}/,
+  assert.match(blindspot, /const href = shared\?\.values\.home \|\| from;/,
+    'a shared check no longer takes precedence over the record-page handoff');
+  assert.match(blindspot, /\/api\/record\?href=\$\{encodeURIComponent\(href\)\}/,
     'Blindspot no longer resolves the public record carried in its URL');
   assert.doesNotMatch(record, /\/blindspot\?[^`]*price=/,
     'a record median is being passed to Blindspot as though it were an asking price');

@@ -3,11 +3,13 @@ import { configured as mailConfigured, send } from '../../../lib/email.js';
 import { MAX_BODY, ipOf, isBot, makeThrottle, readJson } from '../../../lib/formguard.js';
 import {
   COST_SHARE, COST_DEFAULTS, PLAN_SHARE, PLAN_DEFAULTS,
-  PROGRESSIVE_SHARE, PROGRESSIVE_DEFAULTS, decodeShare,
+  PROGRESSIVE_SHARE, PROGRESSIVE_DEFAULTS, BLINDSPOT_SHARE,
+  blindspotShareInput, decodeShare,
 } from '../../../lib/share.js';
 import { renderCostReport } from '../../../lib/report/cost.js';
 import { renderPlanReport } from '../../../lib/report/plan.js';
 import { renderProgressiveReport } from '../../../lib/report/progressive.js';
+import { renderBlindspotReport } from '../../../lib/report/blindspot.js';
 import { rentFor, recordByHref } from '../../../lib/data/query.js';
 import { agent } from '../../../lib/agent.js';
 
@@ -16,10 +18,10 @@ import { agent } from '../../../lib/agent.js';
  * existed (NEXT.md §8.2).
  *
  * ── IT SENDS A COPY. IT DOES NOT COLLECT ANYONE ────────────────────────────
- * The address is used once, to send the thing the reader asked for, and is
- * written nowhere: no CRM row, no database, no analytics field. So there is no
- * consent to record and nothing to unsubscribe from, and the page says so in
- * those words.
+ * The address is used once, to send the thing the reader asked for, and this
+ * site writes no CRM row, database row or analytics field. The email provider
+ * receives the address and content to deliver that message; the UI says so.
+ * There is no marketing consent to record and no subscription to leave.
  *
  * That is deliberate and it is not the whole of §8.2. The section also wants a
  * row in the Property CRM — but the only consent wording this site has ever
@@ -52,6 +54,9 @@ const TOOLS = {
     schema: PROGRESSIVE_SHARE, defaults: PROGRESSIVE_DEFAULTS, path: '/progressive',
     render: renderProgressiveReport,
   },
+  blindspot: {
+    schema: BLINDSPOT_SHARE, defaults: {}, path: '/blindspot', render: renderBlindspotReport,
+  },
 };
 
 export async function POST(req) {
@@ -80,13 +85,19 @@ export async function POST(req) {
 
   const got = decodeShare(tool.schema, String(body.hash || ''));
   if (!got) return NextResponse.json({ error: 'That result could not be read.' }, { status: 400 });
+  // A calculator can fill an omitted field with its published start value.
+  // Blindspot has no default property or listing: every required field must
+  // survive exactly, or the emailed check would answer a different question.
+  if (body.tool === 'blindspot' && blindspotShareInput(String(body.hash || ''))?.error) {
+    return NextResponse.json({ error: 'That shared check could not be read.' }, { status: 400 });
+  }
   const values = { ...tool.defaults, ...got.values };
 
   /* The rent comparison, when the reader named a home — read here rather than
      posted, like every other figure. A missing one drops the section; it never
      fails the send. */
   let market = null;
-  if (values.home) {
+  if (body.tool === 'cost' && values.home) {
     const rec = recordByHref(values.home);
     if (rec) {
       const rent = rentFor(values.home, {
@@ -99,13 +110,15 @@ export async function POST(req) {
   }
 
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://truestorey.vercel.app').replace(/\/$/, '');
-  const { subject, text, html } = tool.render({
+  const rendered = tool.render({
     values,
     market,
     link: `${siteUrl}${tool.path}#${String(body.hash).replace(/^#/, '')}`,
     agent: agent(),
     siteUrl,
   });
+  if (rendered.error) return NextResponse.json({ error: rendered.error }, { status: 404 });
+  const { subject, text, html } = rendered;
 
   const sent = await send({ to: email, subject, text, html });
   if (!sent || sent.error) {

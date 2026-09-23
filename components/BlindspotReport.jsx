@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { toolRun } from './Track.jsx';
@@ -8,7 +8,10 @@ import { titleCase } from '../lib/name.js';
 import { Figure, still } from './Motion.jsx';
 import MoneyInput from './MoneyInput.jsx';
 import { viewingQuestions } from '../lib/blindspot/viewing.js';
+import { BLINDSPOT_SHARE, blindspotShareInput, encodeShare } from '../lib/share.js';
 import ResultBridge from './ResultBridge.jsx';
+import ShareResult from './ShareResult.jsx';
+import EmailReport from './EmailReport.jsx';
 
 /**
  * Blindspot — six checks, one score, every point traceable.
@@ -26,7 +29,19 @@ import ResultBridge from './ResultBridge.jsx';
  *
  * The paragraph at the top is written by a model. The number never is.
  */
-export default function BlindspotReport() {
+async function getReport(input, signal) {
+  const res = await fetch('/api/ai/blindspot', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+    signal,
+  });
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.error || 'That did not work.');
+  return result;
+}
+
+export default function BlindspotReport({ canEmail = false }) {
   const params = useSearchParams();
   const from = params.get('from') || '';
   const [floor, setFloor] = useState('');
@@ -39,7 +54,10 @@ export default function BlindspotReport() {
   const [state, setState] = useState('idle');
   const [report, setReport] = useState(null);
   const [error, setError] = useState('');
+  const [linkError, setLinkError] = useState('');
+  const [fromLink, setFromLink] = useState(false);
   const box = useRef(null);
+  const requestId = useRef(0);
 
   // A record page already knows the property. Make the reader supply only the
   // two facts it cannot know: the actual asking price and this unit's area.
@@ -48,12 +66,23 @@ export default function BlindspotReport() {
   // it into a field labelled "what it is being asked for" would turn a filed
   // middle into a seller's claim that nobody made.
   useEffect(() => {
-    if (!from) { setPrefill('idle'); return; }
+    const shareLike = /^#v=/.test(window.location.hash);
+    const shared = shareLike ? blindspotShareInput(window.location.hash) : null;
+    if (shareLike && (!shared || shared.error)) {
+      setLinkError(shared?.error || 'This shared check uses a version that cannot be read. Start a new check.');
+      setPrefill('idle');
+      return;
+    }
+    const href = shared?.values.home || from;
+    if (!href) { setPrefill('idle'); return; }
     const ctl = new AbortController();
     setPrefill('loading');
-    fetch(`/api/record?href=${encodeURIComponent(from)}`, { signal: ctl.signal })
-      .then(r => (r.ok ? r.json() : Promise.reject(new Error('no record'))))
-      .then(rec => {
+    (async () => {
+      try {
+        const res = await fetch(`/api/record?href=${encodeURIComponent(href)}`, { signal: ctl.signal });
+        if (!res.ok) throw new Error('no record');
+        const rec = await res.json();
+        if (ctl.signal.aborted) return;
         setPicked({
           href: rec.href,
           label: rec.label,
@@ -62,8 +91,41 @@ export default function BlindspotReport() {
         });
         setQ('');
         setPrefill('done');
-      })
-      .catch(e => { if (e.name !== 'AbortError') setPrefill('failed'); });
+        if (!shared) return;
+
+        // A link carries inputs, never a score. Re-run against today's filed
+        // records so the published rubric and the evidence cannot go stale in
+        // a copied URL. This is a new check, not a stored or frozen report.
+        const input = shared.values;
+        setPrice(String(input.price));
+        setArea(String(input.area));
+        setFloor(input.floor ? String(input.floor) : '');
+        setFromLink(true);
+        setState('loading');
+        const id = ++requestId.current;
+        toolRun('blindspot');
+        try {
+          const result = await getReport({
+            href: input.home, askPrice: input.price, areaSqft: input.area,
+            floor: input.floor || null,
+          }, ctl.signal);
+          if (ctl.signal.aborted || id !== requestId.current) return;
+          setReport(result);
+          setState('done');
+          requestAnimationFrame(() => box.current?.scrollIntoView({
+            behavior: still() ? 'auto' : 'smooth', block: 'start',
+          }));
+        } catch (err) {
+          if (ctl.signal.aborted || id !== requestId.current) return;
+          setError(err.message);
+          setState('error');
+        }
+      } catch (err) {
+        if (ctl.signal.aborted) return;
+        setPrefill('failed');
+        if (shared) setLinkError('The property in this shared check could not be found. Search for it again.');
+      }
+    })();
     return () => ctl.abort();
   }, [from]);
 
@@ -84,19 +146,33 @@ export default function BlindspotReport() {
   const psf = ready ? Math.round(Number(price) / Number(area)) : null;
   const canBack = Boolean(from && picked?.href === from);
 
+  function invalidate() {
+    // If the reader edits an input while a request is running, its old answer
+    // must not arrive later underneath the new figure shown in the form.
+    requestId.current += 1;
+    setReport(null);
+    setState('idle');
+    setError('');
+    setFromLink(false);
+    // After opening a shared check, the address bar still names its original
+    // inputs. Once the form changes, leaving that fragment in place would let
+    // a copied browser URL answer a different question from the visible form.
+    if (blindspotShareInput(window.location.hash)) {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+  }
+
   async function run(e) {
     e.preventDefault();
     if (!ready || state === 'loading') return;
     setState('loading'); setError(''); setReport(null); toolRun('blindspot');
+    const id = ++requestId.current;
     try {
-      const res = await fetch('/api/ai/blindspot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ href: picked.href, askPrice: Number(price), areaSqft: Number(area),
-                               floor: floor ? Number(floor) : null }),
+      const j = await getReport({
+        href: picked.href, askPrice: Number(price), areaSqft: Number(area),
+        floor: floor ? Number(floor) : null,
       });
-      const j = await res.json();
-      if (!res.ok) throw new Error(j.error || 'That did not work.');
+      if (id !== requestId.current) return;
       setReport(j); setState('done');
       // Jump rather than glide for a reader who has asked for less motion.
       // The report can be a screen and a half, so this is one of the longest
@@ -105,6 +181,7 @@ export default function BlindspotReport() {
         behavior: still() ? 'auto' : 'smooth', block: 'start',
       }));
     } catch (err) {
+      if (id !== requestId.current) return;
       setError(err.message); setState('error');
     }
   }
@@ -112,6 +189,11 @@ export default function BlindspotReport() {
   return (
     <>
       <form onSubmit={run}>
+        {linkError && <p className="note" role="alert">{linkError}</p>}
+        {fromLink && <p className="note" role="status">
+          <b>Opened from a shared check.</b> The inputs were restored and the checks run again
+          against the public records held today. The points may differ from when the link was made.
+        </p>}
         <div className="fld">
           <label className="lab" htmlFor="bs-q" style={{ display: 'block', marginBottom: 6 }}>
             The block or project
@@ -127,7 +209,7 @@ export default function BlindspotReport() {
               <span className="mono">{picked.sub} · {num(picked.n)} filed</span>
               {canBack && <Link href={from}>← Back to the property</Link>}
               <button type="button" className="linkish" style={{ marginLeft: canBack ? 0 : 'auto' }}
-                onClick={() => { setPicked(null); setQ(''); setReport(null); setState('idle'); setPrefill('idle'); }}>
+                onClick={() => { invalidate(); setPicked(null); setQ(''); setPrefill('idle'); setFromLink(false); setLinkError(''); }}>
                 Change
               </button>
             </div>
@@ -167,12 +249,12 @@ export default function BlindspotReport() {
                 {/* The slider appears once there is a figure to move. Before that
                     there is nothing for a thumb to point at, and a range control
                     sitting at zero next to an empty box reads as a broken field. */}
-                <MoneyInput value={price} onChange={setPrice} emptyIsBlank
+                <MoneyInput value={price} onChange={v => { setPrice(v); invalidate(); }} emptyIsBlank
                   slider={price !== '' && price != null}
                   min={100000} max={8000000} step={10000}
                   placeholder="e.g. S$1,250,000" ariaLabel="Asking price" /></label>
               <label><span>Floor area, sq ft</span>
-                <input type="number" step="10" value={area} onChange={e => setArea(e.target.value)} placeholder="e.g. 1,292" /></label>
+                <input type="number" step="10" value={area} onChange={e => { setArea(e.target.value); invalidate(); }} placeholder="e.g. 1,292" /></label>
               {/* Optional, and it changes the answer more than anything else here:
                   adjusting comparables to the reader's own floor moved Blk 242
                   Bishan from "above every comparable" on the second storey to the
@@ -180,7 +262,7 @@ export default function BlindspotReport() {
                   used exactly as filed and the report says so. */}
               <label><span>Floor <small>(optional)</small></span>
                 <input type="number" step="1" min="1" max="70" value={floor}
-                  onChange={e => setFloor(e.target.value)} placeholder="e.g. 12" /></label>
+                  onChange={e => { setFloor(e.target.value); invalidate(); }} placeholder="e.g. 12" /></label>
               <label><span>Asking price per sq ft</span>
                 <input readOnly value={psf ? `$${f(psf).replace('S$', '')} psf` : '—'} tabIndex={-1}
                   style={{ background: 'var(--sunk)', color: 'var(--mute)' }} /></label>
@@ -190,13 +272,13 @@ export default function BlindspotReport() {
                 than the three inputs above it. The primary action of the site's
                 flagship tool cannot be the least prominent thing in its own form. */}
             <button type="submit" className="cta" disabled={!ready || state === 'loading'}>
-              {state === 'loading' ? 'Checking public records…' : 'Run the six checks'}
+              {state === 'loading' ? 'Checking public records…' : 'Check this property'}
             </button>
             <p className="blindspot-status" role="status" aria-live="polite">
               {state === 'loading'
                 ? 'Reading filed sales, lease, liquidity, supply, land and planning records.'
                 : ready
-                  ? 'Ready. The same inputs always produce the same points.'
+                  ? 'Ready. Points follow the published rules and the filed records held today.'
                   : 'Add the asking price and floor area to continue. Floor is optional.'}
             </p>
           </div>
@@ -212,14 +294,17 @@ export default function BlindspotReport() {
         <div className="warn" style={{ marginTop: 18 }}><p style={{ margin: 0 }}>{error}</p></div>
       )}
 
-      {report && <Result report={report} boxRef={box} />}
+      {report && <Result report={report} boxRef={box} canEmail={canEmail} />}
     </>
   );
 }
 
-function Result({ report, boxRef }) {
+function Result({ report, boxRef, canEmail }) {
   const r = report;
-  const pctOfMax = r.max ? r.points / r.max : 0;
+  const shareHash = encodeShare(BLINDSPOT_SHARE, {
+    home: r.record.href, price: r.input.askPrice,
+    area: r.input.areaSqft, floor: r.input.floor,
+  });
   /* Checks that contributed at least one point. The weighted total cannot
      be read back into a count, so it is counted here from the checks
      themselves rather than inferred. */
@@ -269,6 +354,18 @@ function Result({ report, boxRef }) {
             </p>
           )}
         </div>
+      </div>
+
+      <div className="blindspot-keep">
+        <h3>Keep this check or send it to someone</h3>
+        <ShareResult tool="blindspot" title={`Blindspot check: ${titleCase(r.record.label)}`}
+          url={() => `${window.location.origin}/blindspot#${shareHash}`}
+          note={<p className="hint">
+            Anyone with the link can see this property and the listing figures. They sit after
+            the <span className="mono">#</span>, outside the initial page request. To restore the
+            property and rerun the checks, the browser sends those inputs to Truestorey. The
+            result uses the records held at that time; it is not a frozen report.
+          </p>} />
       </div>
 
       {r.notApplicable?.length > 0 && (
@@ -334,6 +431,10 @@ function Result({ report, boxRef }) {
         transactions, not by a model. {r.summary ? 'The paragraph is written by a model from those figures and adds none of its own.' : ''}<br />
         {r.disclaimer}
       </p>
+
+      {canEmail && <EmailReport tool="blindspot" hash={shareHash} title="my Blindspot check"
+        description="Get the checks, their limits, the filed comparables and viewing questions in one email you can keep or forward. The copy is recomputed from the same public records and rubric; it omits the optional generated paragraph."
+        privacyNote="The property and listing inputs were sent to run this check and will be sent again to make the email. They are not kept." />}
 
       <ResultBridge tool="Blindspot report"
         nextHref={`/plan?price=${r.input.askPrice || ''}&from=${encodeURIComponent(r.record.href)}`}

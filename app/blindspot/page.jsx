@@ -5,6 +5,7 @@ import ToolIntro from '../../components/ToolIntro.jsx';
 import ToolUse from '../../components/ToolUse.jsx';
 import BlindspotReport from '../../components/BlindspotReport.jsx';
 import { CHECKS, totalPossible, RUBRIC_VERSION } from '../../lib/blindspot/rubric.js';
+import { configured as mailConfigured } from '../../lib/email.js';
 
 export const metadata = {
   title: 'Blindspot — six checks on a Singapore property, free | Truestorey',
@@ -23,7 +24,7 @@ export default function Page() {
 
       <section className="pane">
         <Suspense fallback={<p className="hint">Loading the checks…</p>}>
-          <BlindspotReport />
+          <BlindspotReport canEmail={mailConfigured()} />
         </Suspense>
       </section>
 
@@ -35,8 +36,8 @@ export default function Page() {
         </summary>
         <div className="methoddetails-body">
           <p className="hint">
-            This is the whole formula. Nothing else contributes to the score. Same inputs,
-            same points, every time.
+            This is the whole formula. Nothing else contributes to the score. The same inputs
+            against the same held records give the same points; a data refresh can change them.
           </p>
         {/* .tablewrap, not .tw — `.tw` is the town-tile button, which brought a
             tile background and its teal --heat wash along with it. */}

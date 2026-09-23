@@ -38,10 +38,14 @@ export default function Page() {
           <li><b>No user agent, no screen fingerprint.</b> Only a coarse phone / tablet / desktop
             class, from the window width.</li>
           <li><b>No third-party analytics.</b> No Google Analytics, no tag manager, no pixels.</li>
-          <li><b>Nothing you type into a calculator is collected by default.</b> A price, a salary,
-            a loan, a floor area or an address stays in your browser while the tool runs. If you
-            deliberately request an emailed copy, the figures needed to write it are sent once and
-            not stored. A shared result stays inside the link you choose to send.</li>
+          <li><b>Calculator figures are not added to analytics.</b> The financial calculators run
+            in your browser by default. Blindspot is different: it sends the chosen property,
+            asking price, area and optional floor to our analysis API to produce the check. We do
+            not save a Blindspot report or add those inputs to a contact record. A shared link
+            keeps its inputs after the <code>#</code>, outside the initial page request; opening
+            a Blindspot link sends them to the analysis API again. If you request an emailed copy,
+            the address and report are sent to our email provider for delivery, not added to a
+            mailing list.</li>
         </ul>
 
         <h2 className="sh"><span>What is recorded</span></h2>
@@ -123,8 +127,8 @@ const DESCRIPTIONS = {
   LEAD_START: 'The first keystroke in the enquiry form. No content.',
   LEAD_SUBMIT: 'An enquiry was sent, and whether the consent box was ticked. No name, email or message.',
   TOOL_RUN: 'A tool was actually used — its name only, once per tab.',
-  SHARE: 'A link to a calculator result was copied or shared — which tool, and how. Not the link and not the figures, which never reach this site.',
-  REPORT: 'A written copy of a result was emailed — which tool. Not the address, which is not stored, and not the figures.',
+  SHARE: 'A result link was copied or shared — only the tool and method are recorded in this event, never the link or figures.',
+  REPORT: 'A written copy was requested — only the tool is recorded in this event, not the address or figures.',
   SITUATION: 'A guided path was taken from the tools page.',
   VITALS: 'How fast the page was: load, layout stability, response to the first interaction.',
 };

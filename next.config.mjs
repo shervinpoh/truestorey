@@ -146,11 +146,17 @@ const nextConfig = {
     // /cost reads a filed rent beside the cost of ownership. Both the rent
     // index and the shards are opened at request time.
     '/api/rent': ['./data/rents.json', './data/records/**', './data/index.json'],
-    // The emailed copy of a /cost result recomputes the ledger on the server and
-    // reads the same filed rent /api/rent does, by a path built at request time.
-    // Without this the email sends with the rent comparison silently missing in
-    // production, and complete in dev.
-    '/api/report': ['./data/rents.json', './data/records/**', './data/index.json'],
+    // An emailed /cost result reads filed rent, and an emailed /blindspot
+    // result reruns the entire rubric. Both use runtime-built paths. If one
+    // of these is missing in production, the email and the on-screen report
+    // disagree while local tests still pass.
+    '/api/report': [
+      './data/rents.json', './data/records/**', './data/index.json',
+      './data/geo.json', './data/mop.json', './data/gls.json',
+      './data/zoning.json', './data/comps.json', './data/trend.json',
+      './data/storey.json', './data/planning.json',
+      './data/sources/leasehold-table.json',
+    ],
     // /yield sends a count per project and fetches the cohorts when a reader
     // opens one. Reading yield.json at request time is invisible to the tracer,
     // so without this the route works in dev and returns nothing for every

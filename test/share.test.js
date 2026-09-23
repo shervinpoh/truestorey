@@ -19,7 +19,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { COST_SHARE, COST_LABELS, PLAN_SHARE, PLAN_LABELS, PROGRESSIVE_SHARE, PROGRESSIVE_LABELS, decodeShare, encodeShare } from '../lib/share.js';
+import { COST_SHARE, COST_LABELS, PLAN_SHARE, PLAN_LABELS, PROGRESSIVE_SHARE, PROGRESSIVE_LABELS, BLINDSPOT_SHARE, BLINDSPOT_LABELS, blindspotShareInput, decodeShare, encodeShare } from '../lib/share.js';
 import { EVENTS, sanitise } from '../lib/analytics.js';
 
 const code = (...p) => readFileSync(path.join(process.cwd(), ...p), 'utf8')
@@ -142,8 +142,34 @@ test('/plan and /progressive links survive the round trip, on/off and numbered c
   assert.deepEqual(decodeShare(PLAN_SHARE, '#v=1&hdbLoan=true&loans=2').dropped, ['hdbLoan', 'loans']);
 });
 
+test('a Blindspot link restores the exact property and listing inputs, never a posted score', () => {
+  const inputs = { home: '/hdb/bishan/242-bishan-st-22', price: 1_200_000, area: 1292, floor: 12 };
+  const hash = '#' + encodeShare(BLINDSPOT_SHARE, inputs);
+  assert.deepEqual(blindspotShareInput(hash), { values: inputs });
+  assert.ok(!hash.includes('points='), 'a score belongs to the rubric, not the link');
+  assert.equal(blindspotShareInput('#v=1&home=%2Fhdb%2Fbishan%2F242-bishan-st-22&price=1200000').error.length > 0, true,
+    'a missing area must not silently become a default home size');
+  assert.match(blindspotShareInput('#v=1&home=javascript%3Aalert%281%29&price=1200000&area=1292').error,
+    /could not be read/, 'an invalid property must not be fetched');
+  assert.match(blindspotShareInput('#v=1&home=%2Fhdb%2Fbishan%2F242-bishan-st-22&price=abc&area=1292').error,
+    /could not be read/, 'a changed asking price must not be guessed');
+  assert.equal(blindspotShareInput('#how-to-read'), null, 'an ordinary anchor is not a shared check');
+  for (const key of Object.keys(BLINDSPOT_SHARE.fields)) assert.ok(BLINDSPOT_LABELS[key]);
+});
+
+test('Blindspot shares the completed inputs, not a stale form or generated summary', () => {
+  const src = code('components', 'BlindspotReport.jsx');
+  assert.match(src, /price: r\.input\.askPrice/);
+  assert.match(src, /area: r\.input\.areaSqft/);
+  assert.match(src, /home: r\.record\.href/);
+  assert.match(src, /blindspotShareInput\(window\.location\.hash\)/);
+  assert.match(src, /setReport\(null\);\s*setState\('idle'\)/,
+    'editing an input leaves an old answer below the new asking price');
+  assert.doesNotMatch(src, /[?]v=1&home=/, 'shared inputs moved into a server-visible query string');
+});
+
 test('every field a link can carry has a name the page can say', () => {
-  for (const [schema, labels] of [[COST_SHARE, COST_LABELS], [PLAN_SHARE, PLAN_LABELS], [PROGRESSIVE_SHARE, PROGRESSIVE_LABELS]]) {
+  for (const [schema, labels] of [[COST_SHARE, COST_LABELS], [PLAN_SHARE, PLAN_LABELS], [PROGRESSIVE_SHARE, PROGRESSIVE_LABELS], [BLINDSPOT_SHARE, BLINDSPOT_LABELS]]) {
     const missing = Object.keys(schema.fields).filter(k => !labels[k]);
     assert.deepEqual(missing, [], `${schema.tool}: a dropped field would be named by its code, not in words`);
   }
