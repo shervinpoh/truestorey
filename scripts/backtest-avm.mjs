@@ -205,7 +205,10 @@ for (const t of trials) {
       ownShare: e.sample ? e.fromAddress / e.sample : 0,
       effN: Number(r.comparables.reduce((s, c) => s + c.weight, 0).toFixed(3)),
       radiusKm: e.radiusKm ?? 0,
-      bandPct: Number(((r.band.psfHigh - r.band.psfLow) / r.psf).toFixed(4)),
+      /* The RAW evidence spread, not the published band. From v7 the band can
+         be widened to the method's own typical miss, and dumping that would
+         feed the error table a feature defined by the error table. */
+      bandPct: Number((r.band.rawPct ?? (r.band.psfHigh - r.band.psfLow) / r.psf).toFixed(4)),
       spreadPct: Number(((r.spread.psfHigh - r.spread.psfLow) / r.psf).toFixed(4)),
       ageMed: ages.length ? ages[(ages.length - 1) >> 1] : null,
       floorAdj: e.floorAdjusted ? e.floorAdjusted.moved / Math.max(1, e.floorAdjusted.of) : 0,

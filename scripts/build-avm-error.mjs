@@ -88,6 +88,26 @@ for (const r of train) (bins[keyOf(r)] ||= []).push(r);
 const table = {};
 for (const [k, v] of Object.entries(bins)) if (v.length >= MIN_BIN) table[k] = stat(v);
 
+/**
+ * ── THE THIN END GETS ITS OWN FIGURE ──────────────────────────────────────
+ * The lowest effN tercile ran from 0.5 to about 2.3, and its figures were an
+ * average across that range. At the bottom of it — evidence weighing about
+ * one sale — the private error was 3.0% median and 11.3% at p90, against the
+ * bin's 2.7% and 8.4%. The bin was printing "tight" on lookups whose own
+ * history said "workable": the least evidence got the most confident word.
+ *
+ * So a lookup whose evidence weighs no more than THIN_EFFN — about one sale
+ * and a little — is graded against lookups that were just as thin, whatever
+ * its band. The band is exactly the thing thin evidence cannot measure, so it
+ * is not used to split them further.
+ */
+export const THIN_EFFN = 1.2;
+const thinTier = {};
+for (const k of ['HDB', 'PRIVATE']) {
+  const v = train.filter(r => r.kind === k && r.effN <= THIN_EFFN);
+  if (v.length >= MIN_BIN) thinTier[k] = stat(v);
+}
+
 const byKind = {};
 for (const k of ['HDB', 'PRIVATE']) byKind[k] = stat(train.filter(r => r.kind === k));
 const overall = stat(train);
@@ -103,7 +123,7 @@ const overall = stat(train);
  * Both are reported whatever they say. A table that fails them is a finding,
  * not something to retune until it passes.
  */
-const pick = r => table[keyOf(r)] || byKind[r.kind] || overall;
+const pick = r => (r.effN <= THIN_EFFN && thinTier[r.kind]) || table[keyOf(r)] || byKind[r.kind] || overall;
 const under90 = test.filter(r => r.ape <= pick(r).p90).length;
 const underMed = test.filter(r => r.ape <= pick(r).median).length;
 const calibration = {
@@ -125,7 +145,8 @@ const out = {
   trainN: train.length,
   minBin: MIN_BIN,
   features: ['kind', 'bandPct', 'effN'],
-  cuts,
+  cuts: { ...cuts, thinEffN: THIN_EFFN },
+  thin: thinTier,
   bins: table,
   byKind,
   overall,
@@ -147,6 +168,7 @@ for (const k of Object.keys(table).sort()) {
 const thin = Object.keys(bins).filter(k => bins[k].length < MIN_BIN);
 if (thin.length) console.log(`\n  ${thin.length} bins fell below the floor and fall back to their kind: ${thin.join(', ')}`);
 console.log(`\nkind fallbacks:`);
+for (const [k, v] of Object.entries(thinTier)) console.log(`  ${(k + '|thin').padEnd(16)} ${String(v.n).padStart(4)}   ${(100 * v.median).toFixed(2)}%   ${(100 * v.p90).toFixed(2)}%   (effN <= ${THIN_EFFN})`);
 for (const [k, v] of Object.entries(byKind)) console.log(`  ${k.padEnd(16)} ${String(v.n).padStart(4)}   ${(100 * v.median).toFixed(2)}%   ${(100 * v.p90).toFixed(2)}%`);
 
 console.log(`\nCalibration on ${test.length} held-out lookups:`);

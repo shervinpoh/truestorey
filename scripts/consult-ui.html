@@ -605,12 +605,16 @@ function render(r) {
       <p class="note"><b>${esc(e.error.band)}</b> — half of lookups like this came in within
       <b>${(100 * e.error.medianPct).toFixed(1)}%</b>, nine in ten within <b>${(100 * e.error.p90Pct).toFixed(1)}%</b>.
       Measured over ${e.error.trials.toLocaleString()} held-out sales${e.error.bin ? ' · ' + esc(e.error.bin) : ''}.</p>
+      ${e.band.outer ? `<p class="note">In dollars: nine in ten land between <b>${money(e.band.outer.priceLow)}</b> and <b>${money(e.band.outer.priceHigh)}</b>.</p>` : ''}
       <p class="note meta">This is not the band above. The band says where comparable homes transacted; this says how often an estimate built this way has missed.</p></div>`
       : `<div class="warnbox">Error <b>unmeasured</b> — no error table has been built. That is not the same as the error being small. Run <code>npm run build:avm-error</code>.</div>`;
     out.push(panel('Indicative range', `
       ${pt}
       <div class="band">${e.band.psfLow}–${e.band.psfHigh} psf · ${money(e.band.priceLow)} – ${money(e.band.priceHigh)}</div>
-      <p class="note">The weighted interquartile range of what comparable homes <b>actually transacted at</b>, restated onto ${r.input.floor ? 'storey ' + r.input.floor : 'the filed storeys'} and into one quarter's money. Not ±x% of a point, and not a confidence interval — no distribution was fitted, so none is claimed.</p>
+      ${e.band.widened
+        ? `<div class="warnbox"><b>The comparables alone could not define a range.</b> Weighted, they said ${e.band.evidencePsfLow === e.band.evidencePsfHigh ? `a single figure — ${e.band.evidencePsfLow} psf` : `${e.band.evidencePsfLow}–${e.band.evidencePsfHigh} psf`}, because ${Math.round(100 * (e.evidence.ownShare ?? 0))}% of the weight sits on ${e.evidence.fromAddress === 1 ? 'one sale' : 'very few sales'}. A range that narrow is not precision; it is the absence of any measured spread. It is widened to the method's own typical miss — ${(100 * e.error.medianPct).toFixed(1)}% either side — which is the level half of lookups shaped like this one came in under.</div>`
+        : `<p class="note">The weighted interquartile range of what comparable homes <b>actually transacted at</b>, restated onto ${r.input.floor ? 'storey ' + r.input.floor : 'the filed storeys'} and into one quarter's money. Not ±x% of a point, and not a confidence interval — no distribution was fitted, so none is claimed.</p>`}
+      ${e.band.collapsed ? `<div class="warnbox"><b>This is one figure, not a range</b>, and no error table exists to widen it by. Do not quote it.</div>` : ''}
       ${err}
       <dl class="kv">
         <dt>cohort</dt><dd>${e.evidence.sample} comparable sales — ${e.evidence.fromAddress} at this address, ${e.evidence.fromNearby} nearby${e.evidence.radiusKm ? ' (within ' + e.evidence.radiusKm + 'km)' : ''}</dd>
@@ -1708,11 +1712,14 @@ ${e.ok ? `
   <div class="lbl">What comparable homes actually transacted at</div>
   <div class="range">${money(e.band.priceLow)} &ndash; ${money(e.band.priceHigh)}</div>
   <div class="psf">${e.band.psfLow}&ndash;${e.band.psfHigh} psf${!r.clientSafe && e.psf ? `  ·  midpoint ${e.psf} psf` : ''}</div>
+  ${e.band.outer ? `<p style="margin:4mm 0 0;color:#4a4a4a">About half of sales like this land inside that range. <b>Nine in ten land between ${money(e.band.outer.priceLow)} and ${money(e.band.outer.priceHigh)}</b>.</p>` : ''}
 </div>
 
 <section>
   <h2>What this figure is</h2>
-  <p>This is the weighted middle half of what <b>comparable homes actually sold for</b> — restated${I.floor ? ` onto storey ${I.floor}` : ''} and into one quarter's money so that sales from different months and different heights can sit beside each other.</p>
+  ${e.band.widened
+    ? `<p>Recent sales of homes like this one are few, so they cannot on their own say how far a price might sit either side of the central figure. This range is therefore set at the <b>typical error of this method</b> for evidence this thin — measured on past sales it was not allowed to see — rather than read off the comparable sales themselves.</p>`
+    : `<p>This is the weighted middle half of what <b>comparable homes actually sold for</b> — restated${I.floor ? ` onto storey ${I.floor}` : ''} and into one quarter's money so that sales from different months and different heights can sit beside each other.</p>`}
   <p>It is not a percentage either side of a guess, and it is not a confidence interval: no statistical distribution was assumed, so none is claimed. Every sale it rests on is listed below and can be checked against URA's own record.</p>
 </section>
 
