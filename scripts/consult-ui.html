@@ -90,6 +90,23 @@ details.calc > *:not(summary){padding-left:18px;padding-right:18px}
 details.calc > *:last-child{padding-bottom:18px}
 details.calc .row:last-of-type{margin-bottom:14px}
 .result{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}
+.howto{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:4px 0 14px}
+.howto div{border:1px solid var(--line);border-radius:var(--r2);padding:10px 12px;background:var(--card);font-size:var(--t-small)}
+.howto b{display:block;font-family:"IBM Plex Mono",monospace;font-size:var(--t-micro);letter-spacing:.1em;text-transform:uppercase;color:var(--acc);margin-bottom:4px}
+@media (max-width:640px){.howto{grid-template-columns:1fr}}
+.lcard{border:1px solid var(--line);border-left:4px solid var(--line2);border-radius:var(--r2);padding:12px 14px;margin:10px 0;background:var(--card)}
+.lcard.tone-good{border-left-color:var(--up)} .lcard.tone-bad{border-left-color:var(--dn)} .lcard.tone-muted{border-left-color:var(--warn)}
+.lhead{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
+.lhead .ask{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:var(--t-small)}
+.lverdict{font-family:Archivo,system-ui,sans-serif;font-variation-settings:"wdth" 88;font-size:var(--t-lead);margin:6px 0 2px}
+.lcard.tone-good .lverdict{color:var(--up)} .lcard.tone-bad .lverdict{color:var(--dn)}
+.lrange{font-family:"IBM Plex Mono",monospace;font-size:var(--t-small);color:var(--ink2)}
+.lcard p{margin:6px 0}
+.lcaution{font-size:var(--t-small);color:var(--warn)}
+.lreasons{list-style:none;padding:0;margin:6px 0 0;font-size:var(--t-small)}
+.lreasons li{margin:2px 0}
+.lreasons li.good::before{content:"✓ ";color:var(--up)} .lreasons li.bad::before{content:"! ";color:var(--dn);font-weight:600}
+.lactions{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
 .good{color:var(--up)} .bad{color:var(--dn)}
 
 #nav{display:flex;gap:2px;margin-left:auto}
@@ -272,8 +289,25 @@ label.opt.disabled{opacity:.5;cursor:not-allowed}
 
 <section class="page" id="page-scan" hidden>
   <section class="panel">
-    <h2>Blocks trading away from their neighbourhood</h2>
-    <p class="lede">Every HDB block priced twice — once on its own filed sales, once on its neighbours' — with the part visible risk explains already stripped out. <b>This is a farming list, not listings.</b> It says where to look.</p>
+    <h2>Where your next sellers are</h2>
+    <p class="lede">Owners who have just become <b>able</b> to sell, and owners who have just been given a <b>reason</b> to. Each row comes with the line to open with. Built from the latest filed sales every time you open this page — nothing to rebuild.</p>
+    <div class="row">
+      <div><label for="ptown">HDB town</label><select id="ptown"><option value="">all towns</option></select></div>
+    </div>
+    <div class="chips" id="plists">
+      <button class="chip" data-l="opened" aria-pressed="true">MOP just opened</button>
+      <button class="chip" data-l="records" aria-pressed="false">New record in the block</button>
+      <button class="chip" data-l="mopSoon" aria-pressed="false">Reaching MOP</button>
+      <button class="chip" data-l="ssd" aria-pressed="false">Condo stamp duty just ended</button>
+    </div>
+    <p class="note" id="pwhy"></p>
+    <div id="pout"></div>
+    <p class="prov" id="pmeta"></p>
+  </section>
+
+  <section class="panel">
+    <h2>For buyers · HDB blocks selling below their neighbourhood</h2>
+    <p class="lede">Every HDB block priced twice — once on its own filed sales, once on its neighbours' — with the part visible risk explains already stripped out. Where flats sell for less than nearby ones and nothing in the records explains it, that is the first place to look for a buyer who wants value. <b>Places to look, not listings.</b></p>
     <div class="row">
       <div><label for="scantown">Town</label><select id="scantown"><option value="">all</option></select></div>
       <div><label for="scanview">Show</label><select id="scanview">
@@ -287,7 +321,7 @@ label.opt.disabled{opacity:.5;cursor:not-allowed}
   </section>
 
   <section class="panel">
-    <h2>Condominiums against their own district</h2>
+    <h2>For buyers · condominiums against their own district</h2>
     <p class="lede">Every condominium resale priced against what its district says a home of that size, tenure, remaining lease and storey should fetch. <b>The same farming list, for private.</b> What is left after all of that is the part the fit was never given — address, build, outlook — so read it as a map of which buildings carry a premium, not as a list of mispricings.</p>
     <div class="row">
       <div><label for="psdist">District</label><select id="psdist"><option value="">all</option></select></div>
@@ -309,7 +343,12 @@ label.opt.disabled{opacity:.5;cursor:not-allowed}
 <section class="page" id="page-find" hidden>
   <section class="panel">
     <h2>Screen listings</h2>
-    <p class="lede">Paste listings — one per block, separated by a blank line. A link, copied detail, or both. <b>Nothing is fetched from a portal</b>; this reads what you paste.</p>
+    <p class="lede">For a buyer weighing several listings: which ones are priced below what similar homes actually sold for, which are fair, and which are asking too much — and what to offer. <b>Nothing is fetched from a portal</b>; it reads what you paste.</p>
+    <div class="howto">
+      <div><b>1 · Paste</b>Copy each listing's address, price, size and unit number from PropertyGuru or anywhere else. Leave a blank line between listings.</div>
+      <div><b>2 · Read, then check sizes</b>Press <em>Read them</em>. A size that doesn't match the block's flats is flagged — usually a typo, and it will offer the fix.</div>
+      <div><b>3 · Screen</b>Press <em>Screen them</em>. Each listing comes back as <span style="color:var(--up)">below the market</span>, in line, or <span style="color:var(--dn)">above it</span> — best first, with what to offer.</div>
+    </div>
     <label for="paste">Paste here</label>
     <textarea id="paste" rows="8" placeholder="https://www.propertyguru.com.sg/listing/…
 Blk 649 Jln Tenaga
@@ -891,12 +930,16 @@ $('#dq').addEventListener('input', e => {
     $('#dhits').hidden = !r.hits.length;
   }, 160);
 });
-$('#dhits').addEventListener('click', async e => {
-  const li = e.target.closest('li'); if (!li) return;
+/* One way in, from the search box or from a Scan row. */
+async function openDevelopment(href) {
   $('#dhits').hidden = true;
   $('#devout').innerHTML = '<section class="panel"><p class="note">Reading…</p></section>';
-  const p = await fetch('/api/development?href=' + encodeURIComponent(li.dataset.href)).then(x => x.json());
+  const p = await fetch('/api/development?href=' + encodeURIComponent(href)).then(x => x.json());
   renderDev(p);
+}
+$('#dhits').addEventListener('click', async e => {
+  const li = e.target.closest('li'); if (!li) return;
+  openDevelopment(li.dataset.href);
 });
 
 function renderDev(p) {
@@ -1321,39 +1364,97 @@ $('#doparse').addEventListener('click', async () => {
       <td><input data-i="${i}" data-f="areaSqft" value="${L.areaSqft ?? ''}" inputmode="numeric" style="width:80px"></td>
       <td><input data-i="${i}" data-f="floor" value="${L.floor ?? ''}" inputmode="numeric" style="width:60px"></td>
       <td>${L.missing.length ? `<span class="pill bad">missing ${esc(L.missing.join(', '))}</span> ` : ''}
-        ${L.areaCheck?.ran === false ? '' : (L.areaCheck.plausible ? '<span class="pill">size ok</span>' : `<span class="pill bad">size looks wrong</span>`)}
+        ${L.areaCheck?.ran === false ? `<span class="meta">${esc(L.areaCheck.why || '')}</span>` : (L.areaCheck.plausible ? `<span class="pill">size matches the block${L.areaCheck.inferred ? ` · sized like a ${esc(String(L.areaCheck.type).toLowerCase().replace(/^(\d) room$/, '$1-room'))}` : ''}</span>` : `<span class="pill bad">size doesn't match the block</span>`)}
         ${L.note ? `<div class="note meta">${esc(L.note)}</div>` : ''}
-        ${L.areaCheck?.why ? `<div class="note" style="color:var(--dn)">${esc(L.areaCheck.why)}</div>` : ''}</td>
+        ${L.areaCheck?.suggest ? `<div class="note" style="color:var(--dn)">${esc(L.areaCheck.suggest)}</div>
+            <button class="ghost usefix" data-i="${i}" data-sqft="${L.areaCheck.suggestedSqft}">Use ${Number(L.areaCheck.suggestedSqft).toLocaleString('en-SG')} sqft</button>`
+          : (L.areaCheck?.why ? `<div class="note" style="color:var(--dn)">${esc(L.areaCheck.why)}</div>` : '')}</td>
     </tr>`).join('')}
   </table></div><p class="prov">Correct anything wrong before screening. An overstated floor area understates the psf, which reads as a discount and ranks first.</p></div>`;
   $('#parsed').addEventListener('input', e => {
     const el = e.target; if (!el.dataset.f) return;
     parsed[Number(el.dataset.i)][el.dataset.f] = toNum(el.value) || null;
   });
+  /* One click takes the suggested size: fills the box, so the correction is
+     visible and still editable, rather than silently swapping a number. */
+  $('#parsed').addEventListener('click', e => {
+    const b = e.target.closest('.usefix'); if (!b) return;
+    const i = Number(b.dataset.i), v = Number(b.dataset.sqft);
+    parsed[i].areaSqft = v;
+    const box = $('#parsed').querySelector(`input[data-i="${i}"][data-f="areaSqft"]`);
+    if (box) box.value = v;
+    b.closest('td').innerHTML = `<span class="pill">corrected to ${v.toLocaleString('en-SG')} sqft — matches the block</span>`;
+  });
   $('#doscreen').hidden = false;
 });
 
 $('#doscreen').addEventListener('click', async () => {
-  const r = await fetch('/api/screen', { method: 'POST', headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ listings: parsed }) }).then(x => x.json());
+  let r;
+  try {
+    r = await getJson('/api/screen', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ listings: parsed }) });
+  } catch (e) { $('#screened').innerHTML = `<div class="warnbox">${esc(e.message)}</div>`; return; }
   const rows = r.screened || [];
-  const shortlist = rows.filter(x => x.ok && x.residual?.verdict.code === 'discount-unexplained' && (x.score?.ratio ?? 0) >= 0.5);
-  $('#screened').innerHTML = `
-    <div class="result"><h3>Shortlist</h3>
-    <p class="note meta">Both halves must pass: an unexplained discount that survives the method's own error, AND a positive score of at least half of what could be scored. Cheap and bad is a bad flat at its correct price.</p>
-    ${shortlist.length ? `<div class="scroll"><table><tr><th>property</th><th class="num">asking</th><th class="num">est</th><th class="num">gap</th><th class="num">score</th></tr>
-      ${shortlist.sort((a, b) => a.residual.gap.pct - b.residual.gap.pct).map(x => `<tr><td>${esc(x.label)}</td>
-        <td class="num">${money(x.price)}</td><td class="num">${money(x.residual.estimate.price)}</td>
-        <td class="num gapdown">${pc(x.residual.gap.pct)}</td><td class="num">${x.score.points}/${x.score.max}</td></tr>`).join('')}
-      </table></div>` : `<p class="note">Nothing cleared both.</p>`}
-    <h3 style="margin-top:18px">Everything screened</h3>
-    <div class="scroll"><table><tr><th>property</th><th class="num">gap</th><th class="num">score</th><th>verdict</th></tr>
-      ${rows.map(x => `<tr><td>${esc(x.label || x.addressLine || '—')}</td>
-        <td class="num">${x.ok ? `<span class="${x.residual.gap.pct < 0 ? 'gapdown' : 'gapup'}">${pc(x.residual.gap.pct)}</span>` : '—'}</td>
-        <td class="num">${x.score ? x.score.points + '/' + x.score.max : '—'}</td>
-        <td>${x.ok ? esc(x.residual.verdict.code) + (x.residual.test2.flagged.length ? ` <span class="meta">(${x.residual.test2.flagged.map(f => esc(f.key)).join(', ')})</span>` : '')
-          : `<span class="err">${esc(x.reason)}</span>`}</td></tr>`).join('')}
-    </table></div></div>`;
+  const count = k => rows.filter(x => x.advice?.key === k).length;
+  const below = count('below-unexplained');
+
+  /* Already sorted best first by the server: below the market with nothing to
+     explain it, then fair, then cheaper for a reason, then asking too much. */
+  const card = (x, i) => {
+    const A = x.advice || {};
+    /* tone-*, not good/bad: the panel already styles any .good or .bad as
+       coloured text, and a card carrying that class turned every line in it
+       red — the verdict became the whole card. */
+    const tone = A.tone ? 'tone-' + A.tone : '';
+    const facts = [x.unit, x.areaSqft ? Number(x.areaSqft).toLocaleString('en-SG') + ' sqft' : null,
+                   x.floor ? 'storey ' + x.floor : null].filter(Boolean).join(' · ');
+    const fix = x.sizeCheck?.suggestedSqft;
+    return `<div class="lcard ${tone}">
+      <div class="lhead"><b>${esc(x.label || x.addressLine || 'Unmatched listing')}</b>
+        <span class="meta">${esc(facts)}</span>
+        ${x.price ? `<span class="ask">asking ${money(x.price)}</span>` : ''}</div>
+      <div class="lverdict">${esc(A.verdict || '')}</div>
+      ${A.range ? `<div class="lrange">similar homes sold for ${esc(A.range)}${A.nineInTen ? ` · nine in ten ${esc(A.nineInTen)}` : ''}</div>` : ''}
+      ${A.caution ? `<p class="lcaution">${esc(A.caution)}</p>` : ''}
+      <p>${esc(A.action || A.says || '')}</p>
+      ${A.fix ? `<p class="note">${esc(A.fix)}</p>` : ''}
+      ${(A.reasons || []).length ? `<ul class="lreasons">${A.reasons.map(t => `<li class="${t.good ? 'good' : 'bad'}">${esc(t.text)}</li>`).join('')}</ul>` : ''}
+      <div class="lactions">
+        ${fix ? `<button class="go refix" data-k="${i}" data-sqft="${fix}">Use ${Number(fix).toLocaleString('en-SG')} sqft and screen again</button>` : ''}
+        ${x.href && x.ok ? `<button class="ghost openval" data-k="${i}">Open the full valuation</button>` : ''}
+      </div>
+    </div>`;
+  };
+
+  $('#screened').innerHTML = `<div class="result">
+    <h3>Your listings, best first</h3>
+    <p class="note">${rows.length} screened · <b style="color:var(--up)">${below}</b> priced below the market with nothing in the records to explain it${below ? ' — view those first' : ''}
+      · ${count('in-line')} in line · ${count('below-explained')} cheaper for a reason
+      · <b style="color:var(--dn)">${count('above-unexplained') + count('above-with-risks')}</b> asking above the market
+      ${count('cannot-price') ? ` · ${count('cannot-price')} couldn't be priced` : ''}</p>
+    ${rows.map(card).join('')}
+    <p class="prov">"Similar homes sold for" is the middle half of recent sales of comparable homes, restated to today's prices and this storey; "nine in ten" is how far this method has actually missed on sales it never saw. A verdict is about the price only — condition, facing, noise and layout are settled at the viewing, and no record has seen them.</p>
+  </div>`;
+
+  for (const b of $('#screened').querySelectorAll('.refix')) {
+    b.addEventListener('click', () => {
+      const x = rows[Number(b.dataset.k)];
+      const i = parsed.findIndex(p => p.href === x.href && p.price === x.price);
+      if (i > -1) parsed[i].areaSqft = Number(b.dataset.sqft);
+      $('#doscreen').click();
+    });
+  }
+  for (const b of $('#screened').querySelectorAll('.openval')) {
+    b.addEventListener('click', async () => {
+      const x = rows[Number(b.dataset.k)];
+      await pick(x.href);
+      if (x.areaSqft) $('#area').value = x.areaSqft;
+      if (x.floor) $('#floor').value = x.floor;
+      if (x.price) $('#price').value = x.price;
+      location.hash = '#/valuation';
+    });
+  }
+  reveal($('#screened'));
 });
 
 /* ── compare ─────────────────────────────────────────────────────────── */
@@ -1808,7 +1909,7 @@ function route() {
   for (const a of document.querySelectorAll('#nav a')) {
     if (a.dataset.page === page) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   }
-  if (page === 'scan') { loadScan(); loadPrivateScan(); }
+  if (page === 'scan') { loadProspect(); loadScan(); loadPrivateScan(); }
   if (page === 'find') loadFeed();
   if (page === 'land') loadLand();
   if (page === 'data') loadStatus();
@@ -1818,6 +1919,69 @@ addEventListener('hashchange', route);
 
 /* ── scan ────────────────────────────────────────────────────────────── */
 let scanData = null;
+/* ── prospecting ─────────────────────────────────────────────────────────
+   The lists that lead this page: who has just become able to sell, and who
+   has just been given a reason to. See lib/consult/prospect.js. */
+const PWHY = {
+  opened: "Young blocks whose <b>first resale</b> has appeared in the last six months. Their owners have just reached MOP, and that first price is what every one of them is now comparing against. Be the agent who tells them what it means for their flat.",
+  records: "A sale in the last two months that is the <b>highest ever filed</b> for its flat type in the block. Every owner of that type will hear about it from someone — better from you, with the figure and what theirs might fetch.",
+  mopSoon: "Blocks reaching their MOP this year or next with <b>no resale yet</b>. The year is the earliest possible — MOP counts from key collection, which the records do not carry — so treat it as a season. Nobody has sold here yet, so the first agent they hear from sets the conversation.",
+  ssd: "Condo purchases whose <b>seller's stamp duty period</b> has ended in the last three months or ends in the next three — three years for purchases before 4 Jul 2025. Those owners can now sell without the duty. Some will have sold since; the records cannot see who still owns.",
+};
+let pData = null, pList = 'opened';
+async function loadProspect(force) {
+  if (pData && !force) return renderProspect();
+  try { pData = await getJson('/api/prospect?town=' + encodeURIComponent($('#ptown').value)); }
+  catch (e) { $('#pout').innerHTML = `<div class="warnbox">${esc(e.message)}</div>`; return; }
+  if (!$('#ptown').dataset.filled) {
+    $('#ptown').insertAdjacentHTML('beforeend', pData.towns.map(t => `<option>${esc(t)}</option>`).join(''));
+    $('#ptown').dataset.filled = '1';
+  }
+  renderProspect();
+}
+function renderProspect() {
+  if (!pData) return;
+  for (const b of $('#plists').querySelectorAll('.chip')) {
+    const L = pData[b.dataset.l];
+    b.textContent = b.textContent.replace(/\s·\s\d+$/, '') + ` · ${L?.total ?? 0}`;
+    b.setAttribute('aria-pressed', String(b.dataset.l === pList));
+  }
+  $('#pwhy').innerHTML = PWHY[pList];
+  const L = pData[pList];
+  if (!L?.rows?.length) { $('#pout').innerHTML = '<p class="note">Nothing in this list for the current filter.</p>'; }
+  else {
+    $('#pout').innerHTML = L.rows.map((r, i) => `<div class="lcard">
+      <div class="lhead"><b>${esc(r.label || r.project)}</b>
+        <span class="meta">${r.town ? esc(r.town) : 'D' + esc(r.district)}${r.segment ? ' · ' + esc(r.segment) : ''}${r.units ? ' · ' + r.units + ' flats' : ''}${r.lapsed != null ? ` · ${r.lapsed + r.soon} purchases` : ''}</span></div>
+      <p>${esc(r.says)}</p>
+      <div class="lactions">
+        <button class="ghost pcopy" data-i="${i}">Copy the line</button>
+        ${r.href ? `<button class="ghost popen" data-i="${i}">${r.town ? 'Price a flat here' : 'Open the development'}</button>` : ''}
+      </div></div>`).join('')
+      + (L.total > L.rows.length ? `<p class="note meta">Showing ${L.rows.length} of ${L.total}${pList !== 'ssd' ? ' — narrow by town to see the rest' : ''}.</p>` : '');
+  }
+  $('#pmeta').innerHTML = `Data through ${esc(pData.dataThrough.hdb)} (HDB) and ${esc(pData.dataThrough.private || '—')} (private). ${pData.sources.map(esc).join(' · ')}. ${pList === 'mopSoon' && pData.mopSoon.caveat ? esc(pData.mopSoon.caveat) : ''}`;
+}
+$('#plists').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  pList = b.dataset.l; renderProspect();
+});
+$('#ptown').addEventListener('change', () => loadProspect(true));
+$('#pout').addEventListener('click', async e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const r = pData[pList].rows[Number(b.dataset.i)];
+  if (b.classList.contains('pcopy')) {
+    /* For a flyer, a WhatsApp or a note before knocking. */
+    try { await navigator.clipboard.writeText(`${r.label || r.project}: ${r.says}`); b.textContent = 'Copied'; }
+    catch { b.textContent = 'Copy blocked — select the text instead'; }
+    return;
+  }
+  if (b.classList.contains('popen')) {
+    if (r.town) { await pick(r.href); location.hash = '#/valuation'; }
+    else { location.hash = '#/development'; openDevelopment(r.href); }
+  }
+});
+
 async function loadScan() {
   if (scanData) return renderScan();
   const r = await fetch('/api/scan').then(x => x.json());

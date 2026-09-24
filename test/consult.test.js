@@ -861,7 +861,16 @@ test('the size check compares like with like, or does not run', async () => {
      inside the window; when it no longer does, that half has nothing to test. */
   const types = rec.flatTypes || Object.keys(rec.byType || {});
   if (types.length > 1) {
-    assert.strictEqual(sizeCheck(rec, 1001).ran, false, 'a mixed-type block with no stated type must not be checked');
+    /* A mixed-type block with no stated type is checked only as the ONE type
+       the size can belong to. The failure this guards was a correct 4-room
+       flagged against a median taken mostly from 5-rooms; inferring the type
+       from the size cannot do that, and it catches a size that fits no type
+       at all, which refusing to check never could. */
+    const c = sizeCheck(rec, 1001);
+    if (c.ran) {
+      assert.strictEqual(c.plausible, true, 'a correct 4-room was flagged when its type was not stated');
+      assert.strictEqual(c.inferred, true);
+    }
   }
   assert.strictEqual(sizeCheck(rec, 1001, '4 Room').plausible, true, 'a correct 4-room was flagged');
   assert.strictEqual(sizeCheck(rec, 1400, '4 Room').plausible, false, 'an oversized 4-room was missed');

@@ -39,6 +39,8 @@ import { estimate, clientSafe } from '../lib/consult/avm.js';
 import { redact } from '../lib/consult/redact.js';
 import { residual } from '../lib/consult/residual.js';
 import { score } from '../lib/consult/score.js';
+import { advise } from '../lib/consult/advise.js';
+import { prospect } from '../lib/consult/prospect.js';
 import { outlook } from '../lib/consult/outlook.js';
 import { comps, floorMid } from '../lib/blindspot/measure.js';
 import { plan } from '../lib/calc/plan.js';
@@ -270,17 +272,36 @@ const server = http.createServer(async (req, res) => {
       const b = await readBody(req);
       const out = (b.listings || []).map(L => {
         const rec = L.href ? recordByHref(L.href) : null;
-        if (!rec) return { ...L, ok: false, reason: 'No record matched that address.' };
-        if (!(Number(L.price) > 0) || !(Number(L.areaSqft) > 0)) {
-          return { ...L, ok: false, reason: 'Needs both a price and a floor area.' };
+        if (!rec) {
+          const r0 = { ...L, ok: false, reason: 'No record matched that address.' };
+          return { ...r0, advice: advise(r0) };
         }
+        if (!(Number(L.price) > 0) || !(Number(L.areaSqft) > 0)) {
+          const r0 = { ...L, ok: false, reason: 'Needs both a price and a floor area.' };
+          return { ...r0, advice: advise(r0) };
+        }
+        /* Re-checked against the size as it stands NOW. The parse step ran
+           the check on the pasted figure; if the size was corrected in the
+           table since, that verdict is about a number no longer in play. */
+        const size = rec.kind === 'HDB'
+          ? sizeCheck(rec, Number(L.areaSqft), L.areaCheck?.type || null)
+          : { ran: false };
         const res2 = residual(rec, { asking: Number(L.price), areaSqft: Number(L.areaSqft),
                                      floor: Number(L.floor) || null });
         const sc = score(rec);
-        return { ...L, label: rec.label, town: rec.town || null, ok: res2.ok,
-                 reason: res2.reason || null, residual: res2.ok ? res2 : null,
-                 score: sc.ok ? { points: sc.points, max: sc.max, ratio: sc.ratio } : null };
+        const row = {
+          ...L, label: rec.label, town: rec.town || null, ok: res2.ok,
+          reason: res2.reason || null, residual: res2.ok ? res2 : null, sizeCheck: size,
+          score: sc.ok ? { points: sc.points, max: sc.max, ratio: sc.ratio } : null,
+          factors: sc.ok ? sc.factors.map(f => ({ key: f.key, ran: f.ran, points: f.points, max: f.max,
+                                                  value: f.value ?? null, freehold: !!f.freehold })) : [],
+        };
+        /* The verdict in words — see lib/consult/advise.js. The page prints
+           this and not the codes underneath it. */
+        return { ...row, advice: advise(row) };
       });
+      out.sort((a, b) => (a.advice?.rank ?? 9) - (b.advice?.rank ?? 9)
+        || (a.advice?.gapPct ?? 0) - (b.advice?.gapPct ?? 0));
       return json(res, 200, { screened: out, generatedAt: new Date().toISOString() });
     }
 
@@ -315,6 +336,21 @@ const server = http.createServer(async (req, res) => {
          prints the reason instead of the table. */
       if (p.ok && p.identity?.kind !== 'HDB') p.stacks = stackProfile(p.identity.label);
       return json(res, p.ok ? 200 : 404, p);
+    }
+
+    /**
+     * Where the next sellers are — see lib/consult/prospect.js. Computed from
+     * whatever data is on disk, so it is as current as the last data refresh
+     * and never needs building.
+     */
+    if (url.pathname === '/api/prospect') {
+      const p = prospect({ town: url.searchParams.get('town') || null, limit: 60 });
+      if (!p.ok) return json(res, 404, p);
+      /* A project name is not a link. Resolve each to its page where one
+         exists, so a row can open the development profile. */
+      const slug = s2 => '/condo/' + String(s2).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      for (const r of p.ssd.rows) r.href = recordByHref(slug(r.project)) ? slug(r.project) : null;
+      return json(res, 200, p);
     }
 
     /**
