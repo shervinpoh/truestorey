@@ -348,6 +348,19 @@ a push is not a deploy: `gh api repos/shervinpoh/truestorey/commits/<sha>/status
 says whether it built. `test/tracing.test.js` now fails when a tracked file
 imports an untracked one.
 
+**A test that froze one property's numbers kept fresh data off the live site
+for days.** The nightly refresh runs `npm test` before it commits `data/`, and
+a failed test skips the commit — so the site quietly keeps yesterday's data
+while the workflow goes red in a list nobody opens. Between 18 and 23 Sep four
+different tests did it: a floor check balanced on five dollars, "Cashew
+Crescent has at least 18 sales" in a window that only ever drops old sales,
+and three AVM tests that assumed Parc Clematis would keep its one dominant
+sale. Each was true the day it was written. A test that reads `data/` must
+assert a rule that holds on tomorrow's data — sweep real records, or compare
+two things rebuilt from the same rows — and a named case must `t.skip()` when
+the data stops reproducing it. A green commit history is not evidence the
+refresh ran: `gh run list --workflow refresh-data.yml` is.
+
 ## Layout
 
 ```

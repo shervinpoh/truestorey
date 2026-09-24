@@ -55,7 +55,15 @@ test('every street with a landed house has a page', () => {
 test('Cashew Crescent, the case that surfaced it', () => {
   const r = landedRecords['cashew-crescent'];
   assert.ok(r, '/landed/cashew-crescent is gone');
-  assert.ok(r.n >= 18, `only ${r.n} sales; there were 18 terrace and semi-detached`);
+  /* The street page holds EVERY terrace and semi-detached sale filed on the
+     street — that is what the bug took away. This used to assert "at least
+     18", the count on the day it was written; data/private.json is a rolling
+     window, so one sale aged out, the count became 17, and the failed test
+     kept the nightly refresh from committing any data at all. The count moves.
+     The rule does not: every house sale on the street is on the street's page. */
+  const filed = priv.rows.filter(x => isHouse(x) && x.street === 'CASHEW CRESCENT').length;
+  assert.ok(filed > 0, 'no house sales on Cashew Crescent in the window — nothing left to check');
+  assert.equal(r.n, filed, `the page holds ${r.n} of the ${filed} house sales filed on the street`);
   assert.deepEqual(r.estates, ['CASHEW VILLAS'],
     'the estate name is how a reader who was told "Cashew Villas" finds this page');
   assert.ok(search.entries.some(e => e.h === '/landed/cashew-crescent'),
@@ -135,4 +143,17 @@ test('the build still keys a house on its property type, not its project name', 
     'projKey is back to testing the project name');
   assert.match(src, /const isHouse = r =>[^;]*!STRATA\.test/,
     'isHouse stopped excluding strata, so strata units will be moved onto street pages');
+});
+
+test('every street page holds exactly the house sales filed on that street', () => {
+  /* The general form of the Cashew Crescent check, over all of them. Exact
+     equality held on all 1,014 streets when this was written, and it cannot
+     drift as the window rolls because both sides are rebuilt from the same
+     rows. */
+  const byStreet = new Map();
+  for (const x of priv.rows) if (isHouse(x)) byStreet.set(x.street, (byStreet.get(x.street) || 0) + 1);
+  const wrong = Object.values(landedRecords)
+    .filter(r => r.n !== (byStreet.get(r.street) || 0))
+    .map(r => `${r.href}: page ${r.n}, filed ${byStreet.get(r.street) || 0}`);
+  assert.deepEqual(wrong.slice(0, 8), [], `${wrong.length} street page(s) disagree with the sales filed on them`);
 });

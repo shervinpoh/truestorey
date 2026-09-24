@@ -163,6 +163,11 @@ for (const t of trials) {
        that it is usable forward at all. A leak-free version needs the level
        refitted as of each trial's cutoff. */
     useLevels: !off('levels'),
+    /* --levels early grades the adjustment out of time: each building's level
+       as it stood in the first third of the window, three years before the
+       sales being priced. The default reads the whole-window level, which
+       includes the period under test. */
+    levelField: arg('levels', 'gap') === 'early' ? 'earlyGap' : 'gap',
     ...(MIN_EFF !== null ? { minEffectiveN: Number(MIN_EFF) } : {}),
     weights: off('weights') ? FLAT : undefined,
   });
@@ -203,6 +208,11 @@ for (const t of trials) {
       /* knowable before the answer */
       sample: e.sample,
       ownShare: e.sample ? e.fromAddress / e.sample : 0,
+      /* By WEIGHT, not count: two own sales can carry 38% of an answer or 95%
+         of it, and it is the weight that decides whether neighbours outvote
+         the building. */
+      ownWeight: Number.isFinite(e.ownShare) ? Number(e.ownShare.toFixed(3)) : null,
+      levelled: e.levelAdjusted?.restated ?? 0,
       effN: Number(r.comparables.reduce((s, c) => s + c.weight, 0).toFixed(3)),
       radiusKm: e.radiusKm ?? 0,
       /* The RAW evidence spread, not the published band. From v7 the band can
