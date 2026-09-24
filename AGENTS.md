@@ -1,5 +1,31 @@
 # Truestorey
 
+> **Codex — read this first. Ownership changed on 25 Sep 2026.**
+>
+> At Shervin's instruction, **Claude has taken the website build back.** From
+> now on, do not commit or push changes to the site — pages, components,
+> `lib/`, `data/`, tests, `NEXT.md` — without Shervin asking you to directly.
+> A push to `master` is a deploy, and two agents deploying the same site
+> without coordinating is how a working change gets overwritten.
+>
+> **The concierge stays yours.** `app/api/concierge/`, `app/concierge-lab/`,
+> `lib/concierge/`, `docs/AI_CONCIERGE.md`, `scripts/concierge-*`,
+> `scripts/bench-concierge-transcribe.mjs` and `test/concierge.test.js` are
+> yours to finish. Claude will not touch them. When the concierge needs to be
+> wired into a site page or route, say so to Shervin so the hand-off is done
+> once and deliberately.
+>
+> **Your uncommitted work outside the concierge was left exactly as it was:**
+> `NEXT.md`, `docs/BLINDSPOT_FIRST_USE_TEST.md`, `lib/blindspot/measure.js`,
+> `scripts/07_Bot.gs`, `scripts/10_Articles.gs` and
+> `test/article-automation.test.js`. Please either commit what is finished or
+> tell Shervin what state it is in, so Claude can pick it up without guessing.
+>
+> **One thing that affects you:** local development sessions post analytics to
+> the production events table — `/concierge-lab`, which exists only locally,
+> shows up in it. Claude is fixing that in the tracking layer; nothing to change
+> on your side.
+
 Editorial-first Singapore property site. Every lookup and calculator is free
 with no sign-up — that is the whole strategic position against the paid
 competitor, not a launch offer.

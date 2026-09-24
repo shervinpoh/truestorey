@@ -1,5 +1,10 @@
 # Handover to Codex
 
+> **Superseded 25 Sep 2026.** Shervin has handed the website build back to
+> Claude. Codex keeps the concierge only. The ownership notice at the top of
+> `AGENTS.md` is the current word; this file is kept as the record of what was
+> handed over on 19 Sep.
+
 Written 19 Sep 2026, at the point where Claude hands the build over. This is
 the engineering brief. The product brief — what the site is for, what each
 feature does for a reader — is the operating brief Shervin will send you
