@@ -1,12 +1,16 @@
 import EditorialImage from '../components/EditorialImage.jsx';
 import Link from 'next/link';
-import { catalogue, hdbIndex, allUrls, allTowns, projects, boundaries, getIndex, storey } from '../lib/data/query.js';
+import fs from 'node:fs';
+import path from 'node:path';
+import { catalogue, hdbIndex, allUrls, allTowns, projects, getIndex, storey, glsAwards, mop } from '../lib/data/query.js';
 import { feed } from '../lib/articles.js';
-import { SITUATIONS } from '../lib/nav.js';
+import { SITUATIONS, TOOL_GROUPS } from '../lib/nav.js';
 import { ogForHome } from '../lib/og.js';
 import Search from '../components/Search.jsx';
 import WhoBuilt from '../components/WhoBuilt.jsx';
-import IslandMap from '../components/IslandMap.jsx';
+import IslandDots from '../components/IslandDots.jsx';
+import Icon from '../components/Icon.jsx';
+import RecentStrip from '../components/RecentStrip.jsx';
 
 /* The homepage had no og:image, so the link people actually paste into a chat
    shared as a grey rectangle while every block page had a generated card with
@@ -44,6 +48,27 @@ export function generateMetadata() {
  * The island is server-rendered SVG rather than the real map: /map ships about
  * a megabyte of points and the homepage must not be the slowest page.
  */
+/* The map's frame and counts, read once. The points themselves are fetched
+   by the client from /api/island; the page only needs the box, so its
+   aspect ratio is reserved before any script runs (the PriceMap lesson). */
+let _frame;
+function mapFrame() {
+  if (_frame !== undefined) return _frame;
+  try {
+    const m = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'data', 'map.json'), 'utf8'));
+    const [s, w, n, e] = m.bbox;
+    _frame = { bbox: m.bbox, aspect: `${((e - w) * 1000).toFixed(0)} / ${((n - s) * 1000).toFixed(0)}`, counts: m.counts };
+  } catch { _frame = null; }
+  return _frame;
+}
+
+/* ── SIX TOOLS, NOT SIXTEEN ────────────────────────────────────────────────
+   The homepage is a doorway, not a second index (browse-href.test.js holds it
+   to that). These are the six questions most visitors arrive with; the other
+   ten are one click away in the header and on /tools. */
+const FEATURED = ['/blindspot', '/plan', '/cost', '/tools?calc=sell', '/compare', '/land'];
+const featured = () => FEATURED.map(h => TOOL_GROUPS.flatMap(g => g.items).find(t => t.href === h)).filter(Boolean);
+
 export default async function Home() {
   const cat = catalogue();
   /* feed(), not allInsights(). The homepage read file-based notes only, so
@@ -87,6 +112,42 @@ export default async function Home() {
   const privateSales = [...projects('condo'), ...projects('landed')].reduce((a, p) => a + p.n, 0);
   const blocks = towns.reduce((a, t) => a + t.blockCount, 0);
   const refreshed = getIndex().hdb?.accessedAt;
+  const num = n => Number(n).toLocaleString('en-SG');
+  /* "24 Sep", not "2026-09-24": the long form wrapped onto two lines on a
+     phone, and the year is not in doubt on a figure checked daily. */
+  const checkedOn = refreshed
+    ? new Date(`${refreshed}T00:00:00Z`).toLocaleDateString('en-SG', { day: 'numeric', month: 'short', timeZone: 'UTC' })
+    : null;
+  const frame = mapFrame();
+
+  /* ── THIS WEEK IN THE RECORDS ─────────────────────────────────────────────
+     A reason to come back is something that changed since the last visit.
+     Four things the agencies publish on their own schedule, each dated and
+     sourced, each a door into the page that holds the rest. */
+  const pulse = [];
+  if (latest && qoq != null) {
+    pulse.push({ label: 'HDB resale price index', href: '/market', fig: String(latest.index ?? latest.value),
+      say: `${qoq >= 0 ? 'Up' : 'Down'} ${Math.abs(qoq).toFixed(1)}% on the quarter`, src: `${idx.source} · ${latest.quarter}` });
+  }
+  const award = glsAwards()?.sites?.find(x => /^Residential/i.test(x.use) && Number.isFinite(x.psmGfaOrGpr));
+  if (award) {
+    pulse.push({ label: 'Latest land award', href: '/land', fig: award.site,
+      say: `S$${Math.round(award.psmGfaOrGpr / 10.7639).toLocaleString('en-SG')} psf ppr${Number.isFinite(award.bids) ? ` · ${award.bids} bid${award.bids === 1 ? '' : 's'}` : ''}`,
+      src: `URA Government Land Sales · awarded ${award.award}` });
+  }
+  const m = mop();
+  const thisYear = m?.upcomingByYear?.find(y => y.year === m.generatedForYear);
+  if (thisYear) {
+    const top = Object.entries(thisYear.towns || {}).sort((a, b) => b[1] - a[1])[0];
+    pulse.push({ label: `Flats reaching MOP in ${thisYear.year}`, href: '/mop', fig: num(thisYear.units),
+      say: top ? `Most in ${top[0].charAt(0) + top[0].slice(1).toLowerCase()}: ${num(top[1])}` : 'Eligible to sell, not supply',
+      src: `${m.source} · ${thisYear.year}` });
+  }
+  if (posts[0]) {
+    pulse.push({ label: 'Newest from the desk', href: posts[0].href, fig: posts[0].title,
+      say: posts[0].summary ? posts[0].summary.slice(0, 110) + (posts[0].summary.length > 110 ? '…' : '') : '',
+      src: posts[0].date });
+  }
 
   /* ── THE FIRST SCREEN SAID NOTHING ABOUT ANY PROPERTY ─────────────────────
      It opened with "A clearer view of Singapore property" — a sentence any
@@ -133,42 +194,68 @@ export default async function Home() {
     source: st.source?.hdb, period: st.source?.period,
   } : null;
 
-  const num = n => n.toLocaleString('en-SG');
 
   return (
     <main className="shell wide home-atlas">
       <section className="hero">
         <div className="herosay">
           <p className="hero-product lab">Singapore property, openly · free, no account</p>
-          <h1>Blindspot.<span>Before you fall for the home, see what the records know.</span></h1>
-          <p className="sub">I compare the asking price with filed sales and surface the lease, resale,
-            land and planning questions worth asking before a viewing.</p>
+          <h1>Before you fall for the home,<span>see what the records know.</span></h1>
+          <p className="sub">Every filed HDB and private sale in Singapore, block by block. Check an
+            asking price against them in two minutes, or look up any address — nothing to sign up for.</p>
           <div className="herosearch">
-            <p className="lab">Start with a block or project</p>
+            <p className="lab">Check a home · start with a block or project</p>
             <Search destination="blindspot" />
-            <p className="searchpromise">Select the property, enter its flat type or bedroom count, asking price and size, and take
-              the questions the public records raise into your viewing.</p>
+            <p className="searchpromise">Blindspot compares the asking price with filed sales and raises the
+              lease, resale, land and planning questions worth asking at the viewing.</p>
           </div>
+          <dl className="heroproof">
+            <div><dt>{num((frame?.counts?.hdb || blocks) + (frame?.counts?.condo || 0) + (frame?.counts?.landed || 0))}</dt><dd>blocks and projects</dd></div>
+            <div><dt>{num(hdbSales + privateSales)}</dt><dd>filed sales</dd></div>
+            <div><dt>{refreshed ? checkedOn : '—'}</dt><dd>data checked daily</dd></div>
+          </dl>
         </div>
         <div className="heromap">
-          <div className="atlas-heading"><span className="lab">The island, drawn from filed resales</span>
-            <Link href="/map" aria-label="Explore the full property map">Explore map ↗</Link></div>
-          <IslandMap areas={boundaries().areas} towns={towns}
-            plotted={urls.length} source={`${cat.hdbSource} · ${cat.hdbPeriod?.from}–${cat.hdbPeriod?.to}`} compact />
+          {frame ? <IslandDots bbox={frame.bbox} aspect={frame.aspect} fallbackCounts={frame.counts} /> : null}
+          <Link href="/map" className="heromap-go">Open the full price map <Icon name="arrow" size={15} /></Link>
+        </div>
+      </section>
+      <p className="prov evidence-source">{cat.hdbSource} · {cat.hdbPeriod?.from}–{cat.hdbPeriod?.to}
+        {' / '}{cat.privateSource} · {cat.privatePeriod?.from}–{cat.privatePeriod?.to}
+        {' · '}<Link href="/methodology">Where the numbers come from</Link></p>
+
+      <RecentStrip />
+
+      <section className="home-section home-tools" aria-labelledby="tools-title">
+        <div className="home-section-heading"><div><p className="lab">Free tools · no sign-up</p>
+          <h2 id="tools-title">What are you trying to work out?</h2></div>
+          <Link href="/tools">All sixteen tools ↗</Link></div>
+        <div className="hometools">
+          {featured().map(t => (
+            <Link key={t.href} href={t.href.includes('?calc=') ? `${t.href}#quick` : t.href} className="hometool">
+              <span className="hometool-ico"><Icon name={t.icon} size={26} /></span>
+              <b>{t.name}</b><span>{t.note}</span>
+            </Link>
+          ))}
         </div>
       </section>
 
-      <div className="home-evidence">
-        <div className="evidence-intro"><span className="lab">Public records.</span><b>Open to everyone.</b>
-          <Link href="/methodology">Where the numbers come from ↗</Link></div>
-        <dl className="proof">
-          <div><dt>{num(blocks)}</dt><dd>HDB blocks with a filed resale</dd></div>
-          <div><dt>{num(hdbSales + privateSales)}</dt><dd>filed transactions</dd></div>
-          <div><dt>{refreshed || '—'}</dt><dd>HDB data · checked daily</dd></div>
-        </dl>
-        <p className="prov evidence-source">{cat.hdbSource} · {cat.hdbPeriod?.from}–{cat.hdbPeriod?.to}
-          {' / '}{cat.privateSource} · {cat.privatePeriod?.from}–{cat.privatePeriod?.to}</p>
-      </div>
+      {pulse.length > 0 && (
+        <section className="home-section home-pulse" aria-labelledby="pulse-title">
+          <div className="home-section-heading"><div><p className="lab">Updated as the agencies publish</p>
+            <h2 id="pulse-title">This week in the records</h2></div></div>
+          <div className="pulse">
+            {pulse.map(c => (
+              <Link key={c.label} href={c.href} className="pulsecard">
+                <span className="lab">{c.label}</span>
+                <b className="pulsecard-fig">{c.fig}</b>
+                <span className="pulsecard-say">{c.say}</span>
+                <span className="prov">{c.src}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {floorFinding && (
         <section className="home-finding" aria-labelledby="finding-title">

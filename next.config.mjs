@@ -143,7 +143,14 @@ const nextConfig = {
       './data/sources/leasehold-table.json',
     ],
     // Search, lookup and the record API all read the shards.
-    '/api/search': ['./data/search.json', './data/index.json'],
+    // towns.json since 26 Sep: the header search offers an HDB town first.
+    '/api/search': ['./data/search.json', './data/index.json', './data/towns.json'],
+    // The article intake chooses a photograph of the place a piece names
+    // (lib/place.js), which reads the GLS programme, the planning-area
+    // boundaries and the geocodes at request time.
+    '/api/webhook/article': ['./data/gls.json', './data/boundaries.json', './data/geo.json'],
+    // The homepage map's points, served compact (app/api/island).
+    '/api/island': ['./data/map.json'],
     '/api/lookup': ['./data/index.json'],
     '/api/record': ['./data/records/**', './data/index.json'],
     // /cost reads a filed rent beside the cost of ownership. Both the rent

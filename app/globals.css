@@ -159,69 +159,107 @@ h3{font-weight:600;font-size:1.02rem;letter-spacing:-.02em;margin:0 0 4px}
  text-underline-offset:2px;text-decoration-thickness:1px}
 a{color:var(--ink)}
 
-/* ── global nav ────────────────────────────────────────────────────────── */
-.gnav{border-bottom:1px solid var(--ink);position:sticky;top:0;z-index:40;
- background:var(--paper);backdrop-filter:saturate(180%) blur(6px)}
-.gnav .in{max-width:1040px;margin:0 auto;padding:13px 20px;display:flex;
- align-items:center;justify-content:space-between;gap:16px}
-.mk{font-weight:800;font-size:1.04rem;letter-spacing:-.052em;text-decoration:none;color:var(--ink);
- white-space:nowrap}
-.mk em{font-style:normal;font-weight:400;color:var(--mute)}
-.mk b{background:var(--acc);color:var(--on-acc);padding:0 6px;font-weight:900}
-/* Wraps rather than scrolls. The eleven links measure ~594px, so between a
-   phone and a laptop the row used to run off the edge of a hidden scroller.
-   A second line on a tablet is cheap; an invisible one is not. */
-.gnav .navrow{display:flex;flex-wrap:wrap;gap:6px 20px;list-style:none;margin:0;padding:0}
-.gnav a.n,.gnav button.n{font-size:var(--t-small);font-weight:500;color:var(--ink2);text-decoration:none;
- white-space:nowrap;padding-bottom:2px}
-.gnav button.n{background:none;border:0;font-family:inherit;cursor:pointer;padding:2px 0;
- display:inline-flex;align-items:center;gap:5px}
-.gnav a.n:hover,.gnav button.n:hover{color:var(--ink)}
-.gnav a.n[aria-current="page"],.gnav button.n[aria-current="true"]{color:var(--ink);font-weight:700;
- box-shadow:0 3px 0 var(--acc)}
-.gnav button.n i{font-style:normal;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--t-micro);
- color:var(--mute)}
-.gnav button.n[aria-expanded="true"]{color:var(--ink);font-weight:700}
+/* ── global nav ────────────────────────────────────────────────────────────
+   Rebuilt 26 Sep. Shervin: the logo was too small, and the bar was a wordmark
+   at one end, three menus at the other and nothing between them but a lone
+   "← Tools". Now the logo is a mark and a 22px wordmark, the menus sit beside
+   it, and the right end carries the two things a visitor most often wants: a
+   search that finds places and tools, and the site's main tool, one tap away.
+   The "up" link shows only on a phone, where the menu is folded. */
+.gnav{border-bottom:1px solid var(--line);position:sticky;top:0;z-index:40;
+ background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:saturate(180%) blur(10px)}
+.gnav .in{max-width:1180px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:28px;min-height:var(--headh)}
+.mk{text-decoration:none;color:var(--ink);white-space:nowrap;display:inline-flex;flex:0 0 auto}
+.logo{display:inline-flex;align-items:center;gap:10px}
+.logo-mark{display:block;flex:0 0 auto}
+.logo-word{font-family:"Archivo",system-ui,sans-serif;font-variation-settings:"wdth" 88;font-weight:800;
+ font-size:22px;letter-spacing:-.035em;line-height:1;color:var(--ink)}
+.logo-word b{color:var(--acc);font-weight:800}
+:root[data-theme="dark"] .logo-word b{color:var(--acc-lit)}
+.gnav .navrow{display:flex;gap:4px;list-style:none;margin:0;padding:0}
+.gnav button.n{background:none;border:0;font-family:inherit;cursor:pointer;padding:9px 12px;border-radius:var(--r1);
+ display:inline-flex;align-items:center;gap:6px;font-size:15px;font-weight:600;color:var(--ink2);white-space:nowrap}
+.gnav button.n:hover,.gnav button.n[aria-expanded="true"]{color:var(--ink);background:var(--sunk)}
+.gnav button.n[aria-current="true"]{color:var(--ink);box-shadow:inset 0 -2px 0 var(--acc)}
+.gnav button.n i{font-style:normal;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--t-micro);color:var(--mute)}
+.navend{margin-left:auto;display:flex;align-items:center;gap:10px}
+.hsearch{display:inline-flex;align-items:center;gap:9px;height:40px;padding:0 10px 0 12px;min-width:260px;
+ border:1px solid var(--line);border-radius:var(--r2);background:var(--card,var(--paper));color:var(--mute);
+ font:inherit;font-size:var(--t-small);cursor:pointer;text-align:left}
+.hsearch:hover{border-color:var(--ink2);color:var(--ink2)}
+.hsearch-say{flex:1}
+.hsearch kbd,.palette kbd{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--t-micro);
+ border:1px solid var(--line);border-radius:var(--r1);padding:1px 5px;color:var(--mute);background:var(--paper)}
+.navcta{display:inline-flex;align-items:center;height:40px;padding:0 16px;border-radius:var(--r2);background:var(--acc);
+ color:var(--on-acc);font-weight:700;font-size:var(--t-small);text-decoration:none;white-space:nowrap}
+.navcta:hover{filter:brightness(1.12)}
 
-/* ── the desktop dropdowns ──────────────────────────────────────────────────
-   Eleven equal-weight links, none of which named a tool. "Tools" was one word
-   among ten, and behind it sat the six calculators that are the whole argument
-   for this site over a paid competitor — two of which no nav anywhere led to.
-   Three headings that print their contents instead. */
+/* ── the menus ────────────────────────────────────────────────────────────── */
 .navgrp{position:relative}
-/* Tools has grown from six items to eleven, and this had no height limit at
-   all — the panel simply ran past the bottom of the window with nothing to
-   scroll. The mobile panel had been given one; the desktop one never was. */
-.navdrop{position:absolute;top:calc(100% + 11px);right:0;z-index:42;min-width:330px;
- background:var(--paper);border:1px solid var(--ink);padding:4px 0;
+.navdrop{position:absolute;top:calc(100% + 10px);left:0;z-index:42;min-width:340px;
+ background:var(--card,var(--paper));border:1px solid var(--line);border-radius:var(--r2);box-shadow:var(--lift);padding:8px;
  max-height:calc(100vh - 96px);overflow-y:auto;overscroll-behavior:contain}
-.navgrp:first-child .navdrop{left:0;right:auto}
-.navdrop a{display:block;padding:9px 15px;text-decoration:none;color:var(--ink);
- border-bottom:1px solid var(--line2)}
-.navdrop a:last-child{border-bottom:0}
-.navdrop a b{display:block;font-size:var(--t-small);font-weight:600;letter-spacing:-.022em;line-height:1.25}
-.navdrop a span{display:block;font-size:var(--t-micro);color:var(--ink2);line-height:1.4;margin-top:3px}
-.navdrop a:hover{background:var(--acc)}
-.navdrop a:hover b,.navdrop a:hover span{color:var(--on-acc)}
-.navdrop a[aria-current="page"] b{box-shadow:inset 0 -2px 0 var(--acc)}
+.navrun+.navrun{margin-top:6px;padding-top:6px;border-top:1px solid var(--line2)}
+.navrun>.lab{display:block;padding:6px 10px 4px}
+.navlink,.navtool{display:flex;gap:12px;align-items:flex-start;padding:9px 10px;border-radius:var(--r1);
+ text-decoration:none;color:var(--ink)}
+.navlink:hover,.navtool:hover,.navlink:focus-visible,.navtool:focus-visible{background:var(--sunk)}
+.navtool-ico{flex:0 0 auto;width:38px;height:38px;border-radius:var(--r2);display:grid;place-items:center;
+ background:var(--acc-soft);color:var(--acc)}
+.navtool-ico.sm{width:32px;height:32px}
+:root[data-theme="dark"] .navtool-ico{background:rgba(88,188,195,.12);color:var(--acc-lit)}
+.navtool:hover .navtool-ico{background:var(--acc);color:var(--on-acc)}
+.navtool-txt b{display:block;font-size:var(--t-small);font-weight:650;letter-spacing:-.015em;line-height:1.25}
+.navtool-txt span{display:block;font-size:12.5px;color:var(--ink2);line-height:1.35;margin-top:2px}
+.navlink[aria-current="page"] b,.navtool[aria-current="page"] b{box-shadow:inset 0 -2px 0 var(--acc)}
+/* The tools panel: every tool, four runs of four, the width of the header. */
+.navgrp:has(.navmega){position:static}
+.navmega{position:absolute;left:24px;right:24px;top:calc(100% + 1px);z-index:42;max-width:1132px;margin:0 auto;
+ background:var(--card,var(--paper));border:1px solid var(--line);border-radius:0 0 var(--r2) var(--r2);box-shadow:var(--lift);
+ padding:18px 18px 0;max-height:calc(100vh - 90px);overflow-y:auto;overscroll-behavior:contain}
+.navmega-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px 14px}
+.navmega-run>.lab{display:block;padding:0 10px 6px}
+.navmega-foot{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;margin:14px -18px 0;padding:13px 28px;
+ border-top:1px solid var(--line2);background:var(--sunk);font-size:var(--t-small)}
+.navmega-foot a{color:var(--ink);font-weight:600;text-decoration:none}
+.navmega-foot a:hover{text-decoration:underline;text-underline-offset:3px}
+.navmega-all{margin-left:auto;display:inline-flex;align-items:center;gap:6px;color:var(--acc)!important}
+
+/* ── the search palette ───────────────────────────────────────────────── */
+.palette{position:fixed;inset:0;z-index:80;background:rgba(17,20,20,.38);display:flex;justify-content:center;
+ align-items:flex-start;padding:10vh 16px 16px}
+.palette-box{width:100%;max-width:640px;background:var(--card,var(--paper));border:1px solid var(--line);
+ border-radius:12px;box-shadow:0 24px 70px -20px rgba(0,0,0,.45);overflow:hidden;display:flex;flex-direction:column;
+ max-height:min(640px,80vh)}
+.palette-input{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);color:var(--mute)}
+.palette-input input{flex:1;border:0;outline:0;background:transparent;font:inherit;font-size:17px;color:var(--ink);min-width:0}
+.palette-close{border:1px solid var(--line);background:var(--paper);border-radius:var(--r1);font-family:"IBM Plex Mono",ui-monospace,monospace;
+ font-size:var(--t-micro);color:var(--mute);padding:3px 7px;cursor:pointer}
+.palette-list{list-style:none;margin:0;padding:6px;overflow-y:auto}
+.palette-sec{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--t-micro);letter-spacing:.12em;
+ text-transform:uppercase;color:var(--mute);padding:10px 10px 4px}
+.palette-list a{display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:var(--r2);text-decoration:none;color:var(--ink)}
+.palette-list a.on{background:var(--sunk)}
+.palette-ico{width:34px;height:34px;flex:0 0 auto;border-radius:var(--r2);display:grid;place-items:center;
+ background:var(--acc-soft);color:var(--acc)}
+.palette-txt{flex:1;min-width:0}
+.palette-txt b{display:block;font-weight:650;font-size:15px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.palette-txt span{display:block;font-size:12.5px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.palette-go{color:var(--mute);opacity:0}
+.palette-list a.on .palette-go{opacity:1}
+.palette-empty{padding:18px 12px;color:var(--ink2);font-size:var(--t-small)}
+.palette-foot{margin:0;padding:9px 16px;border-top:1px solid var(--line2);font-size:var(--t-micro);color:var(--mute);
+ display:flex;gap:6px;align-items:center}
+html.palette-open{overflow:hidden}
 
 /* ── the mobile nav ─────────────────────────────────────────────────────────
-   The row used to scroll horizontally with its scrollbar hidden, which meant
-   six of eleven links — the whole Tools set included — were on the page and
-   invisible. There was nothing to scroll TOWARDS: no bar, no fade, no arrow.
-   A menu that cannot be seen is a menu that does not exist.
-
-   A disclosure instead. It is a <details>, so it opens with no JavaScript and
-   works before hydration, which matters on the pages people arrive at from
-   Google. Square, hairline, and it overlays rather than pushing the page
-   down — a sticky header that changes height when you tap it moves the
-   article out from under the reader's thumb.
-
-   The panel is hidden above 560px and the row is hidden below it, so only one
-   of the two is ever in the accessibility tree. */
+   A <details>, so it opens with no JavaScript and works before hydration,
+   which matters on the pages people arrive at from Google. It overlays rather
+   than pushing the page down — a sticky header that changes height when you
+   tap it moves the article out from under the reader's thumb. */
 .gnav .navmenu{display:none}
 .gnav .navmenu>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:9px;
- border:1px solid var(--ink);padding:0 12px;height:38px;min-width:44px;user-select:none}
+ border:1px solid var(--line);border-radius:var(--r2);padding:0 12px;height:40px;min-width:44px;user-select:none}
 .gnav .navmenu>summary::-webkit-details-marker{display:none}
 .gnav .navmenu>summary:after{content:"+";font-family:"IBM Plex Mono",ui-monospace,monospace;
  font-size:var(--t-small);line-height:1;color:var(--ink);margin-left:auto}
@@ -229,11 +267,9 @@ a{color:var(--ink)}
 .gnav .navmenu[open]>summary{background:var(--acc);border-color:var(--acc-line)}
 .gnav .navmenu[open]>summary .lab,.gnav .navmenu[open]>summary:after,
 .gnav .navmenu[open]>summary .navwhere{color:var(--on-acc)}
-/* Where you already are, so opening the menu never costs you your place. */
 .navwhere{font-size:var(--t-micro);font-weight:600;color:var(--ink2);letter-spacing:-.01em}
-
 .navpanel{position:absolute;left:0;right:0;top:100%;z-index:41;background:var(--paper);
- border-bottom:1px solid var(--ink);padding:2px 20px 10px;
+ border-bottom:1px solid var(--ink);padding:2px 20px 14px;
  max-height:calc(100vh - 60px);overflow-y:auto;overscroll-behavior:contain}
 .navgroup{padding-top:11px}
 .navgroup+.navgroup{border-top:1px solid var(--line2)}
@@ -241,28 +277,34 @@ a{color:var(--ink)}
 .navgroup ul{list-style:none;margin:0;padding:0}
 /* 44px minimum, because this is the one control on the site that is only ever
    used with a thumb. */
-.navgroup a{display:block;padding:11px 2px;min-height:44px;font-size:var(--t-small);font-weight:500;
- color:var(--ink);text-decoration:none;letter-spacing:-.02em}
+.navgroup a{display:flex;align-items:center;gap:12px;padding:11px 2px;min-height:44px;font-size:15px;font-weight:500;
+ color:var(--ink);text-decoration:none;letter-spacing:-.01em}
+.navgroup a .ico{color:var(--acc);flex:0 0 auto}
 .navgroup a[aria-current="page"]{font-weight:700;box-shadow:inset 0 -3px 0 var(--acc)}
+.navrunlab{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--t-micro);letter-spacing:.1em;
+ text-transform:uppercase;color:var(--mute);padding:12px 2px 2px}
+/* The phone's up link belongs to the phone. */
+@media(min-width:1101px){ .gnav .backup{display:none} }
 
-/* 800px is where the row stops fitting on one line: 96px of wordmark, 16px of
-   gap, 634px of links and 40px of padding is 786. Below that it would wrap,
-   and a sticky header that grows to two or three rows takes a permanent bite
-   out of every screen it sits on — 81px of an iPad's 900. The menu keeps the
-   header at one row at every width, so the panel starts here rather than at a
-   phone breakpoint. The wrap above is left in as a backstop: if a label is
-   ever added or a font loads wider, the row grows a line instead of silently
-   running off the edge again. */
-@media(max-width:800px){
- .gnav .in{position:relative}
+/* Below 1100px the row, the search pill and the button do not fit beside a
+   22px wordmark; the search becomes an icon and the menus fold into the
+   panel. A sticky header that grew to two rows would take a permanent bite
+   out of every screen it sits on. */
+@media(max-width:1100px){
+ .gnav .in{position:relative;gap:12px}
  .gnav .navrow{display:none}
  .gnav .navmenu{display:block}
+ .hsearch{min-width:0;width:40px;padding:0;justify-content:center}
+ .hsearch-say,.hsearch kbd{display:none}
+}
+@media(max-width:560px){
+ .navcta{display:none}
+ .logo-word{font-size:19px}
+ .logo-mark{width:26px;height:26px}
 }
 /* A 375px phone cannot carry the wordmark, a useful parent link and a menu
    that repeats the active group. The parent is the information worth keeping;
-   the menu still says "Menu" and the open panel names every group. At the
-   very narrow 320px edge the arrow keeps its full accessible label while the
-   visible parent name yields to the page breadcrumb immediately below. */
+   the menu still says "Menu" and the open panel names every group. */
 @media(max-width:420px){
  .gnav .in{gap:8px;padding-inline:14px}
  .gnav .navwhere{display:none}
@@ -2971,3 +3013,38 @@ sup.cite a:hover{text-decoration:underline}
 .keepreading a:hover .kr-title{text-decoration:underline;text-underline-offset:3px}
 .keepreading .kr-sum{font-size:var(--t-small);color:var(--ink2);margin:0 0 6px;line-height:1.45}
 .keepreading .kr-meta{font-size:var(--t-micro);color:var(--mute);margin:0}
+
+/* ── /tools: every tool as a card ──────────────────────────────────────────
+   Same icons and groups as the header's Tools menu, larger, with what each
+   tool needs from you — the thing that decides whether you open it now. */
+.toolfinder{margin:6px 0 30px;position:relative}
+.toolfinder-box{display:flex;align-items:center;gap:12px;height:58px;padding:0 18px;border:1.5px solid var(--ink2);
+ border-radius:12px;background:var(--card);color:var(--mute);box-shadow:var(--lift)}
+.toolfinder-box:focus-within{border-color:var(--acc);box-shadow:0 0 0 4px var(--acc-soft)}
+.toolfinder-box input{flex:1;border:0;outline:0;background:transparent;font:inherit;font-size:17px;color:var(--ink);min-width:0}
+.toolfinder-hits{list-style:none;margin:10px 0 0;padding:6px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+.toolfinder-hits a{display:grid;grid-template-columns:auto auto 1fr;align-items:center;gap:6px 12px;padding:10px 12px;
+ border-radius:var(--r2);text-decoration:none;color:var(--ink)}
+.toolfinder-hits a:hover{background:var(--sunk)}
+.toolfinder-hits a .ico{color:var(--acc)}
+.toolfinder-hits a span{color:var(--ink2);font-size:var(--t-small)}
+.toolfinder-none{padding:12px;color:var(--ink2);font-size:var(--t-small)}
+.toolsdir-group{margin:0 0 34px}
+.toolcards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:14px}
+.toolcard{display:flex;flex-direction:column;gap:8px;padding:18px 18px 16px;border:1px solid var(--line);border-radius:12px;
+ background:var(--card);text-decoration:none;color:var(--ink);transition:border-color .15s,box-shadow .15s,transform .15s}
+.toolcard:hover,.toolcard:focus-visible{border-color:var(--acc);box-shadow:var(--lift);transform:translateY(-2px)}
+.toolcard-ico{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:var(--acc-soft);color:var(--acc);margin-bottom:4px}
+.toolcard:hover .toolcard-ico{background:var(--acc);color:var(--on-acc)}
+:root[data-theme="dark"] .toolcard-ico{background:rgba(88,188,195,.12);color:var(--acc-lit)}
+.toolcard h3{margin:0;font-size:var(--t-lead);line-height:1.2;letter-spacing:-.02em}
+.toolcard p{margin:0;font-size:var(--t-small);color:var(--ink2);line-height:1.45}
+.toolcard .toolcard-need{font-size:12.5px;color:var(--mute);border-top:1px solid var(--line2);padding-top:8px;margin-top:auto}
+.toolcard .toolcard-need b{display:block;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--t-micro);
+ letter-spacing:.1em;text-transform:uppercase;font-weight:400;margin-bottom:2px}
+.toolcard-go{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:var(--t-small);color:var(--acc);margin-top:4px}
+@media(prefers-reduced-motion:reduce){.toolcard,.toolcard:hover{transition:none;transform:none}}
+@media(max-width:1000px){.toolcards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.toolcards{grid-template-columns:1fr}.toolcard{flex-direction:row;flex-wrap:wrap;align-items:flex-start}
+ .toolcard-ico{width:40px;height:40px;margin:0}.toolcard h3{flex:1;min-width:60%;font-size:17px;align-self:center}
+ .toolcard p,.toolcard-go{flex-basis:100%}}

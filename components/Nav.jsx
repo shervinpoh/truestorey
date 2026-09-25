@@ -1,8 +1,11 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { NAV, SITUATIONS, isHere, runsOf } from '../lib/nav.js';
+import { NAV, SITUATIONS, TOOL_GROUPS, ICON_FOR, isHere, runsOf } from '../lib/nav.js';
 import BackLink from './BackLink.jsx';
+import Logo from './Logo.jsx';
+import Icon from './Icon.jsx';
+import CommandSearch from './CommandSearch.jsx';
 
 /**
  * The global nav.
@@ -54,6 +57,17 @@ import BackLink from './BackLink.jsx';
  * Below 800px it collapses to the same list as a single disclosure panel —
  * see globals.css. The row and the panel render from one array so a link
  * cannot exist in one and not the other.
+ *
+ * ── 26 SEP: THE TOOLS ARE ON SCREEN AGAIN, AS PICTURES ─────────────────────
+ * The three sentences above fixed readability and cost findability: Shervin
+ * could not find the tool he wanted in his own site. Tools now opens a wide
+ * panel with every tool drawn as an icon and named by its question, in four
+ * runs of four (TOOL_GROUPS), with the three situations underneath for the
+ * reader who does not know which question is theirs. A header search (⌘K)
+ * finds tools as well as addresses. The logo is a mark and a larger
+ * wordmark; the "up" link, which sat alone in the middle of the bar, now
+ * shows only on a phone, where the menu is folded away and it is the only
+ * way up.
  */
 export default function Nav({ here = '' }) {
   const [open, setOpen] = useState(null);      // group name, or null
@@ -83,7 +97,7 @@ export default function Nav({ here = '' }) {
   return (
     <nav className="gnav" aria-label="Primary" ref={navRef}>
       <div className="in">
-        <Link href="/" className="mk">True<b>storey</b></Link>
+        <Link href="/" className="mk" aria-label="Truestorey — home"><Logo /></Link>
 
         {/* One step UP, beside the wordmark, inside the sticky nav — so the
             way out is wherever the reader is rather than 8,500px above them.
@@ -102,36 +116,54 @@ export default function Nav({ here = '' }) {
                   onClick={() => setOpen(on ? null : g.group)}>
                   {g.group}<i aria-hidden="true">{on ? '−' : '+'}</i>
                 </button>
-                {on && (
-                  <div className="navdrop">
-                    {g.guided ? <>
-                      {SITUATIONS.map(sit => (
-                        <Link key={sit.id} href={sit.href}>
-                          <b>{sit.label}</b><span>{sit.sub}</span>
-                        </Link>
+                {on && (g.guided ? (
+                  <div className="navmega">
+                    <div className="navmega-grid">
+                      {TOOL_GROUPS.map(run => (
+                        <div className="navmega-run" key={run.label}>
+                          <span className="lab">{run.label}</span>
+                          {run.items.map(t => (
+                            <Link key={t.href} href={t.href} className="navtool"
+                              aria-current={here === t.href ? 'page' : undefined}>
+                              <span className="navtool-ico"><Icon name={t.icon} size={20} /></span>
+                              <span className="navtool-txt"><b>{t.name}</b><span>{t.note}</span></span>
+                            </Link>
+                          ))}
+                        </div>
                       ))}
-                      <Link href="/tools" className="navall"
-                        aria-current={here === '/tools' ? 'page' : undefined}>
-                        <b>Browse every tool</b><span>All eleven, and the four quick answers</span>
-                      </Link>
-                    </> : runsOf(g).map(run => (
+                    </div>
+                    <div className="navmega-foot">
+                      <span className="lab">Not sure where to start?</span>
+                      {SITUATIONS.map(sit => <Link key={sit.id} href={sit.href}>{sit.label}</Link>)}
+                      <Link href="/tools" className="navmega-all">Every tool, explained <Icon name="arrow" size={15} /></Link>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="navdrop">
+                    {runsOf(g).map(run => (
                       <div className="navrun" key={run.label || 'all'}>
                         {run.label && <span className="lab">{run.label}</span>}
                         {run.items.map(l => (
-                          <Link key={l.href} href={l.href}
+                          <Link key={l.href} href={l.href} className="navlink"
                             aria-current={isHere(l, here) ? 'page' : undefined}>
-                            <b>{l.panelLabel || l.label}</b>
-                            {l.blurb && <span>{l.blurb}</span>}
+                            {ICON_FOR[l.href] && <span className="navtool-ico sm"><Icon name={ICON_FOR[l.href]} size={17} /></span>}
+                            <span className="navtool-txt"><b>{l.panelLabel || l.label}</b>
+                              {l.blurb && <span>{l.blurb}</span>}</span>
                           </Link>
                         ))}
                       </div>
                     ))}
                   </div>
-                )}
+                ))}
               </li>
             );
           })}
         </ul>
+
+        <div className="navend">
+          <CommandSearch />
+          <Link href="/blindspot" className="navcta">Check a home</Link>
+        </div>
 
         {/* Mobile: the same links, grouped, behind a disclosure.
             Keyed on the pathname so a client-side navigation returns a fresh
@@ -143,7 +175,9 @@ export default function Nav({ here = '' }) {
             {openGroup ? <span className="navwhere">{openGroup.group}</span> : null}
           </summary>
           <div className="navpanel">
-            {NAV.map(g => (
+            {/* Tools first on a phone: it is what a visitor opens the menu for,
+                and it was the third group, below six places to look up. */}
+            {[...NAV].sort((a, b) => Number(!!b.guided) - Number(!!a.guided)).map(g => (
               <div className="navgroup" key={g.group}>
                 <span className="lab">{g.group}</span>
                 <ul>
@@ -151,17 +185,27 @@ export default function Nav({ here = '' }) {
                       one run, where the screen is smallest and a wrong tap
                       costs the most. Same three sentences here. */}
                   {g.guided ? <>
+                    {TOOL_GROUPS.flatMap(run => [
+                      <li key={run.label} className="navrunlab" aria-hidden="true">{run.label}</li>,
+                      ...run.items.map(t => (
+                        <li key={t.href}><Link href={t.href} className="navmtool"
+                          aria-current={here === t.href ? 'page' : undefined}>
+                          <Icon name={t.icon} size={18} />{t.name}</Link></li>
+                      )),
+                    ])}
+                    <li className="navrunlab" aria-hidden="true">Not sure where to start?</li>
                     {SITUATIONS.map(sit => (
                       <li key={sit.id}><Link href={sit.href}>{sit.label}</Link></li>
                     ))}
                     <li><Link href="/tools"
-                      aria-current={here === '/tools' ? 'page' : undefined}>Browse every tool</Link></li>
+                      aria-current={here === '/tools' ? 'page' : undefined}>Every tool, explained</Link></li>
                   </> : runsOf(g).flatMap(run => [
                     run.label ? <li key={run.label} className="navrunlab" aria-hidden="true">{run.label}</li> : null,
                     ...run.items.map(l => (
                       <li key={l.href}>
                         <Link href={l.href}
                           aria-current={isHere(l, here) ? 'page' : undefined}>
+                          {ICON_FOR[l.href] && <Icon name={ICON_FOR[l.href]} size={18} />}
                           {l.panelLabel || l.label}
                         </Link>
                       </li>

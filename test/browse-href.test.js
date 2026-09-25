@@ -64,11 +64,17 @@ test('every tool in the nav is listed on /tools', async () => {
   const { NAV } = await import('../lib/nav.js');
   const { readFileSync } = await import('node:fs');
   const page = readFileSync(new URL('../app/tools/page.jsx', import.meta.url), 'utf8');
+  const { TOOL_GROUPS } = await import('../lib/nav.js');
   const tools = NAV.find(g => /tool/i.test(g.group))?.items || [];
   assert.ok(tools.length > 5);
+  /* Since 26 Sep the page renders every tool as a card from TOOL_GROUPS — the
+     same data as the header's Tools menu — so a tool is listed when it is in
+     TOOL_GROUPS and the page maps TOOL_GROUPS. */
+  assert.match(page, /TOOL_GROUPS\.map/, '/tools no longer renders the tool cards');
+  const listed = new Set(TOOL_GROUPS.flatMap(g => g.items.map(i => i.href)));
   for (const t of tools) {
     if (t.href === '/tools') continue;                 // the page itself
-    assert.ok(page.includes(`href="${t.href}"`), `/tools does not link ${t.href}`);
+    assert.ok(listed.has(t.href) || page.includes(`href="${t.href}"`), `/tools does not link ${t.href}`);
   }
 });
 
