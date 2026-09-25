@@ -12,7 +12,6 @@ import Masthead from '../../../components/Masthead.jsx';
 import Insight from '../../../components/Insight.jsx';
 import Gate from '../../../components/Gate.jsx';
 import { configured as crmConfigured } from '../../../lib/crm.js';
-import Follow from '../../../components/Follow.jsx';
 import { ogForPost } from '../../../lib/og.js';
 
 export async function generateStaticParams() {
@@ -188,12 +187,11 @@ export default async function Page({ params }) {
         </section>
       )}
 
-      <section className="pane">
-        <Follow />
-        {/* Same reason as the record page: a form that cannot store an address
-            must not ask for one. Follow.jsx above it already works this way. */}
-        {crmConfigured() && <Gate />}
-      </section>
+      {/* The WhatsApp offer is the footer band's, one scroll below; a second
+          panel here printed the same button twice (Shervin, 26 Sep). Same
+          reason as the record page for the gate: a form that cannot store an
+          address must not ask for one. */}
+      {crmConfigured() && <section className="pane"><Gate /></section>}
 
       {others.length > 0 && (
         <section className="pane">

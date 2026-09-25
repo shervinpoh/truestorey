@@ -44,6 +44,9 @@ const USES = [
   ['residential', 'Residential', /^Residential$|^Condominium$/i],
   ['ec', 'Executive condo', /^EC$/i],
   ['mixed', 'With commercial', /^Residential with Commercial|^Mixed$/i],
+  /* URA's landed plots, 1993–2017. Their rate is per m² of site area, which
+     is a different measure, so this tab alone reads psmSite and says so. */
+  ['landed', 'Landed plots', /^Landed$/],
   ['all', 'Every use', /./],
 ];
 
@@ -54,6 +57,8 @@ export default function LandView({ data }) {
   const [shown, setShown] = useState(25);
 
   const match = USES.find(u => u[0] === use)[2];
+  const siteRate = use === 'landed';
+  const rateOf = s => (siteRate ? s.psmSite : s.psmGfaOrGpr);
   const sites = useMemo(
     () => data.sites.filter(s => match.test(s.use) && (!area || s.planningArea === area)),
     [data.sites, match, area]);
@@ -69,10 +74,10 @@ export default function LandView({ data }) {
   const byYear = useMemo(() => {
     const y = new Map();
     for (const s of sites) {
-      if (!Number.isFinite(s.psmGfaOrGpr)) continue;
+      if (!Number.isFinite(rateOf(s))) continue;
       const k = s.award.slice(0, 4);
       if (!y.has(k)) y.set(k, []);
-      y.get(k).push(s.psmGfaOrGpr);
+      y.get(k).push(rateOf(s));
     }
     return [...y.entries()].sort()
       .filter(([, v]) => v.length >= 2)          // one site is not a year
@@ -80,9 +85,9 @@ export default function LandView({ data }) {
         const s = v.slice().sort((a, b) => a - b);
         return { label: k, value: s[Math.floor(s.length / 2)], n: v.length };
       });
-  }, [sites]);
+  }, [sites, siteRate]);
 
-  const withRate = sites.filter(s => Number.isFinite(s.psmGfaOrGpr));
+  const withRate = sites.filter(s => Number.isFinite(rateOf(s)));
   /*
    * IT SAID "296 MATCHING" AND SHOWED TWELVE.
    *
@@ -95,7 +100,7 @@ export default function LandView({ data }) {
   const PAGE = 25;
   const latest = sites.slice(0, shown);
   const median = withRate.length
-    ? withRate.map(s => s.psmGfaOrGpr).sort((a, b) => a - b)[Math.floor(withRate.length / 2)]
+    ? withRate.map(rateOf).sort((a, b) => a - b)[Math.floor(withRate.length / 2)]
     : null;
 
   return (
@@ -122,7 +127,7 @@ export default function LandView({ data }) {
       <div className="kpi3" style={{ marginTop: 16 }}>
         <div><div className="v"><Figure value={sites.length} format={n => Math.round(n).toLocaleString('en-SG')} /></div>
           <span className="lab">Sites awarded</span></div>
-        <div><div className="v">{median ? money(median) : '—'}</div><span className="lab">Median rate, psm</span></div>
+        <div><div className="v">{median ? money(median) : '—'}</div><span className="lab">{siteRate ? 'Median rate, psm of site' : 'Median rate, psm'}</span></div>
         <div><div className="v">{sites.length ? `${sites.at(-1).award.slice(0, 4)}–${sites[0].award.slice(0, 4)}` : '—'}</div>
           <span className="lab">Awarded between</span></div>
       </div>
@@ -133,18 +138,18 @@ export default function LandView({ data }) {
             <span>Median rate by year of award</span>
             <span>years with two or more sites</span>
           </h2>
-          <Chart points={byYear} format={n => `$${Math.round(n).toLocaleString('en-SG')}`} unit=" psm"
+          <Chart points={byYear} format={n => `S$${Math.round(n).toLocaleString('en-SG')}`} unit={siteRate ? ' psm of site' : ' psm'}
             height={140}
             ariaLabel={`Median land rate per square metre by year of award, ${byYear[0].label} to ${byYear.at(-1).label}.`} />
           {/* Said here, beside the chart, not once at the foot of the page. */}
-          <div className="warn" style={{ marginTop: 12 }}>
+          {!siteRate && <div className="warn" style={{ marginTop: 12 }}>
             <p style={{ margin: 0 }}>
               <b>These rates are not all on the same basis.</b> URA heads the column
               &ldquo;$psm per GFA or $psm per GPR&rdquo; and the sheet does not say which applies to
               a given site, so two rates in this chart may be measuring different things. Prices are
               nominal — 1993 dollars are not 2026 dollars.
             </p>
-          </div>
+          </div>}
         </>
       )}
 
@@ -160,7 +165,7 @@ export default function LandView({ data }) {
           <thead><tr>
             <th className="when">Awarded</th><th>Site</th><th>Sold by</th>
             <th className="num">Price</th>
-            <th className="num">psm</th>
+            <th className="num">{siteRate ? 'psm of site' : 'psm'}</th>
             <th className="bidsh">Bids <i>· ahead of 2nd</i></th>
             <th className="who">Became</th>
           </tr></thead>
@@ -176,7 +181,7 @@ export default function LandView({ data }) {
                 {/* HDB publishes no rate column. An em dash, not a computed
                     figure — deriving one would invent a basis URA's own column
                     is already ambiguous about. */}
-                <td className="mono num">{s.psmGfaOrGpr ? money(s.psmGfaOrGpr) : '—'}</td>
+                <td className="mono num">{rateOf(s) ? money(rateOf(s)) : '—'}</td>
                 {/* A single bid is the most informative number on this row and
                     it is easy to skim past. */}
                 {/* The count is a fact; the SPREAD is the finding. A site won
@@ -252,6 +257,16 @@ export default function LandView({ data }) {
           the full tender list — {data.hdb.bids.toLocaleString('en-SG')} individual bids — and the
           spread runs from a site won by a tenth of a per cent to one won by more than double the
           next offer. HDB publishes this and nobody surfaces it.
+        </div>
+      )}
+
+      {siteRate && data.landed && (
+        <div className="note" style={{ marginTop: 20 }}>
+          <b>A different rate, on purpose.</b> These {data.landed.count} plots were sold by URA for
+          terraces, semi-detached houses and bungalows between {data.landed.fromYear} and{' '}
+          {data.landed.toYear}. URA rates them per square metre of the whole site, not per square
+          metre of floor area, so they are shown only here and never beside the rates in the other
+          tabs, where the same column would mean something else.
         </div>
       )}
 

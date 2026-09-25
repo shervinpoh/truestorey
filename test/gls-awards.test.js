@@ -277,3 +277,24 @@ test('the programme\'s awarded sites agree with the awards record', has, async (
   const { changed } = markAwarded(gls, d);
   assert.deepEqual(changed, [], `the programme still reads unawarded for: ${changed.join(', ')} — run npm run ingest:gls-awards`);
 });
+
+/* URA's landed plots are rated per m² of SITE area. Beside the per-GFA rates
+   in one column they would read as land at a quarter of the price. */
+test('landed plots keep their own rate and never join the floor-area column', async () => {
+  const { landedFileUrl } = await import('../scripts/ingest-gls-awards.mjs');
+  assert.equal(landedFileUrl('<a href="https://isomer-user-content.by.gov.sg/467/0333/06 URA Vacant Sites (online version).xlsx">'), null);
+  assert.match(landedFileUrl('<a href="https://isomer-user-content.by.gov.sg/467/fba8/ura-landed-housing-sites.xlsx">'), /landed-housing-sites\.xlsx$/);
+  const f = new URL('../data/gls-landed.json', import.meta.url);
+  if (existsSync(f)) {
+    const l = JSON.parse(readFileSync(f, 'utf8'));
+    for (const s of l.sites) {
+      assert.equal(s.use, 'Landed');
+      assert.ok(!('psmGfaOrGpr' in s), `${s.site} carries a floor-area rate`);
+    }
+    assert.match(l.rateNote, /SITE area/);
+  }
+  const page = readFileSync(new URL('../app/land/page.jsx', import.meta.url), 'utf8');
+  assert.match(page, /vendor: 'URA', psmGfaOrGpr: null/, 'landed rows can reach the floor-area rate column');
+  const view = readFileSync(new URL('../components/LandView.jsx', import.meta.url), 'utf8');
+  assert.match(view, /siteRate \? 'psm of site' : 'psm'/, 'the landed tab no longer says which rate it shows');
+});

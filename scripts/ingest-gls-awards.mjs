@@ -147,7 +147,7 @@ const clean = s => String(s ?? '').replace(/\s+/g, ' ').trim();
 
 export async function ingestGlsAwards() {
   const accessedAt = new Date().toISOString();
-  let buf, fileUrl;
+  let buf, fileUrl, pageHtml = null;
   if (FILE_ARG) {
     buf = await fs.readFile(FILE_ARG);
     fileUrl = `local file: ${FILE_ARG.split('/').pop()}`;
@@ -155,7 +155,8 @@ export async function ingestGlsAwards() {
   } else {
     const page = await fetch(SOURCE.page, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Truestorey/1.0; +https://truestorey.vercel.app)' } });
     if (!page.ok) throw new Error(`URA's past-sales page returned ${page.status}`);
-    const { url, links } = currentFileUrl(await page.text());
+    pageHtml = await page.text();
+    const { url, links } = currentFileUrl(pageHtml);
     if (!url) {
       throw new Error('could not find the past-sites spreadsheet link on URA\'s page. '
         + `Spreadsheet links found: ${links.length ? links.join(' · ') : 'none'}. `
@@ -272,7 +273,74 @@ export async function ingestGlsAwards() {
       console.log(`  programme updated — now awarded: ${changed.join(', ')}`);
     }
   } catch (e) { console.warn(`  programme statuses not updated: ${e.message}`); }
+
+  /* The landed-housing sheet sits beside this one on the same page. It is a
+     closed history — URA's last separate landed award was in 2017 — but it
+     is read the same way so the day URA adds one, it arrives. Its failure
+     never fails the awards: it is the lesser dataset. */
+  if (pageHtml) {
+    try { await ingestLanded(pageHtml); }
+    catch (e) { console.warn(`  landed housing sites not updated: ${e.message}`); }
+  }
   return out;
+}
+
+/**
+ * URA's landed housing sites, 1993 onwards: plots sold for terraces,
+ * semi-detached houses and bungalows. Its rate is per square metre of SITE
+ * area, not of floor area, so it is kept in its own file and never joins the
+ * rate column above — the two are different measures of different things.
+ */
+export function landedFileUrl(html) {
+  const links = [...String(html).matchAll(/href="(https:\/\/isomer-user-content\.by\.gov\.sg\/[^"]+\.xlsx)"/gi)].map(m => m[1]);
+  const hit = links.find(u => /landed-housing-sites/i.test(u));
+  return hit ? encodeURI(decodeURI(hit)) : null;
+}
+
+async function ingestLanded(html) {
+  const url = landedFileUrl(html);
+  if (!url) throw new Error('no landed-housing spreadsheet linked on URA\'s page');
+  const res = await fetch(url, { headers: { 'User-Agent': 'truestorey-ingest' } });
+  if (!res.ok) throw new Error(`URA returned ${res.status} for ${url}`);
+  const files = unzip(Buffer.from(await res.arrayBuffer()));
+  const ss = sharedStrings(files.get('xl/sharedStrings.xml')?.toString('utf8') || '');
+  const rows = sheetRows(files.get('xl/worksheets/sheet1.xml').toString('utf8'), ss);
+  const H = rows[0].map(clean);
+  const at = re => H.findIndex(h => re.test(h));
+  const col = { launch: at(/date of launch/i), close: at(/tender closing/i), award: at(/date of award/i),
+    where: at(/^location/i), use: at(/type of development/i), lease: at(/^lease/i), area: at(/site area/i),
+    bids: at(/no\. of bids/i), who: at(/successful tenderer/i), price: at(/successful tender price/i),
+    rate: at(/\$psm per site area/i), area2: at(/planning area/i) };
+  for (const [k, v] of Object.entries(col)) if (v < 0) throw new Error(`landed sheet: column "${k}" is gone. Header was: ${H.join(' | ')}`);
+  const sites = [];
+  for (const r of rows.slice(1)) {
+    const award = excelDate(r[col.award]);
+    const price = num(r[col.price]);
+    if (!award || !price) continue;
+    sites.push({
+      award, launched: excelDate(r[col.launch]), closed: excelDate(r[col.close]),
+      site: clean(r[col.where]), use: 'Landed', useFull: clean(r[col.use]), lease: clean(r[col.lease]),
+      areaSqm: num(r[col.area]), bids: num(r[col.bids]), winner: clean(r[col.who]), price,
+      psmSite: num(r[col.rate]), planningArea: clean(r[col.area2]),
+    });
+  }
+  sites.sort((a, b) => (a.award < b.award ? 1 : -1));
+  const OUT = new URL('../data/gls-landed.json', import.meta.url);
+  let before = null;
+  try { before = JSON.parse(await fs.readFile(OUT, 'utf8')); } catch { /* first run */ }
+  if (before?.sites?.length && sites.length < before.sites.length && !FORCE) {
+    throw new Error(`landed sheet has ${sites.length} awarded plots against ${before.sites.length} on file; not written`);
+  }
+  const years = [...new Set(sites.map(s => s.award.slice(0, 4)))].sort();
+  await fs.writeFile(OUT, JSON.stringify({
+    source: 'URA landed housing sites — past sales', sourcePage: SOURCE.page, sourceFile: url,
+    licence: 'URA publishes past sale sites for reference and research.',
+    accessedAt: new Date().toISOString(), latestAward: sites[0]?.award || null,
+    rateNote: 'The rate is per square metre of SITE area. It is not comparable to the per-GFA rates of the main awards list.',
+    counts: { awarded: sites.length, fromYear: years[0], toYear: years.at(-1) },
+    sites,
+  }));
+  console.log(`Wrote data/gls-landed.json — ${sites.length} landed plots · ${years[0]}–${years.at(-1)}`);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

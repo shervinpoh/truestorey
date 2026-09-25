@@ -243,7 +243,9 @@ test('every lead form is hidden when there is nowhere to write', () => {
     'more than one Gate in RecordPage — one of them is outside the guard');
 
   const ins = strip('app/insights/[slug]/page.jsx');
-  assert.match(ins, /crmConfigured\(\) && <Gate \/>/, 'the article lead form is ungated again');
+  /* The section around it moved inside the guard on 26 Sep, so an article
+     without a CRM renders no empty pane. The guard is what is asserted. */
+  assert.match(ins, /crmConfigured\(\) && (?:<section[^>]*>)?<Gate \/>/, 'the article lead form is ungated again');
 
   for (const f of ['app/hdb/[town]/[block]/page.jsx', 'app/condo/[slug]/page.jsx',
                    'app/landed/[slug]/page.jsx']) {

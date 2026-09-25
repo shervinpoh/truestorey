@@ -15,12 +15,16 @@ const code = (...p) => readFileSync(path.join(process.cwd(), ...p), 'utf8')
   .replace(/\{\/\*[\s\S]*?\*\/\}/g, '').replace(/\/\*[\s\S]*?\*\//g, '')
   .split('\n').filter(l => !/^\s*(\/\/|\*)/.test(l)).join('\n');
 
-test('the footer, the Blindspot result and the notes all carry the same offer', () => {
+test('the footer and the Blindspot result carry the offer, and no page shows it twice', () => {
   assert.match(code('components', 'SiteFooter.jsx'), /<FollowWhatsApp where="footer" variant="band" \/>/,
     'the footer lost the channel — it is the one placement on every page');
   assert.match(code('components', 'BlindspotReport.jsx'), /<FollowWhatsApp where="blindspot" variant="row"/,
     'the Blindspot result lost the channel');
-  assert.match(code('components', 'Follow.jsx'), /<FollowWhatsApp where="insights" variant="panel" \/>/);
+  /* The notes carried their own panel directly above the footer band, so the
+     same button appeared twice one scroll apart. The band is the offer. */
+  for (const p of [['app', 'insights', 'page.jsx'], ['app', 'insights', '[slug]', 'page.jsx']]) {
+    assert.doesNotMatch(code(...p), /<Follow\b|<FollowWhatsApp/, `${p.join('/')} prints a second WhatsApp offer above the footer's`);
+  }
 });
 
 test('it renders nothing when no channel is configured, and opens WhatsApp safely', () => {

@@ -6,7 +6,6 @@ import { feed } from '../../lib/articles.js';
 import { brief } from '../../lib/brief.js';
 import MarketStrip from '../../components/MarketStrip.jsx';
 import Feed from '../../components/Feed.jsx';
-import Follow from '../../components/Follow.jsx';
 
 export const metadata = {
   ...shareCard('/insights'),
@@ -138,9 +137,9 @@ export default async function Page() {
             </section>
           )}
 
-          <section className="pane">
-            <Follow />
-          </section>
+          {/* No follow panel here: the footer band on every page is the
+              WhatsApp offer, and this one sat directly above it — two
+              identical buttons one scroll apart (Shervin, 26 Sep). */}
         </>
       )}
     </main>

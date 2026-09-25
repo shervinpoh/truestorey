@@ -3,7 +3,7 @@ import Masthead from '../../components/Masthead.jsx';
 import ToolIntro from '../../components/ToolIntro.jsx';
 import ToolUse from '../../components/ToolUse.jsx';
 import LandView from '../../components/LandView.jsx';
-import { glsAwards, hdbSitesLinked } from '../../lib/data/query.js';
+import { glsAwards, glsLanded, hdbSitesLinked } from '../../lib/data/query.js';
 import PageFigure from '../../components/PageFigure.jsx';
 
 export const metadata = {
@@ -16,7 +16,7 @@ export const metadata = {
 export default function Page() {
   const ura = glsAwards();
   const hdb = hdbSitesLinked();
-  const d = merge(ura, hdb);
+  const d = withLanded(merge(ura, hdb), glsLanded());
   return (
     <main className="shell wide">
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
@@ -50,6 +50,20 @@ export default function Page() {
       </section>
     </main>
   );
+}
+
+/**
+ * URA's landed housing plots, as rows of their own use. Their rate is per m²
+ * of SITE area, so it travels as `psmSite` and never enters psmGfaOrGpr: the
+ * "Every use" tab shows a dash for them, and only the Landed tab, which
+ * relabels its column, shows the site rate.
+ */
+function withLanded(d, landed) {
+  if (!d || !landed?.sites?.length) return d;
+  const sites = [...d.sites, ...landed.sites.map(s => ({ ...s, vendor: 'URA', psmGfaOrGpr: null }))]
+    .sort((a, b) => (a.award < b.award ? 1 : -1));
+  return { ...d, sites, landed: { count: landed.sites.length, fromYear: landed.counts.fromYear,
+    toYear: landed.counts.toYear, rateNote: landed.rateNote } };
 }
 
 /**
