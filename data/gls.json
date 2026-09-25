@@ -26,7 +26,10 @@
    "use": "Residential",
    "list": "Confirmed",
    "status": "Awarded",
-   "launchDate": null
+   "launchDate": null,
+   "awardDate": "2026-06-23",
+   "awardBids": 4,
+   "awardPrice": 750569199
   },
   {
    "name": "Peck Hay Road",
@@ -39,7 +42,10 @@
    "use": "Residential",
    "list": "Confirmed",
    "status": "Awarded",
-   "launchDate": null
+   "launchDate": null,
+   "awardDate": "2026-06-16",
+   "awardBids": 4,
+   "awardPrice": 542400000
   },
   {
    "name": "New Upper Changi Road",
@@ -51,8 +57,11 @@
    "gfaSqm": 88480,
    "use": "Residential",
    "list": "Confirmed",
-   "status": "Open for tender",
-   "launchDate": null
+   "status": "Awarded",
+   "launchDate": null,
+   "awardDate": "2026-09-04",
+   "awardBids": 4,
+   "awardPrice": 1425388000
   },
   {
    "name": "Lorong Puntong / Sin Ming Avenue",
@@ -64,8 +73,11 @@
    "gfaSqm": 12040,
    "use": "Residential",
    "list": "Confirmed",
-   "status": "Open for tender",
-   "launchDate": null
+   "status": "Awarded",
+   "launchDate": null,
+   "awardDate": "2026-09-18",
+   "awardBids": 7,
+   "awardPrice": 208099000
   },
   {
    "name": "Marina Gardens Lane",
@@ -156,7 +168,10 @@
    "use": "Commercial & Residential",
    "list": "Confirmed",
    "status": "Awarded",
-   "launchDate": null
+   "launchDate": null,
+   "awardDate": "2026-07-20",
+   "awardBids": 3,
+   "awardPrice": 2128000000
   },
   {
    "name": "Town Hall Link",

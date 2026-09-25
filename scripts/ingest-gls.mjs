@@ -44,6 +44,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { geocodeProject, geocodeStreet, loadCache, saveCache, loadPace, savePace } from './lib/onemap.mjs';
+import { markAwarded } from '../lib/gls-status.js';
 
 const ROOT = process.cwd();
 const SRC = path.join(ROOT, 'data', 'sources', 'gls-programme.json');
@@ -158,6 +159,16 @@ async function main() {
     console.error('  Add lat/lon by hand for these, or correct the names.\n');
     process.exit(1);
   }
+
+  /* Statuses follow URA's awards, not the hand-typed status in the source
+     file (lib/gls-status.js). Without this, re-running this ingest would put
+     back "Open for tender" on a site the awards ingest had marked awarded. */
+  try {
+    const awards = JSON.parse(await fs.readFile(path.join(ROOT, 'data', 'gls-awards.json'), 'utf8'));
+    const { sites: marked, changed } = markAwarded({ programme: src.programme, sites: out }, awards);
+    out.splice(0, out.length, ...marked);
+    if (changed.length) console.log(`  awarded since the programme was typed in: ${changed.join(', ')}`);
+  } catch { /* no awards file yet: the typed statuses stand */ }
 
   const withUnits = out.filter(s => s.units != null);
   const withGfa = out.filter(s => s.gfaSqm != null);

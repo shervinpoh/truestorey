@@ -214,3 +214,66 @@ test('no field has swallowed the rest of the document', hHas, () => {
     }
   }
 });
+
+/* ── the sheet's link moves; the ingest follows it ──────────────────────────
+   URA's asset host puts every upload in a new folder. The ingest downloaded
+   one fixed URL and went on re-reading the 8 September sheet after URA had
+   published a newer one, so the New Upper Changi Road and Lorong Puntong
+   awards never arrived and every refresh reported success. */
+const ingestSrc = readFileSync(new URL('../scripts/ingest-gls-awards.mjs', import.meta.url), 'utf8');
+
+test('the spreadsheet link is read from URA\'s page, never remembered', async () => {
+  const { currentFileUrl } = await import('../scripts/ingest-gls-awards.mjs');
+  const page = `<a href="https://isomer-user-content.by.gov.sg/467/e90f/ura-vacant-sites-infill.xlsx">infill</a>
+    <a href="https://isomer-user-content.by.gov.sg/467/fba8/ura-landed-housing-sites.xlsx">landed</a>
+    <a href="https://isomer-user-content.by.gov.sg/467/0333/06 URA Vacant Sites (online version).xlsx">past sites</a>`;
+  const { url } = currentFileUrl(page);
+  assert.equal(url, 'https://isomer-user-content.by.gov.sg/467/0333/06%20URA%20Vacant%20Sites%20(online%20version).xlsx');
+  assert.equal(currentFileUrl('<a href="https://isomer-user-content.by.gov.sg/467/x/ura-landed-housing-sites.xlsx">').url, null,
+    'the landed-housing sheet was taken for the past-sites sheet');
+  const code = ingestSrc.replace(/\/\*[\s\S]*?\*\//g, '').split('\n').filter(l => !/^\s*(\/\/|\*)/.test(l)).join('\n');
+  assert.doesNotMatch(code, /isomer-user-content\.by\.gov\.sg\/467\/[0-9a-f]{8}-/,
+    'a fixed spreadsheet URL is back in the ingest — it will go stale the next time URA uploads');
+  assert.match(code, /could not find the past-sites spreadsheet link/, 'a missing link must fail loudly, not fall back');
+});
+
+test('the source file and the latest award travel with the data', has, () => {
+  assert.match(d.sourceFile, /^https:\/\/isomer-user-content\.by\.gov\.sg\/|^local file: /);
+  assert.equal(d.latestAward, d.sites[0].award, 'latestAward disagrees with the newest site');
+});
+
+test('a sheet with fewer awards than the last is refused', () => {
+  /* URA only adds awards. The landed-housing sheet sits beside this one on
+     the same page; a mix-up must not overwrite thirty years of history. */
+  assert.match(ingestSrc, /sites\.length < before\.sites\.length && !FORCE/);
+  assert.match(ingestSrc, /Nothing was written/);
+});
+
+test('a programme site is awarded only by an award made after the programme was announced', async () => {
+  const { markAwarded, programmeStart } = await import('../lib/gls-status.js');
+  assert.equal(programmeStart('2026 H2'), '2026-06-01');
+  assert.equal(programmeStart('2027 H1'), '2026-12-01');
+  const programme = { programme: '2026 H2', sites: [
+    { name: 'Lorong Puntong / Sin Ming Avenue', status: 'Open for tender' },
+    { name: 'Marina Gardens Lane', status: 'Open for tender' },
+    { name: 'Media Circle', status: 'Available for application' },
+  ] };
+  const awards = { sites: [
+    { site: 'Lorong Puntong / Sin Ming Avenue', award: '2026-09-18', bids: 7, price: 208099000 },
+    { site: 'Lorong Puntong', award: '2014-10-13', bids: 18, price: 1 },
+    { site: 'Marina Gardens Lane', award: '2023-07-11', bids: 4, price: 1 },
+    { site: 'Media Circle (Parcel B)', award: '2026-08-01', bids: 2, price: 1 },
+  ] };
+  const { sites, changed } = markAwarded(programme, awards);
+  assert.deepEqual(changed, ['Lorong Puntong / Sin Ming Avenue']);
+  assert.equal(sites[0].awardBids, 7);
+  assert.equal(sites[1].status, 'Open for tender', 'a 2023 award of the same name marked a 2026 site awarded');
+  assert.equal(sites[2].status, 'Available for application', 'Parcel B\'s award was given to the unparcelled site');
+});
+
+test('the programme\'s awarded sites agree with the awards record', has, async () => {
+  const gls = JSON.parse(readFileSync(new URL('../data/gls.json', import.meta.url), 'utf8'));
+  const { markAwarded } = await import('../lib/gls-status.js');
+  const { changed } = markAwarded(gls, d);
+  assert.deepEqual(changed, [], `the programme still reads unawarded for: ${changed.join(', ')} — run npm run ingest:gls-awards`);
+});

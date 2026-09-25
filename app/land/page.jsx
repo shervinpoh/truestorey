@@ -32,7 +32,11 @@ export default function Page() {
           unit="sites"
           support={`${(ura?.sites?.length || 0).toLocaleString('en-SG')} from URA and ${(hdb?.sites?.length || 0).toLocaleString('en-SG')} from HDB, with the winning tender, the rate, and every losing bid the agency published.`}
           note="What a developer paid for land is not what anything built on it is worth. The two are separated by years, a construction cost and a market nobody has seen yet."
-          source={`${ura?.source || 'URA Government Land Sales'} · accessed ${String(ura?.accessedAt || '').slice(0, 10)}`} />
+          /* The latest award, not only the access date. The page read
+             "accessed 24 Sep" while serving URA's 8 Sep sheet, because the
+             ingest re-downloaded a stale link: an access date says the site
+             looked, not that it found anything new. */
+          source={`${ura?.source || 'URA Government Land Sales'} · latest award on file ${String(ura?.latestAward || ura?.sites?.[0]?.award || '').slice(0, 10)} · checked ${String(ura?.accessedAt || '').slice(0, 10)}`} />
       )}
 
       <section className="pane">

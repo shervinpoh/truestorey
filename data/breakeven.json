@@ -1,6 +1,6 @@
 {
  "version": "2026-09-breakeven-v1",
- "builtAt": "2026-09-21T12:22:54.333Z",
+ "builtAt": "2026-09-25T19:23:20.237Z",
  "fit": {
   "intercept": 684.7478349003122,
   "land": 1.631203546032108,
@@ -13,9 +13,9 @@
   "r2": 0.9271266752621453,
   "drift": {
    "resamples": 4000,
-   "perMonthLow": 2.1989446853710253,
-   "perMonthHigh": 18.066496460886565,
-   "shareNotPositive": 0.02
+   "perMonthLow": 2.1158391495650424,
+   "perMonthHigh": 17.86948633498842,
+   "shareNotPositive": 0.0245
   }
  },
  "pooledFit": {
@@ -30,9 +30,9 @@
   "r2": 0.8771421863041404,
   "drift": {
    "resamples": 4000,
-   "perMonthLow": 2.7612461810118933,
-   "perMonthHigh": 11.601842114511529,
-   "shareNotPositive": 0.01075
+   "perMonthLow": 2.6494595175682516,
+   "perMonthHigh": 11.613834205455603,
+   "shareNotPositive": 0.0075
   }
  },
  "harmonisation": {
@@ -456,6 +456,32 @@
   }
  ],
  "unlaunched": [
+  {
+   "sameStreetAs": null,
+   "site": "Lorong Puntong / Sin Ming Avenue",
+   "planningArea": "Bishan",
+   "award": "2026-09-18",
+   "winner": "Eco World Development (S) Pte. Ltd.",
+   "bids": 7,
+   "gfaSqm": 0,
+   "lease": "99",
+   "tenderLaunched": "2026-06-25",
+   "harmonised": true,
+   "landPsfPpr": 1612
+  },
+  {
+   "sameStreetAs": null,
+   "site": "New Upper Changi Road",
+   "planningArea": "Bedok",
+   "award": "2026-09-04",
+   "winner": "United Venture Development (Daisy) Pte. Ltd. and CL Sapphire Pte. Ltd.",
+   "bids": 4,
+   "gfaSqm": 0,
+   "lease": "99",
+   "tenderLaunched": "2026-05-15",
+   "harmonised": true,
+   "landPsfPpr": 1537
+  },
   {
    "sameStreetAs": null,
    "site": "Berlayar Drive",

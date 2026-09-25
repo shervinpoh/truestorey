@@ -153,6 +153,8 @@ npm run ingest:boundaries   URA Master Plan planning areas
 npm run ingest:zoning       URA Master Plan land use + plot ratio
 npm run ingest:planning     URA planning decisions (what has been APPROVED)
 npm run ingest:gls          GLS sites from data/sources/gls-programme.json
+npm run ingest:gls-awards   every URA award, from the sheet URA's page links
+                            to today. --file=<path> for a sheet by hand.
 npm run build:map      data/map.json
 npm run build:storey   data/storey.json  (Tower View)
 npm run build:yield    data/yield.json
@@ -379,6 +381,13 @@ refuses a number the pack does not hold, the first person, invented
 experience and everything in `lib/compliance.js`. `inventedVoice()` also
 guards intake and the publish button. A topic no dataset can answer is
 archived with the reason, never written from nothing.
+
+**A download link is not a dataset.** URA's asset host puts every upload
+of the past-sites sheet in a new folder. The awards ingest fetched one fixed
+URL and kept re-reading the 8 Sep sheet after URA published a newer one, so
+two September awards never arrived and every three-day refresh reported
+success. The link is now read from URA's page on each run, a missing link
+fails the run, and a sheet with fewer awards than the last is refused.
 
 **A name is not a site.** The first news pack matched the GLS awards record
 by name and handed the writer a 2014 Lorong Puntong award as this month's

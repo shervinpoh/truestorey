@@ -37,12 +37,36 @@
  */
 import fs from 'node:fs/promises';
 import zlib from 'node:zlib';
+import { markAwarded } from '../lib/gls-status.js';
 
 const SOURCE = {
   name: 'URA Government Land Sales — past sale sites',
   page: 'https://www.ura.gov.sg/land-sales/past-sales-sites/',
-  file: 'https://isomer-user-content.by.gov.sg/467/243b544e-2b84-4c73-8d41-ae9d63ae9c4c/06%20URA%20Vacant%20Sites%20(online%20version).xlsx',
 };
+
+/* ── THE LINK MOVES EVERY TIME URA UPDATES THE SHEET ───────────────────────
+   This downloaded one fixed URL, .../243b544e-.../06 URA Vacant Sites (online
+   version).xlsx. URA's asset host gives every upload a new folder, so when
+   URA added the September awards the new sheet went to .../033342db-.../ and
+   the old URL went on serving the 8 September copy. The refresh ran every
+   three days, rewrote gls-awards.json from the stale file, and reported
+   success: the New Upper Changi Road and Lorong Puntong awards never arrived.
+   Shervin noticed and downloaded the sheet by hand.
+
+   So the link is read from URA's page on every run. The page is otherwise a
+   client-rendered app, but its download links are in the HTML. If the link
+   cannot be found, the ingest FAILS — falling back to a remembered URL is
+   exactly how it went stale without anyone knowing. */
+export function currentFileUrl(html) {
+  const links = [...String(html).matchAll(/href="(https:\/\/isomer-user-content\.by\.gov\.sg\/[^"]+\.xlsx)"/gi)].map(m => m[1]);
+  const hit = links.find(u => /vacant%20sites|vacant sites/i.test(u) && !/infill/i.test(u));
+  return { url: hit ? encodeURI(decodeURI(hit)) : null, links };
+}
+
+/* A file given by hand: `npm run ingest:gls-awards -- --file=path.xlsx`, for
+   the day URA's page changes shape and the link cannot be found. */
+const FILE_ARG = (process.argv.find(a => a.startsWith('--file=')) || '').slice(7);
+const FORCE = process.argv.includes('--force');
 
 /* Excel counts days from 1899-12-30 — the famous off-by-one that keeps the
  * 1900 leap-year bug compatible. Getting this wrong shifts every award by a
@@ -123,10 +147,26 @@ const clean = s => String(s ?? '').replace(/\s+/g, ' ').trim();
 
 export async function ingestGlsAwards() {
   const accessedAt = new Date().toISOString();
-  const res = await fetch(SOURCE.file, { headers: { 'User-Agent': 'truestorey-ingest' } });
-  if (!res.ok) throw new Error(`URA returned ${res.status} for the past-sites spreadsheet`);
-  const buf = Buffer.from(await res.arrayBuffer());
-  console.log(`  downloaded ${(buf.length / 1024).toFixed(0)} KB`);
+  let buf, fileUrl;
+  if (FILE_ARG) {
+    buf = await fs.readFile(FILE_ARG);
+    fileUrl = `local file: ${FILE_ARG.split('/').pop()}`;
+    console.log(`  read ${(buf.length / 1024).toFixed(0)} KB from ${FILE_ARG}`);
+  } else {
+    const page = await fetch(SOURCE.page, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Truestorey/1.0; +https://truestorey.vercel.app)' } });
+    if (!page.ok) throw new Error(`URA's past-sales page returned ${page.status}`);
+    const { url, links } = currentFileUrl(await page.text());
+    if (!url) {
+      throw new Error('could not find the past-sites spreadsheet link on URA\'s page. '
+        + `Spreadsheet links found: ${links.length ? links.join(' · ') : 'none'}. `
+        + 'Download it from ' + SOURCE.page + ' and run: npm run ingest:gls-awards -- --file=<path>');
+    }
+    const res = await fetch(url, { headers: { 'User-Agent': 'truestorey-ingest' } });
+    if (!res.ok) throw new Error(`URA returned ${res.status} for ${url}`);
+    buf = Buffer.from(await res.arrayBuffer());
+    fileUrl = url;
+    console.log(`  downloaded ${(buf.length / 1024).toFixed(0)} KB from ${url}`);
+  }
 
   // Saved so a parse failure can be read back rather than guessed at — the
   // lesson from the boundaries ingest, which failed silently on a markup
@@ -182,11 +222,28 @@ export async function ingestGlsAwards() {
   sites.sort((a, b) => (a.award < b.award ? 1 : -1));
   if (!sites.length) throw new Error('parsed the sheet but found no awarded sites');
 
+  /* ── WHAT CHANGED, AND A WRONG FILE REFUSED ─────────────────────────────
+     URA only ever adds awards. A sheet with fewer than the last one is the
+     wrong sheet — the landed-housing list sits beside this one on URA's page,
+     and a column check alone would not catch every mix-up — so it is refused
+     rather than allowed to delete history. --force overrides, deliberately. */
+  const OUT = new URL('../data/gls-awards.json', import.meta.url);
+  let before = null;
+  try { before = JSON.parse(await fs.readFile(OUT, 'utf8')); } catch { /* first run */ }
+  if (before?.sites?.length && sites.length < before.sites.length && !FORCE) {
+    throw new Error(`this sheet has ${sites.length} awarded sites and the current data has ${before.sites.length}. `
+      + 'URA only adds awards, so this is probably the wrong file. Nothing was written. Re-run with --force if it is right.');
+  }
+  const key = s => `${s.site}|${s.award}`;
+  const known = new Set((before?.sites || []).map(key));
+  const added = sites.filter(s => !known.has(key(s)));
+
   const years = [...new Set(sites.map(s => s.award.slice(0, 4)))].sort();
   const out = {
     source: SOURCE.name,
     sourcePage: SOURCE.page,
-    sourceFile: SOURCE.file,
+    sourceFile: fileUrl,
+    latestAward: sites[0].award,
     licence: 'URA publishes past sale sites for reference and research.',
     accessedAt,
     rateNote: 'URA heads the rate column "$psm per GFA or $psm per GPR". The sheet does not say '
@@ -195,11 +252,26 @@ export async function ingestGlsAwards() {
     counts: { awarded: sites.length, fromYear: years[0], toYear: years.at(-1) },
     sites,
   };
-  await fs.writeFile(new URL('../data/gls-awards.json', import.meta.url), JSON.stringify(out));
-  const kb = ((await fs.stat(new URL('../data/gls-awards.json', import.meta.url))).size / 1024).toFixed(0);
-  console.log(`Wrote data/gls-awards.json — ${kb} KB · ${sites.length} awarded sites · ${years[0]}–${years.at(-1)}`);
+  await fs.writeFile(OUT, JSON.stringify(out));
+  const kb = ((await fs.stat(OUT)).size / 1024).toFixed(0);
+  console.log(`Wrote data/gls-awards.json — ${kb} KB · ${sites.length} awarded sites · ${years[0]}–${years.at(-1)} · latest award ${out.latestAward}`);
   const res_ = sites.filter(s => /^Residential|^Condominium/i.test(s.use)).length;
   console.log(`  ${res_} residential · ${sites.length - res_} other use`);
+  console.log(added.length
+    ? `  ${added.length} new since the last run:\n${added.map(s => `    ${s.award}  ${s.site} — ${s.bids ?? '?'} bids, S$${Number(s.price).toLocaleString('en-SG')}`).join('\n')}`
+    : '  nothing new since the last run');
+
+  /* The current programme's statuses follow the awards (lib/gls-status.js),
+     so a site awarded this week stops reading "Open for tender". */
+  const glsFile = new URL('../data/gls.json', import.meta.url);
+  try {
+    const gls = JSON.parse(await fs.readFile(glsFile, 'utf8'));
+    const { sites: marked, changed } = markAwarded(gls, out);
+    if (changed.length) {
+      await fs.writeFile(glsFile, JSON.stringify({ ...gls, sites: marked }, null, 1));   // as ingest-gls writes it
+      console.log(`  programme updated — now awarded: ${changed.join(', ')}`);
+    }
+  } catch (e) { console.warn(`  programme statuses not updated: ${e.message}`); }
   return out;
 }
 
