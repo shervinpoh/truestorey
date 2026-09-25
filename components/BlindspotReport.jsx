@@ -471,12 +471,12 @@ function Result({ report, boxRef, canEmail }) {
 
       <p className="prov" style={{ marginTop: 22 }}>
         Rubric {r.version} · every point above is produced by a published rule over filed
-        transactions, not by a model. {r.summary ? 'The paragraph is written by a model from those figures and adds none of its own.' : ''}<br />
+        transactions, not by a model. {r.summary ? 'The paragraph above is assembled from those same figures and adds none of its own.' : ''}<br />
         {r.disclaimer}
       </p>
 
       {canEmail && <EmailReport tool="blindspot" hash={shareHash} title="my Blindspot check"
-        description="Get the checks, their limits, the filed comparables and viewing questions in one email you can keep or forward. The copy is recomputed from the same public records and rubric; it omits the optional generated paragraph."
+        description="Get the checks, their limits, the filed comparables and viewing questions in one email you can keep or forward. The copy is recomputed from the same public records and rubric; it leaves out the summary paragraph."
         privacyNote="The property and listing inputs were sent to run this check and will be sent again to make the email. They are not kept." />}
 
       <ResultBridge tool="Blindspot report"

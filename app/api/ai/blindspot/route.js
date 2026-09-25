@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { analyse } from '../../../../lib/blindspot/analyse.js';
 import { recordByHref } from '../../../../lib/data/query.js';
 import { unitDetailError } from '../../../../lib/blindspot/unit.js';
-import { claude, configured } from '../../../../lib/ai/providers.js';
+import { summarise } from '../../../../lib/blindspot/summary.js';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -21,19 +21,6 @@ export const maxDuration = 60;
  * score and its findings intact — which is the test of whether a feature is
  * built on data or on a model pretending to be data.
  */
-
-const SYSTEM = `You are writing the summary paragraph of a property due-diligence report for a Singapore real estate site.
-
-You will be given a completed analysis: a risk score, the checks that produced it, and the figure behind each one. Your job is ONLY to write connecting prose.
-
-Hard rules:
-- Never produce a number that is not already in the analysis. Do not estimate, extrapolate or round differently.
-- Never state or imply what a property is worth. Never use "undervalued", "overvalued", "bargain", "best deal", "expert" or "specialist".
-- Never say the score means the property is good or bad. It counts things worth checking.
-- Where a check did not run, say plainly that it was not measured. Never imply that means there is no risk.
-- An inapplicable check is different from a missing measurement. Do not call it unmeasured or a passed check.
-- Two short paragraphs maximum. Plain British English. No headings, no bullet points, no markdown.
-- Write for an owner or buyer, not for an agent.`;
 
 export async function POST(req) {
   let body;
@@ -60,30 +47,15 @@ export async function POST(req) {
   });
   if (report.error) return NextResponse.json(report, { status: 404 });
 
-  // 2 — the part that is, and which the report survives without.
-  let summary = null;
-  if (configured.anthropic()) {
-    const facts = {
-      address: report.record.label,
-      score: `${report.points} of a possible ${report.max}`,
-      band: report.band,
-      askingPsf: report.input.askingPsf,
-      checksThatRan: report.checks.map(c => ({ check: c.title, points: `${c.points}/${c.max}`, finding: c.finding })),
-      checksNotRun: report.skipped.map(s => s.title),
-      checksNotApplicable: report.notApplicable.map(s => ({ check: s.title, reason: s.reason })),
-    };
-    const out = await claude(SYSTEM, [{
-      role: 'user',
-      content: `Write the summary for this analysis.\n\n${JSON.stringify(facts, null, 2)}`,
-    }]);
-    if (out?.text) summary = out.text.trim();
-    else if (out?.error) summary = null;
-  }
+  // 2 — the paragraph, assembled from the report rather than written by a
+  // model. See lib/blindspot/summary.js for why: the model's version printed
+  // figures the score did not contain.
+  const summary = summarise(report);
 
   return NextResponse.json({
     ...report,
     summary,
-    summaryAvailable: configured.anthropic(),
+    summaryAvailable: Boolean(summary),
     // Said out loud in the payload so no client can present this as a valuation.
     disclaimer: 'This counts things worth checking. It is not a valuation, not advice, and not a verdict on the property. Every market figure names its source and period; price ranges come from the filed transactions shown.',
   });
