@@ -25,10 +25,13 @@
 /* No dotenv: three npm dependencies is the architecture. The npm script
    passes --env-file-if-exists=.env.local, the way every other ingest does. */
 import { findings } from '../lib/findings.js';
-import { claude, firstJson } from '../lib/ai/providers.js';
+import { claude } from '../lib/ai/providers.js';
 import { photograph, photoId } from '../lib/photo.js';
 import { findCover, coverId } from '../lib/cover.js';
 import { placeOf } from '../lib/place.js';
+import { findingPack } from '../lib/editorial/packs.js';
+import { write } from '../lib/editorial/write.js';
+import { fileDraft, notifyBot } from '../lib/editorial/file.js';
 
 const DRY = process.argv.includes('--dry');
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL || 'https://truestorey.vercel.app').replace(/\/$/, '');
@@ -44,36 +47,9 @@ if (!DRY && /localhost|127\.0\.0\.1/.test(SITE)) {
   process.exit(1);
 }
 
-const SYSTEM = `You write for Truestorey, a Singapore property site published by Shervin Poh, CEA Reg. No. R066925H, Huttons Asia Pte Ltd. Everything you write goes out under that registration number.
-
-YOU ARE GIVEN A FINDING THAT HAS ALREADY BEEN MEASURED. You did not find it and you may not improve on it. Your job is to explain what it means for someone buying, owning or selling a home — the consequence, the thing that is easy to misread, the question it should make them ask.
-
-THE FIGURES ARE FIXED. Use only the numbers in FINDING, written with the period beside them. You may not add, estimate, round differently, annualise or recall any other figure. If you want a number you were not given, say it in words or leave it out. A number that is not in FINDING makes the piece unpublishable.
-
-THE CAVEAT IS NOT OPTIONAL. If the finding carries one, it goes in the piece, near the top, in your own words. It is there because the measurement cannot separate two explanations, and a reader who does not know that is being misled by arithmetic.
-
-HARD RULES — breaking any makes it unpublishable:
-- Never state a valuation, an estimate of what any property is worth, or a price forecast.
-- Never use: undervalued, best deal, expert, specialist, guaranteed, hot market, must buy, only safe way.
-- Never tell a reader to buy or sell. No verdicts.
-- Never imply a school place, a walking time, or a distance to anything.
-- Never quote or paraphrase Straits Times, Business Times, EdgeProp, Stacked or any publisher.
-- Never predict what prices will do. Say what has happened, with its period.
-- MOP eligibility is not incoming supply. Do not describe it as supply.
-
-HOUSE STYLE: British spelling. Singapore dollars as S$1,234,567. Plain, direct, unhurried — more interested in what a figure does not say than in what it does. No first-person plural. Short paragraphs. Do not open with "In a move that" or "As Singapore's property market". End on the practical consequence.
-
-OUTPUT. One JSON object, nothing else, no code fences:
-{
-  "title": "under 70 characters, specific, no colon-subtitle construction",
-  "slug": "lowercase-hyphenated",
-  "excerpt": "one sentence under 200 characters",
-  "content_html": "…"
-}
-NEVER put a double-quote character inside title or excerpt; use an apostrophe.
-
-content_html: 500 to 800 words. Allowed tags only — p h2 h3 strong em ul ol li blockquote a figure figcaption img table thead tbody tr th td small. No <h1>. No inline styles or classes; they are stripped.
-Put {{CHART}} on its own line where the figure belongs, about a third of the way in. It is replaced with the data graphic and its source line. Use it exactly once.`;
+/* The prompt, the rules and the hooks live in lib/editorial/write.js now, and
+   the same writer serves the news desk and the long analyses. What the desk
+   still owns is choosing the finding and drawing its graphic. */
 
 function chartFor(f) {
   const p = new URLSearchParams();
@@ -181,41 +157,21 @@ console.log(`\nFinding [${finding.score.toFixed(2)}] ${finding.kind} — ${findi
 console.log(`  ${finding.claim}`);
 if (finding.caveat) console.log(`  caveat: ${finding.caveat}`);
 
-const user = [
-  `FINDING\n${finding.claim}`,
-  finding.caveat ? `\nCAVEAT (must appear in the piece)\n${finding.caveat}` : '',
-  `\nFIGURES — these and no others\n` + finding.figures
-    .map(x => `· ${x.what}: ${x.value} (${x.period}, ${x.source})`).join('\n'),
-  `\nThe page for this subject is ${SITE}${finding.href} — link it once, in the prose, by name.`,
-].join('\n');
-
-/* claude() returns { text } or { error }, never a bare string — and null when
-   no key is set. Each is a different thing to tell somebody. */
-const reply = await claude(SYSTEM, [{ role: 'user', content: user }], { maxTokens: 2600 });
-if (!reply) {
-  console.error('\nANTHROPIC_API_KEY is not set, so nothing can be written.\n');
-  process.exit(1);
-}
-if (reply.error) {
-  console.error(`\nThe writer failed: ${reply.error}. Nothing filed.\n`);
-  process.exit(1);
-}
-const art = firstJson(reply.text);
-if (!art?.title || !art?.content_html) {
-  console.error('\nThe writer did not return usable JSON. Nothing filed.\n');
-  console.error(String(reply.text).slice(0, 400));
-  process.exit(1);
-}
-
-/* The graphic is substituted here, not by the model: it is a URL carrying
-   measured values, and a model asked to build one would be writing figures
-   into a query string. */
+const pack = findingPack(finding, { site: SITE });
+/* The graphic is built here, not by the model: it is a URL carrying measured
+   values, and a model asked to build one would be writing figures into a
+   query string. */
 const chart = chartFor(finding);
-const figure = `<figure><img src="${chart}" alt="${finding.claim.replace(/"/g, "'")}" />`
-  + `<figcaption>${finding.figures[0].source} · ${finding.figures[0].period}</figcaption></figure>`;
-art.content_html = String(art.content_html).includes('{{CHART}}')
-  ? art.content_html.replace('{{CHART}}', figure)
-  : art.content_html + figure;
+pack.chart = { src: chart, alt: finding.claim.replace(/"/g, "'"),
+  caption: `${finding.figures[0].source} · ${finding.figures[0].period}` };
+
+const out = await write(pack, { log: console.log });
+if (out.error) {
+  console.error(`\n${out.error}`);
+  for (const p of out.problems || []) console.error(`  · ${p}`);
+  process.exit(1);
+}
+const art = out.draft;
 
 /* A photograph of the place first: the finding's own page is the source, so
    lib/place.js resolves the town or block exactly, with no name-matching.
@@ -239,11 +195,6 @@ const row = {
     unsplash_photographer_profile_url: photo.unsplash_photographer_profile_url,
     unsplash_download_location: photo.unsplash_download_location,
   } : {}),
-  category: 'note',
-  tags: [finding.kind, String(finding.subject).toLowerCase()].slice(0, 4),
-  /* The finding's own subject page is the source: it is where every figure in
-     the piece can be checked against the filed record. */
-  source_urls: [`${SITE}${finding.href}`],
 };
 
 if (DRY) {
@@ -255,25 +206,14 @@ if (DRY) {
 }
 
 /* ── THE SECRET IS A HEADER, NOT A FIELD ──────────────────────────────────
-   This sent it in the body and the first scheduled run came back 401. The
-   shape was copied from the Make blueprint's notify call, which posts
-   {"secret": …} to a DIFFERENT endpoint — /api/webhook/article reads
-   Authorization: Bearer, and reads nothing from the body but the article.
-
+   This once sent it in the body and the first scheduled run came back 401.
    Had it been accepted it would have been worse: a body field is stored, so
-   the secret would have been written onto the article row. */
-const res = await fetch(`${SITE}/api/webhook/article`, {
-  method: 'POST',
-  headers: {
-    'content-type': 'application/json',
-    authorization: `Bearer ${process.env.ARTICLE_WEBHOOK_SECRET || ''}`,
-  },
-  body: JSON.stringify(row),
-});
-const out = await res.json().catch(() => ({}));
+   the secret would have been written onto the article row. fileDraft() sends
+   Authorization: Bearer, which is all the webhook reads. */
+const res = await fileDraft(row);
 if (!res.ok) {
-  console.error(`\nThe webhook refused it — HTTP ${res.status}: ${out.error || ''}`);
-  if (out.duplicateOf) console.error(`It repeats "${out.duplicateOf.title}".`);
+  console.error(`\nThe webhook refused it — HTTP ${res.status}: ${res.body.error || ''}`);
+  if (res.body.duplicateOf) console.error(`It repeats "${res.body.duplicateOf.title}".`);
   /* 409 is the duplicate check, and a repeated story is a normal morning
      rather than a breakage — the run above has already skipped everything it
      knew was covered, so this is the title check catching something the
@@ -284,67 +224,9 @@ console.log(`\nFiled as a draft: ${row.title}\nRead it at ${SITE}/studio\n`);
 
 /* ── AND THEN TELL SOMEBODY ────────────────────────────────────────────────
    The desk filed drafts on 10 and 11 September and nobody was told about
-   either. Both runs were green, because filing is what they were asked to do
-   and filing is what they did.
-
-   The notification was only ever wired for the OTHER supply. Make.com posts
-   kind:'articles' straight to the Apps Script, which appends a row to the
-   Articles tab and WhatsApps the title — see artFromMake_ in
-   scripts/10_Articles.gs. The desk posts to this site's webhook instead,
-   which stores the row in Supabase and makes exactly one outbound call, to
-   Unsplash, for the licence ping. The bot reads a Google Sheet. It has never
-   had any way of knowing a desk article exists.
-
-   Which is also why /drafts in WhatsApp would have shown nothing: it reads
-   the same sheet.
-
-   So this posts the same shape Make posts, to the same endpoint, and
-   artFromMake_ does the rest — the row lands on the Articles tab, the message
-   goes out, and /pub N and /skip N work on a desk piece exactly as they work
-   on a pipeline one. Its acknowledgement says whether WhatsApp or the email
-   fallback actually accepted the notification.
-
-   IT NEVER FAILS THE RUN. The article is filed by the time this is called and
-   a notification is not worth losing it over. But it is LOUD when it cannot
-   send, because a quiet notification failure is the bug this exists to fix. */
-async function notifyBot(filed) {
-  /* The same /exec as CRM_WEBHOOK_URL — one Apps Script deployment serves
-     both. Set them to the same value. */
-  const url = process.env.APPS_SCRIPT_URL;
-  const k = process.env.WA_WEBHOOK_KEY;
-  const secret = process.env.MAKE_SECRET;
-  if (!url || !k || !secret) {
-    console.warn('  NOT NOTIFIED. '
-      + [!url && 'APPS_SCRIPT_URL', !k && 'WA_WEBHOOK_KEY', !secret && 'MAKE_SECRET']
-        .filter(Boolean).join(', ')
-      + ' is not set, so the article is filed and nothing will say so.\n');
-    return;
-  }
-  try {
-    const res = await fetch(`${url}${url.includes('?') ? '&' : '?'}k=${encodeURIComponent(k)}`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        kind: 'articles',
-        secret,
-        items: [{
-          id: filed.id || '', slug: filed.slug || row.slug, title: row.title,
-          category: row.category, excerpt: row.excerpt,
-          sources: row.source_urls || [],
-        }],
-      }),
-      signal: AbortSignal.timeout(15000),
-    });
-    const reply = await res.json().catch(() => ({}));
-    if (!res.ok || !reply.ok) {
-      console.warn(`  NOT NOTIFIED. Apps Script ${res.status}: ${reply.error || 'no delivery acknowledgement'}.`);
-    } else if (reply.notified) {
-      console.log(`  Bot delivery confirmed via ${reply.channel || 'configured fallback'}.`);
-    } else {
-      console.log(`  Bot acknowledged the article; no new message was needed (${reply.reason || 'duplicate'}).`);
-    }
-  } catch (e) {
-    console.warn(`  NOT NOTIFIED. ${e.name === 'TimeoutError' ? 'The Apps Script timed out' : e.message}.`);
-  }
-}
-await notifyBot(out);
+   either. Both runs were green, because filing is what they were asked to do.
+   The bot reads a Google Sheet and had no way of knowing a desk article
+   existed, so this posts the same shape Make posts, to the same Apps Script,
+   and /pub N and /skip N work on a desk piece exactly as on any other. The
+   code is in lib/editorial/file.js, shared with the news desk. */
+await notifyBot(res.body, row);

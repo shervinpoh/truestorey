@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { timingSafeEqual } from 'node:crypto';
 import { sanitizeHtml, textOf } from '../../../../lib/sanitize.js';
 import { insertArticle, slugTaken, recentTitles, configured } from '../../../../lib/supabase/rest.js';
-import { duplicateOf } from '../../../../lib/compliance.js';
+import { duplicateOf, inventedVoice } from '../../../../lib/compliance.js';
 import { findCover, coverId, readCover } from '../../../../lib/cover.js';
 import { placeOf } from '../../../../lib/place.js';
 import { claude } from '../../../../lib/ai/providers.js';
@@ -96,6 +96,19 @@ export async function POST(req) {
   }
 
   const category = CATEGORIES.has(body.category) ? body.category : 'note';
+
+  /* An invented experience is refused at the door, not left for the publish
+     button to catch: a draft that says "I have watched couples…" is not a
+     draft anybody should have to read to reject. 422 names the phrase, so the
+     sender's log says exactly what was wrong. */
+  const voice = inventedVoice(`${title} ${body.excerpt || ''} ${html}`);
+  if (voice) {
+    return NextResponse.json({
+      error: 'That piece claims an experience nobody on record had, and cannot be filed.',
+      found: voice,
+      note: 'Pieces are written by the desk, not in the first person. Address the reader as "you" instead.',
+    }, { status: 422 });
+  }
 
   /* ── the same story, filed again ──────────────────────────────────────────
      One GLS tender arrived three times — "Marina Gardens Lane, Orchard

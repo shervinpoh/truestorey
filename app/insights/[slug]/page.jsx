@@ -1,10 +1,11 @@
 import EditorialImage from '../../../components/EditorialImage.jsx';
 import CoverCaption from '../../../components/CoverCaption.jsx';
+import ShareArticle from '../../../components/ShareArticle.jsx';
 import { withEditorialAsset } from '../../../lib/editorial-assets.js';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { allInsights, insight, around } from '../../../lib/insights.js';
-import { piece } from '../../../lib/articles.js';
+import { piece, feed } from '../../../lib/articles.js';
 import { town as getTown, mop } from '../../../lib/data/query.js';
 import { slugify } from '../../../lib/slug.js';
 import Masthead from '../../../components/Masthead.jsx';
@@ -62,8 +63,17 @@ export default async function Page({ params }) {
     const eligible = years.filter(y => y <= m.generatedForYear).length;
     return { name, reason: eligible === 0 && earliest ? earliest : null };
   });
-  const others = allInsights().filter(p => p.slug !== post.slug).slice(0, 4);
+  /* ── KEEP READING ────────────────────────────────────────────────────────
+     This listed only the notes Shervin writes as files, so a desk or news
+     piece — most of what is published — never appeared under another one,
+     and a reader who finished an article was offered the same three notes on
+     every page. It reads the whole feed now, pictures first: the moment a
+     reader finishes a piece is the moment they are most likely to read
+     another, and a title with its photograph earns that click. */
+  const others = (await feed()).filter(p => p.slug !== post.slug).slice(0, 3);
   const { newer, older } = around(post.slug);
+  const SITE = (process.env.NEXT_PUBLIC_SITE_URL || 'https://truestorey.vercel.app').replace(/\/$/, '');
+  const shareUrl = `${SITE}${post.href}`;
 
   return (
     <main className="shell">
@@ -83,7 +93,7 @@ export default async function Page({ params }) {
             row is something a pipeline filed. That distinction already exists
             and needs no schema to carry it. */}
         <p className="prov" style={{marginTop:0}}>
-          {post.kind === 'deep' ? `${post.minutes} min read · ` : ''}
+          {post.minutes ? `${post.minutes} min read · ` : ''}
           {post.source === 'file'
             ? 'Written by Shervin Poh.'
             : 'Written by the Truestorey desk from the filed data, and published by Shervin Poh.'}
@@ -105,6 +115,7 @@ export default async function Page({ params }) {
               {post.date ? ` on ${post.date}` : ''} and are not re-read since. The
               pages they came from carry the current ones.</>}
         </p>
+        <ShareArticle url={shareUrl} title={post.title} summary={post.summary || ''} variant="compact" />
         {post.image && (
           <figure className="posthero">
             <EditorialImage post={post} eager />
@@ -120,6 +131,8 @@ export default async function Page({ params }) {
             {post.tags.map(t => <span key={t} className="kind">{t}</span>)}
           </div>
         )}
+
+        <ShareArticle url={shareUrl} title={post.title} summary={post.summary || ''} variant="full" />
 
         {towns.length > 0 && (
           <div style={{marginTop:26,paddingTop:18,borderTop:'1px solid var(--line)'}}>
@@ -184,18 +197,18 @@ export default async function Page({ params }) {
 
       {others.length > 0 && (
         <section className="pane">
-          <h2 className="sh"><span>More</span><Link href="/insights">Everything →</Link></h2>
-          <ul className="feed">
+          <h2 className="sh"><span>Keep reading</span><Link href="/insights">Everything →</Link></h2>
+          <ul className="keepreading">
             {others.map(p => (
-              <li key={p.slug} className={p.kind === 'deep' ? 'deep' : undefined}>
+              <li key={p.slug}>
                 <Link href={p.href}>
-                  <div className="fmeta">
-                    <span className={'kind' + (p.kind === 'deep' ? ' deep' : '')}>
-                      {p.kind === 'deep' ? 'Deep dive' : 'Note'}
-                    </span>
-                    <span className="fdate">{p.date}</span>
-                  </div>
-                  <p className="ftitle">{p.title}</p>
+                  {p.image
+                    ? <EditorialImage post={p} className="kr-img" />
+                    : <span className="kr-img kr-tile" aria-hidden="true">{p.kind === 'deep' ? 'Deep dive' : 'Note'}</span>}
+                  <span className={'kind' + (p.kind === 'deep' ? ' deep' : '')}>{p.kind === 'deep' ? 'Deep dive' : 'Note'}</span>
+                  <p className="kr-title">{p.title}</p>
+                  {p.summary && <p className="kr-sum">{p.summary}</p>}
+                  <p className="kr-meta mono">{p.date}{p.minutes ? ` · ${p.minutes} min read` : ''}</p>
                 </Link>
               </li>
             ))}

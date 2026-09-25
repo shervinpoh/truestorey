@@ -54,6 +54,8 @@
     "build:budget": "node scripts/build-budget.mjs",
     "audit:articles": "node scripts/audit-articles.mjs",
     "desk": "node --env-file-if-exists=.env.local scripts/desk.mjs",
+    "newsdesk": "node --env-file-if-exists=.env.local scripts/newsdesk.mjs",
+    "analysis": "node --env-file-if-exists=.env.local scripts/analysis.mjs",
     "backfill:photos": "node --env-file-if-exists=.env.local scripts/backfill-photos.mjs",
     "backfill:covers": "node --env-file-if-exists=.env.local scripts/backfill-covers.mjs",
     "render:island": "node scripts/render/export-island.mjs && \"/Applications/Blender.app/Contents/MacOS/Blender\" -b -P scripts/render/island.py -- --out public/editorial/island-a.png --samples 128 --width 2400",

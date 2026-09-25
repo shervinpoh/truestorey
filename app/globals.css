@@ -2919,3 +2919,55 @@ sup.cite a:hover{text-decoration:underline}
 .wafollow.row p{margin:0;flex:1 1 240px;font-size:var(--t-small);color:var(--ink2)}
 @media(max-width:560px){.wafollow-btn{width:100%;justify-content:center}}
 
+
+/* ── the numbers panel inside an article ───────────────────────────────────
+   Written by lib/editorial/figures.js as <figure><figcaption><ul>, because
+   article HTML arrives over a webhook and the sanitiser strips every class.
+   A figure whose list is its body is this panel and nothing else, so the
+   selector is the structure. Every figure in it carries its period and
+   source in the <small>, which is what makes it a panel and not a boast. */
+.post figure:has(> ul){margin:26px 0 30px;padding:16px 18px 6px;border-top:3px solid var(--acc);
+ background:var(--sunk);border-radius:0 0 var(--r2) var(--r2)}
+.post figure:has(> ul) figcaption{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--t-micro);
+ letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0 0 10px}
+.post figure > ul{list-style:none;padding:0;margin:0;display:grid;gap:14px 22px;
+ grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.post figure > ul li{margin:0 0 10px;font-size:var(--t-small);line-height:1.4;color:var(--ink2)}
+.post figure > ul li strong{display:block;font-size:clamp(22px,3vw,27px);line-height:1.1;letter-spacing:-.035em;
+ color:var(--ink);font-variant-numeric:tabular-nums;margin-bottom:4px}
+.post figure > ul li small{display:block;margin-top:5px;font-family:"IBM Plex Mono",ui-monospace,monospace;
+ font-size:var(--t-micro);color:var(--mute);letter-spacing:.02em}
+.post figure > img{width:100%;height:auto;display:block}
+.post figure > img + figcaption{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--t-micro);
+ color:var(--mute);margin-top:6px}
+
+/* ── share an article ──────────────────────────────────────────────────── */
+.sharearticle.compact{margin:10px 0 20px}
+.sharearticle.full{margin:30px 0 6px;padding:18px 0 4px;border-top:1px solid var(--line)}
+.sharearticle-say{margin:0 0 12px;font-size:var(--t-body);color:var(--ink2)}
+.sharearticle-say b{color:var(--ink)}
+.sharearticle-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.sharearticle-btn,.sharearticle-main{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+ min-width:40px;height:40px;padding:0 11px;border:1px solid var(--line);border-radius:var(--r1);
+ background:transparent;color:var(--ink);font:inherit;font-size:var(--t-small);text-decoration:none;cursor:pointer;line-height:1}
+.sharearticle-btn:hover,.sharearticle-btn:focus-visible{border-color:var(--acc);color:var(--acc)}
+.sharearticle.compact .sharearticle-btn{padding:0;width:40px}
+.sharearticle.compact .sharearticle-btn:has(span){width:auto;padding:0 11px}
+.sharearticle-main{background:var(--acc);border-color:var(--acc);color:var(--on-acc);font-weight:600;padding:0 16px}
+.sharearticle-main:hover{filter:brightness(1.12)}
+@media(max-width:560px){.sharearticle.full .sharearticle-btn span{display:none}
+ .sharearticle.full .sharearticle-btn{width:44px;height:44px;padding:0}}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* ── keep reading ──────────────────────────────────────────────────────── */
+.keepreading{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:22px;
+ grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.keepreading a{display:block;text-decoration:none;color:var(--ink)}
+.keepreading .kr-img{width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;display:block;
+ border-radius:var(--r2);background:var(--sunk);margin:0 0 10px}
+.keepreading .kr-tile{display:flex;align-items:flex-end;padding:12px;font-family:"IBM Plex Mono",ui-monospace,monospace;
+ font-size:var(--t-micro);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.keepreading .kr-title{font-size:var(--t-lead);line-height:1.2;letter-spacing:-.02em;font-weight:600;margin:6px 0 6px}
+.keepreading a:hover .kr-title{text-decoration:underline;text-underline-offset:3px}
+.keepreading .kr-sum{font-size:var(--t-small);color:var(--ink2);margin:0 0 6px;line-height:1.45}
+.keepreading .kr-meta{font-size:var(--t-micro);color:var(--mute);margin:0}

@@ -158,6 +158,10 @@ npm run build:storey   data/storey.json  (Tower View)
 npm run build:yield    data/yield.json
 npm run build:guides   content/guides/ from the deck research base
 npm run note           scaffold a dated editorial note
+npm run desk           the daily data note, from lib/findings.js
+npm run newsdesk       the daily news note, from URA's and HDB's own pages
+npm run analysis       rebuild the long pieces from data (lib/editorial/analysis.js)
+npm run backfill:covers   a Commons photograph of the place, for filed articles
 npm run digest         send block watches. --dry renders without sending.
 ```
 
@@ -361,6 +365,27 @@ two things rebuilt from the same rows — and a named case must `t.skip()` when
 the data stops reproducing it. A green commit history is not evidence the
 refresh ran: `gh run list --workflow refresh-data.yml` is.
 
+**The editorial wrote nothing a reader could use, and invented a person.**
+The five notes published before 26 Sep carried no figures between them: the
+Make writer was handed a headline and an "angle", never the release or this
+site's data, and told to describe any figure it lacked in words. It was also
+told to "write as him", so it did — "I have watched couples…", twice in each
+of two published notes, under the CEA number. Nine deep dives could not be
+published because their numbers came from the model ("$2,600 PSF", "your
+helper sleeps in the bomb shelter") and had nothing to cite. `lib/editorial/`
+is the replacement: a pack of figures computed from `data/` or read from the
+agency's page, a writer that may use only those, and `verify.js`, which
+refuses a number the pack does not hold, the first person, invented
+experience and everything in `lib/compliance.js`. `inventedVoice()` also
+guards intake and the publish button. A topic no dataset can answer is
+archived with the reason, never written from nothing.
+
+**A name is not a site.** The first news pack matched the GLS awards record
+by name and handed the writer a 2014 Lorong Puntong award as this month's
+price. Marina Gardens Lane and Orchard Boulevard have earlier awards on file
+too. A site's price comes from its own release; the record is consulted for
+it only within ten days of the release date.
+
 ## Layout
 
 ```
@@ -376,6 +401,9 @@ lib/
   data/query.js the read layer over data/
   ai/providers  Perplexity, Claude, Gemini over plain fetch
   supabase/rest PostgREST over plain fetch
+  editorial/    packs · analysis · sources · write · verify · file — every
+                article's figures, fixed before a model writes a word
+  cover.js      a Commons photograph of the place, credit in the URL fragment
   sanitize.js   allowlist HTML sanitiser
   geojson.js    attribute parsing, Douglas–Peucker, shoelace centroid
 data/           build-time JSON, versioned with the repo

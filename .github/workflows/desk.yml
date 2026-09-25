@@ -1,4 +1,5 @@
-# The daily desk piece, written from the filed data.
+# The daily desk piece, written from the filed data — and the news piece,
+# written from an agency release (scripts/newsdesk.mjs).
 #
 # WHY IT IS NOT PART OF refresh-data.yml. That job's business is the data, and
 # it must go green or red on whether the data refreshed. Folding an article
@@ -78,3 +79,22 @@ jobs:
           else
             npm run desk ${{ inputs.dry && '-- --dry' || '' }}
           fi
+
+      # The news desk: one agency release, read from URA's or HDB's own page,
+      # written against this site's data by lib/editorial/write.js. It
+      # replaces the writer in the Make scenario, which never saw the release.
+      # Runs even when the desk found nothing (or failed), because the two
+      # supplies are independent; a quiet day for one says nothing about the
+      # other. Filing nothing is a normal outcome and exits 0.
+      - name: Write today's news piece
+        if: ${{ always() && !inputs.backfill }}
+        env:
+          ANTHROPIC_API_KEY:      ${{ secrets.ANTHROPIC_API_KEY }}
+          SUPABASE_URL:           ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY:    ${{ secrets.SUPABASE_SECRET_KEY }}
+          ARTICLE_WEBHOOK_SECRET: ${{ secrets.ARTICLE_WEBHOOK_SECRET }}
+          NEXT_PUBLIC_SITE_URL:   ${{ vars.NEXT_PUBLIC_SITE_URL }}
+          APPS_SCRIPT_URL:        ${{ secrets.APPS_SCRIPT_URL }}
+          WA_WEBHOOK_KEY:         ${{ secrets.WA_WEBHOOK_KEY }}
+          MAKE_SECRET:            ${{ secrets.MAKE_SECRET }}
+        run: npm run newsdesk ${{ inputs.dry && '-- --dry' || '' }}

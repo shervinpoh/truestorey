@@ -1,3 +1,13 @@
+> **Superseded 26 Sep 2026 for writing.** The Make writer (Claude, from a
+> headline and an angle) never saw the release or any of this site's data, and
+> its published notes carried no figures and invented Shervin's experience.
+> `scripts/newsdesk.mjs` now reads URA's and HDB's own pages, builds a pack of
+> figures from `data/`, writes with `lib/editorial/write.js` and files through
+> the same webhook, daily, in `.github/workflows/desk.yml`. The Make writer
+> scenario can be switched off; the source-brief scenario can stay. The intake
+> refuses invented first-person experience either way. Everything below is
+> kept as the record of how the Make chain was built.
+
 # The daily article pipeline
 
 Perplexity finds it · Gemini triages it · Claude writes it · **Shervin

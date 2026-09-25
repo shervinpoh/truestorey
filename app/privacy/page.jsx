@@ -130,7 +130,7 @@ const DESCRIPTIONS = {
   LEAD_START: 'The first keystroke in the enquiry form. No content.',
   LEAD_SUBMIT: 'An enquiry was sent, and whether the consent box was ticked. No name, email or message.',
   TOOL_RUN: 'A tool was actually used — its name only, once per tab.',
-  SHARE: 'A result link was copied or shared — only the tool and method are recorded in this event, never the link or figures.',
+  SHARE: 'A result link or an article was copied or shared — only the tool (or "article") and the method, such as WhatsApp or copy, are recorded in this event, never the link, the article or any figures.',
   REPORT: 'A written copy was requested — only the tool is recorded in this event, not the address or figures.',
   FOLLOW: 'The WhatsApp channel button was pressed — only which page it was on. This site never learns who followed.',
   SITUATION: 'A guided path was taken from the tools page.',

@@ -15,10 +15,18 @@ const src = readFileSync(path.join(process.cwd(), 'scripts', 'desk.mjs'), 'utf8'
 /* photograph() lives in lib/ so the backfill can reuse it — one fetch, one
    Singapore check, one place to get the licence terms right. */
 const photoSrc = readFileSync(path.join(process.cwd(), 'lib', 'photo.js'), 'utf8');
+/* 26 Sep: the prompt, the retry and the filing moved into lib/editorial/, so
+   the desk, the news desk and the long analyses share one writer and one set
+   of rules. These tests follow the code there; test/editorial.test.js drives
+   the writer itself. */
+const writeSrc = readFileSync(path.join(process.cwd(), 'lib', 'editorial', 'write.js'), 'utf8');
+const fileSrc = readFileSync(path.join(process.cwd(), 'lib', 'editorial', 'file.js'), 'utf8');
+const packSrc = readFileSync(path.join(process.cwd(), 'lib', 'editorial', 'packs.js'), 'utf8');
 
 test('the model is told the figures are fixed and may not add to them', () => {
-  assert.match(src, /THE FIGURES ARE FIXED/, 'the constraint that keeps a model from assigning a number is gone');
-  assert.match(src, /may not add, estimate/i);
+  assert.match(writeSrc, /THE FIGURES ARE FIXED/, 'the constraint that keeps a model from assigning a number is gone');
+  assert.match(writeSrc, /Never add, subtract, divide, average/i);
+  assert.match(src, /await write\(pack/, 'the desk no longer goes through the verified writer');
   /* Was topFinding(). Still arithmetic, still not the model — it walks the
      ranked list now so a story that stays top cannot block every other one. */
   assert.match(src, /const ranked = findings\(\)/, 'the story is no longer chosen by arithmetic');
@@ -28,8 +36,9 @@ test('the caveat is not optional', () => {
   // A finding carries a caveat when the measurement cannot separate two
   // explanations — a median moving because prices moved, or because the mix
   // did. A piece that omits it is misleading by arithmetic.
-  assert.match(src, /THE CAVEAT IS NOT OPTIONAL/);
-  assert.match(src, /CAVEAT \(must appear in the piece\)/);
+  assert.match(writeSrc, /Every caveat in the pack appears/);
+  assert.match(writeSrc, /CAVEATS \(each must appear, early\)/);
+  assert.match(packSrc, /caveats: f\.caveat \? \[f\.caveat\] : \[\]/, 'a finding\'s caveat no longer reaches the pack');
 });
 
 test('a quiet day files nothing', () => {
@@ -54,12 +63,13 @@ test('the chart is built from measured values, not by the model', () => {
   // A model asked to build the chart URL would be writing figures into a
   // query string, which is assigning numbers by another route.
   assert.match(src, /function chartFor/);
-  assert.match(src, /\{\{CHART\}\}/, 'the placeholder the model may use is gone');
+  assert.match(src, /pack\.chart = \{ src: chart/, 'the chart is no longer handed to the writer as a fixed URL');
+  assert.match(writeSrc, /\{\{CHART\}\}/, 'the placeholder the model may use is gone');
   assert.doesNotMatch(src, /"chart_url"|chartUrl.*from the model/i);
 });
 
 test('the source is the subject page, where every figure can be checked', () => {
-  assert.match(src, /source_urls: \[`\$\{SITE\}\$\{finding\.href\}`\]/,
+  assert.match(packSrc, /const href = `\$\{site\}\$\{f\.href\}`;[\s\S]{0,1400}sources: \[href\]/,
     'the piece no longer cites where its figures can be verified');
 });
 
@@ -67,9 +77,9 @@ test('the three failure modes of the writer are told apart', () => {
   // claude() returns null with no key, { error } on a failure, { text } on
   // success. Collapsing those into one message sends somebody looking for a
   // network fault when the key is simply missing.
-  assert.match(src, /ANTHROPIC_API_KEY is not set/);
-  assert.match(src, /reply\.error/);
-  assert.match(src, /did not return usable JSON/);
+  assert.match(writeSrc, /ANTHROPIC_API_KEY is not set/);
+  assert.match(writeSrc, /reply\.error/);
+  assert.match(writeSrc, /failed verification twice/);
 });
 
 /**
@@ -239,16 +249,16 @@ test('every search term is plain ASCII', () => {
  * stored, so the secret would have been written onto the article row.
  */
 test('the webhook secret travels as a header and never in the body', () => {
-  assert.match(src, /authorization: `Bearer \$\{process\.env\.ARTICLE_WEBHOOK_SECRET/,
+  assert.match(fileSrc, /authorization: `Bearer \$\{process\.env\.ARTICLE_WEBHOOK_SECRET/,
     'the secret is not being sent as a bearer token; the webhook will refuse it');
+  assert.match(src, /await fileDraft\(row\)/, 'the desk no longer files through the shared helper');
   /* Comments stripped: the note above the fix quotes {"secret": …} to explain
      what was wrong, and an unfiltered search finds the explanation. Fourth
      source-reading test today to match its own prose. */
-  const code = src.replace(/\/\*[\s\S]*?\*\//g, '').split('\n')
-    .filter(l => !/^\s*(\/\/|\*)/.test(l)).join('\n');
-  assert.doesNotMatch(code, /secret: process\.env|"secret":/,
+  const fd = /export async function fileDraft[\s\S]*?\n\}/.exec(fileSrc)[0];
+  assert.doesNotMatch(fd, /secret: process\.env|"secret":/,
     'the secret is in the request body again — it would be stored on the row');
-  assert.match(src, /body: JSON\.stringify\(row\)/, 'the body should carry the article and nothing else');
+  assert.match(fd, /body: JSON\.stringify\(row\)/, 'the body should carry the article and nothing else');
 });
 
 /**
@@ -313,10 +323,10 @@ test('a duplicate is a quiet morning, every other refusal is red', () => {
  * existed — which is also why /drafts in WhatsApp would have shown nothing.
  */
 test('the desk tells the bot, in the shape the bot already understands', () => {
-  const code = src.replace(/\/\*[\s\S]*?\*\//g, '').split('\n')
+  const code = fileSrc.replace(/\/\*[\s\S]*?\*\//g, '').split('\n')
     .filter(l => !/^\s*(\/\/|\*)/.test(l)).join('\n');
   assert.match(code, /async function notifyBot/, 'nothing announces a filed draft again');
-  assert.match(code, /await notifyBot\(/, 'notifyBot is defined and never called');
+  assert.match(src, /await notifyBot\(/, 'notifyBot is defined and never called');
   assert.match(code, /kind: 'articles'/,
     'the payload no longer matches artFromMake_, so the Apps Script will ignore it');
   assert.match(code, /k=\$\{encodeURIComponent\(k\)\}/,
@@ -329,7 +339,7 @@ test('the desk tells the bot, in the shape the bot already understands', () => {
  * path has to be loud.
  */
 test('a failure to notify is loud and never fails the run', () => {
-  const fn = /async function notifyBot[\s\S]*?\n\}/.exec(src);
+  const fn = /async function notifyBot[\s\S]*?\n\}/.exec(fileSrc);
   assert.ok(fn, 'notifyBot moved — check this test still describes it');
   const body = fn[0];
   assert.doesNotMatch(body, /process\.exit/, 'a failed notification now kills the run');
@@ -340,7 +350,7 @@ test('a failure to notify is loud and never fails the run', () => {
 
 /* HTTP success is transport evidence; reply.ok + reply.notified is delivery. */
 test('Apps Script delivery is claimed only from its structured acknowledgement', () => {
-  const fn = /async function notifyBot[\s\S]*?\n\}/.exec(src)[0];
+  const fn = /async function notifyBot[\s\S]*?\n\}/.exec(fileSrc)[0];
   assert.match(fn, /await res\.json/, 'the response body is not checked');
   assert.match(fn, /reply\.ok/, 'the Apps Script result is ignored');
   assert.match(fn, /reply\.notified/, 'an acknowledgement is being confused with delivery');
