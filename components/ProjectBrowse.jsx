@@ -134,7 +134,7 @@ export default function ProjectBrowse({ items = [], base, noun = 'projects', uni
               <button key={d.d} className="tile" style={{ '--heat': heat(d.median, dRange), textAlign: 'left',
                 border: 0, font: 'inherit', cursor: 'pointer' }} onClick={() => chooseDistrict(d.d)}>
                 <span className="n">District {d.d}</span>
-                <span className="v mono">{d.median ? `$${d.median.toLocaleString('en-SG')} ${unit}` : '—'}</span>
+                <span className="v mono">{d.median ? `S$${d.median.toLocaleString('en-SG')} ${unit}` : '—'}</span>
                 <span className="b mono">{d.n.toLocaleString('en-SG')} {noun} · {d.segment}</span>
               </button>
             ))}

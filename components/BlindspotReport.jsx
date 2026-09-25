@@ -278,7 +278,7 @@ export default function BlindspotReport({ canEmail = false }) {
               {picked.kind === 'HDB' ? (
                 <label><span>HDB flat type</span>
                   <select value={flatType} required onChange={e => { setFlatType(e.target.value); invalidate(); }}>
-                    <option value="">Choose the listing's flat type</option>
+                    <option value="">Choose…</option>
                     {HDB_FLAT_TYPES.map(t => <option key={t} value={t}>{hdbFlatLabel(t)}</option>)}
                   </select></label>
               ) : (

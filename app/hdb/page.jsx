@@ -31,7 +31,7 @@ export default function Page() {
         <TownTiles placeholder="Filter towns…"
           items={towns.map(t => ({
             key: t.slug, href: t.href, n: titleCase(t.name), value: t.medianPsf,
-            s: `$${t.medianPsf} psf median`,
+            s: `S$${t.medianPsf} psf median`,
             b: `${t.blockCount.toLocaleString('en-SG')} blocks`,
           }))} />
         <p className="prov">{i.hdb?.source} · {i.hdb?.period?.from} to {i.hdb?.period?.to} · accessed {i.hdb?.accessedAt}</p>

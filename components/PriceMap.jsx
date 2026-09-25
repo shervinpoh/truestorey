@@ -850,7 +850,7 @@ export default function PriceMap({ map }) {
         <div className="mapfocus">
           <b>{titleCase(region[R.LABEL])}</b>
           <span className="mono">
-            {Number.isFinite(region[R.PSF]) ? `$${n(region[R.PSF])} psf median` : 'no median'}
+            {Number.isFinite(region[R.PSF]) ? `S$${n(region[R.PSF])} psf median` : 'no median'}
             {' · '}{n(region[R.PLOTTED])} of {n(region[R.MEMBERS])} {k.unit} plotted
           </span>
           {region[R.HREF] && <Link href={region[R.HREF]}>Open {titleCase(region[R.LABEL])} →</Link>}
@@ -919,7 +919,7 @@ export default function PriceMap({ map }) {
           <div className="maptip" style={tipAt(hr[R.LAT], hr[R.LON])}>
             <b>{regionName(hr[R.LABEL])}</b>
             <span className="mono">
-              {Number.isFinite(hr[R.PSF]) ? `$${n(hr[R.PSF])} psf median` : 'no median'}
+              {Number.isFinite(hr[R.PSF]) ? `S$${n(hr[R.PSF])} psf median` : 'no median'}
               {' · '}{n(hr[R.PLOTTED])} {k.unit}
             </span>
             <span className="mono">

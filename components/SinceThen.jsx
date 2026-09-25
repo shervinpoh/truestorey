@@ -46,7 +46,7 @@ export default function SinceThen({ site, rec, trend, label }) {
         <div className="arcgap" aria-hidden="true"><span /></div>
         <div>
           <span className="lab">Today · the homes on it</span>
-          <b className="mono">{rec?.medianPsf ? `$${num(rec.medianPsf)}` : '—'}</b>
+          <b className="mono">{rec?.medianPsf ? `S$${num(rec.medianPsf)}` : '—'}</b>
           <span className="hint">
             {rec?.n
               ? <>median of {num(rec.n)} filed transactions{rec.period ? `, ${rec.period.from} to ${rec.period.to}` : ''}</>

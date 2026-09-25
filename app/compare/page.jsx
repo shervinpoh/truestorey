@@ -38,7 +38,7 @@ const KEYS = ['a', 'b', 'c'];
 
 /** A field that renders the same way whatever kind of record it came from. */
 const money = v => (Number.isFinite(v) ? `S$${v.toLocaleString('en-SG')}` : '—');
-const psf = v => (Number.isFinite(v) ? `$${v.toLocaleString('en-SG')}` : '—');
+const psf = v => (Number.isFinite(v) ? `S$${v.toLocaleString('en-SG')}` : '—');
 
 export default async function Page({ searchParams }) {
   const sp = await searchParams;
