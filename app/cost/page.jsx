@@ -1,3 +1,4 @@
+import { shareCard } from '../../lib/og.js';
 import Masthead from '../../components/Masthead.jsx';
 import ToolIntro from '../../components/ToolIntro.jsx';
 import ToolUse from '../../components/ToolUse.jsx';
@@ -7,6 +8,7 @@ import { configured as mailConfigured } from '../../lib/email.js';
 import FromBack from '../../components/FromBack.jsx';
 
 export const metadata = {
+  ...shareCard('/cost'),
   title: 'What owning it actually costs — the ledger before the property does anything | Truestorey',
   description: 'Stamp duty, interest, commission, and the CPF interest accruing against your home the whole time you live in it. What a sale must clear to return your own money, and what it would take to have kept pace with the CPF Ordinary Account rate. Free, nothing saved.',
   alternates: { canonical: '/cost' },

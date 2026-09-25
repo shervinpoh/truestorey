@@ -1,3 +1,4 @@
+import { shareCard } from '../../lib/og.js';
 import Link from 'next/link';
 import Masthead from '../../components/Masthead.jsx';
 import ToolIntro from '../../components/ToolIntro.jsx';
@@ -5,6 +6,7 @@ import ToolUse from '../../components/ToolUse.jsx';
 import NeighbourhoodChat from '../../components/NeighbourhoodChat.jsx';
 
 export const metadata = {
+  ...shareCard('/neighbourhood'),
   title: 'Neighbourhood tracker — what has actually been announced | Truestorey',
   description: 'Live retrieval on any Singapore estate, town or project, with every claim linked to its source. Free, no sign-up.',
   alternates: { canonical: '/neighbourhood' },

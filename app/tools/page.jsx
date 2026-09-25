@@ -1,3 +1,4 @@
+import { shareCard } from '../../lib/og.js';
 import Link from 'next/link';
 import Masthead from '../../components/Masthead.jsx';
 import Tools from '../../components/Tools.jsx';
@@ -5,6 +6,7 @@ import { RATES_REVIEWED } from '../../lib/calc/constants.js';
 import { SITUATIONS } from '../../lib/nav.js';
 
 export const metadata = {
+  ...shareCard('/tools'),
   title: 'Tools — start from what you are trying to work out | Truestorey',
   description: 'Buying, selling, or checking one specific home. Every calculator and lookup on the site, free, with no sign-up and no locked tier — grouped by the question you actually have.',
   alternates: { canonical: '/tools' },

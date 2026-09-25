@@ -1,8 +1,10 @@
+import { shareCard } from '../../lib/og.js';
 import { archive } from '../../lib/data/query.js';
 import Masthead from '../../components/Masthead.jsx';
 import Archive from '../../components/Archive.jsx';
 
 export const metadata = {
+  ...shareCard('/archive'),
   title: 'Policy and data archive — Singapore residential property | Truestorey',
   description: 'Every official announcement and data release that moves Singapore residential property, dated and linked to its primary source.',
   alternates: { canonical: '/archive' },

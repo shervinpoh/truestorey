@@ -1,3 +1,4 @@
+import { shareCard } from '../../lib/og.js';
 import Link from 'next/link';
 import { yields } from '../../lib/data/query.js';
 import Masthead from '../../components/Masthead.jsx';
@@ -6,6 +7,7 @@ import ToolUse from '../../components/ToolUse.jsx';
 import YieldView from '../../components/YieldView.jsx';
 
 export const metadata = {
+  ...shareCard('/yield'),
   title: 'Gross rental yields by project and district | Truestorey',
   description: 'Filed rents over filed prices, matched on unit size, project by project. Gross, and clear about it. Free, no sign-up.',
   alternates: { canonical: '/yield' },

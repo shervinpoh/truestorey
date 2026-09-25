@@ -1,3 +1,4 @@
+import { shareCard } from '../../lib/og.js';
 import Link from 'next/link';
 import { mop, getIndex, boundaries, geoRecords } from '../../lib/data/query.js';
 import PageFigure from '../../components/PageFigure.jsx';
@@ -8,6 +9,7 @@ import { simplify } from '../../lib/geojson.js';
 import FromBack from '../../components/FromBack.jsx';
 
 export const metadata = {
+  ...shareCard('/mop'),
   title: 'HDB MOP tracker — which blocks reach their fifth year, by town | Truestorey',
   description: 'Every block approaching the end of its Minimum Occupation Period, named, mapped and dated, with the units behind each. Built on filed resale evidence, not assumed dates.',
   alternates: { canonical: '/mop' },

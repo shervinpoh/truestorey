@@ -1,3 +1,4 @@
+import { shareCard } from '../../lib/og.js';
 import { projects, getIndex } from '../../lib/data/query.js';
 import Masthead from '../../components/Masthead.jsx';
 import ProjectBrowse from '../../components/ProjectBrowse.jsx';
@@ -5,6 +6,7 @@ import ProjectBrowse from '../../components/ProjectBrowse.jsx';
 const NS = 'landed';
 
 export const metadata = {
+  ...shareCard('/landed'),
   title: 'Landed property prices by street — Singapore | Truestorey',
   description: 'Filed landed transactions by street, from the URA Data Service. URA does not name landed projects, so landed is addressed by street.',
   alternates: { canonical: '/landed' },

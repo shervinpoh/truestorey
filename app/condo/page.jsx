@@ -1,3 +1,4 @@
+import { shareCard } from '../../lib/og.js';
 import { projects, getIndex } from '../../lib/data/query.js';
 import Masthead from '../../components/Masthead.jsx';
 import ProjectBrowse from '../../components/ProjectBrowse.jsx';
@@ -5,6 +6,7 @@ import ProjectBrowse from '../../components/ProjectBrowse.jsx';
 const NS = 'condo';
 
 export const metadata = {
+  ...shareCard('/condo'),
   title: 'Condo and apartment prices by project — every project in Singapore | Truestorey',
   description: 'Filed transactions for every private residential project, from the URA Data Service. Median psf, the observed range, and the sales behind them.',
   alternates: { canonical: '/condo' },

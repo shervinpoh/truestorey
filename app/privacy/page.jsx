@@ -1,8 +1,11 @@
+import { shareCard } from '../../lib/og.js';
 import Masthead from '../../components/Masthead.jsx';
 import { EVENTS } from '../../lib/analytics.js';
 import { CONSENT_COPY } from '../../lib/consent.js';
 
 export const metadata = {
+  ...shareCard('/privacy'),
+  alternates: { canonical: '/privacy' },
   title: 'Privacy — what is collected, which is almost nothing',
   description:
     'No cookies, no IP address, no fingerprinting, no third-party analytics. What Truestorey '

@@ -1,3 +1,4 @@
+import { shareCard } from '../../lib/og.js';
 import Link from 'next/link';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -6,6 +7,7 @@ import PriceMap from '../../components/PriceMap.jsx';
 import IslandRelief from '../../components/IslandRelief.jsx';
 
 export const metadata = {
+  ...shareCard('/map'),
   title: 'Price map — every block and project in Singapore by psf | Truestorey',
   description: 'All 13,115 HDB blocks and private projects with a filed transaction, plotted by median price per square foot. Free, no sign-up.',
   alternates: { canonical: '/map' },

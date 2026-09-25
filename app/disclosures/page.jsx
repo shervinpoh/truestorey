@@ -1,7 +1,10 @@
+import { shareCard } from '../../lib/og.js';
 import Masthead from '../../components/Masthead.jsx';
 import { agent } from '../../lib/agent.js';
 
 export const metadata = {
+  ...shareCard('/disclosures'),
+  alternates: { canonical: '/disclosures' },
   title: 'Disclosures — who publishes this, and what it is not',
   description:
     'Truestorey is published by a licensed CEA salesperson. What that means for what appears '

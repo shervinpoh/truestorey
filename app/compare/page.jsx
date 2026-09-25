@@ -1,3 +1,4 @@
+import { shareCard } from '../../lib/og.js';
 import Link from 'next/link';
 import { recordByHref, getIndex } from '../../lib/data/query.js';
 import { titleCase } from '../../lib/name.js';
@@ -8,6 +9,7 @@ import ComparePicker from '../../components/ComparePicker.jsx';
 import FromBack from '../../components/FromBack.jsx';
 
 export const metadata = {
+  ...shareCard('/compare'),
   title: 'Compare — two or three blocks side by side | Truestorey',
   description: 'Put any blocks or projects next to each other: median price and psf, the observed range, the spread, filed transactions and lease left. Free, no sign-up, and the comparison is in the URL.',
   alternates: { canonical: '/compare' },

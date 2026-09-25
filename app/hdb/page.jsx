@@ -1,9 +1,11 @@
+import { shareCard } from '../../lib/og.js';
 import { allTowns, getIndex } from '../../lib/data/query.js';
 import { titleCase } from '../../lib/name.js';
 import Masthead from '../../components/Masthead.jsx';
 import TownTiles from '../../components/TownTiles.jsx';
 
 export const metadata = {
+  ...shareCard('/hdb'),
   title: 'HDB resale prices by town — every block in Singapore | Truestorey',
   description: 'Filed HDB resale transactions for every town and every block, from HDB via data.gov.sg. Median price, median psf and the transactions behind them.',
   alternates: { canonical: '/hdb' },

@@ -1,3 +1,4 @@
+import { shareCard } from '../../lib/og.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import Masthead from '../../components/Masthead.jsx';
@@ -8,6 +9,7 @@ import { getIndex } from '../../lib/data/query.js';
 import { parseRemaining } from '../../lib/calc/lease.js';
 
 export const metadata = {
+  ...shareCard('/lease'),
   title: 'What a lease is worth — Singapore’s leasehold relativity table | Truestorey',
   description: 'The table the State itself uses to price lease renewals and differential premium, all 99 years of it, with the cost of one more year of holding. Free, sourced, no sign-up.',
   alternates: { canonical: '/lease' },

@@ -1,8 +1,10 @@
+import { shareCard } from '../../lib/og.js';
 import Link from 'next/link';
 import { catalogue, allUrls, archive } from '../../lib/data/query.js';
 import Masthead from '../../components/Masthead.jsx';
 
 export const metadata = {
+  ...shareCard('/about'),
   title: 'About — who writes this and where the numbers come from | Truestorey',
   description: 'Who is behind Truestorey, what the data is, where it comes from, and the rules the site holds itself to.',
   alternates: { canonical: '/about' },

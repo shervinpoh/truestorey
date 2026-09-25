@@ -1,8 +1,11 @@
+import { shareCard } from '../../lib/og.js';
 import Masthead from '../../components/Masthead.jsx';
 import { JOBS } from '../../lib/datasets.js';
 import { getIndex, priceIndices } from '../../lib/data/query.js';
 
 export const metadata = {
+  ...shareCard('/methodology'),
+  alternates: { canonical: '/methodology' },
   title: 'Methodology — what is measured, from what, and what it cannot tell you',
   description:
     'Every figure on Truestorey, its source, the period it covers, how often it is refreshed, '

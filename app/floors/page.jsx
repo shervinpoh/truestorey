@@ -1,3 +1,4 @@
+import { shareCard } from '../../lib/og.js';
 import Link from 'next/link';
 import { storey } from '../../lib/data/query.js';
 import Masthead from '../../components/Masthead.jsx';
@@ -6,6 +7,7 @@ import ToolUse from '../../components/ToolUse.jsx';
 import FloorView from '../../components/FloorView.jsx';
 
 export const metadata = {
+  ...shareCard('/floors'),
   title: 'What a high floor is actually worth — HDB and condo floor premium | Truestorey',
   description: 'The floor premium measured within the same building, so the estate, the lease and the location cancel out. Every town, every flat type, from filed transactions. Free, no sign-up.',
   alternates: { canonical: '/floors' },

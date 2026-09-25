@@ -1,3 +1,4 @@
+import { shareCard } from '../../lib/og.js';
 import { Suspense } from 'react';
 import Link from 'next/link';
 import Masthead from '../../components/Masthead.jsx';
@@ -8,6 +9,7 @@ import { CHECKS, totalPossible, RUBRIC_VERSION } from '../../lib/blindspot/rubri
 import { configured as mailConfigured } from '../../lib/email.js';
 
 export const metadata = {
+  ...shareCard('/blindspot'),
   title: 'Blindspot — six checks on a Singapore property, free | Truestorey',
   description: 'Where the asking price sits against filed sales at the address or a transparent nearby cohort, how many flats nearby reach MOP, what land is coming, and what was approved next door. A published rubric, not a model’s opinion.',
   alternates: { canonical: '/blindspot' },

@@ -1,3 +1,4 @@
+import { shareCard } from '../../lib/og.js';
 import Link from 'next/link';
 import Masthead from '../../components/Masthead.jsx';
 import ToolIntro from '../../components/ToolIntro.jsx';
@@ -8,6 +9,7 @@ import { titleCase } from '../../lib/name.js';
 import { configured as mailConfigured } from '../../lib/email.js';
 
 export const metadata = {
+  ...shareCard('/plan'),
   title: 'Can I afford it — TDSR, downpayment and stamp duty in one answer | Truestorey',
   description: 'One flow: what a bank will lend you, what the LTV allows, the cash floor CPF cannot cover, and BSD and ABSD on top. Free, nothing saved, nothing sent.',
   alternates: { canonical: '/plan' },

@@ -1,3 +1,4 @@
+import { shareCard } from '../../lib/og.js';
 import Link from 'next/link';
 import { hdbIndex, sora, mop, getIndex, ppi, quantum } from '../../lib/data/query.js';
 import Masthead from '../../components/Masthead.jsx';
@@ -5,6 +6,7 @@ import MarketView from '../../components/MarketView.jsx';
 import QuantumView from '../../components/QuantumView.jsx';
 
 export const metadata = {
+  ...shareCard('/market'),
   title: 'Singapore property market — indices and recorded sale prices | Truestorey',
   description: 'HDB and private property price indices, and the whole prices buyers actually paid by town or region, size and year. Government figures with source and period.',
   alternates: { canonical: '/market' },

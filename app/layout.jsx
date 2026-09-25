@@ -7,6 +7,8 @@ import { agent } from '../lib/agent.js';
 import { ldJson, organisation } from '../lib/schema.js';
 import Theme from '../components/Theme.jsx';
 
+import { ogDefault } from '../lib/og.js';
+
 export const metadata = {
   // See the note in app/sitemap.js: a fallback that does not resolve is worse
   // than an ugly one, because it goes into every canonical and OG URL.
@@ -16,7 +18,11 @@ export const metadata = {
     template: '%s',
   },
   description: 'Every filed HDB resale and private transaction in Singapore, by block and by project. Observed price ranges, what a sale would net, and what is nearby at straight-line distance. Free, no sign-up.',
-  openGraph: { siteName: 'Truestorey', locale: 'en_SG', type: 'website' },
+  /* A card on every page by default — see ogDefault() in lib/og.js. Pages with
+     something more specific (records, tools, notes) replace it. */
+  openGraph: { siteName: 'Truestorey', locale: 'en_SG', type: 'website',
+    images: [{ url: ogDefault(), width: 1200, height: 630 }] },
+  twitter: { card: 'summary_large_image', images: [ogDefault()] },
 };
 
 export default function RootLayout({ children }) {

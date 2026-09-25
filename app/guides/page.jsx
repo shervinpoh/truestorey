@@ -1,8 +1,10 @@
+import { shareCard } from '../../lib/og.js';
 import Link from 'next/link';
 import { allGuides } from '../../lib/guides.js';
 import Masthead from '../../components/Masthead.jsx';
 
 export const metadata = {
+  ...shareCard('/guides'),
   title: 'Guides — what buying, selling and renting in Singapore actually costs | Truestorey',
   description: 'The full guides, free and complete: stamp duties, financing rules, decoupling, and both sides of renting. No sign-up, no email wall, nothing gated.',
   alternates: { canonical: '/guides' },

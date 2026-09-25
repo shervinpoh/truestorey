@@ -1,3 +1,4 @@
+import { shareCard } from '../../lib/og.js';
 import Masthead from '../../components/Masthead.jsx';
 import ToolIntro from '../../components/ToolIntro.jsx';
 import ToolUse from '../../components/ToolUse.jsx';
@@ -6,6 +7,7 @@ import { glsAwards, hdbSitesLinked } from '../../lib/data/query.js';
 import PageFigure from '../../components/PageFigure.jsx';
 
 export const metadata = {
+  ...shareCard('/land'),
   title: 'What developers paid for the land — every awarded GLS site since 1993 | Truestorey',
   description: 'Every Government Land Sales site URA has awarded, with the winning tender, the rate per square metre and the number of bids. The floor under any launch price, published and sourced.',
   alternates: { canonical: '/land' },

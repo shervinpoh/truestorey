@@ -1,8 +1,10 @@
+import { shareCard } from '../../lib/og.js';
 import Link from 'next/link';
 import Masthead from '../../components/Masthead.jsx';
 import { GROUPS, ALL } from '../../lib/refusals.js';
 
 export const metadata = {
+  ...shareCard('/refused'),
   title: 'What this site refuses to tell you, and why | Truestorey',
   description: 'Fifteen things Truestorey has been asked for and declined — a valuation, a launch-price projection, a project score, walking times, a shaded school radius — each with the reason and the file that enforces it.',
   alternates: { canonical: '/refused' },

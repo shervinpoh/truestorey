@@ -1,3 +1,4 @@
+import { shareCard } from '../../lib/og.js';
 import EditorialImage from '../../components/EditorialImage.jsx';
 import Link from 'next/link';
 import { topics } from '../../lib/insights.js';
@@ -8,6 +9,7 @@ import Feed from '../../components/Feed.jsx';
 import Follow from '../../components/Follow.jsx';
 
 export const metadata = {
+  ...shareCard('/insights'),
   title: 'Truestorey — Singapore property, in filed numbers',
   description:
     'A property and finance desk for Singapore. Short notes when something moves, longer pieces '

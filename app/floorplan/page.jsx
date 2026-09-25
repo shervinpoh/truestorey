@@ -1,3 +1,4 @@
+import { shareCard } from '../../lib/og.js';
 import Link from 'next/link';
 import Masthead from '../../components/Masthead.jsx';
 import ToolIntro from '../../components/ToolIntro.jsx';
@@ -5,6 +6,7 @@ import ToolUse from '../../components/ToolUse.jsx';
 import FloorplanUpload from '../../components/FloorplanUpload.jsx';
 
 export const metadata = {
+  ...shareCard('/floorplan'),
   title: 'Floorplan Reader — layout, light and what to ask a QP | Truestorey',
   description: 'Upload a floor plan and get its layout efficiency, what the plan does and does not show about orientation, and the wall questions to put to your ID and a qualified person. Free, nothing stored.',
   alternates: { canonical: '/floorplan' },

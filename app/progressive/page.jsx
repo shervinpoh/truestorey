@@ -1,3 +1,4 @@
+import { shareCard } from '../../lib/og.js';
 import { Suspense } from 'react';
 import Masthead from '../../components/Masthead.jsx';
 import ToolIntro from '../../components/ToolIntro.jsx';
@@ -7,6 +8,7 @@ import { configured as mailConfigured } from '../../lib/email.js';
 import './construction.css';
 
 export const metadata = {
+  ...shareCard('/progressive'),
   title: 'Paying for a home still being built — the progressive payment ladder | Truestorey',
   description: 'What you pay, in what order, for a property under construction — the statutory schedule quoted from the Housing Developers Rules, with what the bank draws and what the instalment climbs to. Free, nothing saved.',
   alternates: { canonical: '/progressive' },
