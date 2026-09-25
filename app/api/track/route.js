@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { sanitise } from '../../../lib/analytics.js';
+import { sanitise, analyticsSink } from '../../../lib/analytics.js';
 import { insertEvent, configured } from '../../../lib/supabase/rest.js';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -60,14 +60,16 @@ export async function POST(req) {
     const ev = sanitise(JSON.parse(raw));
     if (!ev) return new NextResponse(null, { status: 204 });
 
-    if (configured()) {
+    // Only the live deployment writes to the table — see analyticsSink().
+    const sink = analyticsSink(process.env, { databaseConfigured: configured() });
+    if (sink === 'database') {
       // Awaited on purpose. A serverless function may be frozen the moment it
       // responds, so a fire-and-forget insert is a coin toss — which is the
       // same class of silent loss this change exists to end. insertEvent caps
       // itself at 2.5s so a slow database cannot hold the page open.
       const { error } = await insertEvent(ev);
       if (error) warnOnce('analytics insert failed: ' + error);
-    } else {
+    } else if (sink === 'file') {
       appendToFile(JSON.stringify(ev));
     }
   } catch { /* swallow */ }
