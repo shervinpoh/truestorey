@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Icon from './Icon.jsx';
 import { findTools, TOOL_GROUPS } from '../lib/nav.js';
-import { readRecent } from '../lib/recent.js';
 import { titleCase } from '../lib/name.js';
 
 /**
@@ -14,20 +13,18 @@ import { titleCase } from '../lib/name.js';
  * typing "stamp duty" into it returned nothing. This lives in the header on
  * every page, opens with ⌘K or "/", and answers both kinds of question in one
  * list: tools first when the words name a tool (lib/nav.js findTools), places
- * from the same index /api/search already serves. Empty, it offers what this
- * reader looked at last (lib/recent.js, their own device only) and one
+ * from the same index /api/search already serves. Empty, it offers one
  * starting tool from each group.
  */
 export default function CommandSearch() {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
   const [places, setPlaces] = useState([]);
-  const [recent, setRecent] = useState([]);
   const [active, setActive] = useState(0);
   const input = useRef(null);
   const router = useRouter();
 
-  const show = useCallback(() => { setRecent(readRecent()); setOpen(true); }, []);
+  const show = useCallback(() => setOpen(true), []);
   const hide = useCallback(() => { setOpen(false); setQ(''); setPlaces([]); setActive(0); }, []);
 
   /* ⌘K / Ctrl+K anywhere; "/" when the reader is not already typing. */
@@ -71,7 +68,6 @@ export default function CommandSearch() {
   const rows = useMemo(() => {
     if (!q.trim()) {
       return [
-        ...recent.map(r => ({ key: `r${r.href}`, href: r.href, icon: r.kind === 'home' ? 'building' : 'clock', name: r.label, note: r.kind === 'home' ? 'Looked at recently' : 'Used recently', section: 'Pick up where you left off' })),
         ...starters.map(t => ({ key: `s${t.href}`, href: t.href, icon: t.icon, name: t.name, note: t.note, section: 'Start with a tool' })),
       ];
     }
@@ -81,7 +77,7 @@ export default function CommandSearch() {
         name: titleCase(p.label), note: [p.sub, p.n ? `${Number(p.n).toLocaleString('en-SG')} filed sales` : ''].filter(Boolean).join(' · '),
         section: 'Blocks, projects and streets' })),
     ];
-  }, [q, tools, places, recent, starters]);
+  }, [q, tools, places, starters]);
 
   useEffect(() => { setActive(0); }, [q]);
 

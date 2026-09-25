@@ -87,6 +87,10 @@
     enough to stop the page reading as a spreadsheet, not enough to read as
     a card in a marketplace. */
  --r1:3px; --r2:8px;
+  /* The homepage map's price ramp, palest = cheaper. Validated 26 Sep as an
+     ordinal ramp (monotone lightness, 0.06+ steps, palest 2.15:1 on --sunk).
+     The old #CDE9E9 end did not clear 2:1, which is why that map read pale. */
+ --dot-1:#63B0B6; --dot-2:#4497A0; --dot-3:#2D7D85; --dot-4:#1E6268; --dot-5:#14494D; --dot-6:#0A2E31;
  /* Elevation instead of hairlines, used on surfaces that genuinely sit above
     the page. Warm-tinted rather than neutral black, or it greys the ground. */
  --lift:0 1px 2px rgba(17,20,20,.05), 0 12px 34px -18px rgba(17,20,20,.20);
@@ -101,6 +105,9 @@
    that is not what this is. Dark is still defined below but only applies when
    something explicitly sets data-theme="dark". Nothing does today. */
 :root[data-theme="dark"]{
+  /* Brighter = dearer on the dark ground, validated the same way (palest
+     2.96:1 on --card). */
+ --dot-1:#2B6A6F; --dot-2:#378A91; --dot-3:#4DA8AF; --dot-4:#78C6CB; --dot-5:#ABDFE2; --dot-6:#E3F7F7;
  --paper:#0B0D0F; --paper-clear:rgba(11,13,15,0); --card:#121517; --sunk:#15181B;
  --ink:#ECEEF0; --ink2:#AFB6BD; --mute:#79828B;
  --line:#232830; --line2:#191D22;
@@ -160,25 +167,23 @@ h3{font-weight:600;font-size:1.02rem;letter-spacing:-.02em;margin:0 0 4px}
 a{color:var(--ink)}
 
 /* ── global nav ────────────────────────────────────────────────────────────
-   Rebuilt 26 Sep. Shervin: the logo was too small, and the bar was a wordmark
-   at one end, three menus at the other and nothing between them but a lone
-   "← Tools". Now the logo is a mark and a 22px wordmark, the menus sit beside
-   it, and the right end carries the two things a visitor most often wants: a
-   search that finds places and tools, and the site's main tool, one tap away.
-   The "up" link shows only on a phone, where the menu is folded. */
+   Rebuilt 26 Sep. The bar was a wordmark at one end, three menus at the other
+   and nothing between them but a lone "← Tools". The menus now sit beside the
+   wordmark, and the right end carries the two things a visitor most often
+   wants: a search that finds places and tools, and the site's main tool. The
+   "up" link shows only on a phone, where the menu is folded. */
 .gnav{border-bottom:1px solid var(--line);position:sticky;top:0;z-index:40;
  background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:saturate(180%) blur(10px)}
 .gnav .in{max-width:1180px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:28px;min-height:var(--headh)}
-.mk{text-decoration:none;color:var(--ink);white-space:nowrap;display:inline-flex;flex:0 0 auto}
-.logo{display:inline-flex;align-items:center;gap:10px}
-.logo-mark{display:block;flex:0 0 auto}
-.logo-word{font-family:"Archivo",system-ui,sans-serif;font-variation-settings:"wdth" 88;font-weight:800;
- font-size:22px;letter-spacing:-.035em;line-height:1;color:var(--ink)}
-.logo-word b{color:var(--acc);font-weight:800}
-:root[data-theme="dark"] .logo-word b{color:var(--acc-lit)}
+/* The wordmark as it has always been: "True" in ink, "storey" reversed out
+   of the deep teal. Shervin, 26 Sep: keep it. Set at --t-lead rather than
+   the old 16.6px, because at that size it was the smallest thing in the bar. */
+.mk{font-weight:800;font-size:var(--t-lead);letter-spacing:-.052em;text-decoration:none;color:var(--ink);
+ white-space:nowrap;flex:0 0 auto;line-height:1}
+.mk b{background:var(--acc);color:var(--on-acc);padding:1px 6px 2px;font-weight:900}
 .gnav .navrow{display:flex;gap:4px;list-style:none;margin:0;padding:0}
 .gnav button.n{background:none;border:0;font-family:inherit;cursor:pointer;padding:9px 12px;border-radius:var(--r1);
- display:inline-flex;align-items:center;gap:6px;font-size:15px;font-weight:600;color:var(--ink2);white-space:nowrap}
+ display:inline-flex;align-items:center;gap:6px;font-size:var(--t-small);font-weight:600;color:var(--ink2);white-space:nowrap}
 .gnav button.n:hover,.gnav button.n[aria-expanded="true"]{color:var(--ink);background:var(--sunk)}
 .gnav button.n[aria-current="true"]{color:var(--ink);box-shadow:inset 0 -2px 0 var(--acc)}
 .gnav button.n i{font-style:normal;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--t-micro);color:var(--mute)}
@@ -209,8 +214,8 @@ a{color:var(--ink)}
 .navtool-ico.sm{width:32px;height:32px}
 :root[data-theme="dark"] .navtool-ico{background:rgba(88,188,195,.12);color:var(--acc-lit)}
 .navtool:hover .navtool-ico{background:var(--acc);color:var(--on-acc)}
-.navtool-txt b{display:block;font-size:var(--t-small);font-weight:650;letter-spacing:-.015em;line-height:1.25}
-.navtool-txt span{display:block;font-size:12.5px;color:var(--ink2);line-height:1.35;margin-top:2px}
+.navtool-txt b{display:block;font-size:var(--t-small);font-weight:700;letter-spacing:-.015em;line-height:1.25}
+.navtool-txt span{display:block;font-size:var(--t-small);color:var(--mute);line-height:1.35;margin-top:2px}
 .navlink[aria-current="page"] b,.navtool[aria-current="page"] b{box-shadow:inset 0 -2px 0 var(--acc)}
 /* The tools panel: every tool, four runs of four, the width of the header. */
 .navgrp:has(.navmega){position:static}
@@ -229,10 +234,10 @@ a{color:var(--ink)}
 .palette{position:fixed;inset:0;z-index:80;background:rgba(17,20,20,.38);display:flex;justify-content:center;
  align-items:flex-start;padding:10vh 16px 16px}
 .palette-box{width:100%;max-width:640px;background:var(--card,var(--paper));border:1px solid var(--line);
- border-radius:12px;box-shadow:0 24px 70px -20px rgba(0,0,0,.45);overflow:hidden;display:flex;flex-direction:column;
+ border-radius:var(--r2);box-shadow:var(--lift);overflow:hidden;display:flex;flex-direction:column;
  max-height:min(640px,80vh)}
 .palette-input{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);color:var(--mute)}
-.palette-input input{flex:1;border:0;outline:0;background:transparent;font:inherit;font-size:17px;color:var(--ink);min-width:0}
+.palette-input input{flex:1;border:0;outline:0;background:transparent;font:inherit;font-size:var(--t-body);color:var(--ink);min-width:0}
 .palette-close{border:1px solid var(--line);background:var(--paper);border-radius:var(--r1);font-family:"IBM Plex Mono",ui-monospace,monospace;
  font-size:var(--t-micro);color:var(--mute);padding:3px 7px;cursor:pointer}
 .palette-list{list-style:none;margin:0;padding:6px;overflow-y:auto}
@@ -243,8 +248,8 @@ a{color:var(--ink)}
 .palette-ico{width:34px;height:34px;flex:0 0 auto;border-radius:var(--r2);display:grid;place-items:center;
  background:var(--acc-soft);color:var(--acc)}
 .palette-txt{flex:1;min-width:0}
-.palette-txt b{display:block;font-weight:650;font-size:15px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.palette-txt span{display:block;font-size:12.5px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.palette-txt b{display:block;font-weight:700;font-size:var(--t-small);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.palette-txt span{display:block;font-size:var(--t-small);color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .palette-go{color:var(--mute);opacity:0}
 .palette-list a.on .palette-go{opacity:1}
 .palette-empty{padding:18px 12px;color:var(--ink2);font-size:var(--t-small)}
@@ -277,7 +282,7 @@ html.palette-open{overflow:hidden}
 .navgroup ul{list-style:none;margin:0;padding:0}
 /* 44px minimum, because this is the one control on the site that is only ever
    used with a thumb. */
-.navgroup a{display:flex;align-items:center;gap:12px;padding:11px 2px;min-height:44px;font-size:15px;font-weight:500;
+.navgroup a{display:flex;align-items:center;gap:12px;padding:11px 2px;min-height:44px;font-size:var(--t-small);font-weight:500;
  color:var(--ink);text-decoration:none;letter-spacing:-.01em}
 .navgroup a .ico{color:var(--acc);flex:0 0 auto}
 .navgroup a[aria-current="page"]{font-weight:700;box-shadow:inset 0 -3px 0 var(--acc)}
@@ -299,8 +304,6 @@ html.palette-open{overflow:hidden}
 }
 @media(max-width:560px){
  .navcta{display:none}
- .logo-word{font-size:19px}
- .logo-mark{width:26px;height:26px}
 }
 /* A 375px phone cannot carry the wordmark, a useful parent link and a menu
    that repeats the active group. The parent is the information worth keeping;
@@ -3013,38 +3016,3 @@ sup.cite a:hover{text-decoration:underline}
 .keepreading a:hover .kr-title{text-decoration:underline;text-underline-offset:3px}
 .keepreading .kr-sum{font-size:var(--t-small);color:var(--ink2);margin:0 0 6px;line-height:1.45}
 .keepreading .kr-meta{font-size:var(--t-micro);color:var(--mute);margin:0}
-
-/* ── /tools: every tool as a card ──────────────────────────────────────────
-   Same icons and groups as the header's Tools menu, larger, with what each
-   tool needs from you — the thing that decides whether you open it now. */
-.toolfinder{margin:6px 0 30px;position:relative}
-.toolfinder-box{display:flex;align-items:center;gap:12px;height:58px;padding:0 18px;border:1.5px solid var(--ink2);
- border-radius:12px;background:var(--card);color:var(--mute);box-shadow:var(--lift)}
-.toolfinder-box:focus-within{border-color:var(--acc);box-shadow:0 0 0 4px var(--acc-soft)}
-.toolfinder-box input{flex:1;border:0;outline:0;background:transparent;font:inherit;font-size:17px;color:var(--ink);min-width:0}
-.toolfinder-hits{list-style:none;margin:10px 0 0;padding:6px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
-.toolfinder-hits a{display:grid;grid-template-columns:auto auto 1fr;align-items:center;gap:6px 12px;padding:10px 12px;
- border-radius:var(--r2);text-decoration:none;color:var(--ink)}
-.toolfinder-hits a:hover{background:var(--sunk)}
-.toolfinder-hits a .ico{color:var(--acc)}
-.toolfinder-hits a span{color:var(--ink2);font-size:var(--t-small)}
-.toolfinder-none{padding:12px;color:var(--ink2);font-size:var(--t-small)}
-.toolsdir-group{margin:0 0 34px}
-.toolcards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:14px}
-.toolcard{display:flex;flex-direction:column;gap:8px;padding:18px 18px 16px;border:1px solid var(--line);border-radius:12px;
- background:var(--card);text-decoration:none;color:var(--ink);transition:border-color .15s,box-shadow .15s,transform .15s}
-.toolcard:hover,.toolcard:focus-visible{border-color:var(--acc);box-shadow:var(--lift);transform:translateY(-2px)}
-.toolcard-ico{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:var(--acc-soft);color:var(--acc);margin-bottom:4px}
-.toolcard:hover .toolcard-ico{background:var(--acc);color:var(--on-acc)}
-:root[data-theme="dark"] .toolcard-ico{background:rgba(88,188,195,.12);color:var(--acc-lit)}
-.toolcard h3{margin:0;font-size:var(--t-lead);line-height:1.2;letter-spacing:-.02em}
-.toolcard p{margin:0;font-size:var(--t-small);color:var(--ink2);line-height:1.45}
-.toolcard .toolcard-need{font-size:12.5px;color:var(--mute);border-top:1px solid var(--line2);padding-top:8px;margin-top:auto}
-.toolcard .toolcard-need b{display:block;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--t-micro);
- letter-spacing:.1em;text-transform:uppercase;font-weight:400;margin-bottom:2px}
-.toolcard-go{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:var(--t-small);color:var(--acc);margin-top:4px}
-@media(prefers-reduced-motion:reduce){.toolcard,.toolcard:hover{transition:none;transform:none}}
-@media(max-width:1000px){.toolcards{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:520px){.toolcards{grid-template-columns:1fr}.toolcard{flex-direction:row;flex-wrap:wrap;align-items:flex-start}
- .toolcard-ico{width:40px;height:40px;margin:0}.toolcard h3{flex:1;min-width:60%;font-size:17px;align-self:center}
- .toolcard p,.toolcard-go{flex-basis:100%}}

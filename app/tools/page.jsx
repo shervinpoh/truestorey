@@ -3,9 +3,7 @@ import Link from 'next/link';
 import Masthead from '../../components/Masthead.jsx';
 import Tools from '../../components/Tools.jsx';
 import { RATES_REVIEWED } from '../../lib/calc/constants.js';
-import { SITUATIONS, TOOL_GROUPS, itemFor } from '../../lib/nav.js';
-import Icon from '../../components/Icon.jsx';
-import ToolFinder from '../../components/ToolFinder.jsx';
+import { SITUATIONS } from '../../lib/nav.js';
 
 export const metadata = {
   ...shareCard('/tools'),
@@ -45,55 +43,15 @@ export const metadata = {
 export default async function Page({ searchParams }) {
   const sp = (await searchParams) || {};
   const asked = Array.isArray(sp.calc) ? sp.calc[0] : (sp.calc ?? null);
-  /* ── EVERY TOOL ON THE PAGE, NOT BEHIND IT ───────────────────────────────
-     This page opened on three situation cards and two closed drawers, one of
-     them holding the whole catalogue, so a visitor who came to /tools to see
-     the tools saw none. Shervin, 26 Sep: the useful tools get overlooked, and
-     he could not find the one he wanted himself. Now every tool is a card,
-     in the same four groups and with the same icons as the header's Tools
-     menu, each saying what it answers and what it needs from you. The quick
-     calculators are open, and the situations are one line for the reader who
-     does not know which question is theirs. */
-  const need = href => itemFor(href)?.need;
   return (
-    <main className="shell wide toolsdir-page">
-      <Masthead crumbs={[{ href: '/', label: 'Home' }]} title="Every tool, free"
+    <main className="shell">
+      <Masthead crumbs={[{ href: '/', label: 'Home' }]} title="Tools"
         sub="Start from the question you actually have. Every answer is free with no email required; longer reports can be emailed after you have read them. Every figure shows the rate it used and when that rate was last checked." />
 
-      <ToolFinder />
-
-      <div className="toolsdir">
-        {TOOL_GROUPS.map(g => (
-          <section className="toolsdir-group" key={g.label} aria-labelledby={`tg-${g.label}`}>
-            <h2 className="sh" id={`tg-${g.label}`}><span>{g.label}</span></h2>
-            <div className="toolcards">
-              {g.items.map(t => (
-                <Link className="toolcard" key={t.href}
-                  href={t.href.includes('?calc=') ? `${t.href}#quick` : t.href}>
-                  <span className="toolcard-ico"><Icon name={t.icon} size={24} /></span>
-                  <h3>{t.name}</h3>
-                  <p>{t.note}</p>
-                  {need(t.href) && <p className="toolcard-need"><b>You need</b> {need(t.href)}</p>}
-                  <span className="toolcard-go">Open <Icon name="arrow" size={15} /></span>
-                </Link>
-              ))}
-            </div>
-          </section>
-        ))}
-      </div>
-
-      {/* id so a link can land ON the calculator. "When can I sell?" pointed at
-          /tools?calc=sell and dropped the reader at the top of this page. */}
-      <section className="pane" id="quick">
-        <h2 className="sh"><span>Quick answers from one figure</span></h2>
-        <p className="lede">Selling dates, borrowing, stamp duty and loan interest. Each has its own
-          link, so you can send someone straight to the answer rather than to this page.</p>
-        <Tools ratesReviewed={RATES_REVIEWED} asked={asked} />
-      </section>
-
       <section className="pane">
-        <h2 className="sh"><span>Not sure which question is yours?</span></h2>
-        <p className="lede">Choose the sentence that is true now. Each opens three useful starting points.</p>
+        <h2 className="sh"><span>What are you trying to work out?</span></h2>
+        <p className="lede">Choose the sentence that is true now. The next page gives you three
+          useful starting points—not the entire catalogue.</p>
         <div className="toolpaths">
           {SITUATIONS.map((s, i) => (
             <Link className="toolpath" href={s.href} key={s.id} id={s.id}>
@@ -107,14 +65,76 @@ export default async function Page({ searchParams }) {
         </div>
       </section>
 
+      {/* id so a link can land ON the calculator. "When can I sell?" pointed at
+          /tools?calc=sell and dropped the reader at the top of this page, in
+          front of the three situation cards — one of which is the page they had
+          just come from. It read as being sent back where they started. */}
       <section className="pane">
-        <h2 className="sh"><span>The lookups and reading behind them</span></h2>
-        <ul className="idx">
+        <details className="tooldrawer" id="quick" open={Boolean(asked)}>
+          <summary>
+            <span><span className="lab">Four short calculators</span>
+              <b>Get a quick answer from one figure</b></span>
+            <span className="drawersub">Selling dates, borrowing, stamp duty and loan interest</span>
+          </summary>
+          <div className="tooldrawer-body">
+            <p className="lede">
+              Each has its own link, so you can send someone straight to the answer rather than
+              to this page.
+            </p>
+            <Tools ratesReviewed={RATES_REVIEWED} asked={asked} />
+          </div>
+        </details>
+      </section>
+
+      {/* Open by default since 26 Sep: a page called Tools that showed no tool
+          until you opened a drawer was the one Shervin could not find his way
+          around. The quick calculators above stay folded unless asked for. */}
+      <section className="pane">
+        <details className="tooldrawer" open>
+          <summary>
+            <span><span className="lab">Complete index</span>
+              <b>Browse every tool</b></span>
+            <span className="drawersub">Including specialist tools not recommended in the three paths</span>
+          </summary>
+          <div className="tooldrawer-body">
+            <ul className="idx">
+          <li><Link href="/plan"><span className="n">Can I afford it</span>
+            <span className="s">TDSR, the LTV ceiling, the downpayment, the cash CPF cannot cover, and both stamp duties — chained, not four separate answers</span></Link></li>
+          <li><Link href="/progressive"><span className="n">Buying off the plan</span>
+            <span className="s">The nine stages a developer may bill you for, quoted from the Housing Developers Rules, and what your instalment does at each one</span></Link></li>
+          <li><Link href="/cost"><span className="n">What owning it actually costs</span>
+            <span className="s">Stamp duty, interest, commission and the CPF interest running against your home the whole time — what a sale must clear to return your own money</span></Link></li>
+          <li><Link href="/lease"><span className="n">What a lease is worth</span>
+            <span className="s">The table the State itself applies to a lease renewal, all ninety-nine years of it, and what one more year of holding costs</span></Link></li>
+          <li><Link href="/land"><span className="n">What the land cost</span>
+            <span className="s">Every Government Land Sales site awarded since 1993 — the winning tender, the rate, how many bid, and every losing bid where HDB published it</span></Link></li>
+          <li><Link href="/compare"><span className="n">Compare</span>
+            <span className="s">Two or three blocks side by side, in a link you can send</span></Link></li>
+          <li><Link href="/blindspot"><span className="n">Blindspot — six checks</span>
+            <span className="s">Where the asking price sits, who else will be selling, what land is coming, what could be built next door. A published rubric, not an opinion</span></Link></li>
+          <li><Link href="/floorplan"><span className="n">Read a floor plan</span>
+            <span className="s">Layout efficiency, what the plan shows about light, and the wall questions for your ID and a QP. Nothing stored</span></Link></li>
+          <li><Link href="/neighbourhood"><span className="n">What has been announced nearby</span>
+            <span className="s">Live retrieval on any town or project, every claim linked to its source</span></Link></li>
+          <li><Link href="/floors"><span className="n">What a higher floor is worth</span>
+            <span className="s">Measured within a building, not across the country</span></Link></li>
+          <li><Link href="/yield"><span className="n">Rental yields</span>
+            <span className="s">Filed rents over filed prices, matched on unit size. Gross, and clear about it</span></Link></li>
+            </ul>
+
+            <h3 className="sh" style={{ marginTop: 22 }}><span>The lookups behind them</span></h3>
+            <ul className="idx">
+          <li><Link href="/map"><span className="n">The price map</span>
+            <span className="s">Every block and project in Singapore by psf, labelled by town</span></Link></li>
+          <li><Link href="/mop"><span className="n">Which flats can start selling, by town</span>
+            <span className="s">The same MOP question, across every block at once</span></Link></li>
           <li><Link href="/hdb"><span className="n">What a sale would actually net you</span>
             <span className="s">The proceeds waterfall sits on every block page, with your block&apos;s own numbers in it</span></Link></li>
           <li><Link href="/guides"><span className="n">All four guides</span>
             <span className="s">Stamp duties, financing, decoupling, renting — complete, nothing gated</span></Link></li>
-        </ul>
+            </ul>
+          </div>
+        </details>
       </section>
     </main>
   );

@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { NAV, SITUATIONS, TOOL_GROUPS, ICON_FOR, isHere, runsOf } from '../lib/nav.js';
 import BackLink from './BackLink.jsx';
-import Logo from './Logo.jsx';
 import Icon from './Icon.jsx';
 import CommandSearch from './CommandSearch.jsx';
 
@@ -64,10 +63,9 @@ import CommandSearch from './CommandSearch.jsx';
  * panel with every tool drawn as an icon and named by its question, in four
  * runs of four (TOOL_GROUPS), with the three situations underneath for the
  * reader who does not know which question is theirs. A header search (⌘K)
- * finds tools as well as addresses. The logo is a mark and a larger
- * wordmark; the "up" link, which sat alone in the middle of the bar, now
- * shows only on a phone, where the menu is folded away and it is the only
- * way up.
+ * finds tools as well as addresses. The "up" link, which sat alone in the
+ * middle of the bar, now shows only on a phone, where the menu is folded
+ * away and it is the only way up.
  */
 export default function Nav({ here = '' }) {
   const [open, setOpen] = useState(null);      // group name, or null
@@ -97,7 +95,7 @@ export default function Nav({ here = '' }) {
   return (
     <nav className="gnav" aria-label="Primary" ref={navRef}>
       <div className="in">
-        <Link href="/" className="mk" aria-label="Truestorey — home"><Logo /></Link>
+        <Link href="/" className="mk">True<b>storey</b></Link>
 
         {/* One step UP, beside the wordmark, inside the sticky nav — so the
             way out is wherever the reader is rather than 8,500px above them.

@@ -1,4 +1,3 @@
-import RecentTracker from '../components/RecentTracker.jsx';
 import './globals.css';
 import './atlas.css';
 import Track from '../components/Track.jsx';
@@ -57,7 +56,6 @@ export default function RootLayout({ children }) {
         <script type="application/ld+json"
           dangerouslySetInnerHTML={ldJson(organisation(a))} />
         <Track />
-        <RecentTracker />
         <NavHere />
         {children}
         <SiteFooter name={a.name} cea={a.cea} agency={a.agency} lic={a.lic} phone={a.phone} />
