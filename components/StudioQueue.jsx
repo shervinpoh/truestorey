@@ -1,5 +1,7 @@
 'use client';
 import { useState } from 'react';
+import { readCover } from '../lib/cover.js';
+import CoverCaption from './CoverCaption.jsx';
 
 /**
  * The draft queue.
@@ -84,7 +86,14 @@ export default function StudioQueue({ drafts, live = [] }) {
               whether to publish something has to show what is being published:
               a wrong or unsuitable image is exactly the sort of thing a person
               catches in a second and a rule never will. */}
-          {!a.header_image_url ? null : a.unsplash_photographer_name ? (
+          {!a.header_image_url ? null : readCover(a.header_image_url)?.src ? (
+            /* A Commons photograph of the place, credit and all — shown with the
+               caption a reader will see, so the approval covers both. */
+            <figure className="draftimg">
+              <img src={readCover(a.header_image_url).src} alt="" loading="lazy" />
+              <CoverCaption cover={readCover(a.header_image_url)} className="hint covercap" />
+            </figure>
+          ) : a.unsplash_photographer_name ? (
             <figure className="draftimg">
               <img src={a.header_image_url} alt="" loading="lazy" />
               <figcaption className="hint">

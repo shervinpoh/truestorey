@@ -3,9 +3,17 @@ import { timingSafeEqual } from 'node:crypto';
 import { sanitizeHtml, textOf } from '../../../../lib/sanitize.js';
 import { insertArticle, slugTaken, recentTitles, configured } from '../../../../lib/supabase/rest.js';
 import { duplicateOf } from '../../../../lib/compliance.js';
+import { findCover, coverId, readCover } from '../../../../lib/cover.js';
+import { placeOf } from '../../../../lib/place.js';
+import { claude } from '../../../../lib/ai/providers.js';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+/* Choosing a photograph is a handful of Commons requests, six thumbnails and
+   one look by a model — ten to twenty-five seconds, against a ten-second
+   default. The choice itself is cut off at thirty, so Make is answered well
+   inside its own timeout even on a slow morning. */
+export const maxDuration = 60;
 
 /**
  * The article intake, from the Make.com pipeline.
@@ -107,7 +115,8 @@ export async function POST(req) {
      of them are the same tender. 409 with the slug it duplicates, so the
      pipeline can log which story it already had. */
   const candidateSlug = slugify(body.slug || title);
-  const priorTitle = duplicateOf({ title, slug: candidateSlug }, await recentTitles());
+  const recent = await recentTitles();
+  const priorTitle = duplicateOf({ title, slug: candidateSlug }, recent);
   if (priorTitle) {
     return NextResponse.json({
       error: 'That story has already been filed.',
@@ -125,11 +134,36 @@ export async function POST(req) {
   if (await slugTaken(slug)) slug = `${slug}-${new Date().toISOString().slice(0, 10)}`;
   if (await slugTaken(slug)) slug = `${slug}-${Math.random().toString(36).slice(2, 6)}`;
 
-  const image = String(body.header_image_url || '').trim();
-  const photographer = String(body.unsplash_photographer_name || '').trim();
+  /* ── A PHOTOGRAPH OF THE PLACE, CHOSEN HERE ───────────────────────────────
+     The Make pipeline has never sent an image, so every piece it filed arrived
+     bare and got a stock photograph of an object later, if anyone ran the
+     backfill. It is chosen at intake instead, so the draft Shervin reviews
+     already shows the photograph a reader will see, and approving the piece
+     approves the picture.
+
+     A sender that supplies its own image keeps it. The desk sends a Commons
+     cover it has already chosen; anything else it sends is honoured as
+     before. Failure here never costs the article: no photograph, and the
+     draft files anyway. */
+  let image = String(body.header_image_url || '').trim();
+  let photographer = String(body.unsplash_photographer_name || '').trim();
+  let coverNote = image ? 'supplied' : null;
+  if (!image) {
+    const avoid = new Set(recent.map(r => coverId(r.header_image_url)).filter(Boolean));
+    const found = await findCover(
+      { title, slug: candidateSlug, tags: Array.isArray(body.tags) ? body.tags : [],
+        sources: Array.isArray(body.source_urls) ? body.source_urls : [] },
+      { placeOf, avoid, claude, signal: AbortSignal.timeout(30000) },
+    ).catch(e => ({ url: null, reason: e.name === 'TimeoutError' ? 'timed out' : e.message }));
+    if (found.url) { image = found.url; photographer = ''; }
+    coverNote = found.url ? `chosen by ${found.how}` : `none: ${found.reason}`;
+  }
   // An Unsplash image without its photographer is a licence breach waiting to
-  // happen, so the image is dropped rather than the attribution.
-  const keepImage = image && (!/unsplash/i.test(image) || photographer);
+  // happen, so the image is dropped rather than the attribution. A Commons
+  // image carries its credit in its own URL, and one that does not is dropped
+  // for the same reason.
+  const commons = readCover(image);
+  const keepImage = image && (commons ? !commons.refused : (!/unsplash/i.test(image) || photographer));
 
   const download = await pingUnsplash(body.unsplash_download_location);
 
@@ -159,6 +193,7 @@ export async function POST(req) {
     status: 'draft',
     unsplashDownload: download,
     imageKept: Boolean(keepImage),
+    cover: coverNote,
     review: '/studio',
     note: 'Filed as a draft. It is not on the site until it is published from /studio.',
   }, { status: 201 });

@@ -33,6 +33,10 @@ data/events.jsonl
 # back; never versioned.
 data/.zoning-raw.geojson
 
+# What backfill:covers replaced, so a run can be put back by hand. Local only:
+# it holds the old Unsplash credits and nothing a reader needs.
+data/.covers-undo.json
+
 # Raw URA planning download. Kept for diagnosis, never versioned.
 data/.planning-raw.json
 

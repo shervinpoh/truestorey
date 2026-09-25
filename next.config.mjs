@@ -54,6 +54,9 @@ const nextConfig = {
       // not the index — and leaving it out of this list took the blindspot
       // function from 75.6MB to 222.5MB against a 250MB ceiling.
       './data/.zoning-raw.geojson',
+      // backfill:covers' undo log. Small, but the same rule: the tracer reads
+      // the disk, not .gitignore.
+      './data/.covers-undo.json',
       // The local reading list. Headlines and links from publishers own feeds,
       // for reference only — rule 9 keeps every one of these outlets off the
       // site, and this excludes them from any build as well.

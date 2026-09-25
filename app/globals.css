@@ -819,6 +819,14 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 .posthero img{width:100%;height:auto;display:block;background:var(--sunk)}
 .posthero figcaption{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--t-micro);letter-spacing:.08em;
  text-transform:uppercase;color:var(--mute);margin-top:7px}
+/* A Commons photograph's caption is a sentence and a credit, not a label, so
+   it is not set in the capitals above. The credit keeps the mono of every
+   other provenance line on the site. */
+.posthero figcaption.covercap{font-family:inherit;font-size:var(--t-small);letter-spacing:0;text-transform:none;
+ line-height:1.45;margin-top:8px}
+.covercap-credit{display:block;margin-top:3px;font-family:"IBM Plex Mono",ui-monospace,monospace;
+ font-size:var(--t-micro);letter-spacing:.02em;color:var(--mute)}
+.covercap a{color:inherit;text-decoration:underline;text-underline-offset:2px}
 
 /* ── tile browse · a grid you can read, not a column you must scroll ────── */
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:1px;

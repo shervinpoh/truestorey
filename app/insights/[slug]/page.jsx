@@ -1,4 +1,5 @@
 import EditorialImage from '../../../components/EditorialImage.jsx';
+import CoverCaption from '../../../components/CoverCaption.jsx';
 import { withEditorialAsset } from '../../../lib/editorial-assets.js';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -107,7 +108,9 @@ export default async function Page({ params }) {
         {post.image && (
           <figure className="posthero">
             <EditorialImage post={post} eager />
-            {post.imageCredit && <figcaption>{post.imageCredit}</figcaption>}
+            {post.cover
+              ? <CoverCaption cover={post.cover} />
+              : post.imageCredit && <figcaption>{post.imageCredit}</figcaption>}
           </figure>
         )}
         <Insight post={post} />
@@ -126,7 +129,7 @@ export default async function Page({ params }) {
                 <li key={t.slug}>
                   <Link href={t.href}>
                     <span className="n">{t.name}</span>
-                    <span className="s mono">{t.blocks.length} blocks · {t.n.toLocaleString('en-SG')} filed resales · ${t.medianPsf} psf median</span>
+                    <span className="s mono">{t.blocks.length} blocks · {t.n.toLocaleString('en-SG')} filed resales · S${t.medianPsf} psf median</span>
                   </Link>
                 </li>
               ))}

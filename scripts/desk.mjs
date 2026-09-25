@@ -27,6 +27,8 @@
 import { findings } from '../lib/findings.js';
 import { claude, firstJson } from '../lib/ai/providers.js';
 import { photograph, photoId } from '../lib/photo.js';
+import { findCover, coverId } from '../lib/cover.js';
+import { placeOf } from '../lib/place.js';
 
 const DRY = process.argv.includes('--dry');
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL || 'https://truestorey.vercel.app').replace(/\/$/, '');
@@ -141,6 +143,8 @@ async function recentlyFiled() {
       }
       const id = photoId(a.header_image_url);
       if (id) photos.add(id);
+      const cid = coverId(a.header_image_url);
+      if (cid) photos.add(cid);
     }
     return { covered, photos };
   } catch (e) {
@@ -213,13 +217,22 @@ art.content_html = String(art.content_html).includes('{{CHART}}')
   ? art.content_html.replace('{{CHART}}', figure)
   : art.content_html + figure;
 
+/* A photograph of the place first: the finding's own page is the source, so
+   lib/place.js resolves the town or block exactly, with no name-matching.
+   A stock photograph of an object only when Commons has nothing that passes. */
+const cover = await findCover(
+  { title: art.title, slug: art.slug, tags: [finding.kind], sources: [`${SITE}${finding.href}`] },
+  { placeOf, avoid: filed?.photos || new Set(), claude, log: console.log });
+if (!cover.url) console.log(`  no photograph of the place — ${cover.reason}`);
+
 /* The title and the finding, never the subject's name. photo.js only ever
    matches against this text; the proper noun in it is not searched for. */
-const photo = await photograph(art.title, `${finding.kind} ${finding.claim || ''}`,
+const photo = cover.url ? null : await photograph(art.title, `${finding.kind} ${finding.claim || ''}`,
                                filed?.photos || new Set());
 
 const row = {
   ...art,
+  ...(cover.url ? { header_image_url: cover.url } : {}),
   ...(photo ? {
     header_image_url: photo.header_image_url,
     unsplash_photographer_name: photo.unsplash_photographer_name,
