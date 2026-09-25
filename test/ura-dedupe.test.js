@@ -43,6 +43,15 @@ test('a launch selling identical units keeps every one of them', () => {
     'a partially repeated entry is a real launch and must be left whole');
 });
 
+test('a doubled list that contains a real identical pair is still one copy, pair kept', () => {
+  /* PARC CLEMATIS: 1,068 rows, 532 distinct — every sale twice, and one real
+     pair doubled to four. The old ratio test read 2.0075 and let it through. */
+  const list = [t(1850000, 60), t(1850000, 60), t(1990000, 70), t(2100000, 80), t(2250000, 90)];
+  const out = dedupeEntry(entry([...list, ...list]));
+  assert.equal(out.length, 5, 'ten rows are two copies of five sales');
+  assert.equal(out.filter(x => x.price === 1850000).length, 2, 'the real pair inside the copy is a pair, not one sale');
+});
+
 test('the collapse needs enough distinct sales to rule out coincidence', () => {
   // Two identical apartments filed twice is x2 and is plausibly real.
   const two = [t(1850000, 60), t(1850000, 60)];

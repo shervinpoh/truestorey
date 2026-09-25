@@ -147,8 +147,10 @@ test('a maximum GFA is flagged, because the rate is then a floor', () => {
  *
  * The list therefore GROUPS and never dedupes. Two identical units in one
  * launch really do sell at one price in one month — the excess concentrates
- * in Parc Clematis, Parktown Residence and Grand Dunman — so dropping rows
- * would understate volume and drag every median on the page. Replacing
+ * in Parktown Residence and Grand Dunman — so dropping rows
+ * would understate volume and drag every median on the page. (Parc Clematis
+ * was on that list until it turned out to be the feed sending its whole list
+ * twice; see dedupeEntry in scripts/ingest-ura.mjs.) Replacing
  * `filed` with `recent` in the list is the edit that brings the nine rows
  * back, and it looks like removing a needless indirection.
  */

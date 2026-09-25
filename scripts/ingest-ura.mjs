@@ -59,21 +59,45 @@ async function getToken(accessKey) {
  * answer where the evidence runs out.
  *
  * Nothing here touches HDB, which is clean at 0.08%.
+ *
+ * ── A COPIED LIST CAN CONTAIN REAL REPEATS ──────────────────────────────────
+ * PARC CLEMATIS arrived as one entry of 1,068 transactions: every sale twice.
+ * The rule above let it through, because two of its sales were genuinely
+ * identical — filed twice by URA, then doubled by the feed to four — so the
+ * ratio came out 1,068 / 532 = 2.0075 and read as a real launch. The site
+ * showed twice its sales and the panel priced it off each comparable twice.
+ *
+ * So the test is on every signature's COUNT, not on the total: if all of them
+ * share a divisor N ≥ 2, the list is N copies of itself and each count is
+ * divided by N — which keeps a real pair inside a doubled list as a pair. The
+ * uniform case above is the special one where every count is N. Over the
+ * 10 Sep download this changes exactly two entries of 3,857: PARC CLEMATIS
+ * (1,068 → 534) and a ten-row landed entry on JALAN LOYANG BESAR (→ 5).
  */
 export const MIN_DISTINCT_TO_COLLAPSE = 3;
+
+const gcd = (a, b) => (b ? gcd(b, a % b) : a);
 
 export function dedupeEntry(p) {
   const tx = p?.transaction || [];
   if (tx.length < 2) return tx;
   const sig = t => [t.contractDate, t.price, t.area, t.propertyType, t.typeOfSale,
                     t.floorRange, t.tenure, t.district, t.noOfUnits].join('|');
-  const first = new Map();
-  for (const t of tx) if (!first.has(sig(t))) first.set(sig(t), t);
-  const distinct = first.size;
-  if (distinct < MIN_DISTINCT_TO_COLLAPSE) return tx;
-  const ratio = tx.length / distinct;
-  if (ratio <= 1 || Math.abs(ratio - Math.round(ratio)) > 1e-9) return tx;
-  return [...first.values()];
+  const count = new Map();
+  for (const t of tx) count.set(sig(t), (count.get(sig(t)) || 0) + 1);
+  if (count.size < MIN_DISTINCT_TO_COLLAPSE) return tx;
+  let copies = 0;
+  for (const n of count.values()) copies = gcd(copies, n);
+  if (copies < 2) return tx;
+  /* In the order URA sent them, first occurrences kept. */
+  const kept = new Map();
+  return tx.filter(t => {
+    const k = sig(t);
+    const n = kept.get(k) || 0;
+    if (n >= count.get(k) / copies) return false;
+    kept.set(k, n + 1);
+    return true;
+  });
 }
 
 /** Transaction data is split across 4 batches. All four are needed for full coverage. */
