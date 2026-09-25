@@ -1,3 +1,5 @@
+import FollowWhatsApp from './FollowWhatsApp.jsx';
+
 /**
  * How to get the next one.
  *
@@ -11,13 +13,11 @@
  * button — an empty promise is worse than no promise.
  */
 export default function Follow({ compact = false }) {
-  const url = process.env.NEXT_PUBLIC_WA_CHANNEL;
-  if (!url) return null;
+  /* The same component as the footer and the Blindspot result, so the offer
+     reads and looks the same wherever it is made. */
   return (
-    <div className="note" style={{ marginTop: compact ? 20 : 28 }}>
-      <b>Notes go out as they are written.</b> Short ones most days when something moves,
-      a longer piece most weeks. <a href={url} target="_blank" rel="noopener noreferrer">Follow
-      on WhatsApp</a> — no sign-up, and nothing on this site is ever held back for subscribers.
+    <div style={{ marginTop: compact ? 20 : 28 }}>
+      <FollowWhatsApp where="insights" variant="panel" />
     </div>
   );
 }

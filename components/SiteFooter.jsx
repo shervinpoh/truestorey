@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { NAV, SITUATIONS } from '../lib/nav.js';
+import FollowWhatsApp from './FollowWhatsApp.jsx';
 
 /**
  * The footer.
@@ -48,6 +49,10 @@ export default function SiteFooter({
   return (
     <footer className="site">
       <div className="shell wide">
+        {/* First in the footer, above the directory, because the end of a page
+            is where a reader who found it useful decides whether to come back.
+            Renders nothing if the channel is not configured. */}
+        <FollowWhatsApp where="footer" variant="band" />
         <nav className="fnav" aria-label="Footer">
           {groups.map(g => (
             <div className="fcol" key={g.group}>

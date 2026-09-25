@@ -12,6 +12,7 @@ import { BLINDSPOT_SHARE, blindspotShareInput, encodeShare } from '../lib/share.
 import ResultBridge from './ResultBridge.jsx';
 import ShareResult from './ShareResult.jsx';
 import EmailReport from './EmailReport.jsx';
+import FollowWhatsApp from './FollowWhatsApp.jsx';
 import { HDB_FLAT_TYPES, hdbFlatLabel, unitDetailError } from '../lib/blindspot/unit.js';
 
 /**
@@ -409,6 +410,10 @@ function Result({ report, boxRef, canEmail }) {
             property and rerun the checks, the browser sends those inputs to Truestorey. The
             result uses the records held at that time; it is not a frozen report.
           </p>} />
+        {/* Beside the other ways to keep this, because that is the moment a
+            reader decides this site is worth coming back to. */}
+        <FollowWhatsApp where="blindspot" variant="row"
+          lead="Want the next one? New notes and data updates go out on a WhatsApp channel." />
       </div>
 
       {r.notApplicable?.length > 0 && (

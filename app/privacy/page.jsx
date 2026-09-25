@@ -132,6 +132,7 @@ const DESCRIPTIONS = {
   TOOL_RUN: 'A tool was actually used — its name only, once per tab.',
   SHARE: 'A result link was copied or shared — only the tool and method are recorded in this event, never the link or figures.',
   REPORT: 'A written copy was requested — only the tool is recorded in this event, not the address or figures.',
+  FOLLOW: 'The WhatsApp channel button was pressed — only which page it was on. This site never learns who followed.',
   SITUATION: 'A guided path was taken from the tools page.',
   VITALS: 'How fast the page was: load, layout stability, response to the first interaction.',
 };
