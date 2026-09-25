@@ -528,9 +528,15 @@ function ViewingBrief({ report }) {
 function PriceEvidence({ price, kind }) {
   const observed = price.observed;
   const scored = price.scored;
-  const comps = scored?.comparisons || [];
+  /* When nothing could be scored, the sales the widest search DID find are
+     shown instead of only the word "unavailable" — labelled as too few to
+     score and never ranked against the asking price. */
+  const thin = !scored ? price.thin : null;
+  const comps = scored?.comparisons || thin?.comparisons || [];
   const lastMonth = comps.map(c => c.month).filter(Boolean).sort().at(-1);
-  const psf = v => `$${num(Math.round(v))} psf`;
+  // S$, as everywhere else on the site. This read "$719 psf" beside pages that
+  // say S$ — a currency a Singapore reader should never have to infer.
+  const psf = v => `S$${num(Math.round(v))} psf`;
   const above = v => v == null ? null
     : `${v >= 100 ? Math.round(v) : v.toFixed(1)}% above the highest comparable`;
   const position = cohort => {
@@ -576,9 +582,16 @@ function PriceEvidence({ price, kind }) {
                 : scored.tenure === 'freehold'
                   ? <>, freehold only</>
                   : <>, leasehold with a similar number of years left</>}
-              . The filed range was {psf(scored.low)} to{' '}
+              . The {scored.restated ? 'restated' : 'filed'} range was {psf(scored.low)} to{' '}
               {psf(scored.high)}, median {psf(scored.median)}. The asking price is{' '}
               <b>{position(scored)}</b>.
+              {scored.restated && (
+                <> Nothing close enough sold here in the last twelve months, so the search went
+                  back {scored.months} months and restated each older sale to{' '}
+                  {scored.restated.to} prices using the {scored.restated.index} — an older sale as
+                  filed would put the market&rsquo;s movement into the comparison as though it
+                  were about this home. The table keeps the filed figure beside each one.</>
+              )}
             </p>
           ) : (
             <p>
@@ -614,18 +627,29 @@ function PriceEvidence({ price, kind }) {
           <span className="prov">
             {scored.cutoff} to {lastMonth || 'latest held month'} · {scored.sample} filed transactions ·{' '}
             {price.source || 'HDB via data.gov.sg · URA Data Service'}
+            {scored.restated && <> · restated to {scored.restated.to} by the {scored.restated.index}{scored.restated.source ? ` (${scored.restated.source})` : ''}</>}
           </span>
         </div>
       ) : (
         <div className="priceevidence off">
           <span className="lab">Not scored</span>
           <p>{price.unavailable}</p>
+          {thin && (
+            <p>
+              <b>What the search did find:</b> {num(thin.sample)} similar sale{thin.sample === 1 ? '' : 's'}{' '}
+              within {num(Math.round((thin.radiusKm || 0) * 1000))}m over {thin.months} months,{' '}
+              {thin.sample === 1 ? `at ${psf(thin.low)}` : `from ${psf(thin.low)} to ${psf(thin.high)}`}
+              {thin.restated && <>, restated to {thin.restated.to} prices by the {thin.restated.index}</>}.
+              {' '}Too few to score the asking price against, so they add no points — shown so you
+              have something real to go on, and listed below.
+            </p>
+          )}
         </div>
       )}
 
       {comps.length > 0 && (
         <details className="compdetails">
-          <summary>Show all {num(comps.length)} comparable sales</summary>
+          <summary>{thin ? `Show the ${num(comps.length)} sale${comps.length === 1 ? '' : 's'} found — too few to score` : `Show all ${num(comps.length)} comparable sales`}</summary>
           <div className="tablewrap">
             <table className="bandtable pricecomps">
               <thead>
@@ -640,7 +664,11 @@ function PriceEvidence({ price, kind }) {
                     <th scope="row"><Link href={c.href}>{titleCase(c.label)}</Link></th>
                     <td className="mono">{c.month}</td>
                     <td>{kind === 'HDB' && c.flatType ? `${hdbFlatLabel(c.flatType)} · ` : ''}{c.areaSqm ? `${c.areaSqm} sqm` : '—'}{c.storey ? ` · ${c.storey}` : ''}</td>
-                    <td className="mono">${num(c.psf)}</td>
+                    {/* Both figures when the comparable was restated — by floor,
+                        by index, or both. An adjusted number that hides what it
+                        started from is not evidence. */}
+                    <td className="mono">S${num(c.psf)}{c.psfFiled != null && c.psfFiled !== c.psf && (
+                      <span className="hint" style={{ display: 'block' }}>filed S${num(c.psfFiled)}</span>)}</td>
                     <td className="mono">{c.distanceM ? `${num(c.distanceM)}m` : 'this block'}</td>
                   </tr>
                 ))}

@@ -25,6 +25,18 @@
 > the production events table — `/concierge-lab`, which exists only locally,
 > shows up in it. Claude is fixing that in the tracking layer; nothing to change
 > on your side.
+>
+> **25 Sep — Blindspot's price check now reaches further before giving up.**
+> When fewer than five comparables exist, it searches nearby sales over 24 and
+> then 36 months, restating each older sale to the latest quarter with the
+> matching official price index; when even that is too thin, it shows the few
+> sales found, unscored. The Blindspot summary paragraph is also no longer
+> written by a model. Five concierge tests assumed the old gap:
+> `BISHAN.sixMillion` (S$6m, 5-room, 1,200 sq ft) is now *assessed* — five
+> five-room sales within 500m over 24 months — and flags as "Worth a closer
+> look". Those tests need a fixture that genuinely cannot be priced, and per
+> CLAUDE.md a named case should `t.skip()` when the data stops reproducing it.
+> Claude has not edited your files.
 
 Editorial-first Singapore property site. Every lookup and calculator is free
 with no sign-up — that is the whole strategic position against the paid
