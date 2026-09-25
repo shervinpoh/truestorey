@@ -80,6 +80,17 @@ td.num{text-align:right;padding-right:14px}
 .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:6px}
 .err{color:var(--warn);font-size:var(--t-small)}
 
+details.unitbox{border-top:1px solid var(--line2);margin:2px 0 14px;padding-top:12px}
+details.unitbox summary{list-style:none;cursor:pointer;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;font-weight:600}
+details.unitbox summary::-webkit-details-marker{display:none}
+details.unitbox summary::before{content:"+";font-family:"IBM Plex Mono",monospace;color:var(--acc)}
+details.unitbox[open] summary::before{content:"\2212"}
+details.unitbox[open] summary{margin-bottom:8px}
+.unitcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:4px 16px}
+.unitcols .lbl{font-family:"IBM Plex Mono",monospace;font-size:var(--t-micro);text-transform:uppercase;letter-spacing:.05em;color:var(--mute);margin:6px 0}
+.unitrow{display:grid;grid-template-columns:minmax(150px,1fr) minmax(0,2fr);gap:12px;margin-bottom:12px}
+@media (max-width:640px){.unitrow{grid-template-columns:1fr}}
+
 details.calc{padding:0}
 details.calc summary{list-style:none;cursor:pointer;padding:16px 18px;display:flex;align-items:center;gap:10px}
 details.calc summary::-webkit-details-marker{display:none}
@@ -221,6 +232,20 @@ label.opt.disabled{opacity:.5;cursor:not-allowed}
         <div><label for="years">Hold (years)</label>
           <select id="years"><option>3</option><option>5</option><option selected>7</option><option>10</option></select></div>
       </div>
+      <details class="unitbox" id="unitbox">
+        <summary>The unit itself <span class="meta">facing · position · condition — optional</span></summary>
+        <p class="note">What you saw at the viewing. No record says which unit sold, so none of this can be measured from sales — the adjustment is yours. Beside it is how far units on the same floors here have actually sold apart.</p>
+        <p class="note" id="ulimits"></p>
+        <div class="unitcols">
+          <div><div class="lbl">Better than most</div><div class="chips" id="ubetter"></div></div>
+          <div><div class="lbl">Worse than most</div><div class="chips" id="uworse"></div></div>
+        </div>
+        <div class="unitrow">
+          <div><label for="upct">Your adjustment (%)</label><input id="upct" autocomplete="off" placeholder="e.g. 2 or -3"></div>
+          <div><label for="unote">Note (optional)</label><input id="unote" autocomplete="off" maxlength="240" placeholder="e.g. corner stack, unblocked to the park"></div>
+        </div>
+        <button class="ghost" id="uclient" aria-pressed="false">On the client report: off</button>
+      </details>
       <div class="actions">
         <button class="go" id="run">Run the report</button>
         <button class="ghost" id="safe" aria-pressed="false">Client-safe: off</button>
@@ -584,6 +609,56 @@ async function pick(href) {
     `<button class="chip" aria-pressed="${i === 0}" data-i="${i}">${esc(t2.type)} <span class="meta">${t2.areaSqft} sqft · ${t2.n} filed</span></button>`).join('');
   applyType(0);
   $('#picked').hidden = false;
+  loadUnit(href);
+}
+
+/* ── the unit itself ────────────────────────────────────────────────────── */
+/* Cleared on every new address: an adjustment belongs to the unit it was
+   made for, and a +5% silently carried from the last property onto this one
+   is the failure this section most needs not to have. */
+let unitOnReport = false;
+function resetUnit() {
+  $('#upct').value = ''; $('#unote').value = '';
+  unitOnReport = false;
+  $('#uclient').setAttribute('aria-pressed', 'false');
+  $('#uclient').textContent = 'On the client report: off';
+  document.querySelectorAll('#ubetter .chip, #uworse .chip').forEach(c => c.setAttribute('aria-pressed', 'false'));
+}
+async function loadUnit(href) {
+  resetUnit();
+  $('#ulimits').textContent = '';
+  try {
+    const u = await getJson('/api/unit?href=' + encodeURIComponent(href));
+    if (!$('#ubetter').children.length) {
+      const chip = f => `<button type="button" class="chip" data-k="${esc(f.key)}" aria-pressed="false">${esc(f.label)}</button>`;
+      $('#ubetter').innerHTML = u.factors.filter(f => f.better).map(chip).join('');
+      $('#uworse').innerHTML = u.factors.filter(f => !f.better).map(chip).join('');
+    }
+    const s = u.spread;
+    $('#ulimits').innerHTML = s?.ran
+      ? `<b>Measured limits.</b> ${esc(s.says)}${s.widened ? ` <span class="meta">${esc(s.widened)}</span>` : ''}`
+      : `<span class="meta">${esc(s?.why || '')}</span>`;
+  } catch (e) {
+    $('#ulimits').innerHTML = `<span class="err">${esc(e.message)}</span>`;
+  }
+}
+for (const id of ['#ubetter', '#uworse']) $(id).addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  b.setAttribute('aria-pressed', String(b.getAttribute('aria-pressed') !== 'true'));
+});
+$('#uclient').addEventListener('click', () => {
+  unitOnReport = !unitOnReport;
+  $('#uclient').setAttribute('aria-pressed', String(unitOnReport));
+  $('#uclient').textContent = 'On the client report: ' + (unitOnReport ? 'on' : 'off');
+});
+/* Sent as typed. The adjustment is signed and toNum strips the sign, so the
+   text goes to lib/consult/unit.js, whose parsePct reads "-3" as −3%. */
+function unitInput() {
+  const factors = [...document.querySelectorAll('#ubetter .chip[aria-pressed=true], #uworse .chip[aria-pressed=true]')].map(c => c.dataset.k);
+  const pct = String($('#upct').value || '').trim();
+  const note = String($('#unote').value || '').trim();
+  if (!pct && !factors.length && !note) return null;
+  return { pct, factors, note, onReport: unitOnReport };
 }
 
 function applyType(i) {
@@ -614,6 +689,7 @@ $('#run').addEventListener('click', async () => {
       /* The unit-number suffix, e.g. "05" from #12-05. Priced only where a
          REALIS export covers the project; ignored everywhere else. */
       stack: String($('#stack').value || '').trim() || null,
+      unit: unitInput(),
       price: num('#price') || null,
       years: Number($('#years').value),
       clientSafe: safeMode,
@@ -627,6 +703,31 @@ $('#run').addEventListener('click', async () => {
     $('#run').disabled = false; $('#run').textContent = 'Run the report';
   }
 });
+
+/* "+3.0%", "−2.0%" — a real minus sign, because this is the one figure on
+   the page whose sign is the whole point. */
+const signedPct = f => `${f > 0 ? '+' : f < 0 ? '\u2212' : ''}${(100 * Math.abs(f)).toFixed(1)}%`;
+const unitReasons = u => (u.factors || []).map(f => f.label[0].toLowerCase() + f.label.slice(1)).join(', ');
+
+function unitPanel(u, r) {
+  if (!u.ok) return `<div class="warnbox">${esc(u.why)}</div>`;
+  const s = u.spread;
+  const why = unitReasons(u);
+  return `
+    ${u.pct ? `<div class="band">${money(u.band.priceLow)} – ${money(u.band.priceHigh)} <span class="meta">${u.band.psfLow}–${u.band.psfHigh} psf</span></div>
+      <p class="note"><b>${signedPct(u.pct)}</b> on the range above${why ? ` — ${esc(why)}` : ''}.${u.note ? ` <i>${esc(u.note)}</i>` : ''}</p>`
+      : `<p class="note"><b>No adjustment set.</b>${why ? ` Noted: ${esc(why)}.` : ''}${u.note ? ` <i>${esc(u.note)}</i>` : ''} The range is unchanged.</p>`}
+    ${u.mismatch ? `<div class="warnbox">${esc(u.mismatch)}</div>` : ''}
+    ${u.caution ? `<div class="warnbox">${esc(u.caution)}</div>` : ''}
+    ${s?.ran ? `<div class="test"><h3>How far units on the same floors sell apart</h3>
+      <p class="note">${esc(s.says)}</p>
+      <p class="note meta">${esc(s.what || '')}${s.widened ? ' ' + esc(s.widened) : ''}</p>
+      <p class="prov">${esc(s.source)}</p></div>`
+      : s ? `<div class="warnbox">${esc(s.why || 'Not measured.')}</div>` : ''}
+    <p class="prov">Your judgement, not a measurement — nothing here could be tested against past sales, so the measured range above is left as it is. ${u.onReport
+      ? '<b>On the client report</b>, labelled as your assessment after viewing.'
+      : 'Not on the client report; switch it on in the form to include it.'}</p>`;
+}
 
 /* ── render ─────────────────────────────────────────────────────────────── */
 function render(r) {
@@ -663,6 +764,11 @@ function render(r) {
         ${e.indexed?.ran !== false ? `<dt>restated to</dt><dd>${esc(e.indexed.asOfQuarter)} <span class="meta">${e.indexed.lagMonths}mo behind today · ${esc(e.indexed.series.label)}</span></dd>` : ''}
       </dl>`));
   }
+
+  /* The agent's adjustment. Beside the range and never inside it, for the
+     same reason as the stack below: the range is backtested and this cannot
+     be — no record says which past sale was a corner unit. */
+  if (r.unit) out.push(panel('Adjusted for the unit — your judgement', unitPanel(r.unit, r)));
 
   /* The stack premium. Shown beside the range and never inside it — the
    estimate is backtested and this is not, and folding an unmeasured term
@@ -1750,6 +1856,10 @@ footer b{color:#1a1a1a}
 
 function reportDocument(r) {
   const e = r.estimate, I = r.input, R = r.record;
+  /* Only when the agent switched it on — in either mode. With client-safe off
+     this function still receives the full report, cautions and all. */
+  const U = r.unit;
+  const unitOnDoc = Boolean(e.ok && U?.ok && U.onReport === true);
   const d = new Date(r.generatedAt);
   const when = d.toLocaleDateString('en-SG', { day: 'numeric', month: 'long', year: 'numeric' });
   const sqft = n => Number(n).toLocaleString('en-SG');
@@ -1815,6 +1925,14 @@ ${e.ok ? `
   <div class="psf">${e.band.psfLow}&ndash;${e.band.psfHigh} psf${!r.clientSafe && e.psf ? `  ·  midpoint ${e.psf} psf` : ''}</div>
   ${e.band.outer ? `<p style="margin:4mm 0 0;color:#4a4a4a">About half of sales like this land inside that range. <b>Nine in ten land between ${money(e.band.outer.priceLow)} and ${money(e.band.outer.priceHigh)}</b>.</p>` : ''}
 </div>
+${unitOnDoc ? `
+<section class="callout">
+  <div class="lbl">The agent's assessment after viewing</div>
+  ${U.pct ? `<div class="range" style="font-size:16pt">${money(U.band.priceLow)} &ndash; ${money(U.band.priceHigh)}</div>
+  <p>This unit is placed <b>${signedPct(U.pct)}</b> against the comparable homes above${unitReasons(U) ? `, for: ${esc(unitReasons(U))}` : ''}.${U.note ? ` ${esc(U.note)}` : ''}</p>`
+  : `<p style="margin-top:2mm">Noted at the viewing: ${esc(unitReasons(U) || '')}${U.note ? `${unitReasons(U) ? '. ' : ''}${esc(U.note)}` : ''}. No adjustment to the range.</p>`}
+  <p class="fine" style="margin-top:0">This is the agent's professional judgement, not a figure from the records: no public record says which unit sold, so facing, position and condition cannot be measured from them.${U.spread?.ran ? ` For scale: ${esc(U.spread.says)} Source: ${esc(U.spread.source)}.` : ''} The range above is what the records show, unchanged.</p>
+</section>` : ''}
 
 <section>
   <h2>What this figure is</h2>
@@ -1853,7 +1971,7 @@ ${e.ok ? `
   <h2>What this is not</h2>
   <ul>
     <li>It is <b>not a valuation</b>. A valuation is a licensed valuer's opinion for a lender or a court, and this is not one.</li>
-    <li>It cannot see inside the unit — condition, renovation, layout, what it faces, what it hears, or what the neighbours are like. Those are settled at a viewing, not in a dataset.</li>
+    <li>It cannot see inside the unit — condition, renovation, layout, what it faces, what it hears, or what the neighbours are like. Those are settled at a viewing, not in a dataset.${unitOnDoc ? ' The assessment above is where the agent has accounted for what was seen.' : ''}</li>
     <li>It describes what <b>has</b> transacted. It is not a forecast, and it carries no view on where prices go next.</li>
     <li>A specific unit can sell above or below this range for reasons entirely proper to it.</li>
   </ul>

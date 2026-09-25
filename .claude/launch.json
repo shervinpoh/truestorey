@@ -32,6 +32,16 @@
         "3100"
       ],
       "port": 3100
+    },
+    {
+      "name": "consult-dev-4174",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "CONSULT_PORT=4174",
+        "node",
+        "scripts/consult-server.mjs"
+      ],
+      "port": 4174
     }
   ]
 }

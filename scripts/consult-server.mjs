@@ -54,6 +54,7 @@ import { dataStatus } from '../lib/consult/status.js';
 import { LEVERS, rateScenario, VERSION as TRANSMISSION_VERSION, REVIEWED as TRANSMISSION_REVIEWED } from '../lib/consult/transmission.js';
 import { developmentProfile } from '../lib/consult/development.js';
 import { stackProfile, stackAdjust } from '../lib/consult/stacks.js';
+import { unitSpread, unitAdjust, FACTORS as UNIT_FACTORS } from '../lib/consult/unit.js';
 import { impliedLaunch, assessLaunch, pipeline as landPipeline, model as breakevenModel } from '../lib/consult/breakeven.js';
 import { districts as privateDistricts, projects as privateProjects } from '../lib/consult/privatescan.js';
 import { loadReading, refreshReading, readingList, markOpened, SOURCES as READING_SOURCES } from '../lib/consult/reading.js';
@@ -153,6 +154,16 @@ const server = http.createServer(async (req, res) => {
       return s ? json(res, 200, s) : json(res, 404, { error: 'No record at that address.' });
     }
 
+    /* The unit itself: the things an agent ticks at a viewing, and how far
+       units on the same floors here have actually sold apart. Fetched when an
+       address is picked, so the limits are on screen BEFORE an adjustment is
+       typed rather than discovered after. */
+    if (url.pathname === '/api/unit') {
+      const href = url.searchParams.get('href');
+      const rec = href ? recordByHref(href) : null;
+      return json(res, 200, { factors: UNIT_FACTORS, spread: rec ? unitSpread(rec) : null });
+    }
+
     if (url.pathname === '/api/report' && req.method === 'POST') {
       const body = await readBody(req);
       const rec = recordByHref(body.href);
@@ -169,6 +180,11 @@ const server = http.createServer(async (req, res) => {
          only ever as its own line beside the estimate. See stackAdjust. */
       const stackRes = rec.kind !== 'HDB' && body.stack
         ? stackAdjust(rec.label, body.stack) : null;
+      /* The agent's own adjustment for what no record sees — facing, corner
+         or corridor, view, noise, condition. Beside the estimate, like the
+         stack, and computed from the FULL estimate so client-safe mode
+         changes what is shown, not what is worked out. */
+      const unitRes = body.unit ? unitAdjust(est, body.unit, unitSpread(rec)) : null;
       const out = {
         /* District and tenure travel too: the client document's header line
            reads "1,044 sqft · storey 18 · District 09 · Freehold", and it
@@ -179,6 +195,7 @@ const server = http.createServer(async (req, res) => {
         input: { areaSqft, floor, price, years },
         estimate: body.clientSafe && est.ok ? clientSafe(est) : est,
         stack: stackRes,
+        unit: unitRes,
         clientSafe: Boolean(body.clientSafe),
         score: score(rec),
         residual: price ? residual(rec, { asking: price, areaSqft, floor }) : null,
