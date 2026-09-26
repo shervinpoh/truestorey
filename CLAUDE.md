@@ -155,6 +155,12 @@ npm run ingest:planning     URA planning decisions (what has been APPROVED)
 npm run ingest:gls          GLS sites from data/sources/gls-programme.json
 npm run ingest:gls-awards   every URA award, from the sheet URA's page links
                             to today. --file=<path> for a sheet by hand.
+npm run ingest:p1      MOE's P1 vacancies and balloting, per school and phase.
+                       MOE shows one exercise; each run KEEPS every year held.
+npm run ingest:buildings  OSM footprints + HDB storey heights for Sunward, then
+                       build:heights (URA floor-band MINIMUMS for condo towers).
+                       Resumable: progress in the OS temp dir; unread tiles
+                       are recorded in `missing` and get no Sunward answer.
 npm run build:map      data/map.json
 npm run build:storey   data/storey.json  (Tower View)
 npm run build:yield    data/yield.json

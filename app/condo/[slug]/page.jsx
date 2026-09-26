@@ -7,6 +7,7 @@ import { titleCase } from '../../../lib/name.js';
 import RecordPage from '../../../components/RecordPage.jsx';
 import { insightsForBlock } from '../../../lib/insights.js';
 import { withP1 } from '../../../lib/schools.js';
+import { massingAround } from '../../../lib/massing.js';
 
 export const dynamicParams = true;
 
@@ -39,6 +40,8 @@ export default async function Page({ params }) {
      along the bearings it produces. Both at build time; neither needs a
      request. */
   const sun = sunFor(rec);
+  /* Sunward: the buildings within reach of this one, cut at build time. */
+  const massing = sun ? massingAround(sun.lat, sun.lon) : null;
   const sunApprovals = sun
     ? approvalsOnBearing(rec, { from: sun.arc.from, to: sun.arc.to, within: 400 })
     : null;
@@ -46,7 +49,7 @@ export default async function Page({ params }) {
     <>
       <script type="application/ld+json"
         dangerouslySetInnerHTML={ldJson(recordSchema(rec))} />
-      <RecordPage sun={sun} sunApprovals={sunApprovals} canCapture={crmConfigured()} rec={rec} land={landForRecord(rec.href)} storey={storeyFor(rec)} near={withP1(nearby(rec))} sales={nearbySalesFor(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []} posts={insightsForBlock(rec.href)}
+      <RecordPage massing={massing} sun={sun} sunApprovals={sunApprovals} canCapture={crmConfigured()} rec={rec} land={landForRecord(rec.href)} storey={storeyFor(rec)} near={withP1(nearby(rec))} sales={nearbySalesFor(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []} posts={insightsForBlock(rec.href)}
       crumbs={[{ href: '/', label: 'Home' },
         { href: '/condo', label: 'Condos' },
         /* The district, which is a real destination now that ?d= opens one.

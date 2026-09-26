@@ -114,7 +114,12 @@ const nextConfig = {
   outputFileTracingIncludes: {
     // Long-tail block pages render on demand too. The raw resale download
     // remains excluded; this is the small, build-time count index.
-    '/hdb/*/*': ['./data/mop.json', './data/mop-filings.json', './data/records/hdb/**'],
+    /* buildings.json: Sunward reads it when a long-tail block or project
+       page renders on demand, so it must NOT be in the excludes above (an
+       exclude wins over an include). It was, briefly, and Sunward would have
+       shown in dev and never in production. */
+    '/hdb/*/*': ['./data/mop.json', './data/mop-filings.json', './data/records/hdb/**', './data/buildings.json'],
+    '/condo/*': ['./data/buildings.json'],
     // Blindspot reads records, geocodes and the MOP register at request time.
     '/api/ai/blindspot': [
       './data/records/**',

@@ -10,6 +10,7 @@ import { ldJson, dataset } from '../../../../lib/schema.js';
 import { insightsForBlock, insightsForTown } from '../../../../lib/insights.js';
 import { mopFor } from '../../../../lib/data/query.js';
 import { withP1 } from '../../../../lib/schools.js';
+import { massingAround } from '../../../../lib/massing.js';
 
 export const dynamicParams = true;   // the tail renders on demand and is then cached
 
@@ -43,6 +44,8 @@ export default async function Page({ params }) {
      along the bearings it produces. Both at build time; neither needs a
      request. */
   const sun = sunFor(rec);
+  /* Sunward: the buildings within reach of this one, cut at build time. */
+  const massing = sun ? massingAround(sun.lat, sun.lon) : null;
   const sunApprovals = sun
     ? approvalsOnBearing(rec, { from: sun.arc.from, to: sun.arc.to, within: 400 })
     : null;
@@ -50,7 +53,7 @@ export default async function Page({ params }) {
     <>
       <script type="application/ld+json"
         dangerouslySetInnerHTML={ldJson(recordSchema(rec))} />
-      <RecordPage mop={mopFor(rec)} sun={sun} sunApprovals={sunApprovals} canWatch={mailConfigured()} canCapture={crmConfigured()} locator={locatorFor(rec)} rec={rec} storey={storeyFor(rec)} near={withP1(nearby(rec))} sales={nearbySalesFor(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []}
+      <RecordPage massing={massing} mop={mopFor(rec)} sun={sun} sunApprovals={sunApprovals} canWatch={mailConfigured()} canCapture={crmConfigured()} locator={locatorFor(rec)} rec={rec} storey={storeyFor(rec)} near={withP1(nearby(rec))} sales={nearbySalesFor(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []}
       posts={[...insightsForBlock(rec.href), ...insightsForTown(town)]
         .filter((p, k, a) => a.findIndex(x => x.slug === p.slug) === k).slice(0, 4)}
       crumbs={[{ href: '/', label: 'Home' }, { href: '/hdb', label: 'HDB' },

@@ -29,7 +29,7 @@ import HowWorked from './HowWorked.jsx';
  * outlines, no heights, no footprints — a mark sits at its bearing and its
  * distance and claims nothing about its shape.
  */
-export default function SunPath({ sun, approvals, label }) {
+export default function SunPath({ sun, approvals, label, withFacing = true }) {
   if (!sun) return null;
   const { arc, today, lat } = sun;
   const items = approvals?.items || [];
@@ -101,7 +101,9 @@ export default function SunPath({ sun, approvals, label }) {
 
       {/* The arc is about the building. This is about the unit — the one fact
           the reader has and the datasets do not. */}
-      <Facing byMonth={sun.byMonth || []} />
+      {/* Superseded by Sunward where the buildings are known (withFacing false):
+          that answers the same question with what stands in the way. */}
+      {withFacing && <Facing byMonth={sun.byMonth || []} />}
 
       {approvals && (
         approvals.total === 0 ? (
@@ -141,8 +143,13 @@ export default function SunPath({ sun, approvals, label }) {
       )}
 
       <div className="note">
-        <b>This does not tell you whether anything is blocked.</b> No public dataset carries the
-        heights and footprints a shadow needs, so none is drawn.
+        {withFacing ? (<>
+          <b>This does not tell you whether anything is blocked.</b> No height is published for
+          enough of the buildings here to draw a shadow, so none is drawn.
+        </>) : (<>
+          <b>Approved is not built.</b> These decisions are not in the sun model above: a permission
+          has no footprint or height until it is built.
+        </>)}
       </div>
       <HowWorked title="What this shows, and what it cannot">
         <p>The bearings are astronomy: where the sun sets from this building, month by month. Near

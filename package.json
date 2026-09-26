@@ -77,7 +77,9 @@
     "ingest:listings": "node scripts/ingest-listings.mjs",
     "reading": "node scripts/reading.mjs",
     "make:blueprints": "node scripts/make/gen-blueprint.mjs && node scripts/make/gen-daily-source-brief.mjs",
-    "ingest:p1": "node scripts/ingest-p1.mjs"
+    "ingest:p1": "node scripts/ingest-p1.mjs",
+    "ingest:buildings": "node scripts/ingest-buildings.mjs && node scripts/build-building-heights.mjs",
+    "build:heights": "node scripts/build-building-heights.mjs"
   },
   "dependencies": {
     "next": "^15.0.0",

@@ -13,6 +13,7 @@ import Storey from './Storey.jsx';
 import SectionNav from './SectionNav.jsx';
 import NearbySales from './NearbySales.jsx';
 import SunPath from './SunPath.jsx';
+import SunStudy from './SunStudy.jsx';
 import BlockMop from './BlockMop.jsx';
 import { titleCase } from '../lib/name.js';
 import { track } from './Track.jsx';
@@ -54,7 +55,7 @@ import { WATCH_PAUSED } from '../lib/watch.js';
  * The proceeds waterfall re-anchors when the flat-type filter moves, so the
  * slider is never centred on a median that is no longer on screen.
  */
-export default function RecordPage({ rec, attribution, crumbs, posts = [], near = null, nearManifest = null, storey = null, canWatch = false, canCapture = false, locator = null, land = null, sales = null, sun = null, sunApprovals = null, mop = null }) {
+export default function RecordPage({ massing = null, rec, attribution, crumbs, posts = [], near = null, nearManifest = null, storey = null, canWatch = false, canCapture = false, locator = null, land = null, sales = null, sun = null, sunApprovals = null, mop = null }) {
   const [median, setMedian] = useState(rec.medianPrice);
 
   useEffect(() => { track(EVENTS.RECORD, { href: rec.href, kind: rec.kind }); }, [rec.href]);
@@ -162,7 +163,12 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
 
       {/* After what has sold nearby: same neighbourhood, different question —
           not what it costs but what it will be like to sit in at six o'clock. */}
-      {hasSun && <SunPath sun={sun} approvals={sunApprovals} label={titleCase(rec.label)} />}
+      {/* Sunward first where the buildings around are known: the window's own
+          answer. The sunset arc and what is approved on it follow. */}
+      {hasSun && massing?.buildings?.length > 0 && (
+        <SunStudy massing={massing} lat={sun.lat} lon={sun.lon} label={titleCase(rec.label)} />
+      )}
+      {hasSun && <SunPath sun={sun} approvals={sunApprovals} label={titleCase(rec.label)} withFacing={!(massing?.buildings?.length > 0)} />}
 
       {land && <LandTrail land={land} label={titleCase(rec.label)} rec={rec} />}
 

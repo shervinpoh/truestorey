@@ -88,7 +88,7 @@ export default function Search({ autoFocus = false, destination = 'record' }) {
        serialisable; passing a routing function here would not. */
     router.push(destination === 'blindspot'
       ? `/blindspot?from=${encodeURIComponent(href)}`
-      : href);
+      : destination === 'sun' ? `${href}#sunward` : href);
   };
 
   function key(e) {
@@ -112,7 +112,8 @@ export default function Search({ autoFocus = false, destination = 'record' }) {
           aria-controls="sug" aria-autocomplete="list"
           aria-label={destination === 'blindspot'
             ? 'Choose a block or project for Blindspot'
-            : 'Search a block or project'}
+            : destination === 'sun' ? 'Choose a block or project to see the sun on its windows'
+              : 'Search a block or project'}
           aria-activedescendant={open && ai >= 0 && sugg[ai] ? `sug-${ai}` : undefined} />
         {open && sugg.length > 0 && (
           <ul className="sug" id="sug" role="listbox">

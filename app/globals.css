@@ -3175,3 +3175,38 @@ sup.cite a:hover{text-decoration:underline}
 .amp1 .reach{font-size:var(--t-small);color:var(--ink2)}
 .amp1 .mono{font-size:var(--t-micro);color:var(--mute);margin-left:4px}
 .schooltable td:first-child{min-width:11em}
+
+/* ── Sunward (components/SunStudy.jsx) ───────────────────────────────────
+   The scene is paper with buildings in the site's neutral wall tones; the
+   home's own building is --acc, and the window turns --acc-lit only while it
+   is in direct sun — the one live, selected datum on the canvas. */
+.sunctl{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:flex-end;margin:6px 0 14px}
+.sunctl .fld{min-width:220px}
+.sunfacing{display:flex}
+.sunfacing button{min-width:42px;padding-left:8px;padding-right:8px}
+.sunview{position:relative}
+.sunscene{width:100%;background:var(--paper);border:1px solid var(--line);border-radius:var(--r2);overflow:hidden}
+.sunscene canvas{display:block}
+.sunviewbar{position:absolute;left:10px;top:10px;display:flex;gap:6px}
+.sunviewbar .ghost{padding:4px 10px;background:var(--card)}
+.suncurve{display:block;width:100%;height:70px;margin-top:14px;cursor:pointer}
+.suncurve-ground{stroke:var(--line)}
+.suncurve-line{fill:none;stroke:var(--ink2);stroke-width:1.5}
+.suncurve-lit{fill:var(--acc-lit);opacity:.28}
+.suncurve-now{stroke:var(--ink);stroke-width:1.5}
+.sunclock{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:flex-end;margin-top:8px}
+.sunclock .sunslider{flex:1;min-width:240px}
+.sunstatus{font-size:var(--t-body);color:var(--ink);margin:12px 0 0;min-height:1.5em}
+.sungrid{border-collapse:separate;border-spacing:2px;width:100%;min-width:520px;font-size:var(--t-small);margin-top:6px}
+.sungrid th{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--t-micro);font-weight:500;color:var(--mute);text-align:center;padding:0 0 4px}
+.sungrid tbody th{text-align:left;padding-right:6px;color:var(--ink2)}
+.sungrid td{height:22px;border-radius:2px;background:var(--line2)}
+.sungrid td.r{background:none;text-align:right;padding-left:8px;color:var(--ink);white-space:nowrap}
+.sungrid tr.on th{color:var(--ink);font-weight:600}
+.sunkey{list-style:none;display:flex;flex-wrap:wrap;gap:4px 16px;padding:0;margin:10px 0 0;font-size:var(--t-small);color:var(--mute)}
+.sunkey i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.suncurve-axis{display:flex;justify-content:space-between;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--t-micro);color:var(--mute);margin-top:2px}
+/* The minutes are in visually hidden text for screen readers; hidden text is
+   absolutely positioned, and without a positioned cell it escaped the
+   table's scroll box and widened the whole page on a phone. */
+.sungrid td,.sungrid th{position:relative}
