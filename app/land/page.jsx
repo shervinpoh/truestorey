@@ -22,7 +22,7 @@ export default function Page() {
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
         title="What developers paid for the land"
         sub="Every Government Land Sales site URA has awarded since 1993 — the winning tender, the rate, and how many wanted it." />
-      <ToolIntro href="/land" />
+      <ToolIntro href="/land" compact />
       <ToolUse id="land" />
 
       {(ura?.sites?.length || hdb?.sites?.length) && (

@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { f, num } from './fmt.js';
 import { Figure } from './Motion.jsx';
 import { titleCase } from '../lib/name.js';
+import Statement from './Statement.jsx';
 
 /**
  * Tower View, as a page you can browse rather than a section on one block.
@@ -84,16 +85,15 @@ export default function FloorView({ storey }) {
                     Middle of {num(rec.within.n)} {S.unit}s compared with themselves — floors{' '}
                     {storey.cuts[side].hi}+ against floors 1–{storey.cuts[side].lo}. Half fall between{' '}
                     {pc(rec.within.p25)} and {pc(rec.within.p75)}.{' '}
-                    <b>{rec.within.neg} of {num(rec.within.n)} came out negative</b> — the high floors
-                    fetched less. This is the figure that holds the building constant.
+                    <b>{rec.within.neg} of {num(rec.within.n)} came out negative.</b>
                   </p>
                 </>
               ) : (
                 <>
                   <b className="statnum" style={{ color: 'var(--mute)' }}>—</b>
                   <p className="hint">
-                    No {S.unit} here has {storey.bars.side} or more filed sales at both ends for this
-                    type. Nothing is shown rather than something estimated off two sales.
+                    No {S.unit} here has {storey.bars.side} filed sales at both ends for this type, so
+                    nothing is shown.
                   </p>
                 </>
               )}
@@ -104,11 +104,10 @@ export default function FloorView({ storey }) {
                 <>
                   <b className="statnum" style={{ color: 'var(--mute)' }}>{pc(rec.spread)}</b>
                   <p className="hint">
-                    The same floors as the figure beside it — {storey.cuts[side].hi}+ against
-                    1–{storey.cuts[side].lo} — with every {S.unit} in {label} thrown in together.{' '}
+                    The same floors, every {S.unit} in {label} thrown together.{' '}
                     {rec.within && rec.spread <= rec.within.p50
-                      ? 'Here it sits at or below that figure, so pooling is not what inflates the premium in this one.'
-                      : `It runs above that figure because the ${S.unit}s with high floors are not the same ${S.unit}s as the ones without. Shown so you can see the size of the trap, not because it answers anything.`}
+                      ? 'Here it sits at or below the figure beside it.'
+                      : `It runs above it because the ${S.unit}s with high floors are not the ${S.unit}s without.`}
                   </p>
                 </>
               ) : (
@@ -120,27 +119,28 @@ export default function FloorView({ storey }) {
             </div>
           </div>
 
+          {/* The statement on this page: the median at every storey band, the
+              evidence both figures above are read from. */}
           {rec.bands?.length > 0 && (
-            <div className="tablewrap">
-              <table className="bandtable">
-                <caption className="hint" style={{ captionSide: 'bottom', textAlign: 'left', marginTop: 10 }}>
-                  Median psf by storey band, {activeType}, {label}. Bands with fewer than{' '}
-                  {storey.bars.band} filed sales are left out entirely.
-                </caption>
-                <thead>
-                  <tr><th scope="col">Storeys</th><th scope="col">Median psf</th><th scope="col">Filed sales</th></tr>
-                </thead>
-                <tbody>
-                  {rec.bands.map(([range, , psf, n]) => (
-                    <tr key={range}>
-                      <th scope="row" className="mono">{range}</th>
-                      <td><span className="barwrap"><span className="bar" style={{ width: `${Math.round((psf / max) * 100)}%` }} /></span><span className="mono">{f(psf)}</span></td>
-                      <td className="mono">{num(n)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <Statement id="floor-bands" title="Every storey band" basis={`${activeType} · ${label} · filed sales`}>
+              <div className="tablewrap">
+                <table className="bandtable">
+                  <thead>
+                    <tr><th scope="col">Storeys</th><th scope="col">Median psf</th><th scope="col">Filed sales</th></tr>
+                  </thead>
+                  <tbody>
+                    {rec.bands.map(([range, , psf, n]) => (
+                      <tr key={range}>
+                        <th scope="row" className="mono">{range}</th>
+                        <td><span className="barwrap"><span className="bar" style={{ width: `${Math.round((psf / max) * 100)}%` }} /></span><span className="mono">{f(psf)}</span></td>
+                        <td className="mono">{num(n)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="stmt-foot">Bands with fewer than {storey.bars.band} filed sales are left out entirely.</p>
+            </Statement>
           )}
         </>
       )}

@@ -5,7 +5,8 @@ import { relativity, annualDecay, curve, LEASE_TABLE } from '../lib/calc/lease.j
 import Chart from './Chart.jsx';
 import { Figure } from './Motion.jsx';
 import MoneyInput from './MoneyInput.jsx';
-import Row from './PlanRow.jsx';
+import Statement from './Statement.jsx';
+import HowWorked from './HowWorked.jsx';
 import ResultBridge from './ResultBridge.jsx';
 
 /**
@@ -67,8 +68,7 @@ export default function LeaseView({ observed = null }) {
                 <MoneyInput value={value} onChange={setValue} /></label>
             </div>
             <p className="hint" style={{ margin: '10px 0 0' }}>
-              A figure you already have — a filed price at the block, or a valuation you have been
-              given. This site does not produce one.
+              A figure you already have &mdash; this site does not produce one.
             </p>
           </fieldset>
         </div>
@@ -79,8 +79,7 @@ export default function LeaseView({ observed = null }) {
               <span className="lab">Worth, against freehold</span>
               <Figure value={pct ?? 0} format={n => `${n.toFixed(1)}%`} />
               <p className="hint">
-                What the State itself uses at {years} year{years === 1 ? '' : 's'} remaining — for
-                lease renewals, differential premium and land betterment charge.
+                The State&rsquo;s own figure at {years} year{years === 1 ? '' : 's'} remaining.
               </p>
             </div>
             <div className="plansumfig">
@@ -88,9 +87,8 @@ export default function LeaseView({ observed = null }) {
               <Figure value={yearCost ?? 0} format={money} />
               <p className="hint">
                 {decay != null
-                  ? <>The table falls {decay.toFixed(2)} points between {years} years left and{' '}
-                    {years - 1}. At {money(v)} today, that is what a year costs on this schedule
-                    alone — before anything the market does.</>
+                  ? <>{decay.toFixed(2)} points between {years} and {years - 1} years left, on{' '}
+                    {money(v)} &mdash; the schedule alone, before the market.</>
                   : <>There is no year below this one on the table.</>}
               </p>
             </div>
@@ -101,19 +99,17 @@ export default function LeaseView({ observed = null }) {
       <dl className="resultguide resultguide-wide" aria-label="How to use this result">
         <div>
           <dt>What changed it</dt>
-          <dd>The {years}-year row sets the lease at <b>{pct?.toFixed(1) ?? '—'}% of freehold</b>.
-            To price one year, the tool converts your {money(v)} input to that freehold equivalent,
-            then applies the table&rsquo;s {decay?.toFixed(2) ?? '—'}-point fall.</dd>
+          <dd>The {years}-year row: <b>{pct?.toFixed(1) ?? '—'}% of freehold</b>, and a{' '}
+            {decay?.toFixed(2) ?? '—'}-point fall to the next year, applied to your {money(v)}.</dd>
         </div>
         <div>
           <dt>What this cannot know</dt>
-          <dd>What a buyer will pay, or the effect of the block, floor, town or condition. This is
-            a government schedule, not a market forecast.</dd>
+          <dd>What a buyer will pay. This is a government schedule, not a market forecast.</dd>
         </div>
         <div className="resultnext">
           <dt>Next useful step</dt>
           <dd><a href="#lease-evidence">Inspect the full table and filed evidence &darr;</a>
-            <span>The published curve first; HDB resale bands below it when available.</span></dd>
+            <span>The curve, then what was actually paid.</span></dd>
         </div>
       </dl>
 
@@ -133,37 +129,40 @@ export default function LeaseView({ observed = null }) {
         <span><i className="lab">One more year</i> <b className="mono">{yearCost == null ? "—" : money(yearCost)}</b></span>
       </div>
 
-      <h2 className="sh" id="lease-evidence" style={{ marginTop: 26 }}>
-        <span>The table</span><span>99 years, as a share of freehold</span>
-      </h2>
-      <Chart
-        points={pts} format={n => n.toFixed(1)} unit="% of freehold" height={150}
-        defaultIndex={99 - years}
-        idleLabel="selected lease — point at the chart to read any year"
-        ariaLabel="Leasehold value as a percentage of freehold value, from 99 years remaining down to 1." />
-
-      <div className="plansteps" style={{ marginTop: 18 }}>
-        <Row label="A fresh 99-year lease" value={`${relativity(99)}%`} note="not 100% — a lease has never been a freehold" />
-        <Row label="60 years left" value={`${relativity(60)}%`} note={`falls ${annualDecay(60).toFixed(2)} points a year here`} />
-        <Row label="30 years left" value={`${relativity(30)}%`} note={`falls ${annualDecay(30).toFixed(2)} points a year here`} />
-        <Row label="A year costs six times more at the end than the start"
-          value={`${annualDecay(20).toFixed(2)} vs ${annualDecay(95).toFixed(2)} pts`}
-          note="20 years left against 95 — the same lease, the same table" strong />
-      </div>
-
-      <div className="note" style={{ marginTop: 20 }}>
-        <b>This is a schedule, not a forecast.</b> It says what a lease is worth relative to a
-        freehold of the same thing, and it is what the State applies when it prices a lease
-        renewal. It does not know your block, your floor, your town or what anyone will pay — and
-        nothing here says when to buy, hold or sell.
-      </div>
-
-      <div className="note">
-        <b>Why the curve bends.</b> Value does not fall by one ninety-ninth a year. Half the lease
-        gone leaves {relativity(50)}% of freehold, not half — the early decades are gentle and the
-        last ones are steep, which is why the cost of waiting is small for a long time and then
-        is not.
-      </div>
+      {/* The page's statement (components/Statement.jsx): the schedule itself,
+          which is what every figure above is read from. */}
+      <Statement id="lease-evidence" title="The table: 99 years, as a share of freehold"
+        basis="The State’s own schedule">
+        <Chart
+          points={pts} format={n => n.toFixed(1)} unit="% of freehold" height={150}
+          defaultIndex={99 - years}
+          idleLabel="selected lease — point at the chart to read any year"
+          ariaLabel="Leasehold value as a percentage of freehold value, from 99 years remaining down to 1." />
+        <div className="tablewrap">
+          <table className="stmt-rows" style={{ marginTop: 14 }}>
+            <tbody>
+              <tr><td>A fresh 99-year lease<span className="q">not 100% — a lease has never been a freehold</span></td>
+                <td className="r">{relativity(99)}%</td></tr>
+              <tr><td>60 years left<span className="q">falls {annualDecay(60).toFixed(2)} points a year here</span></td>
+                <td className="r">{relativity(60)}%</td></tr>
+              <tr><td>30 years left<span className="q">falls {annualDecay(30).toFixed(2)} points a year here</span></td>
+                <td className="r">{relativity(30)}%</td></tr>
+              <tr className="stmt-sub"><td>A year costs six times more at the end than the start
+                <span className="q">20 years left against 95 — the same lease, the same table</span></td>
+                <td className="r">{annualDecay(20).toFixed(2)} vs {annualDecay(95).toFixed(2)} pts</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p className="stmt-foot"><b>This is a schedule, not a forecast.</b> It does not know your block,
+          floor, town or what anyone will pay, and says nothing about when to buy, hold or sell.</p>
+      </Statement>
+      <HowWorked title="Why the curve bends">
+        <p>Value does not fall by one ninety-ninth a year. Half the lease gone leaves{' '}
+          {relativity(50)}% of freehold, not half &mdash; the early decades are gentle and the last ones
+          steep, which is why the cost of waiting is small for a long time and then is not. It is the
+          table the State applies when it prices a lease renewal, differential premium or land
+          betterment charge.</p>
+      </HowWorked>
 
       {observed?.bands?.length > 0 && (
         <>

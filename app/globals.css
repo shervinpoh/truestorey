@@ -1111,8 +1111,11 @@ footer.site{margin-top:52px;padding:28px 0 0;border-top:2px solid var(--ink);lin
 /* Fixed track, so the bar cannot push the figure onto a second line — the
    figure is the point of the row and must sit on the same baseline as it. */
 .bandtable .barwrap{display:inline-block;width:110px;vertical-align:middle;margin-right:10px}
-.bandtable .bar{display:block;height:10px;background:var(--acc-soft);
- border-left:2px solid var(--acc);min-width:2px}
+/* Ink at low strength, like the bars in Chart.jsx. It was --acc-soft with a
+   2px teal cap, and #E7F3F3 on #F6F5F2 is not a visible mark — every row read
+   as a dark tick and nothing, so the bar carried no information. It is a
+   plain quantity, not live or selected data, so it takes no accent. */
+.bandtable .bar{display:block;height:10px;background:color-mix(in srgb,var(--ink) 34%,transparent);min-width:2px}
 .bandtable td:last-child{text-align:right;color:var(--mute);white-space:nowrap}
 
 /* ── the planner ────────────────────────────────────────────────────────── */
@@ -1861,7 +1864,18 @@ sup.cite a:hover{text-decoration:underline}
    wrap, one is a date, and two are company names that will wrap forever if
    allowed to. Left to itself the browser gave the widest column to the longest
    consortium name and squeezed "Bids / ahead of 2nd" into three stacked lines. */
-.landtable{min-width:860px}
+.landtable{min-width:860px;width:100%;border-collapse:collapse;font-size:var(--t-small)}
+/* Its own header and row rules: the .anst rules it relied on are scoped to
+   .answer, which /land is not inside. */
+.landtable th{text-align:left;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--t-micro);
+ font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);padding:0 12px 8px 0;
+ border-bottom:1px solid var(--line)}
+.landtable td{padding:10px 12px 10px 0;border-bottom:1px solid var(--line2);color:var(--ink);line-height:1.4}
+.landtable th{white-space:nowrap}
+.landtable td:nth-child(2){min-width:10em}
+.landtable th:last-child,.landtable td:last-child{padding-right:0}
+.landtable td.who{color:var(--ink2)}
+.landtable .bidgap{display:block;font-style:normal;font-size:var(--t-micro);color:var(--mute)}
 .landtable th,.landtable td{vertical-align:top}
 .landtable .num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .landtable .when{white-space:nowrap}

@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { yields } from '../../lib/data/query.js';
 import Masthead from '../../components/Masthead.jsx';
 import ToolIntro from '../../components/ToolIntro.jsx';
+import Statement from '../../components/Statement.jsx';
+import HowWorked from '../../components/HowWorked.jsx';
 import ToolUse from '../../components/ToolUse.jsx';
 import YieldView from '../../components/YieldView.jsx';
 
@@ -24,7 +26,7 @@ export default function Page() {
         <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
           title="Rental yields"
           sub="Filed rents over filed prices, matched on unit size." />
-      <ToolIntro href="/yield" />
+      <ToolIntro href="/yield" compact />
       <ToolUse id="yield" />
         <section className="pane">
           <div className="warn">
@@ -76,38 +78,36 @@ export default function Page() {
       </section>
 
       <section className="pane">
-        <h2 className="sh"><span>By district</span></h2>
-        <table className="bandtable">
-          <thead><tr><th scope="col">District</th><th scope="col">Gross yield</th><th scope="col">Projects</th></tr></thead>
-          <tbody>
-            {districts.map(([d, v]) => (
-              <tr key={d}>
-                <th scope="row" className="mono">D{d}</th>
-                <td><span className="barwrap"><span className="bar" style={{ width: `${Math.round((v.grossYield / districts[0][1].grossYield) * 100)}%` }} /></span><span className="mono">{pc(v.grossYield)}</span></td>
-                <td className="mono">{v.projects}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
-
-      <section className="pane">
-        <div className="note">
-          <b>This is a gross yield and it is not what you keep.</b> Property tax at the
-          non-owner-occupied rate, maintenance, agent fees, insurance and the months a unit sits
-          empty all come out of it. Every one of those is in the renting guide with a figure beside
-          it. None of them is in this data, so none of them is guessed at here.
-        </div>
-        <div className="note method">
-          <b>Rents are matched to sales of the same size only.</b> URA publishes rent against an
-          area range and price against an exact area. A three-bedroom&rsquo;s rent over a
-          one-bedroom&rsquo;s price is not a yield, so a rent is only ever compared with sales that
-          fall inside its own published band, and a project with no overlap produces nothing.
-        </div>
-        <div className="note method">
-          <b>Rent psf is carried as a range.</b> The published area is a band, so a single rent per
-          square foot would be an invention. Where it appears it appears as two ends.
-        </div>
+        {/* The page's statement (components/Statement.jsx). */}
+        <Statement id="yield-districts" title="Gross yield by district"
+          basis={`Filed rents over filed prices · ${districts.length} districts`}>
+          <div className="tablewrap">
+            <table className="bandtable">
+              <thead><tr><th scope="col">District</th><th scope="col">Gross yield</th><th scope="col">Projects</th></tr></thead>
+              <tbody>
+                {districts.map(([d, v]) => (
+                  <tr key={d}>
+                    <th scope="row" className="mono">D{d}</th>
+                    <td><span className="barwrap"><span className="bar" style={{ width: `${Math.round((v.grossYield / districts[0][1].grossYield) * 100)}%` }} /></span><span className="mono">{pc(v.grossYield)}</span></td>
+                    <td className="mono">{v.projects}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="stmt-foot"><b>This is a gross yield and it is not what you keep.</b> Property
+            tax, maintenance, fees, insurance and empty months all come out of it; none is in this
+            data, so none is guessed at.</p>
+        </Statement>
+        <HowWorked title="How rents are matched to prices">
+          <p><b>Rents are matched to sales of the same size only.</b> URA publishes rent against an
+            area range and price against an exact area. A three-bedroom&rsquo;s rent over a
+            one-bedroom&rsquo;s price is not a yield, so a rent is only compared with sales inside its
+            own published band, and a project with no overlap produces nothing.</p>
+          <p><b>Rent psf is carried as a range.</b> The published area is a band, so a single rent per
+            square foot would be an invention. Where it appears it appears as two ends. What a
+            landlord carries between gross and net is in the renting guide, each with a figure.</p>
+        </HowWorked>
       </section>
 
       <section className="pane">

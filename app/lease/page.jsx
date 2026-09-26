@@ -20,8 +20,8 @@ export default function Page() {
     <main className="shell wide">
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
         title="What a lease is worth"
-        sub="The leasehold relativity table — what the State applies when it prices a lease renewal — and what one more year of holding costs on it." />
-      <ToolIntro href="/lease" />
+        sub="The table the State uses to price a lease, and what one more year of holding costs." />
+      <ToolIntro href="/lease" example="figures" lean />
       <ToolUse id="lease" />
       <section className="pane">
         <LeaseView observed={observed()} />

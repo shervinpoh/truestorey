@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { storey } from '../../lib/data/query.js';
 import Masthead from '../../components/Masthead.jsx';
 import ToolIntro from '../../components/ToolIntro.jsx';
+import HowWorked from '../../components/HowWorked.jsx';
 import ToolUse from '../../components/ToolUse.jsx';
 import FloorView from '../../components/FloorView.jsx';
 
@@ -62,9 +63,9 @@ export default function Page() {
     <main className="shell">
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
         title="Tower view"
-        sub="What a higher floor is worth, measured by comparing a building with itself rather than with other buildings. Free, and it stays free." />
+        sub="What a higher floor is worth, measured by comparing a building with itself." />
 
-      <ToolIntro href="/floors" />
+      <ToolIntro href="/floors" compact />
       <ToolUse id="floors" />
 
       <section className="pane">
@@ -72,35 +73,27 @@ export default function Page() {
       </section>
 
       <section className="pane">
-        <h2 className="sh"><span>Why this is not the number you usually see</span></h2>
         <div className="note">
           <b>Pooling every 4-room flat in the country says floors {cut.hi} and up are worth{' '}
           {pooled != null ? `about ${pooled}%` : 'noticeably'} more per square foot than floors
           1–{cut.lo}.</b> {mostly ? 'Most of that is not the height.' : 'Part of that is not the height.'}{' '}
-          The blocks tall enough to have a {cut.hi}th floor are mostly the newer, longer-leased
-          ones, so comparing them against every low floor in Singapore measures the block as much
-          as the storey.
+          Blocks tall enough to have a {cut.hi}th floor are mostly the newer ones; comparing a block
+          with itself says about {hdb4 ? `${hdb4.p50}%` : 'less'}.
         </div>
-        <div className="note">
-          <b>Comparing a block with itself says about {hdb4 ? `${hdb4.p50}%` : 'less'}.</b>{' '}
-          Same building, same lease, same location, same flat model — all of it identical on both
-          sides of the ratio, so what is left is closer to the height. The floors compared are the
-          same as in the figure above, which is what lets the two be read against each other. That
-          is the figure this page leads with, taken across {hdb4 ? hdb4.n.toLocaleString('en-SG') : ''} blocks
-          that have enough filed sales high and low to be compared at all.
-        </div>
-        <div className="note">
-          <b>It is not always positive.</b> {hdb4 ? `${hdb4.neg} of those ${hdb4.n.toLocaleString('en-SG')} blocks` : 'Some blocks'}{' '}
-          sold higher floors for less per square foot. West-facing afternoon sun, a unit stack facing
-          a road, a renovation difference — the reasons vary and this data cannot tell you which. The
-          count is published rather than smoothed away, because a tool that only ever returns a
-          reassuring number is not measuring anything.
-        </div>
-        <div className="note">
-          <b>No floor number is ever inferred.</b> HDB files &ldquo;10 TO 12&rdquo; and URA files
-          &ldquo;11-15&rdquo;. Neither is turned into a storey here, and basement ranges are dropped
-          rather than counted as the ground floor.
-        </div>
+        <HowWorked title="How a building is compared with itself">
+          <p><b>Same building, same lease, same location, same flat model</b> — all of it identical on
+            both sides of the ratio, so what is left is closer to the height. It is taken across{' '}
+            {hdb4 ? hdb4.n.toLocaleString('en-SG') : ''} blocks with enough filed sales high and low to
+            be compared at all, on the same floors as the pooled figure, so the two can be read
+            against each other.</p>
+          <p><b>It is not always positive.</b> {hdb4 ? `${hdb4.neg} of those ${hdb4.n.toLocaleString('en-SG')} blocks` : 'Some blocks'}{' '}
+            sold higher floors for less per square foot — afternoon sun, a stack facing a road, a
+            renovation. This data cannot say which, and the count is published rather than smoothed
+            away.</p>
+          <p><b>No floor number is ever inferred.</b> HDB files &ldquo;10 TO 12&rdquo; and URA files
+            &ldquo;11-15&rdquo;. Neither is turned into a storey, and basement ranges are dropped rather
+            than counted as the ground floor.</p>
+        </HowWorked>
       </section>
 
       <section className="pane">

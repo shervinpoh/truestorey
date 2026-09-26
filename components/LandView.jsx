@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { siteSlug } from '../lib/land.js';
 import Chart from './Chart.jsx';
 import { Figure } from './Motion.jsx';
+import Statement from './Statement.jsx';
 
 /**
  * What developers paid for the ground.
@@ -144,22 +145,21 @@ export default function LandView({ data }) {
           {/* Said here, beside the chart, not once at the foot of the page. */}
           {!siteRate && <div className="warn" style={{ marginTop: 12 }}>
             <p style={{ margin: 0 }}>
-              <b>These rates are not all on the same basis.</b> URA heads the column
-              &ldquo;$psm per GFA or $psm per GPR&rdquo; and the sheet does not say which applies to
-              a given site, so two rates in this chart may be measuring different things. Prices are
-              nominal — 1993 dollars are not 2026 dollars.
+              <b>These rates are not all on the same basis.</b> URA&rsquo;s column is &ldquo;$psm per
+              GFA or $psm per GPR&rdquo; without saying which, so two rates here may measure different
+              things. Prices are nominal.
             </p>
           </div>}
         </>
       )}
 
-      <h2 className="sh" style={{ marginTop: 26 }}>
-        <span>Most recently awarded</span>
-        <span>
-          {Math.min(latest.length, sites.length).toLocaleString('en-SG')} of{' '}
-          {sites.length.toLocaleString('en-SG')}
-        </span>
-      </h2>
+      {/* The page's statement (components/Statement.jsx). The table was
+          styled only inside .answer, so here it rendered with no header
+          style and no row rules at all — the one list of figures the page
+          exists for, looking like raw markup. */}
+      <Statement id="land-latest" title="Most recently awarded"
+        basis={`${Math.min(latest.length, sites.length).toLocaleString('en-SG')} of ${sites.length.toLocaleString('en-SG')}`}
+        lede={latest.some(s => s.bidDetail?.length) ? 'Open a row to see every bid the agency published.' : null}>
       <div className="tablewrap">
         <table className="anst landtable">
           <thead><tr>
@@ -190,7 +190,7 @@ export default function LandView({ data }) {
                 <td className="mono num">
                   {s.bids ?? '—'}
                   {s.bidDetail?.length > 1 && (
-                    <i style={{ display: 'block', fontStyle: 'normal', fontSize: 10, color: 'var(--mute)' }}>
+                    <i className="bidgap">
                       +{((s.bidDetail[0].bid - s.bidDetail[1].bid) / s.bidDetail[1].bid * 100).toFixed(1)}%
                     </i>
                   )}
@@ -234,6 +234,7 @@ export default function LandView({ data }) {
           </tbody>
         </table>
       </div>
+      </Statement>
 
       {/* The heading counted 296 and the table showed 12. A cap is reasonable —
           657 rows is not a first screen — but an unstated one on a page whose
