@@ -19,8 +19,8 @@ export default function Page() {
     <main className="shell wide">
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
         title="Paying for a home still being built"
-        sub="The nine stages a developer may bill you for, in the order the law sets them — and what your loan and your instalment are doing at each one." />
-      <ToolIntro href="/progressive" example="figures" />
+        sub="The nine stages a developer bills, in the order the law sets, and what your loan does at each." />
+      <ToolIntro href="/progressive" example="figures" lean />
       <ToolUse id="progressive" />
       <section className="pane">
         <Suspense fallback={<p className="hint">Loading…</p>}>

@@ -71,31 +71,13 @@ export default async function Page({ searchParams }) {
     <main className="shell wide">
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
         title="Can I afford it"
-        sub="TDSR, the loan-to-value ceiling, the downpayment, the cash CPF cannot cover, and both stamp duties — as one answer instead of four." />
-      <ToolIntro href="/plan" example="figures" />
+        sub="The largest loan the rules allow, the cash CPF cannot cover and both stamp duties — as one answer." />
+      <ToolIntro href="/plan" example="figures" lean />
       <ToolUse id="plan" />
 
       <section className="pane">
         <Planner markets={markets} budget={budget()}
           initial={{ price: one(sp.price), type: one(sp.type), from: one(sp.from) }} canEmail={mailConfigured()} />
-      </section>
-
-      <section className="pane">
-        <div className="note">
-          <b>Every step is shown, not just the total.</b> The order matters and each line is
-          something you can argue with: what a bank assesses you for is not what the property will
-          carry, and the smaller of the two is your loan. Most calculators show one of those and
-          call it an answer.
-        </div>
-        <div className="note">
-          <b>The cash floor is the part that catches people.</b> A share of the downpayment must be
-          cash and cannot come from CPF, however large the OA balance is. Someone with $400,000 in
-          CPF and $20,000 in the bank can still fail to complete.
-        </div>
-        <div className="note">
-          <b>The calculator keeps no profile.</b> Its figures stay in the page unless you deliberately
-          share or request a copy. There is no sign-up and no email wall on this or any other tool.
-        </div>
       </section>
 
       <section className="pane">

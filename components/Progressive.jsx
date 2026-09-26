@@ -6,7 +6,8 @@ import { progressiveResult } from '../lib/report/progressive.js';
 import { f } from './fmt.js';
 import { Figure } from './Motion.jsx';
 import MoneyInput from './MoneyInput.jsx';
-import Row from './PlanRow.jsx';
+import Statement from './Statement.jsx';
+import HowWorked from './HowWorked.jsx';
 import ConstructionStudy from './ConstructionStudy.jsx';
 import ShareResult, { OpenedFromLink } from './ShareResult.jsx';
 import useShareLink from './useShareLink.js';
@@ -110,10 +111,8 @@ export default function Progressive({ canEmail = false }) {
             {/* The Rules do not fix this. Saying so is the difference between
                 a tool and a brochure. */}
             <p className="hint" style={{ margin: '8px 0 0' }}>
-              The Rules set the booking fee at <em>&ldquo;such amount as set out in item 2 of the
-              Fourth Schedule&rdquo;</em> — it is written into each project&rsquo;s own agreement, not
-              fixed by law. 5% is the usual figure at a launch. Check the Fourth Schedule of the
-              agreement you are actually signing.
+              5% is the usual launch figure, but each project&rsquo;s agreement sets it (Fourth
+              Schedule, item 2) &mdash; check yours.
             </p>
           </fieldset>
 
@@ -128,8 +127,7 @@ export default function Progressive({ canEmail = false }) {
                   onChange={e => setTenure(e.target.value)} /></label>
             </div>
             <p className="hint" style={{ margin: '8px 0 0' }}>
-              A rate you have been quoted, not a rate this site predicts. The instalments below are
-              the fully amortising payment on the amount drawn so far — see the note under the ladder.
+              A rate you were quoted, not one this site predicts.
             </p>
           </fieldset>
         </div>
@@ -140,18 +138,16 @@ export default function Progressive({ canEmail = false }) {
               <span className="lab">Before the bank pays anything</span>
               <Figure value={r.cashCpfTotal + duty.total} format={money} />
               <p className="hint">
-                {money(r.cashCpfTotal)} of the price — {pc(1 - ltv)}, out of your own cash and CPF,
-                across the first {firstDraw >= 0 ? firstDraw + 1 : ''} stages, before the bank has
-                disbursed anything — plus {money(duty.total)} of stamp duty, which is not part of
-                the price and runs on its own clock.
+                {money(r.cashCpfTotal)} ({pc(1 - ltv)}) from your cash and CPF over the first{' '}
+                {firstDraw >= 0 ? firstDraw + 1 : ''} stages, plus {money(duty.total)} stamp duty.
               </p>
             </div>
             <div className="plansumfig">
               <span className="lab">Cash that cannot be CPF</span>
               <Figure value={r.bookingFee} format={money} />
               <p className="hint">
-                The booking fee buys the Option, which exists before the Sale and Purchase
-                Agreement — and CPF cannot be used until that agreement does.
+                The booking fee buys the Option, before the Sale and Purchase Agreement &mdash; and
+                CPF cannot be used until that exists.
               </p>
             </div>
             <div className="plansumrows">
@@ -171,20 +167,18 @@ export default function Progressive({ canEmail = false }) {
       <dl className="resultguide resultguide-wide" aria-label="How to use this result">
         <div>
           <dt>What changed it</dt>
-          <dd>The LTV leaves <b>{pc(1 - ltv)}</b> of the price to cash and CPF. The{' '}
-            <b>{pc(fee)} booking fee</b> is cash-only; your buyer profile and property count
-            set {money(duty.total)} of stamp duty.</dd>
+          <dd>The LTV leaves <b>{pc(1 - ltv)}</b> to cash and CPF; the <b>{pc(fee)} booking fee</b> is
+            cash-only; your profile sets the stamp duty.</dd>
         </div>
         <div>
           <dt>What this cannot know</dt>
           <dd>When the developer&rsquo;s notices will arrive, or whether your bank charges a fully
-            amortising payment or interest-only before TOP. Your project agreement may also carry
-            approved modifications.</dd>
+            amortising payment or interest-only before TOP.</dd>
         </div>
         <div className="resultnext">
           <dt>Next useful step</dt>
           <dd><a href="#construction-heading">Walk through the nine payment stages &uarr;</a>
-            <span>See when your funds end, the bank begins and the instalment climbs.</span></dd>
+            <span>Where your funds end and the bank begins.</span></dd>
         </div>
       </dl>
       <div className="resultshare-wide">
@@ -207,16 +201,28 @@ export default function Progressive({ canEmail = false }) {
         <span><i className="lab">Cash, not CPF</i> <b className="mono">{money(r.bookingFee)}</b></span>
       </div>
 
-      <h2 className="sh" style={{ marginTop: 26 }}>
-        <span>Stamp duty</span><span>on top of the price, on its own clock</span>
-      </h2>
-      <div className="plansteps">
-        <Row label="Buyer's Stamp Duty" value={money(duty.bsd)} note="progressive, on the price" />
-        <Row label="Additional Buyer's Stamp Duty" value={money(duty.absd)}
-          note={duty.absd === 0 ? 'none — first residential property as a citizen' : `${pc(duty.absdRate)} at this profile and count`} />
-        <Row label="Due" value={`${STAMPING.withinDaysInSingapore} days`}
-          note={`from the day after the agreement is first executed in Singapore — ${STAMPING.withinDaysAbroad} days if it is executed abroad`} strong />
-      </div>
+      {/* The page's statement (components/Statement.jsx): the one sum on it
+          with a legal deadline attached. The penalty stays visible under it,
+          because that is the part that changes what somebody does. */}
+      <Statement id="stamp-duty" title="Stamp duty, on top of the price"
+        basis={`Stamp Duties Act · due in ${STAMPING.withinDaysInSingapore} days`}>
+        <div className="tablewrap">
+          <table className="stmt-rows">
+            <tbody>
+              <tr><td>Buyer&rsquo;s Stamp Duty<span className="q">progressive, on the price</span></td>
+                <td className="r">{money(duty.bsd)}</td></tr>
+              <tr><td>Additional Buyer&rsquo;s Stamp Duty<span className="q">{duty.absd === 0
+                ? 'none — first residential property as a citizen'
+                : `${pc(duty.absdRate)} at this profile and count`}</span></td>
+                <td className="r">{money(duty.absd)}</td></tr>
+              <tr className="stmt-total"><td>To pay within {STAMPING.withinDaysInSingapore} days
+                <span className="q">from the day after the agreement is first executed in Singapore &mdash;{' '}
+                  {STAMPING.withinDaysAbroad} days if executed abroad</span></td>
+                <td className="r">{money(duty.total)}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </Statement>
       <div className="note">
         {/* The competitor states the 14 days and stops. The penalty is the part
             that changes what somebody does, and four times the duty on a
@@ -224,33 +230,31 @@ export default function Progressive({ canEmail = false }) {
         <b>Miss it and the penalty is not a late fee.</b> Stamped {STAMPING.penalties[0].after} of
         that deadline, it is {STAMPING.penalties[0].rule}. {STAMPING.penalties[1].after
           .replace(/^after/, 'Later than')} it is {STAMPING.penalties[1].rule} — on this purchase,
-        four times {money(duty.total)}. The clock starts {STAMPING.clockStarts}, not on the day
-        itself.
+        four times {money(duty.total)}.
       </div>
 
-      <div className="note" style={{ marginTop: 20 }}>
-        <b>There is no calendar here, and that is the point.</b> Every construction stage above falls
-        due within {NOTICE_DAYS} days of a notice from the developer that the stage is finished. The
-        Rules set the percentages and the order; they set no interval between one notice and the next.
-        A table that prints &ldquo;6&ndash;9 months&rdquo; beside these figures is showing you a
-        builder&rsquo;s estimate in the same weight as the law.
-      </div>
-
-      <div className="note">
-        <b>Why the payment climbs.</b> You are charged only on what has been disbursed, so the
-        instalment steps up each time the bank pays another slice. The figures above are the fully
-        amortising payment on the amount drawn so far, over your whole tenure — which is how most
-        Singapore banks present a BUC loan. Some packages are interest-only until TOP instead:
-        cheaper during construction, identical afterwards. Ask which one you are being offered.
-      </div>
+      <HowWorked title="Why there is no calendar, and why the payment climbs">
+        <p><b>No calendar, on purpose.</b> Every construction stage falls due within {NOTICE_DAYS} days
+          of a notice from the developer that the stage is finished. The Rules set the percentages and
+          the order; they set no interval between one notice and the next. A table that prints
+          &ldquo;6&ndash;9 months&rdquo; beside these figures is showing a builder&rsquo;s estimate in the
+          same weight as the law.</p>
+        <p><b>Why the payment climbs.</b> You are charged only on what has been disbursed, so the
+          instalment steps up each time the bank pays another slice. The figures are the fully
+          amortising payment on the amount drawn so far, over your whole tenure &mdash; how most
+          Singapore banks present a BUC loan. Some packages are interest-only until TOP instead:
+          cheaper during construction, identical afterwards. Ask which one you are being offered.</p>
+        <p>The stamp duty clock starts {STAMPING.clockStarts}, not on the day itself. The booking fee
+          is set by each project&rsquo;s agreement at <em>&ldquo;such amount as set out in item 2 of
+          the Fourth Schedule&rdquo;</em>, not by law.</p>
+      </HowWorked>
 
       <p className="prov" style={{ marginTop: 22 }}>
         {BUC_SOURCE.name}<br />
         Read against the version current as at {BUC_SOURCE.versionAsAt} ·{' '}
         <a href={BUC_SOURCE.url} target="_blank" rel="noopener noreferrer">{BUC_SOURCE.url}</a><br />
-        Percentages and wording are the Rules&rsquo;. The rate and tenure are yours. Your project&rsquo;s
-        agreement may carry modifications approved by the Controller of Housing — the Second or Third
-        Schedule of that agreement is where they would be.<br />
+        Percentages and wording are the Rules&rsquo;; your agreement may carry approved modifications
+        in its Second or Third Schedule.<br />
         Stamp duty timing: {STAMPING.source} · read against the version current as at{' '}
         {STAMPING.versionAsAt} · <a href={STAMPING.url} target="_blank" rel="noopener noreferrer">{STAMPING.url}</a><br />
         This plans a purchase from figures you typed; it does not value any property and it is not

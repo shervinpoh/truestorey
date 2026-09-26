@@ -3088,7 +3088,7 @@ sup.cite a:hover{text-decoration:underline}
 .stmt-rows td{padding:9px 0;border-bottom:1px solid var(--line2);color:var(--ink);line-height:1.4;vertical-align:baseline}
 .stmt-rows td.r{text-align:right;white-space:nowrap;padding-left:18px;font-family:"IBM Plex Mono",ui-monospace,monospace;
  font-variant-numeric:tabular-nums}
-.stmt-rows td .q{display:block;font-size:var(--t-small);color:var(--mute);margin-top:2px}
+.stmt-rows td .q{display:block;font-size:var(--t-small);font-weight:400;color:var(--mute);margin-top:2px}
 /* In a collapsed table the upper cell's hairline wins over the rule a
    subtotal draws on its own top, so the row above gives its line up. */
 .stmt-rows tr:has(+ tr.stmt-sub) td,.stmt-rows tr:has(+ tr.stmt-total) td{border-bottom:0}

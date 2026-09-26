@@ -7,7 +7,7 @@ import { f } from './fmt.js';
 import { titleCase } from '../lib/name.js';
 import { Figure } from './Motion.jsx';
 import MoneyInput from './MoneyInput.jsx';
-import Row from './PlanRow.jsx';
+import Statement from './Statement.jsx';
 import ShareResult, { OpenedFromLink } from './ShareResult.jsx';
 import useShareLink from './useShareLink.js';
 import { PLAN_SHARE, PLAN_LABELS, PLAN_DEFAULTS as D } from '../lib/share.js';
@@ -591,27 +591,51 @@ export default function Planner({ markets = {}, budget = null, initial = {}, can
         <span><i className="lab">Cash needed</i> <b className="mono">{money(r.cashNeeded)}</b></span>
       </div>
 
+      {/* The working, set as the page's statement and moved up under the
+          answer — at the foot of the page, as plain rows, it read as an
+          appendix (the /cost ledger had the same problem; see Statement.jsx).
+          The cash column now adds up as printed: the cash floor is a
+          constraint on the downpayment, not an amount, so it is a note under
+          it rather than a line in the sum. test/plan.test.js pins the sum. */}
+      <Statement id="plan-working" title="From your income to the cash on the day"
+        basis={`Your figures · rates reviewed ${RATES_REVIEWED}`}
+        lede={<>Each line is a step you can argue with. The smaller of the first two is your loan.</>}>
+        <div className="tablewrap">
+          <table className="stmt-rows">
+            <tbody>
+              <tr><th colSpan={2} scope="colgroup">The loan</th></tr>
+              <tr><td>A bank would assess you for<span className="q">{r.afford.bindingConstraint} over{' '}
+                {r.afford.tenureYears} years, tested at {pc(r.afford.assessedAtRate)}</span></td>
+                <td className="r">{money(r.afford.maxLoan)}</td></tr>
+              <tr><td>The {pc(r.ltv.rate)} ceiling on this price allows<span className="q">{r.ltv.why}</span></td>
+                <td className="r">{money(r.ltv.cap)}</td></tr>
+              <tr className="stmt-sub"><td>So the loan is<span className="q">limited by {r.limitedBy}</span></td>
+                <td className="r">{money(r.loan)}</td></tr>
+
+              <tr><th colSpan={2} scope="colgroup">The cash on the day</th></tr>
+              <tr><td>Downpayment<span className="q">price less the loan · {r.ltv.cashMin === 0
+                ? 'none of it has to be cash — an HDB loan takes it from CPF OA'
+                : `at least ${money(r.cashFloor)} of it must be cash, not CPF`}</span></td>
+                <td className="r">{money(r.downpayment)}</td></tr>
+              <tr><td>Covered by CPF<span className="q">as far as your OA goes</span></td>
+                <td className="r">{r.cpfTowardsDown ? <>&minus;{money(r.cpfTowardsDown)}</> : money(0)}</td></tr>
+              <tr><td>Buyer&rsquo;s Stamp Duty<span className="q">progressive, on the price</span></td>
+                <td className="r">{money(r.duties.bsd)}</td></tr>
+              <tr><td>Additional Buyer&rsquo;s Stamp Duty<span className="q">{r.duties.absd === 0
+                ? 'none — first residential property' : `${pc(r.duties.absdRate)} at this profile and count`}</span></td>
+                <td className="r">{money(r.duties.absd)}</td></tr>
+              <tr><td>Mortgage stamp duty<span className="q">0.4% of the loan, capped at $500</span></td>
+                <td className="r">{money(r.duties.mortgage)}</td></tr>
+              <tr className="stmt-total"><td>Cash needed on the day</td><td className="r">{money(r.cashNeeded)}</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p className="stmt-foot"><b>The cash floor is the part that catches people.</b> However large the
+          OA balance, a bank loan needs part of the downpayment in cash.</p>
+      </Statement>
+
       <MarketWithin market={market} cap={cap} />
       <SizeWithin budget={budget} cap={cap} type={type} />
-
-      <div className="plansteps">
-        <Row label="A bank would assess you for" value={money(r.afford.maxLoan)}
-          note={`${r.afford.bindingConstraint} over ${r.afford.tenureYears} years, tested at ${pc(r.afford.assessedAtRate)}`} />
-        <Row label={`The ${pc(r.ltv.rate)} ceiling on this price allows`} value={money(r.ltv.cap)} note={r.ltv.why} />
-        <Row label="So the loan is" value={money(r.loan)} note={`limited by ${r.limitedBy}`} strong />
-        <Row label="Downpayment" value={money(r.downpayment)} note="price less the loan" />
-        <Row label="— of which must be cash" value={money(r.cashFloor)}
-          note={r.ltv.cashMin === 0
-            ? 'none — an HDB loan takes the downpayment from CPF OA'
-            : `${pc(r.ltv.cashMin)} of price, CPF not allowed`} />
-        <Row label="— covered by CPF" value={money(r.cpfTowardsDown)} note="as far as your OA goes" />
-        <Row label="Buyer's Stamp Duty" value={money(r.duties.bsd)} note="progressive, on the price" />
-        <Row label="Additional Buyer's Stamp Duty" value={money(r.duties.absd)}
-          note={r.duties.absd === 0 ? 'none — first residential property' : `${pc(r.duties.absdRate)} at this profile and count`} />
-        <Row label="Mortgage stamp duty" value={money(r.duties.mortgage)}
-          note="0.4% of the loan, capped at $500 — the line most calculators leave out" />
-        <Row label="Cash needed on the day" value={money(r.cashNeeded)} note="downpayment cash plus all three duties" strong />
-      </div>
 
       {/* After the answer, never in front of it — the email is a copy, not the
           unlock. Absent entirely when the server cannot send. */}

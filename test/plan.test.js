@@ -269,3 +269,23 @@ test('every property type the planner offers has a ceiling above the floor', () 
   assert.ok(caps.length >= 3, 'expected the three per-type ceilings');
   for (const c of caps) assert.ok(c > 100000, `ceiling ${c} is below the slider floor`);
 });
+
+test('the working on /plan adds up to the cash needed on the day, as printed', () => {
+  /* The page sets these lines as a statement with a double-ruled total, so
+     they must sum: downpayment, less what CPF covers, plus the three duties.
+     The cash floor is a constraint on the downpayment, not a line in it. */
+  const cases = [
+    { ...couple, price: 650_000, propertyType: 'HDB', hdbLoan: true },
+    { ...couple, price: 650_000, propertyType: 'HDB', hdbLoan: false },
+    { ...couple, price: 1_600_000, propertyType: 'PRIVATE', propertyCount: 2 },
+    { ...couple, price: 1_300_000, propertyType: 'EC', cpfAvailable: 5_000 },
+  ];
+  for (const c of cases) {
+    const p = plan(c);
+    assert.equal(p.downpayment - p.cpfTowardsDown + p.duties.bsd + p.duties.absd + p.duties.mortgage,
+      p.cashNeeded, `the printed lines do not add up for ${c.propertyType}`);
+    assert.ok(p.downpayment - p.cpfTowardsDown >= p.cashFloor, 'CPF was allowed below the cash floor');
+  }
+  const src = plannerSrc;
+  assert.match(src, /<Statement id="plan-working"/, 'the working is no longer set as the page statement');
+});
