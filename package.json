@@ -76,7 +76,8 @@
     "ingest:realis": "node scripts/ingest-realis.mjs",
     "ingest:listings": "node scripts/ingest-listings.mjs",
     "reading": "node scripts/reading.mjs",
-    "make:blueprints": "node scripts/make/gen-blueprint.mjs && node scripts/make/gen-daily-source-brief.mjs"
+    "make:blueprints": "node scripts/make/gen-blueprint.mjs && node scripts/make/gen-daily-source-brief.mjs",
+    "ingest:p1": "node scripts/ingest-p1.mjs"
   },
   "dependencies": {
     "next": "^15.0.0",
