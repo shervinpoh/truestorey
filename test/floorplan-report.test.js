@@ -70,6 +70,8 @@ test('a line in the site\'s prohibited language or an invented voice is dropped,
     { theme: 'privacy', observation: 'The main door opens straight into the living room.', whyItMatters: 'A visitor sees in.' },
   ] });
   assert.equal(r.unit.summary, '');
+  assert.equal(normaliseReport({ isFloorPlan: true, unit: { type: '3-bedroom flat (appears to be an older HDB layout)' } }).unit.type,
+    '3-bedroom flat', 'a hedge in brackets was left in the headline');
   assert.deepEqual(r.findings.map(f => f.observation), ['The main door opens straight into the living room.']);
   assert.equal(byTheme(r.findings)[0].heading, 'Privacy');
 });

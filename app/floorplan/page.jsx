@@ -7,7 +7,7 @@ import FloorplanUpload from '../../components/FloorplanUpload.jsx';
 
 export const metadata = {
   ...shareCard('/floorplan'),
-  title: 'Floorplan Reader — layout, light and what to ask a QP | Truestorey',
+  title: 'Floorplan Reader — how the unit lives, from its plan | Truestorey',
   description: 'Upload a floor plan and get a report on living in that unit: zoning, privacy, light and air, where the bathrooms and laundry sit, a room-by-room table, a viewing checklist and the wall questions for a qualified person. Shareable. Free, nothing stored.',
   alternates: { canonical: '/floorplan' },
 };

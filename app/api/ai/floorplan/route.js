@@ -72,7 +72,7 @@ Return ONLY this JSON:
   "atTheViewing": [ string ],
   "cannotTell": [ string ]
 }
-"unit.summary" is two or three sentences. "findings" holds 6 to 12 items. "atTheViewing" holds 5 to 8 things to check or measure in person, each tied to something in this plan.`;
+"unit.type" is at most six words, such as "4-room HDB flat" or "3-bedroom condominium unit"; any doubt about the type goes in the summary. "unit.summary" is two or three sentences. "findings" holds 6 to 12 items. "atTheViewing" holds 5 to 8 things to check or measure in person, each tied to something in this plan.`;
 
 async function read(buf, type, signal) {
   if (configured.anthropic()) {

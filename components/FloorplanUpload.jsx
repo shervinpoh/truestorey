@@ -168,7 +168,7 @@ export default function FloorplanUpload() {
                         {sized && <td className="mono">{x.printedSize
                           ? <>{x.printedSize} · {x.areaSqm} m²{x.bed && <><br />{x.bed === 'none of the standard sizes' ? 'no standard bed fits with walkways' : `fits a ${x.bed.toLowerCase()} bed`}</>}</>
                           : '—'}</td>}
-                        <td>{[x.note, x.door].filter(Boolean).join(' ')}</td>
+                        <td>{x.note}{x.door && <>{x.note && <br />}Door: {x.door}</>}</td>
                       </tr>
                     ))}
                   </tbody>
