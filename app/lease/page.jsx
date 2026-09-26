@@ -21,7 +21,7 @@ export default function Page() {
       <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]}
         title="What a lease is worth"
         sub="The table the State uses to price a lease, and what one more year of holding costs." />
-      <ToolIntro href="/lease" example="figures" lean />
+      <ToolIntro href="/lease" example="figures" lean shares={false} />
       <ToolUse id="lease" />
       <section className="pane">
         <LeaseView observed={observed()} />

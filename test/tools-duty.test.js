@@ -45,7 +45,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { bsd, absd, ssd } from '../lib/calc/stampDuty.js';
+import { bsd, absd, ssd, bsdBandsAsPrinted } from '../lib/calc/stampDuty.js';
 
 const stripComments = s => s
   .replace(/\{\/\*[\s\S]*?\*\/\}/g, '')
@@ -136,5 +136,20 @@ test('the figures the tool should now print, pinned', () => {
     assert.equal(s.rate, rate, `legacy SSD sold ${sale}`);
     assert.equal(s.total, duty, `legacy SSD sold ${sale}`);
     assert.equal(s.duty, undefined, 'ssd() has grown a `duty` key — see above');
+  }
+});
+
+test('the band-by-band statement adds up to the total it prints', () => {
+  /* /stamp-duty lists every BSD band under a double-ruled total. The bands
+     must cover the whole price once and, as printed, sum to bsd().total at any
+     price — including one where the top band carries cents and the total has
+     been rounded to the dollar. */
+  for (const price of [150_000, 650_000, 1_200_000, 1_234_567, 1_500_001, 3_500_000, 12_000_001]) {
+    const b = bsd(price);
+    const printed = bsdBandsAsPrinted(b);
+    assert.equal(printed.reduce((s, x) => s + (x.to - x.from), 0), price, `the bands do not cover ${price}`);
+    assert.equal(printed.reduce((s, x) => s + Math.round(x.duty), 0), b.total,
+      `the printed bands do not sum to the total at ${price}`);
+    for (const x of printed) assert.ok(Number.isInteger(x.duty), `a printed band carries cents at ${price}`);
   }
 });

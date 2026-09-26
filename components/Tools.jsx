@@ -1,13 +1,14 @@
 'use client';
 import { useMemo, useState } from 'react';
 import { affordability } from '../lib/calc/affordability.js';
-import { bsd, absd, ssd } from '../lib/calc/stampDuty.js';
+import { bsd, absd, ssd, bsdBandsAsPrinted } from '../lib/calc/stampDuty.js';
 import { sellTimeline } from '../lib/calc/timeline.js';
 import { amortise, extraPaymentSaving } from '../lib/calc/amortise.js';
 import { SOURCES, TDSR_LIMIT, MSR_LIMIT, STRESS_TEST_RATE, VARIABLE_INCOME_HAIRCUT } from '../lib/calc/constants.js';
 import { f } from './fmt.js';
 import { QUICK } from '../lib/nav.js';
 import { toolRun } from './Track.jsx';
+import Statement from './Statement.jsx';
 
 /**
  * The three calculators that were built, tested, and reachable from nowhere.
@@ -76,20 +77,28 @@ export default function Tools({ ratesReviewed, asked = null }) {
       </div>
       <p className="prov" style={{ marginTop: 26 }}>
         {tab === 'loan' ? <>Source: your loan amount, rate, term and extra payment. Monthly amortisation,
-          with the same rate throughout the term. Figures rounded to the nearest dollar.</> : <>
-        Rates last reviewed {ratesReviewed}. TDSR {pc(TDSR_LIMIT)} · MSR {pc(MSR_LIMIT)} ·
-        stress rate {pc(STRESS_TEST_RATE)}.<br />
-        {SOURCES.bsd.name} (effective {SOURCES.bsd.effective}) · {SOURCES.absd.name} (effective {SOURCES.absd.effective}) ·
-        {' '}{SOURCES.ssd.name} (effective {SOURCES.ssd.effective}).<br />
-        These are calculations against published rates, not advice, and not a substitute for IRAS or your banker.
-        </>}
+          with the same rate throughout the term. Figures rounded to the nearest dollar.</>
+          : <RatesSources ratesReviewed={ratesReviewed} />}
       </p>
     </>
   );
 }
 
+/** The rates and sources line, shared with the pages that carry one of these
+ *  calculators on its own — one wording, so the two cannot drift. */
+export function RatesSources({ ratesReviewed }) {
+  return (<>
+    Rates last reviewed {ratesReviewed}. TDSR {pc(TDSR_LIMIT)} · MSR {pc(MSR_LIMIT)} ·
+    stress rate {pc(STRESS_TEST_RATE)}.<br />
+    {SOURCES.bsd.name} (effective {SOURCES.bsd.effective}) · {SOURCES.absd.name} (effective {SOURCES.absd.effective}) ·
+    {' '}{SOURCES.ssd.name} (effective {SOURCES.ssd.effective}).<br />
+    These are calculations against published rates, not advice, and not a substitute for IRAS or your banker.
+  </>);
+}
+
 /* ───────────────────────────── when can I sell ─────────────────────────── */
-function Sell() {
+/* Exported for /when-can-i-sell, which gives this its own page. */
+export function Sell() {
   const [kind, setKind] = useState('HDB');
   const [mopYears, setMopYears] = useState(5);
   const [date, setDate] = useState('2022-03-15');
@@ -373,7 +382,8 @@ const PROFILES = [
   ['SC', 'Singapore Citizen'], ['SPR', 'PR'], ['FOREIGNER', 'Foreigner'], ['ENTITY', 'Entity'],
 ];
 
-function Duty() {
+/* Exported for /stamp-duty, which gives this its own page. */
+export function Duty() {
   const [price, setPrice] = useState(1200000);
   const [profile, setProfile] = useState('SC');
   const [count, setCount] = useState(1);
@@ -445,6 +455,29 @@ function Duty() {
           </div>
         </div>
       </div>
+      {/* Band by band, as the menu and this page's title promise. The
+          headline total above had nothing under it, so "band by band" was a
+          claim the tool did not show. */}
+      {validPrice && a && b.bands?.length > 0 && (
+        <Statement id="duty-bands" title={`Stamp duty on ${money(amount)}`} basis="IRAS rates in force · band by band">
+          <div className="tablewrap">
+            <table className="stmt-rows">
+              <tbody>
+                <tr><th colSpan={2} scope="colgroup">Buyer&rsquo;s Stamp Duty</th></tr>
+                {bsdBandsAsPrinted(b).map((x, i) => (
+                  <tr key={x.from}><td>{pc(x.rate)} on the {i === 0 ? 'first' : 'next'} {money(x.to - x.from)}</td>
+                    <td className="r">{money(x.duty)}</td></tr>
+                ))}
+                <tr className="stmt-sub"><td>Buyer&rsquo;s Stamp Duty</td><td className="r">{money(b.total)}</td></tr>
+                <tr><th colSpan={2} scope="colgroup">Additional Buyer&rsquo;s Stamp Duty</th></tr>
+                <tr><td>{pc(a.rate)} of the whole price<span className="q">at this buyer profile and property count</span></td>
+                  <td className="r">{money(a.total)}</td></tr>
+                <tr className="stmt-total"><td>Stamp duty to pay</td><td className="r">{money(b.total + a.total)}</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </Statement>
+      )}
       {(profile === 'FOREIGNER') && (
         <div className="note"><b>Free trade agreements are not modelled here.</b> Nationals of certain
           countries are treated as citizens for ABSD. If that might be you, check with IRAS rather than

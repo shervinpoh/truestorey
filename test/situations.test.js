@@ -300,6 +300,19 @@ test('no destination is offered in two menus', () => {
   for (const run of TOOL_GROUPS) for (const i of run.items) add(i.href, `Tools › ${run.label}`);
 });
 
+test('no two tools in the menu open the same page', () => {
+  /* Shervin, 26 Sep: "stamp duty on a price" and "when can I sell" "bring me
+     to the same page". Both were /tools?calc=…, which opened the top of
+     /tools for either. A query string or a fragment is not a different page
+     to a reader; the path is. */
+  const seen = new Map();
+  for (const run of TOOL_GROUPS) for (const t of run.items) {
+    const path = t.href.split(/[?#]/)[0];
+    assert.ok(!seen.has(path), `${t.name} and ${seen.get(path)} both open ${path}`);
+    seen.set(path, t.name);
+  }
+});
+
 test('every item still belongs to exactly one run', () => {
   // runsOf() is what the menu renders. If it ever dropped an item the footer
   // would still list it and the menu quietly would not, which is the

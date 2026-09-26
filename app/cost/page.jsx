@@ -10,7 +10,7 @@ import FromBack from '../../components/FromBack.jsx';
 export const metadata = {
   ...shareCard('/cost'),
   title: 'What owning it actually costs — the ledger before the property does anything | Truestorey',
-  description: 'Stamp duty, interest, commission, and the CPF interest accruing against your home the whole time you live in it. What a sale must clear to return your own money, and what it would take to have kept pace with the CPF Ordinary Account rate. Free, nothing saved.',
+  description: 'Stamp duty, interest, commission, and the CPF refund with the interest it accrues while you live there — and the price a sale must clear to return your own money, line by line. Free, nothing saved.',
   alternates: { canonical: '/cost' },
 };
 

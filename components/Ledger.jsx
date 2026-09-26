@@ -489,7 +489,7 @@ export default function Ledger({ indices = {}, canEmail = false }) {
           not the unlock. Absent entirely when the server cannot send. */}
       {canEmail && <EmailReport tool="cost" hash={shareHash} title="the ledger" />}
 
-      <ResultBridge tool="ownership-cost ledger" nextHref="/tools?calc=sell#quick"
+      <ResultBridge tool="ownership-cost ledger" nextHref="/when-can-i-sell"
         nextLabel="Check the dates that affect a sale" />
 
       <p className="prov" style={{ marginTop: 22 }}>
