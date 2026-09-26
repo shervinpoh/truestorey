@@ -19,7 +19,7 @@ import path from 'node:path';
 import { verify } from '../lib/editorial/verify.js';
 import { allowedNumbers, numbersPanel, show } from '../lib/editorial/figures.js';
 import { write, parse, brief } from '../lib/editorial/write.js';
-import { tablesOf, isoDate, relevant, weight, embeddedHtml } from '../lib/editorial/sources.js';
+import { tablesOf, isoDate, relevant, weight, embeddedHtml, chooseRelease } from '../lib/editorial/sources.js';
 import { releasePack } from '../lib/editorial/packs.js';
 import { TOPICS } from '../lib/editorial/analysis.js';
 import { inventedVoice, publishBlockers } from '../lib/compliance.js';
@@ -211,4 +211,24 @@ test('a share sends the article and nothing about the reader', () => {
   assert.match(page, /await feed\(\)/, 'Keep reading went back to the file-only list');
   const og = code('app', 'og', 'route.jsx');
   assert.match(og, /COMMONS\.test\(src\)/, 'the share card fetches a photograph from anywhere');
+});
+
+test('a tender closing is never chosen once its award is out, covered or not', () => {
+  /* 26 Sep 2026: the award (pr26-66) had already been written up, so it was
+     filtered out before the check, and the closing (pr26-65) was filed as
+     "7 bids for Lorong Puntong land, and still no award". */
+  const closing = { url: 'https://www.ura.gov.sg/news/media/pr26-65/', iso: '2026-09-15',
+    title: 'Tender closing for URA sale site at Lorong Puntong / Sin Ming Avenue' };
+  const award = { url: 'https://www.ura.gov.sg/news/media/pr26-66/', iso: '2026-09-18',
+    title: 'Tender award for URA sale site at Lorong Puntong / Sin Ming Avenue' };
+  assert.equal(chooseRelease({ found: [award, closing], covered: new Set([award.url]) }), null,
+    'the closing was chosen after its award had been written up');
+  assert.equal(chooseRelease({ found: [award, closing] })?.url, award.url, 'the award should win over its closing');
+  assert.equal(chooseRelease({ found: [closing] })?.url, closing.url, 'a closing with no award yet is still news');
+  const other = { ...closing, url: 'x', title: 'Tender closing for URA sale site at Dunearn Road' };
+  assert.equal(chooseRelease({ found: [award, other], covered: new Set([award.url]) })?.url, 'x',
+    'an award for one site must not suppress the closing of another');
+  const wording = { ...award, url: 'y', title: 'Award of Tender for URA sale site at Lorong Puntong / Sin Ming Avenue' };
+  assert.equal(chooseRelease({ found: [wording, closing], covered: new Set(['y']) }), null,
+    '"Award of tender" is an award too');
 });

@@ -25,7 +25,7 @@
  *
  * A day with nothing new files nothing and says so.
  */
-import { recentReleases, readRelease, weight } from '../lib/editorial/sources.js';
+import { recentReleases, readRelease, chooseRelease } from '../lib/editorial/sources.js';
 import { releasePack } from '../lib/editorial/packs.js';
 import { write } from '../lib/editorial/write.js';
 import { recentArticles, fileDraft, notifyBot, refuseLocalhost } from '../lib/editorial/file.js';
@@ -47,15 +47,10 @@ if (ONE) {
 } else {
   console.log('\nReading the agencies\' news pages…');
   const found = await recentReleases({ skip: covered, log: console.log });
-  const fresh = found.filter(r => !covered.has(r.url)
-    && !duplicateOf({ title: r.title, slug: r.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') }, filed || []));
-  /* A tender closing is only worth a piece when its award is not also out:
-     the award says everything the closing did, and who won. */
-  const awarded = new Set(fresh.filter(r => /tender award/i.test(r.title)).map(r => r.title.replace(/^.*?sale site at /i, '')));
-  const pool = fresh.filter(r => !(/tender closing/i.test(r.title) && awarded.has(r.title.replace(/^.*?sale site at /i, ''))));
-  pool.sort((a, b) => weight(b.title) - weight(a.title) || b.iso.localeCompare(a.iso));
   for (const r of found) if (covered.has(r.url)) console.log(`  already written: ${r.title}`);
-  release = pool[0];
+  /* chooseRelease, not inline: the award-supersedes-closing check was wrong
+     here and filed a closing as news after its award — see sources.js. */
+  release = chooseRelease({ found, covered, filed: filed || [], duplicateOf });
   if (!release) { console.log(`\nNothing new and residential in the last three weeks. Filing nothing.\n`); process.exit(0); }
 }
 
