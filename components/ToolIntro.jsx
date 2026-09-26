@@ -29,9 +29,17 @@ import { itemFor } from '../lib/nav.js';
  * inputs are illustrative can carry a S$1.6m stranger's number away as their
  * own. Pass the noun for whatever the page has prefilled.
  */
-export default function ToolIntro({ href, example = null, compact = false }) {
+export default function ToolIntro({ href, example = null, compact = false, lean = false }) {
   const t = itemFor(href);
   if (!t?.use) return null;
+  /* lean: the word-budget pilot (26 Sep). The three-part "use / need / get"
+     restated what the title and the form already say; what a reader cannot
+     tell from the page is that the figures are an example and stay put. */
+  if (lean) return (
+    <p className="egline">{example
+      ? <><b>The {example} below are an example.</b> Replace them with yours — they stay in this browser unless you share them or ask for a copy.</>
+      : t.need}</p>
+  );
   const words = (
     <dl>
       <div><dt>Use this when</dt><dd>{t.use}</dd></div>

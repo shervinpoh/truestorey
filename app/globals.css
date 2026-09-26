@@ -3016,3 +3016,20 @@ sup.cite a:hover{text-decoration:underline}
 .keepreading a:hover .kr-title{text-decoration:underline;text-underline-offset:3px}
 .keepreading .kr-sum{font-size:var(--t-small);color:var(--ink2);margin:0 0 6px;line-height:1.45}
 .keepreading .kr-meta{font-size:var(--t-micro);color:var(--mute);margin:0}
+
+/* ── the explanation fold (components/HowWorked.jsx) ─────────────────────── */
+.howworked{margin:14px 0 0;border-top:1px solid var(--line)}
+.howworked>summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;
+ gap:12px;padding:11px 0;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--t-micro);
+ letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.howworked>summary::-webkit-details-marker{display:none}
+.howworked>summary::after{content:"+";font-size:var(--t-small);color:var(--ink)}
+.howworked[open]>summary::after{content:"\2212"}
+.howworked>summary:hover{color:var(--ink)}
+.howworked-body{font-size:var(--t-small);color:var(--ink2);line-height:1.55;padding:0 0 12px;max-width:72ch}
+.howworked-body p{margin:0 0 10px}
+.howworked-body ul{margin:0 0 10px;padding-left:18px}
+.howworked-body li{margin-bottom:6px}
+/* One line under the page title, and the example note beside it. */
+.egline{font-size:var(--t-small);color:var(--ink2);margin:0 0 18px}
+.egline b{color:var(--ink)}

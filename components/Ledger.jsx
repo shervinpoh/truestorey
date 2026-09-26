@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import HowWorked from './HowWorked.jsx';
 import MoneyInput from './MoneyInput.jsx';
 import { Figure } from './Motion.jsx';
 import { f, num } from './fmt.js';
@@ -170,8 +171,7 @@ export default function Ledger({ indices = {}, canEmail = false }) {
             {/* The month matters, not just the year: the SSD schedule changed
                 on 4 Jul 2025 and it is chosen by PURCHASE date. */}
             <p className="hint" style={{ margin: '8px 0 0' }}>
-              The month is used to pick the Seller&rsquo;s Stamp Duty schedule, which changed on
-              4 July 2025 and is selected by when you <em>bought</em>, not when you sell.
+              The month picks the Seller&rsquo;s Stamp Duty schedule.
             </p>
           </fieldset>
 
@@ -192,23 +192,17 @@ export default function Ledger({ indices = {}, canEmail = false }) {
                   onChange={e => setTenure(e.target.value)} /></label>
             </div>
             <p className="hint" style={{ margin: '8px 0 0' }}>
-              The loan is what is left: <b className="mono">{f(loan)}</b>, or{' '}
-              <b className="mono">{(ltv * 100).toFixed(0)}%</b> of the price.
-              {ltv > 0.75 && <> That is above the 75% ceiling for a first housing loan — the
-                figures below still compute it, but a bank would not lend it.</>}
-              {' '}CPF per month is the part of the instalment your Ordinary Account pays; the rest
-              comes out of your pocket and is counted as cash.
+              Loan <b className="mono">{f(loan)}</b> · <b className="mono">{(ltv * 100).toFixed(0)}%</b> of the price.
+              {ltv > 0.75 && <> Above the 75% ceiling — a bank would not lend it.</>}
             </p>
             {/* A control must not use a different number from the one typed
                 into it. The excess is real money — it just never enters the
                 property, so it is not in this ledger. */}
             {r.cpfEntry.clamped && (
               <p className="hint warnline" style={{ margin: '8px 0 0' }}>
-                The instalment is only <b className="mono">{f(r.holding.instalment)}</b>, so that is
-                all your CPF can pay towards it. The remaining{' '}
-                <b className="mono">{f(r.cpfEntry.wanted - r.cpfEntry.used)}</b> a month stays in
-                your Ordinary Account earning the same {(r.cpf.rate * 100).toFixed(1)}% — it never
-                goes into the property, so it is not counted below.
+                The instalment is only <b className="mono">{f(r.holding.instalment)}</b>, so CPF pays
+                no more than that; the other <b className="mono">{f(r.cpfEntry.wanted - r.cpfEntry.used)}</b> a
+                month stays in your Ordinary Account.
               </p>
             )}
           </fieldset>
@@ -224,16 +218,12 @@ export default function Ledger({ indices = {}, canEmail = false }) {
                   onChange={e => setAgent(e.target.value)} /></label>
             </div>
             <p className="hint" style={{ margin: '8px 0 0' }}>
-              Commission is a matter between you and your agent — nobody publishes a rate, so this
-              is your figure and not a market average. GST at {(r.exit.gstRate * 100).toFixed(0)}% is
-              added to it.
+              Your agreed fee. GST at {(r.exit.gstRate * 100).toFixed(0)}% is added.
             </p>
             {r.holding.repaidInYear && (
               <p className="hint warnline" style={{ margin: '8px 0 0' }}>
-                The loan is repaid in year <b className="mono">{r.holding.repaidInYear}</b>, so
-                nothing more goes in after that. The CPF you had already used stays used, and its
-                accrued interest keeps running until the day you sell — which is why that figure
-                carries on climbing while the principal does not.
+                Loan repaid in year <b className="mono">{r.holding.repaidInYear}</b>. The CPF you
+                used keeps accruing interest until you sell.
               </p>
             )}
           </fieldset>
@@ -284,12 +274,9 @@ export default function Ledger({ indices = {}, canEmail = false }) {
             {/* The whole ledger works without this. Saying so stops it reading
                 as a required field somebody has to satisfy before an answer. */}
             <p className="hint" style={{ margin: '8px 0 0' }}>
-              Every figure below works without this. Name a home and the ledger also reads what
-              places like it actually let for, from filed tenancy contracts — which is the one
-              number a cost of ownership is meaningless without.
-              {lookup === 'failed' && <> That lookup failed; the rest of the page is unaffected.</>}
-              {lookup === 'done' && !market?.rent && <> No filed tenancy contract cohort was found
-                for this one, so the rent comparison stays off.</>}
+              Optional. Adds what similar homes rent for, from filed contracts.
+              {lookup === 'failed' && <> The lookup failed; nothing else is affected.</>}
+              {lookup === 'done' && !market?.rent && <> No filed rents for this one.</>}
             </p>
           </fieldset>
         </div>
@@ -300,11 +287,8 @@ export default function Ledger({ indices = {}, canEmail = false }) {
               <span className="lab">A sale must clear</span>
               <Figure value={clear} format={f} />
               <p className="hint">
-                to return every dollar of cash you have put in — after settling the loan
-                {cpfBack ? ', refunding CPF with its interest,' : ''} and paying the commission and
-                legal fees{r.exit.ssd.rate ? ', and Seller’s Stamp Duty' : ''}.
-                {overPaid !== null && <> That is <b>{(overPaid * 100).toFixed(1)}%</b> above what
-                  you paid.</>}
+                to return every dollar of cash you put in{cpfBack ? ', after refunding CPF' : ''}.
+                {overPaid !== null && <> <b>{(overPaid * 100).toFixed(1)}%</b> above what you paid.</>}
               </p>
             </div>
             {/* Only when CPF was actually used. This slot used to grow the
@@ -317,11 +301,8 @@ export default function Ledger({ indices = {}, canEmail = false }) {
                 <span className="lab">Goes back to CPF, not to you</span>
                 <Figure value={cpfBack.total} format={f} />
                 <p className="hint">
-                  {f(cpfBack.principal)} you took out, plus{' '}
-                  <b className="mono">{f(cpfBack.interest)}</b> of accrued interest —{' '}
-                  {(cpfBack.interestShare * 100).toFixed(0)}% of the refund is money you never
-                  had. It returns to your Ordinary Account at completion, so it is not part of
-                  what you walk away with.
+                  {f(cpfBack.principal)} used plus <b className="mono">{f(cpfBack.interest)}</b> interest.
+                  It returns to your CPF, not to you.
                 </p>
               </div>
             )}
@@ -333,18 +314,15 @@ export default function Ledger({ indices = {}, canEmail = false }) {
             <dl className="resultguide" aria-label="How to use this result">
               <div>
                 <dt>What changed it</dt>
-                <dd>The hurdle combines the loan still owing, CPF to refund, selling costs and
-                  every dollar of cash you have put in.</dd>
+                <dd>Loan owing, CPF refund, selling costs and your cash in.</dd>
               </div>
               <div>
                 <dt>What this cannot know</dt>
-                <dd>The eventual sale price. Maintenance, tax, insurance and renovation are also
-                  absent because no public per-property figure exists.</dd>
+                <dd>The sale price. Maintenance, tax and renovation.</dd>
               </div>
               <div className="resultnext">
                 <dt>Next useful step</dt>
-                <dd><a href="#downside">Test this hurdle against the historical record &rarr;</a>
-                  <span>Every {num(r.yearsHeld)}-year window in the published index. No forecast.</span></dd>
+                <dd><a href="#downside">Test it against the historical record &rarr;</a></dd>
               </div>
             </dl>
             <ShareResult tool="cost" title="What owning it actually costs — Truestorey" url={shareUrl} />
@@ -383,8 +361,7 @@ export default function Ledger({ indices = {}, canEmail = false }) {
             <div>
               <span className="lab">Gone for good, owning</span>
               <b className="mono">{f(r.renting.friction)}</b>
-              <span className="hint">Duties, interest and fees. Not the loan principal or the CPF
-                refund — those are still yours, in another form.</span>
+              <span className="hint">Duties, interest and fees only.</span>
             </div>
             <div>
               <span className="lab">Rent over the same {num(r.yearsHeld)} year{r.yearsHeld === 1 ? '' : 's'}</span>
@@ -400,9 +377,7 @@ export default function Ledger({ indices = {}, canEmail = false }) {
             <div className={r.renting.difference > 0 ? 'diff over' : 'diff under'}>
               <span className="lab">{r.renting.difference > 0 ? 'Owning cost more' : 'Owning cost less'}</span>
               <b className="mono">{f(Math.abs(r.renting.difference))}</b>
-              <span className="hint">
-                Before any change in what the home is worth, which this page does not estimate.
-              </span>
+              <span className="hint">Before any change in the home&rsquo;s value.</span>
             </div>
           </div>
           {market?.rent && (
@@ -462,29 +437,21 @@ export default function Ledger({ indices = {}, canEmail = false }) {
         </table>
       </div>
 
-      <div className="note">
-        <b>This is not a valuation.</b> Every figure above comes from what you typed, from
-        published rates, and — in the section on being wrong — from a published index applied to
-        your own purchase price over periods that are named and dated. None of it is an opinion
-        about what your home is worth or what it will fetch: an index is a market and a home is one
-        home, and no number on this page claims to be the second. What a sale would actually
-        realise is a separate question, and{' '}
-        <Link href="/condo">the filed transaction ranges</Link> are the evidence for it.
-      </div>
-
-      <div className="note" style={{ marginTop: 20 }}>
-        <b>What is not in this ledger.</b>
-        <ul className="bul">{r.omissions.map(o => <li key={o.slice(0, 24)}>{o}</li>)}</ul>
-        <p style={{ margin: '10px 0 0' }}>
-          URA&rsquo;s filed rental contracts are on <Link href="/yield">the rental yield page</Link> if
-          you want to put a real number to the first of those.
-        </p>
-      </div>
-
-      <div className="note" style={{ marginTop: 20 }}>
-        <b>The rules being applied.</b>
-        <ul className="bul">{r.caveats.map(c => <li key={c.slice(0, 24)}>{c}</li>)}</ul>
-      </div>
+      <p className="hint" style={{ marginTop: 12 }}>Your inputs and published rates — not a valuation of any home.</p>
+      <HowWorked title="What is not in this ledger, and the rules applied">
+        <p>Every figure comes from what you typed, from published rates, and — in the section on
+          being wrong — from a published index applied to your own price over named, dated periods.
+          None of it says what your home is worth or will fetch; <Link href="/condo">the filed
+          transaction ranges</Link> are the evidence for that.</p>
+        <p><b>Not in this ledger:</b></p>
+        <ul>{r.omissions.map(o => <li key={o.slice(0, 24)}>{o}</li>)}</ul>
+        <p>URA&rsquo;s filed rental contracts are on <Link href="/yield">the rental yield page</Link>.</p>
+        <p><b>The rules being applied:</b></p>
+        <ul>{r.caveats.map(c => <li key={c.slice(0, 24)}>{c}</li>)}</ul>
+        <p>CPF per month is the part of the instalment your Ordinary Account pays; the rest is cash.
+          Commission is your agreed figure, not a market average. The month you bought picks the
+          Seller&rsquo;s Stamp Duty schedule, which changed on 4 July 2025.</p>
+      </HowWorked>
 
       {/* After the answer, never in front of it — §8.2: the email is a copy,
           not the unlock. Absent entirely when the server cannot send. */}
@@ -499,7 +466,7 @@ export default function Ledger({ indices = {}, canEmail = false }) {
         <a href="https://www.cpf.gov.sg/service/article/how-much-do-i-need-to-refund-to-my-cpf-account-if-i-am-selling-my-whole-property"
            target="_blank" rel="noopener noreferrer">CPF Board</a>
         {' · '}nothing on this page is saved. Your figures leave the browser only if you ask for
-        the emailed copy, which is written from them and stored nowhere; the WhatsApp handoff includes no figures.
+        the emailed copy; the WhatsApp handoff includes no figures.
       </p>
 
       <h2 className="sh" style={{ marginTop: 26 }}><span>The rest of it</span></h2>

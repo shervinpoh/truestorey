@@ -96,10 +96,7 @@ export default function Scenarios({ indices = {}, r, price, propertyType }) {
       <h2 className="sh" style={{ marginTop: 26 }}><span>Three you set yourself</span></h2>
 
       <p className="wrongintro">
-        The section above reads the record and chooses nothing. This one does the opposite: you
-        pick the rate, and the arithmetic follows your assumption. Under each slider is the number
-        of {num(years)}-year stretches in the published index that finished at or below the rate
-        you have set — so the assumption stays yours, and how common it has been does not.
+        Pick your own growth rates. Under each: how often the record has done that or worse.
       </p>
 
       {/* A <div>, not a <label>. Wrapping the whole card in a label forwards a
@@ -135,11 +132,7 @@ export default function Scenarios({ indices = {}, r, price, propertyType }) {
         <span>Maintenance, tax and insurance, per month</span>
         <input type="number" min="0" max="5000" step="50" value={monthly}
           onChange={e => setMonthly(e.target.value)} />
-        <span className="hint">
-          Your figure — nobody publishes it per property. It is the first thing named in
-          &ldquo;what is not in this ledger&rdquo; above, and it is the only part of this section
-          the ledger does not already carry.
-        </span>
+        <span className="hint">Your estimate — nobody publishes it per property.</span>
       </label>
 
       {/* The key sits ABOVE the bars, not below them. On a phone the three bars
@@ -201,15 +194,11 @@ export default function Scenarios({ indices = {}, r, price, propertyType }) {
         ))}
       </div>
 
-      <div className="note" style={{ marginTop: 16 }}>
-        <b>These are three arithmetics on three rates you typed.</b> None of them is a forecast and
-        the page does not say which is likely — only how often each has happened. Every figure comes
-        from your own inputs, the published duties, and the index counts beside the sliders. The bar
-        is where a sale price goes, not a view on whether it is a good one.
-        {r.exit.ssd.rate > 0 && <> Seller&rsquo;s Stamp Duty at{' '}
-          <b className="mono">{(r.exit.ssd.rate * 100).toFixed(0)}%</b> is inside the selling costs
-          at this holding period, which is why the short horizons look the way they do.</>}
-      </div>
+      <p className="hint" style={{ marginTop: 14 }}>
+        Three rates you set — not forecasts.
+        {r.exit.ssd.rate > 0 && <> Selling costs include Seller&rsquo;s Stamp Duty at{' '}
+          <b className="mono">{(r.exit.ssd.rate * 100).toFixed(0)}%</b> at this holding period.</>}
+      </p>
     </>
   );
 }

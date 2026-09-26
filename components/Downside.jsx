@@ -1,6 +1,7 @@
 'use client';
 import { useMemo, useState } from 'react';
 import { f, num } from './fmt.js';
+import HowWorked from './HowWorked.jsx';
 import { distribution, countAtOrBelow, cagrFromTotal, qNum, qLabel } from '../lib/calc/windows.js';
 import { saleOutcome } from '../lib/calc/ledger.js';
 
@@ -133,10 +134,7 @@ export default function Downside({ indices = {}, r, price, propertyType }) {
       <h2 className="sh" id="downside" style={{ marginTop: 26 }}><span>What it costs to be wrong</span></h2>
 
       <p className="wrongintro">
-        Everything above assumes the price does whatever it does. This is the other tail. It makes
-        no forecast and picks no growth rate: it reads the published index, takes <b>every</b>{' '}
-        {spanAdj} stretch that has ever run in it, and applies what actually happened in each one
-        to the price you paid.
+        No forecast: <b>every</b> past {spanAdj} stretch of the published index, applied to your price.
       </p>
 
       {propertyType === 'PRIVATE' && (indices.landed && indices.nonLanded) && (
@@ -192,22 +190,14 @@ export default function Downside({ indices = {}, r, price, propertyType }) {
                   seventeen. The total rises and the RATE it asks for falls, and
                   quoting only the total made a 2.7%-a-year bar read as a
                   58.3% one. */}
-              <p className="wrongwhy">
-                That total rises the longer you hold, because you keep putting cash in —{' '}
-                <b className="mono">{f(r.cash.total)}</b> so far, and every instalment adds to it.
-                The rate it asks for falls at the same time. A longer hold is a bigger number and
-                an easier one.
-              </p>
               <p className={missed.count ? 'wrongcount' : 'wrongcount ok'}>
                 <b className="mono">{num(missed.count)} of the {num(missed.of)}</b> {spanAdj}{' '}
                 stretches in {idx.name.replace(/ —.*/, '')} since {dist.from} finished below that.
               </p>
               {sinceBought && (
                 <p className="wrongsince">
-                  Since you bought, in {sinceBought.from}, that index has moved{' '}
-                  <b className="mono">{pct(sinceBought.change)}</b> to {sinceBought.to}. That is what
-                  the market did, not what this home did — the two are not the same number and
-                  nothing here claims to know the second.
+                  Since you bought ({sinceBought.from}) the index has moved{' '}
+                  <b className="mono">{pct(sinceBought.change)}</b> to {sinceBought.to} — the market, not this home.
                 </p>
               )}
             </div>
@@ -229,20 +219,15 @@ export default function Downside({ indices = {}, r, price, propertyType }) {
                   </b>
                   <span className="hint">
                     {o.cashToComplete > 0
-                      ? <>to <b>bring to completion</b>. A sale at that price does not redeem the
-                          loan, and the bank is not optional.</>
-                      : <>in your hand at completion, against <b className="mono">{f(r.cash.total)}</b>{' '}
-                          of cash you put in — {o.cashChange >= 0 ? 'up' : 'down'}{' '}
-                          <b className="mono">{f(Math.abs(o.cashChange))}</b>.</>}
-                    {o.cpfShortfall > 0 && <> And <b className="mono">{f(o.cpfShortfall)}</b> of your
-                      CPF never goes back into the account.</>}
+                      ? <>to <b>bring to completion</b> — the sale would not clear the loan.</>
+                      : <>in hand, against <b className="mono">{f(r.cash.total)}</b> cash in —{' '}
+                          {o.cashChange >= 0 ? 'up' : 'down'} <b className="mono">{f(Math.abs(o.cashChange))}</b>.</>}
+                    {o.cpfShortfall > 0 && <> <b className="mono">{f(o.cpfShortfall)}</b> of CPF not refunded.</>}
                   </span>
                   {k === 'best' && era && (
                     <span className="hint wrongera">
-                      The index stood at <b className="mono">{era.then}</b> when that window opened
-                      and <b className="mono">{era.to}</b> when it closed. It is{' '}
-                      <b className="mono">{era.now}</b> now — that stretch belongs to a market a
-                      fraction of this one&rsquo;s size, which is why it looks the way it does.
+                      Index <b className="mono">{era.then}</b> → <b className="mono">{era.to}</b> then;{' '}
+                      <b className="mono">{era.now}</b> now.
                     </span>
                   )}
                   <span className="hint mono wrongwhen">{o.from} → {o.to}</span>
@@ -253,31 +238,26 @@ export default function Downside({ indices = {}, r, price, propertyType }) {
 
           <p className="hint">
             {dist.negative
-              ? <><b className="mono">{num(dist.negative)}</b> of those {num(dist.n)} stretches ended
-                  lower than they started.</>
-              : <>None of those {num(dist.n)} stretches ended lower than it started — which is a fact
-                  about {r.yearsHeld} years and not about {r.yearsHeld - 1}.</>}
-            {' '}Every window overlaps its neighbours, so these are {num(dist.n)} readings of one
-            history and not {num(dist.n)} independent trials — the index holds{' '}
-            <b className="mono">{num(dist.independent)}</b> {spanAdj} stretches that share no
-            quarter with each other. They are counted, not turned into a
-            probability, for that reason. The worst of them started in{' '}
-            <span className="mono">{dist.worst.from.slice(0, 4)}</span> and the best in{' '}
-            <span className="mono">{dist.best.from.slice(0, 4)}</span>: they are the boundaries of
-            what has happened, not a range of what will.
+              ? <><b className="mono">{num(dist.negative)}</b> of {num(dist.n)} stretches ended lower than they started.</>
+              : <>None of {num(dist.n)} stretches ended lower than it started.</>}
+            {' '}Index moves on your price — not a valuation of this home.
+            {(propertyType === 'HDB' || propertyType === 'EC_DEVELOPER') && ' The minimum occupation period still decides when it can be sold.'}
           </p>
 
-          <div className="note" style={{ marginTop: 18 }}>
-            <b>An index is a market. Your home is one home.</b> Every figure here is the price{' '}
-            <em>you</em> typed, moved by what {idx.agency.replace(/,.*/, '')}&rsquo;s published index
-            actually did over a dated period. It is not an estimate of what this property is worth,
-            was worth, or will fetch — no such number appears on this page, and one address can
-            diverge from the island by a wide margin in either direction.{' '}
-            {propertyType === 'HDB' || propertyType === 'EC_DEVELOPER'
-              ? 'A minimum occupation period governs when this one can be sold at all, which is a '
-                + 'harder constraint than any of the above.'
-              : ''}
-          </div>
+          <HowWorked>
+            <p>The total a sale must clear rises the longer you hold, because you keep putting cash
+              in — <b className="mono">{f(r.cash.total)}</b> so far. The rate it asks for falls at the
+              same time: a longer hold is a bigger number and an easier one.</p>
+            <p>Every window overlaps its neighbours, so these are {num(dist.n)} readings of one
+              history, not {num(dist.n)} independent trials — the index holds{' '}
+              <b className="mono">{num(dist.independent)}</b> {spanAdj} stretches that share no quarter.
+              They are counted, not turned into a probability. The worst started in{' '}
+              {dist.worst.from.slice(0, 4)} and the best in {dist.best.from.slice(0, 4)}: the
+              boundaries of what has happened, not a range of what will.</p>
+            <p>An index is a market; your home is one home. Every figure is the price you typed,
+              moved by what {idx.agency.replace(/,.*/, '')}&rsquo;s published index did over a dated
+              period. One address can diverge from the island by a wide margin either way.</p>
+          </HowWorked>
 
           <p className="prov">
             {idx.name} · {idx.agency} · {idx.base} · {idx.series.from} to{' '}
