@@ -103,3 +103,14 @@ test('a file written today is zero days old, whatever the hour', () => {
   assert.match(fn[0], /Math\.floor\(/, 'ageOf rounds again: a fresh file will read as a day stale');
   assert.doesNotMatch(fn[0], /Math\.round\(/, 'rounding a partial day up makes every afternoon refresh look failed');
 });
+
+test('a source that is fresh on disk is cleared from the failing list', () => {
+  /* 26 Sep 2026: SORA was repaired and refreshed by hand. It was then not due,
+     so the sync never ran it, so its "failing since 9 Sep" entry never cleared
+     and every run past the grace period failed over a file hours old. */
+  const src = readFileSync(new URL('../scripts/sync.mjs', import.meta.url), 'utf8');
+  const clear = src.indexOf('for (const r of rows) if (!r.due) delete health[r.key];');
+  assert.ok(clear > 0, 'a fresh source is no longer cleared from source-health');
+  assert.ok(clear < src.indexOf('fs.writeFileSync(healthPath'), 'the clear must happen before the file is written');
+  assert.ok(clear < src.indexOf('const overdue ='), 'the clear must happen before overdue is judged');
+});

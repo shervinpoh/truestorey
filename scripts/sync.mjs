@@ -143,6 +143,12 @@ for (const r of due) {
     delete health[r.key];            // it worked; forget it ever did not
   }
 }
+/* A source that is fresh on disk is not failing, however it got fresh. The
+   entry used to clear only when THIS script refreshed that source — so SORA,
+   repaired on 26 Sep 2026 and refreshed by hand, was no longer due, was never
+   run here, and stayed "failing since 2026-09-09" in this file, failing every
+   run past the grace period while data/sora.json was hours old. */
+for (const r of rows) if (!r.due) delete health[r.key];
 fs.writeFileSync(healthPath, JSON.stringify(health, null, 2) + '\n');
 
 const daysSince = iso => Math.round((Date.now() - Date.parse(iso + 'T00:00:00Z')) / 86400000);
