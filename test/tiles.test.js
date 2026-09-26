@@ -72,3 +72,16 @@ test('the basemap is OneMap, credited, and not the coloured layer', () => {
   assert.match(map, /BASEMAP\.credit/, 'the credit is not rendered anywhere');
   assert.doesNotMatch(map, /no tile\s*\n?\s*server/, 'the map still claims it has no tile server');
 });
+
+test('/map states how many records it could not plot from the data, not from a typed number', () => {
+  /* "128 records are missing from this map" was a sentence with the number
+     typed in. It was true once; on 26 Sep 2026 the build skipped 104. The
+     count is written into map.json by the build and read from there. */
+  const page = readFileSync(new URL('../app/map/page.jsx', import.meta.url), 'utf8');
+  assert.doesNotMatch(page, /\b\d{2,}\s+records\s+are\s+(missing|not plotted)/,
+    'a count of unplotted records is typed into /map again');
+  assert.match(page, /map\.skipped/, '/map no longer reads the unplotted count from the data');
+  const build = readFileSync(new URL('../scripts/build-map.mjs', import.meta.url), 'utf8');
+  assert.match(build, /^\s*skipped,$/m, 'build-map no longer writes the skipped count into map.json');
+  assert.doesNotMatch(page, /No tiles, no\s+basemap host/, '/map claims it has no tiles beside a tile switch');
+});

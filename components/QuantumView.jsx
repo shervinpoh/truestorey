@@ -46,9 +46,8 @@ export default function QuantumView({ data }) {
     <section className="quantum" aria-labelledby="quantum-title">
       <span className="lab">Recorded whole prices · not psf</span>
       <h2 id="quantum-title">What buyers actually paid.</h2>
-      <p className="hint">Choose a place and a 20 sqm size band. Each year shows the middle half of
-        filed sale prices, its median and the number of sales behind it. No asking prices or
-        estimated values enter this view.</p>
+      <p className="hint">Choose a place and a 20 sqm size band: the middle half of filed sale prices
+        each year, its median and the sales behind it. No asking prices or estimates.</p>
 
       <div className="quantum-market" role="group" aria-label="Property market">
         <button type="button" aria-pressed={market === 'hdb'} onClick={() => chooseMarket('hdb')}>HDB resale</button>

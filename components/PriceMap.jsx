@@ -978,17 +978,12 @@ export default function PriceMap({ map }) {
           ))}
         </div>
         <p className="hint" style={{ margin: '10px 0 0' }}>
-          Six equal-sized groups, not six equal price steps — so the map shows where places actually
-          differ instead of showing that a handful of Orchard projects are expensive. Scales are
-          separate for each property type.
+          Six equal-sized groups, not equal price steps, with a separate scale for each property type.
         </p>
         <p className="hint" style={{ margin: '6px 0 0' }}>
           {land
-            ? <>The land is {land.source}, simplified and stored in this repo. Streets and names, when
-              switched on, are tiles from <a href={BASEMAP.href} target="_blank" rel="noopener noreferrer">OneMap</a>{' '}
-              — {BASEMAP.credit}. Still no map library: a tile is a PNG at a URL computed from three
-              integers, and the projection is this map&rsquo;s own, so the background cannot drift
-              from the dots.{' '}
+            ? <>Streets and names, when switched on, are tiles from{' '}
+              <a href={BASEMAP.href} target="_blank" rel="noopener noreferrer">OneMap</a> — {BASEMAP.credit}.{' '}
               {/*
                 * THE THREE VIEWS DO NOT BEHAVE THE SAME AND THIS USED TO CLAIM
                 * THEY DID. "A {region} name sits at the centroid of its own
@@ -1008,10 +1003,8 @@ export default function PriceMap({ map }) {
               {kind === 0
                 ? <>A town name sits at the centroid of its own planning area, and picking one
                   shades that area.</>
-                : <>A district name sits at the median coordinate of its own {k.unit}, because no
-                  district boundary is published in any dataset here — a postal district is not a
-                  planning area, and drawing one from the other would be inventing a shape. So
-                  picking a district dims everything outside it instead of outlining it.</>}
+                : <>A district name sits at the median of its own {k.unit}; no district boundary is
+                  published, so picking one dims everything outside it instead of outlining it.</>}
             </>
             : <>A {k.region} name sits at the median coordinate of its own {k.unit}, because no
               boundary data has been ingested yet.</>}

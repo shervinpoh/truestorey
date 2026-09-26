@@ -118,19 +118,14 @@ export default function IslandRelief({ meta }) {
           <span className="relieflab mono">Every town&rsquo;s median, as one object</span>
           <p className="reliefsup">
             Singapore&rsquo;s {totalAreas} planning areas, each raised by what a square foot
-            actually sold for in it. <b>Taller and darker is dearer</b> — height and colour
-            carry the same figure, so the pattern reads at a glance and the figure itself
-            is in the key.
+            sold for in it. <b>Taller and darker is dearer.</b>
           </p>
 
 
           <p className="reliefsup">
             {hi.name} is the dearest town on the island at S${num(hi.psf)} psf and{' '}
             {lo.name} the cheapest at S${num(lo.psf)} — a ratio of{' '}
-            <b>{ratio.toFixed(2)}&times;</b>. Height starts at zero and is proportional to
-            the figure itself, so that is the ratio you are looking at. Drawn against the
-            range instead, the same gap would stand twenty-five times taller and Singapore
-            would appear to have a skyline it does not have.
+            <b>{ratio.toFixed(2)}&times;</b>. Height starts at zero, so that is the ratio you see.
           </p>
 
           {/* What a picture cannot do, said plainly, next to the thing that can.
@@ -138,13 +133,9 @@ export default function IslandRelief({ meta }) {
               in which no town is named, has been given a fact and no way to use
               it. */}
           <p className="reliefnote">
-            <b>No town is named here.</b> This is the shape of the whole island;{' '}
-            <Link href="#map">the map below</Link> is where you find yours — it labels every
-            town, gives the figure on hover, and opens the block or project when you click.
-            {' '}{flat} of the {totalAreas} areas lie flat and grey because no HDB resale has
-            been filed in them: the water catchment, the airbases, the port and the outlying
-            islands. That is an absence of housing, not an absence of data, and a hole in the
-            model would have read as the second.
+            <b>No town is named here</b> &mdash; <Link href="#map">the map below</Link> labels every
+            one. {flat} of the {totalAreas} areas lie flat and grey because no HDB resale is filed
+            in them: catchment, airbases, port and islands.
           </p>
 
           <p className="prov mono">

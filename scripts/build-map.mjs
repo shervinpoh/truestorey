@@ -278,6 +278,10 @@ async function main() {
     bbox: [Math.min(...lats), Math.min(...lons), Math.max(...lats), Math.max(...lons)],
     breaks,
     counts: Object.fromEntries(Object.entries(NS).map(([n, c]) => [n, points.filter(p => p[0] === c).length])),
+    /* What is NOT plotted, carried with the data. /map used to say "128
+       records are missing" in a sentence typed into the page, which was true
+       once and never again after the next build. */
+    skipped,
     regions,
     rail,
     land,

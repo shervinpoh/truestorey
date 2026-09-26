@@ -5,6 +5,7 @@ import path from 'node:path';
 import Masthead from '../../components/Masthead.jsx';
 import PriceMap from '../../components/PriceMap.jsx';
 import IslandRelief from '../../components/IslandRelief.jsx';
+import HowWorked from '../../components/HowWorked.jsx';
 
 export const metadata = {
   ...shareCard('/map'),
@@ -40,11 +41,12 @@ export default function Page() {
     );
   }
   const total = Object.values(map.counts).reduce((a, b) => a + b, 0);
+  const unplotted = map.skipped ? (map.skipped.weak || 0) + (map.skipped.noCoord || 0) : 0;
 
   return (
     <main className="shell wide">
       <Masthead crumbs={[{ href: '/', label: 'Home' }]} title="Price map"
-        sub={`All ${total.toLocaleString('en-SG')} blocks and projects with a filed transaction, plotted by median price per square foot. Hover for the figure, click to open. Jump to a town to frame it and dim the rest.`} />
+        sub={`All ${total.toLocaleString('en-SG')} blocks and projects with a filed transaction, by median price per square foot. Hover for the figure, click to open.`} />
 
       <IslandRelief meta={relief} />
 
@@ -56,33 +58,33 @@ export default function Page() {
       </section>
 
       <section className="pane">
-        <div className="note method"><b>There is still no map service underneath this.</b> No tiles, no
-          basemap host, no mapping library — nothing is fetched from anyone else when this page
-          loads. {map.land
-            ? <>The land is {map.land.source}, downloaded once, simplified to about fifteen metres and
-              stored in this repo as a few hundred kilobytes of coordinates. It is drawn by the same
-              canvas pass as the dots.</>
-            : <>The island currently draws itself out of the transactions alone. Run{' '}
-              <code>npm run ingest:boundaries</code> to add URA&rsquo;s published coastline.</>}</div>
-        <div className="note"><b>The dots are still the data.</b> Where there is housing there are
-          dots, and where there is a reservoir, an airbase or the water catchment there are none —
-          which is why the built-up areas read as solid and the middle of the island does not.</div>
-        <div className="note"><b>Stations, not lines.</b> The station marks are optional and off
-          until you ask for them. They are stations and not rail lines because the source — {map.source.rail}
-          {map.source.railAccessed ? `, accessed ${map.source.railAccessed}` : ''} — gives a name and a
-          coordinate for every station exit and says nothing about which line a station sits on. Drawing
-          the lines would mean supplying the network from memory, and a rail line in the wrong place over
-          real transactions is worse than no rail line at all.</div>
-        <div className="note method"><b>A town name sits where its housing is.</b> Each label is drawn at the
-          median coordinate of that town's own plotted blocks, not at the centre of a boundary — there is
-          no boundary file in this map&rsquo;s own data, and drawing one from memory would be the same mistake as
-          drawing the rail lines. The relief above this map does use URA&rsquo;s published boundaries, which is a
-          different file and a different view; what neither of them does is invent an outline. Names that would overlap are dropped rather than overprinted, so the map thins out instead
-          of turning into a smear of text.</div>
-        <div className="note"><b>128 records are missing from this map.</b> They are the ones whose
-          address could not be placed confidently enough to publish. They still have their own pages
-          with full transaction histories — they just are not plotted, because a dot in the wrong
-          street is worse than no dot.</div>
+        {/* Counted by scripts/build-map.mjs and carried in map.json. This was a
+            sentence with "128" typed into it, true once; on 26 Sep it was 104. */}
+        {unplotted > 0 && (
+          <div className="note"><b>{unplotted.toLocaleString('en-SG')} records are not plotted.</b> Their
+            address could not be placed confidently enough to publish, and a dot in the wrong street
+            is worse than none. Their pages still carry every filed sale.</div>
+        )}
+        <HowWorked title="How this map is drawn, and what it will not draw">
+          {/* This said "no tiles, no basemap host" long after OneMap's street
+              tiles became a switch on the map itself — test/tiles.test.js had
+              already caught the same claim in PriceMap.jsx. */}
+          <p><b>The data is drawn here, not by a map service.</b>{' '}
+            {map.land
+              ? <>The land is {map.land.source}, downloaded once, simplified to about fifteen metres and
+                stored in this repo, and drawn by the same canvas pass as the dots. </>
+              : <>The island currently draws itself out of the transactions alone. </>}
+            OneMap&rsquo;s street tiles load only when you switch them on, underneath and dimmed.</p>
+          <p><b>The dots are the data.</b> Where there is housing there are dots; where there is a
+            reservoir, an airbase or the water catchment there are none.</p>
+          <p><b>Stations, not lines.</b> The source &mdash; {map.source.rail}
+            {map.source.railAccessed ? `, accessed ${map.source.railAccessed}` : ''} &mdash; gives a name and a
+            coordinate for every station exit and says nothing about which line a station sits on. Drawing
+            the lines would mean supplying the network from memory.</p>
+          <p><b>No outline is invented.</b> A postal district is not a planning area and no district
+            boundary is published, so district names sit at the median of their own projects. Names that
+            would overlap are dropped rather than overprinted.</p>
+        </HowWorked>
       </section>
 
       <section className="pane">

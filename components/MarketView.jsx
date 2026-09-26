@@ -1,6 +1,7 @@
 'use client';
 import { useMemo, useState } from 'react';
 import Chart from './Chart.jsx';
+import HowWorked from './HowWorked.jsx';
 
 /** The arrow already carries direction, so the number never repeats the sign.
  *  Movement under 0.05% rounds to "0.0%", which reads as a fall that did not
@@ -218,21 +219,19 @@ function IndexPanel({ idx, priv, privMeta }) {
         <p className="prov">{privMeta.source} · datasource {privMeta.datasource} · to {privMeta.latest.quarter} · accessed {String(privMeta.accessedAt).slice(0,10)}</p>
       )}
 
-      {privMeta && (
-        <div className="note" style={{marginTop:4}}>
-          <b>The two are comparable because neither was rebased.</b> HDB publishes its resale index
-          on 1Q2009 = 100 and URA publishes its private residential index on the same base, so the
-          bars and the line can share one scale. That is the only reason this chart is honest —
-          rebasing either one here would have produced a picture of arithmetic rather than of two
-          markets. URA&apos;s series runs back to 1975; only the quarters HDB also covers are drawn.
-        </div>
-      )}
-
       <div className="note" style={{marginTop:4}}>
-        <b>An index is not a price.</b> It tracks the whole country&apos;s resale market against 1Q2009.
-        It tells you the direction of travel — it cannot tell you what your flat is worth, because it
-        knows nothing about your block, your floor or your lease.
+        <b>An index is not a price.</b> It gives the direction of the whole market, and knows nothing
+        about your block, your floor or your lease.
       </div>
+
+      {privMeta && (
+        <HowWorked title="Why the two indices can share one scale">
+          <p>Neither was rebased. HDB publishes its resale index on 1Q2009 = 100 and URA publishes its
+            private residential index on the same base, so the bars and the line share one scale —
+            rebasing either here would draw arithmetic rather than two markets. URA&apos;s series runs
+            back to 1975; only the quarters HDB also covers are drawn.</p>
+        </HowWorked>
+      )}
     </>
   );
 }
