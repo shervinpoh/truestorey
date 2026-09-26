@@ -132,16 +132,21 @@ test('the build still keys a house on its property type, not its project name', 
      script passes until someone rebuilds — and by then the damage is in
      data/. This reads the script, which is the only way to catch the edit
      itself. The revert is one line and looks like tidying. */
-  const src = readFileSync(path.join(process.cwd(), 'scripts', 'build-index.mjs'), 'utf8')
+  /* The rule moved to lib/private-key.js (shared with lib/schools.js), so the
+     build must still import it and the rule itself is read there. */
+  const build = readFileSync(path.join(process.cwd(), 'scripts', 'build-index.mjs'), 'utf8');
+  assert.match(build, /import \{ privateKey \} from '\.\.\/lib\/private-key\.js'/, 'build-index no longer uses the shared keying rule');
+  assert.match(build, /const projKey = privateKey;/, 'build-index keys private sales some other way');
+  const src = readFileSync(path.join(process.cwd(), 'lib', 'private-key.js'), 'utf8')
     .replace(/\/\*[\s\S]*?\*\//g, '');
-  const key = /const projKey = r =>([^;]*);/.exec(src);
-  assert.ok(key, 'projKey is gone from build-index.mjs');
+  const key = /export const privateKey = r =>([^;]*);/.exec(src);
+  assert.ok(key, 'privateKey is gone from lib/private-key.js');
   assert.match(key[1], /isHouse\(r\)/,
-    'projKey no longer routes on isHouse(). Keying on the project name again is what '
+    'privateKey no longer routes on isHouse(). Keying on the project name again is what '
     + 'left two thirds of landed houses unreachable by the street they are on.');
   assert.ok(!/r\.project === (GENERIC_)?LANDED\b/.test(key[1]),
-    'projKey is back to testing the project name');
-  assert.match(src, /const isHouse = r =>[^;]*!STRATA\.test/,
+    'privateKey is back to testing the project name');
+  assert.match(src, /export const isHouse = r =>[^;]*!STRATA\.test/,
     'isHouse stopped excluding strata, so strata units will be moved onto street pages');
 });
 

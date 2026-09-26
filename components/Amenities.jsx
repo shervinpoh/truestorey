@@ -1,6 +1,8 @@
 'use client';
 import { fmtDistance, nearBoundary } from '../lib/geo.js';
 import { titleCase } from '../lib/name.js';
+import Link from 'next/link';
+import { ReachChip } from './SchoolsExplorer.jsx';
 
 /**
  * What is around a block or project.
@@ -82,7 +84,9 @@ export default function Amenities({ near, manifest }) {
             <ul className="amlist">
               {p1.map(s => (
                 <li key={s.name}>
-                  <span className="n">{titleCase(s.name)}</span>
+                  <span className="n">{s.p1 ? <Link href={`/schools/${s.p1.slug}`}>{titleCase(s.name)}</Link> : titleCase(s.name)}
+                    {/* MOE's reading of the last exercise, from lib/schools.js withP1(). */}
+                    {s.p1?.short && <span className="amp1"><ReachChip reach={s.p1} /> <span className="mono">2C {s.p1.year}</span></span>}</span>
                   <span className="d mono">
                     {fmtDistance(s.m)}
                     {nearBoundary(s.m) && <em className="edge"> on the 1km line</em>}
@@ -97,7 +101,7 @@ export default function Amenities({ near, manifest }) {
               <summary>{p2.length} more between 1km and 2km</summary>
               <ul className="amlist">
                 {p2.map(s => (
-                  <li key={s.name}><span className="n">{titleCase(s.name)}</span>
+                  <li key={s.name}><span className="n">{s.p1 ? <Link href={`/schools/${s.p1.slug}`}>{titleCase(s.name)}</Link> : titleCase(s.name)}</span>
                     <span className="d mono">{fmtDistance(s.m)}
                       {s.p1TwoTrack && <em className="edge"> · 2C two-track</em>}</span></li>
                 ))}

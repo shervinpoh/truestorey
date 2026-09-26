@@ -1,6 +1,7 @@
 import { allUrls } from '../lib/data/query.js';
 import { allInsights } from '../lib/insights.js';
 import { NAV, SITUATIONS } from '../lib/nav.js';
+import { primarySchools } from '../lib/schools.js';
 
 /* The fallback must be a domain that RESOLVES. These three files defaulted to
  * truestorey.sg while scripts/send-digest.mjs defaulted to the Vercel URL —
@@ -44,6 +45,10 @@ export default function sitemap() {
     ...allInsights().map(p => ({
       url: BASE + p.href, priority: 0.8, changeFrequency: 'monthly',
       lastModified: new Date(p.date) })),
+    /* One page per primary school MOE lists — the page a parent searching a
+       school's name should land on. */
+    ...(primarySchools()?.list || []).map(sc => ({
+      url: `${BASE}/schools/${sc.slug}`, lastModified, changeFrequency: 'monthly', priority: 0.7 })),
     ...urls.map(u => ({
       url: BASE + u.href,
       lastModified,

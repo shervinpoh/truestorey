@@ -6,6 +6,7 @@ import { ogForRecord } from '../../../lib/og.js';
 import { titleCase } from '../../../lib/name.js';
 import RecordPage from '../../../components/RecordPage.jsx';
 import { insightsForBlock } from '../../../lib/insights.js';
+import { withP1 } from '../../../lib/schools.js';
 
 export const dynamicParams = true;
 
@@ -45,7 +46,7 @@ export default async function Page({ params }) {
     <>
       <script type="application/ld+json"
         dangerouslySetInnerHTML={ldJson(recordSchema(rec))} />
-      <RecordPage sun={sun} sunApprovals={sunApprovals} canCapture={crmConfigured()} rec={rec} land={landForRecord(rec.href)} storey={storeyFor(rec)} near={nearby(rec)} sales={nearbySalesFor(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []} posts={insightsForBlock(rec.href)}
+      <RecordPage sun={sun} sunApprovals={sunApprovals} canCapture={crmConfigured()} rec={rec} land={landForRecord(rec.href)} storey={storeyFor(rec)} near={withP1(nearby(rec))} sales={nearbySalesFor(rec)} nearManifest={nearbyManifest()} attribution={getIndex().attribution || []} posts={insightsForBlock(rec.href)}
       crumbs={[{ href: '/', label: 'Home' },
         { href: '/condo', label: 'Condos' },
         /* The district, which is a real destination now that ?d= opens one.

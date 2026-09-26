@@ -36,7 +36,7 @@ export default function SiteFooter({
   name, cea, agency, lic, phone,
 }) {
   const lookups = NAV.find(g => g.group === 'Look up').items.filter(i =>
-    ['/map', '/hdb', '/condo', '/landed'].includes(i.href));
+    ['/map', '/hdb', '/condo', '/landed', '/schools'].includes(i.href));
   const tools = [NAV.find(g => g.group === 'Tools').items.find(i => i.href === '/tools'), ...SITUATIONS];
   const read = NAV.find(g => g.group === 'Read').items;
   const groups = [

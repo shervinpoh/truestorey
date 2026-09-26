@@ -15,6 +15,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { slugify, hrefOf, shardOf } from '../lib/slug.js';
+import { privateKey } from '../lib/private-key.js';
 
 /** Slugs are public URLs. Two records must never claim the same one. */
 function uniqueSlug(taken, base) {
@@ -172,10 +173,8 @@ async function main() {
        443 named project pages hold nothing but houses and therefore stop
        existing. They were landed estates filed under /condo/, which is a URL
        this site should not have been publishing. */
-    const STRATA = /^Strata/i;
-    const HOUSE = /Terrace|Semi-detached|Detached/i;
-    const isHouse = r => HOUSE.test(r.propertyType) && !STRATA.test(r.propertyType);
-    const projKey = r => (isHouse(r) ? `street|${r.street}` : `proj|${r.project}`);
+    /* The keying rule lives in lib/private-key.js, shared with lib/schools.js. */
+    const projKey = privateKey;
 
     for (const [key, rows] of groupBy(priv.rows, projKey)) {
       const isStreet = key.startsWith('street|');
