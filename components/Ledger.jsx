@@ -2,11 +2,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import HowWorked from './HowWorked.jsx';
+import Statement from './Statement.jsx';
 import MoneyInput from './MoneyInput.jsx';
 import { Figure } from './Motion.jsx';
 import { f, num } from './fmt.js';
 import { titleCase } from '../lib/name.js';
 import { costLedger } from '../lib/report/cost.js';
+import { saleStatement } from '../lib/calc/ledger.js';
 import Downside from './Downside.jsx';
 import Scenarios from './Scenarios.jsx';
 import ShareResult, { OpenedFromLink } from './ShareResult.jsx';
@@ -122,6 +124,7 @@ export default function Ledger({ indices = {}, canEmail = false }) {
   });
 
   const clear = r.breakEven.returnOfCash;
+  const sale = saleStatement(r);
   const cpfBack = r.cpfReturns;
   // Against what was paid — a comparison with the reader's OWN purchase price,
   // not with any estimate of what the property is worth now.
@@ -354,6 +357,92 @@ export default function Ledger({ indices = {}, canEmail = false }) {
           : <span><i className="lab">Gone for good</i> <b className="mono">{f(r.friction)}</b></span>}
       </div>
 
+      {/* ── THE LEDGER, AS A STATEMENT ─────────────────────────────────────
+          Moved up from below the two what-if sections, where it read as an
+          appendix to the headline rather than its working, and set as the
+          page's one statement (components/Statement.jsx). It now ends where
+          the headline comes from: the sale at the price that must be
+          cleared, line by line, down to the cash put in. */}
+      <Statement id="ledger" title="Where every dollar goes"
+        basis={`The ledger · your figures · held ${num(r.yearsHeld)} year${r.yearsHeld === 1 ? '' : 's'}`}
+        lede={sale
+          ? <>The working behind <b className="mono">{f(sale.price)}</b>: what is gone for good, what goes back
+            to CPF, and what a sale at that price pays out.</>
+          : <>What is gone for good, and what goes back to CPF.</>}>
+        <div className="tablewrap">
+          <table className="stmt-rows">
+            <tbody>
+              <tr><th colSpan={2} scope="colgroup">Gone for good — no sale returns these</th></tr>
+              <tr><td>Buyer&rsquo;s Stamp Duty</td><td className="r">{f(r.entry.bsd)}</td></tr>
+              {r.entry.absd > 0 && (
+                <tr><td>Additional Buyer&rsquo;s Stamp Duty, {(r.entry.absdRate * 100).toFixed(0)}%</td>
+                  <td className="r">{f(r.entry.absd)}</td></tr>)}
+              <tr><td>Legal fees on purchase</td><td className="r">{f(r.entry.legal)}</td></tr>
+              <tr><td>Interest paid to the bank over {num(r.yearsHeld)} year{r.yearsHeld === 1 ? '' : 's'}</td>
+                <td className="r">{f(r.holding.interestPaid)}</td></tr>
+              <tr><td>Legal fees on sale</td><td className="r">{f(r.exit.legal)}</td></tr>
+              <tr className="stmt-sub"><td>Gone for good, before commission</td><td className="r">{f(r.friction)}</td></tr>
+
+              {r.cpf.total > 0 && <>
+                <tr><th colSpan={2} scope="colgroup">Comes back — to your CPF, not to you</th></tr>
+                <tr><td>CPF principal used{r.cpfEntry.used
+                  ? <span className="q">{f(r.cpfEntry.used)} a month while the loan ran</span> : null}</td>
+                  <td className="r">{f(r.cpf.principal)}</td></tr>
+                <tr><td>Accrued interest at {(r.cpf.rate * 100).toFixed(1)}%</td>
+                  <td className="r">{f(r.cpf.interest)}</td></tr>
+                <tr className="stmt-sub"><td>Refunded to your Ordinary Account</td><td className="r">{f(r.cpf.total)}</td></tr>
+              </>}
+
+              <tr><th colSpan={2} scope="colgroup">Each month while you hold it</th></tr>
+              <tr><td>Instalment<span className="q">{f(r.cash.perMonth)} of it cash
+                {r.holding.repaidInYear ? `, paid for ${r.holding.loanMonths / 12} years` : ''}</span></td>
+                <td className="r">{f(r.holding.instalment)}</td></tr>
+
+              {sale ? <>
+                <tr><th colSpan={2} scope="colgroup">A sale at {f(sale.price)} — the price that must be cleared</th></tr>
+                <tr><td>Sale price</td><td className="r">{f(sale.price)}</td></tr>
+                {sale.lines.map(l => (
+                  <tr key={l.key}><td>{{
+                    loan: <>Redeems the loan<span className="q">outstanding after {num(r.yearsHeld)} year{r.yearsHeld === 1 ? '' : 's'}</span></>,
+                    cpf: 'Refunds your CPF, with its interest',
+                    commission: `Agent commission, ${r.exit.agentFeePct}% plus GST`,
+                    ssd: <>Seller&rsquo;s Stamp Duty, {(r.exit.ssd.rate * 100).toFixed(0)}%<span className="q">{ssdLabel.replace(/^ — /, '')}</span></>,
+                    legal: 'Legal fees on sale',
+                  }[l.key]}</td><td className="r">&minus;{f(l.amount)}</td></tr>
+                ))}
+                <tr className="stmt-total"><td>Back to you — the cash you put in</td><td className="r">{f(sale.toSeller)}</td></tr>
+              </> : <>
+                <tr><th colSpan={2} scope="colgroup">Charged on the sale price, so it depends on what you get</th></tr>
+                <tr><td>Agent commission at {r.exit.agentFeePct}% plus GST</td>
+                  <td className="r">{(r.exit.agentRate * 100).toFixed(2)}%</td></tr>
+                <tr><td>Seller&rsquo;s Stamp Duty{ssdLabel}</td>
+                  <td className="r">{r.exit.ssd.rate
+                    ? `${(r.exit.ssd.rate * 100).toFixed(0)}%`
+                    : (r.exit.ssd.regime ? 'None' : 'Not applicable')}</td></tr>
+                <tr><td>Outstanding loan after {num(r.yearsHeld)} year{r.yearsHeld === 1 ? '' : 's'}</td>
+                  <td className="r">{f(r.holding.outstanding)}</td></tr>
+              </>}
+            </tbody>
+          </table>
+        </div>
+        <p className="stmt-foot">Your inputs and published rates — not a valuation of any home.
+          {sale && !r.exit.ssd.rate && r.exit.ssd.regime ? ' No Seller’s Stamp Duty: held past the schedule.' : ''}</p>
+      </Statement>
+      <HowWorked title="What is not in this ledger, and the rules applied">
+        <p>Every figure comes from what you typed, from published rates, and — in the section on
+          being wrong — from a published index applied to your own price over named, dated periods.
+          None of it says what your home is worth or will fetch; <Link href="/condo">the filed
+          transaction ranges</Link> are the evidence for that.</p>
+        <p><b>Not in this ledger:</b></p>
+        <ul>{r.omissions.map(o => <li key={o.slice(0, 24)}>{o}</li>)}</ul>
+        <p>URA&rsquo;s filed rental contracts are on <Link href="/yield">the rental yield page</Link>.</p>
+        <p><b>The rules being applied:</b></p>
+        <ul>{r.caveats.map(c => <li key={c.slice(0, 24)}>{c}</li>)}</ul>
+        <p>CPF per month is the part of the instalment your Ordinary Account pays; the rest is cash.
+          Commission is your agreed figure, not a market average. The month you bought picks the
+          Seller&rsquo;s Stamp Duty schedule, which changed on 4 July 2025.</p>
+      </HowWorked>
+
       {r.renting && (
         <>
           <h2 className="sh" style={{ marginTop: 26 }}><span>Against renting the same thing</span></h2>
@@ -395,63 +484,6 @@ export default function Ledger({ indices = {}, canEmail = false }) {
 
       <Scenarios indices={indices} r={r} price={p} propertyType={type} />
 
-      <h2 className="sh" style={{ marginTop: 26 }}><span>The ledger</span></h2>
-
-      <div className="tablewrap">
-        <table className="ledgertable">
-          <tbody>
-            <tr className="grp"><th colSpan={2} scope="colgroup">Gone for good — no sale returns these</th></tr>
-            <tr><td>Buyer&rsquo;s Stamp Duty</td><td className="r mono">{f(r.entry.bsd)}</td></tr>
-            {r.entry.absd > 0 && (
-              <tr><td>Additional Buyer&rsquo;s Stamp Duty, {(r.entry.absdRate * 100).toFixed(0)}%</td>
-                <td className="r mono">{f(r.entry.absd)}</td></tr>)}
-            <tr><td>Legal fees on purchase</td><td className="r mono">{f(r.entry.legal)}</td></tr>
-            <tr><td>Interest paid to the bank over {num(r.yearsHeld)} year{r.yearsHeld === 1 ? '' : 's'}</td>
-              <td className="r mono">{f(r.holding.interestPaid)}</td></tr>
-            <tr><td>Legal fees on sale</td><td className="r mono">{f(r.exit.legal)}</td></tr>
-            <tr className="sub"><td>Subtotal, before commission</td><td className="r mono">{f(r.friction)}</td></tr>
-
-            <tr className="grp"><th colSpan={2} scope="colgroup">Charged on the sale price, so it depends on what you get</th></tr>
-            <tr><td>Agent commission at {r.exit.agentFeePct}% plus GST</td>
-              <td className="r mono">{(r.exit.agentRate * 100).toFixed(2)}%</td></tr>
-            <tr><td>Seller&rsquo;s Stamp Duty{ssdLabel}</td>
-              <td className="r mono">{r.exit.ssd.rate
-                ? `${(r.exit.ssd.rate * 100).toFixed(0)}%`
-                : (r.exit.ssd.regime ? 'None' : 'Not applicable')}</td></tr>
-
-            <tr className="grp"><th colSpan={2} scope="colgroup">Comes back, but to CPF and not to you</th></tr>
-            <tr><td>CPF principal used{r.cpfEntry.used
-              ? ` — ${f(r.cpfEntry.used)} a month while the loan ran` : ''}</td>
-              <td className="r mono">{f(r.cpf.principal)}</td></tr>
-            <tr><td>Accrued interest at {(r.cpf.rate * 100).toFixed(1)}%</td>
-              <td className="r mono">{f(r.cpf.interest)}</td></tr>
-            <tr className="sub"><td>Refunded to your Ordinary Account</td><td className="r mono">{f(r.cpf.total)}</td></tr>
-
-            <tr className="grp"><th colSpan={2} scope="colgroup">Still owed</th></tr>
-            <tr><td>Outstanding loan after {num(r.yearsHeld)} year{r.yearsHeld === 1 ? '' : 's'}</td>
-              <td className="r mono">{f(r.holding.outstanding)}</td></tr>
-            <tr><td>Monthly instalment — {f(r.cash.perMonth)} of it cash
-              {r.holding.repaidInYear ? `, paid for ${r.holding.loanMonths / 12} years` : ''}</td>
-              <td className="r mono">{f(r.holding.instalment)}</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <p className="hint" style={{ marginTop: 12 }}>Your inputs and published rates — not a valuation of any home.</p>
-      <HowWorked title="What is not in this ledger, and the rules applied">
-        <p>Every figure comes from what you typed, from published rates, and — in the section on
-          being wrong — from a published index applied to your own price over named, dated periods.
-          None of it says what your home is worth or will fetch; <Link href="/condo">the filed
-          transaction ranges</Link> are the evidence for that.</p>
-        <p><b>Not in this ledger:</b></p>
-        <ul>{r.omissions.map(o => <li key={o.slice(0, 24)}>{o}</li>)}</ul>
-        <p>URA&rsquo;s filed rental contracts are on <Link href="/yield">the rental yield page</Link>.</p>
-        <p><b>The rules being applied:</b></p>
-        <ul>{r.caveats.map(c => <li key={c.slice(0, 24)}>{c}</li>)}</ul>
-        <p>CPF per month is the part of the instalment your Ordinary Account pays; the rest is cash.
-          Commission is your agreed figure, not a market average. The month you bought picks the
-          Seller&rsquo;s Stamp Duty schedule, which changed on 4 July 2025.</p>
-      </HowWorked>
 
       {/* After the answer, never in front of it — §8.2: the email is a copy,
           not the unlock. Absent entirely when the server cannot send. */}

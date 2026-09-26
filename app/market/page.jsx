@@ -4,6 +4,8 @@ import { hdbIndex, sora, mop, getIndex, ppi, quantum } from '../../lib/data/quer
 import Masthead from '../../components/Masthead.jsx';
 import MarketView from '../../components/MarketView.jsx';
 import QuantumView from '../../components/QuantumView.jsx';
+import ToolIntro from '../../components/ToolIntro.jsx';
+import ToolUse from '../../components/ToolUse.jsx';
 
 export const metadata = {
   ...shareCard('/market'),
@@ -40,8 +42,10 @@ export default function Page() {
     : null;
   return (
     <main className="shell">
-      <Masthead crumbs={[{ href: '/', label: 'Home' }]} title="How the market actually sits"
+      <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]} title="How the market actually sits"
         sub="The index shows direction. Filed sales show what buyers paid. Explore the price history by place and floor area, with the source and period beside every figure." />
+      <ToolIntro href="/market" compact />
+      <ToolUse id="market" />
       {/* NO PageFigure HERE, and that is the finding rather than an omission.
           MarketView already opens with 202.8 under its own label, so adding
           the block above it printed the same number twice within 200px —

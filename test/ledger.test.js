@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { ledger, cpfAccrual, breakEven } from '../lib/calc/ledger.js';
+import { ledger, cpfAccrual, breakEven, saleStatement } from '../lib/calc/ledger.js';
 import { cpfAccruedInterest } from '../lib/calc/proceeds.js';
 import { CPF_OA_RATE, GST_RATE } from '../lib/calc/constants.js';
 
@@ -252,4 +252,32 @@ test('the headline does not mention a CPF refund when there was no CPF', () => {
   const src = readFileSync(new URL('../components/Ledger.jsx', import.meta.url), 'utf8');
   const line = src.slice(src.indexOf('to return every dollar of cash'), src.indexOf('to return every dollar of cash') + 320);
   assert.match(line, /cpfBack \?/, 'the CPF clause must be conditional on CPF having been used');
+});
+
+/* ── the sale, as a completion statement ───────────────────────────────────── */
+
+test('the sale statement adds up as printed and returns the cash put in', () => {
+  // The ledger ends on this, under a double rule. A column that does not add
+  // up as printed is the one thing a statement cannot be; and what reaches the
+  // seller at the break-even price must be the cash they put in, or the
+  // headline and its working disagree.
+  const cases = [
+    base,
+    { ...base, cpfDown: 0, cpfMonthly: 0, cashDown: 400_000 },
+    { ...base, purchaseDate: '2025-03-01', yearsHeld: 2 },            // inside the SSD schedule
+    { ...base, propertyType: 'HDB', price: 650_000, loan: 400_000, loanRate: 0.026, yearsHeld: 10 },
+    { ...base, buyerProfile: 'SC', propertyCount: 2, yearsHeld: 30 },  // ABSD, loan repaid
+  ];
+  for (const c of cases) {
+    const r = ledger(c);
+    const st = saleStatement(r);
+    assert.ok(st, `no statement for ${JSON.stringify(c)}`);
+    assert.equal(st.price, r.breakEven.returnOfCash);
+    assert.equal(st.lines.reduce((a, l) => a + l.amount, 0) + st.toSeller, st.price, 'the column does not add up');
+    assert.ok(Math.abs(st.toSeller - r.cash.total) <= 2,
+      `at the break-even price the seller gets ${st.toSeller}, not the ${r.cash.total} put in`);
+    assert.equal(st.lines.some(l => l.key === 'cpf'), r.cpf.total > 0, 'a CPF line with no CPF used, or none with it');
+    assert.equal(st.lines.some(l => l.key === 'ssd'), Boolean(r.exit.ssd.rate));
+  }
+  assert.equal(saleStatement({ breakEven: { returnOfCash: null } }), null);
 });

@@ -7,6 +7,8 @@ import MopView from '../../components/MopView.jsx';
 import { titleCase, slug, hdbHref } from '../../lib/name.js';
 import { simplify } from '../../lib/geojson.js';
 import FromBack from '../../components/FromBack.jsx';
+import ToolIntro from '../../components/ToolIntro.jsx';
+import ToolUse from '../../components/ToolUse.jsx';
 
 export const metadata = {
   ...shareCard('/mop'),
@@ -34,12 +36,14 @@ export default function Page() {
 
   return (
     <main className="shell wide">
-      <Masthead crumbs={[{ href: '/', label: 'Home' }]} title="When flats can start selling"
+      <Masthead crumbs={[{ href: '/', label: 'Home' }, { href: '/tools', label: 'Tools' }]} title="When flats can start selling"
         /* The count moved to the figure below. It was in this subhead at 14px
            and in the view again underneath, which is the redundancy a page
            gets when nothing is allowed to be the headline. */
         sub="Blocks approaching the end of their Minimum Occupation Period, by town and by year." />
       <FromBack label="the property" />
+      <ToolIntro href="/mop" compact />
+      <ToolUse id="mop" />
 
       {m && (
         <PageFigure

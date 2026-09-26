@@ -61,14 +61,19 @@ for (const ns of ['condo', 'landed']) {
  * a tool that does not exist.
  */
 test('every tool in the nav is listed on /tools', async () => {
-  const { NAV } = await import('../lib/nav.js');
+  /* /tools renders TOOL_GROUPS — the Tools menu's own array — so the two
+     cannot name a tool differently or drop one. It used to be typed out by
+     hand and had drifted from the menu on half its entries. */
+  const { NAV, TOOL_GROUPS } = await import('../lib/nav.js');
   const { readFileSync } = await import('node:fs');
   const page = readFileSync(new URL('../app/tools/page.jsx', import.meta.url), 'utf8');
+  assert.match(page, /TOOL_GROUPS\.map/, '/tools no longer renders the menu’s own list');
+  const listed = new Set(TOOL_GROUPS.flatMap(g => g.items.map(i => i.href)));
   const tools = NAV.find(g => /tool/i.test(g.group))?.items || [];
   assert.ok(tools.length > 5);
   for (const t of tools) {
     if (t.href === '/tools') continue;                 // the page itself
-    assert.ok(page.includes(`href="${t.href}"`), `/tools does not link ${t.href}`);
+    assert.ok(listed.has(t.href), `/tools does not list ${t.href}`);
   }
 });
 

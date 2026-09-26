@@ -3064,3 +3064,39 @@ sup.cite a:hover{text-decoration:underline}
  .fpfacts>div:nth-child(3){border-left:0;padding-left:0}
  .fprooms td:first-child{white-space:normal}
 }
+
+/* ── the statement (components/Statement.jsx) ────────────────────────────
+   The block of figures a page exists to give. Every section head on the site
+   is the same small mono label, so the answer looked like the appendix. This
+   is a sheet on the page instead: --card over --paper, a heading in the
+   heading face, a 2px rule under it as a table's opening rule, rows at
+   reading size in ink, and the double rule — the accountant's mark for "this
+   is the total" — only under a real total. No shadow, --r2 like any panel. */
+.stmt{background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:22px 26px 20px;margin:32px 0 22px}
+.stmt-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 20px;
+ padding-bottom:12px;border-bottom:2px solid var(--ink)}
+.stmt-head h2{margin:0;font-size:var(--t-lead);font-weight:700;letter-spacing:-.01em;line-height:1.25;color:var(--ink)}
+.stmt-basis{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--t-micro);letter-spacing:.06em;
+ text-transform:uppercase;color:var(--mute)}
+.stmt-lede{margin:12px 0 0;font-size:var(--t-body);line-height:1.55;color:var(--ink2);max-width:66ch}
+.stmt-lede b{color:var(--ink)}
+.stmt-rows{width:100%;border-collapse:collapse;font-size:var(--t-body);margin-top:4px}
+.stmt-rows th[scope=colgroup]{text-align:left;padding:22px 0 7px;font-family:"IBM Plex Mono",ui-monospace,monospace;
+ font-size:var(--t-micro);font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);
+ border-bottom:1px solid var(--line)}
+.stmt-rows td{padding:9px 0;border-bottom:1px solid var(--line2);color:var(--ink);line-height:1.4;vertical-align:baseline}
+.stmt-rows td.r{text-align:right;white-space:nowrap;padding-left:18px;font-family:"IBM Plex Mono",ui-monospace,monospace;
+ font-variant-numeric:tabular-nums}
+.stmt-rows td .q{display:block;font-size:var(--t-small);color:var(--mute);margin-top:2px}
+/* In a collapsed table the upper cell's hairline wins over the rule a
+   subtotal draws on its own top, so the row above gives its line up. */
+.stmt-rows tr:has(+ tr.stmt-sub) td,.stmt-rows tr:has(+ tr.stmt-total) td{border-bottom:0}
+.stmt-rows tr.stmt-sub td{font-weight:600;border-top:1px solid var(--ink);border-bottom:0}
+.stmt-rows tr.stmt-total td{font-weight:700;border-top:1px solid var(--ink);border-bottom:3px double var(--ink);padding:12px 0 11px}
+.stmt-rows tr.stmt-total td.r{font-size:var(--t-lead);font-weight:600}
+.stmt-foot{margin:14px 0 0;font-size:var(--t-small);color:var(--mute)}
+.stmt>.tablewrap{margin:0}
+@media(max-width:640px){
+ .stmt{padding:18px 16px 16px}
+ .stmt-rows td.r{padding-left:10px}
+}

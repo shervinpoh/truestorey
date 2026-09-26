@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { NAV, SITUATIONS, QUICK, situationTools, itemFor, runsOf } from '../lib/nav.js';
+import { NAV, SITUATIONS, QUICK, situationTools, itemFor, runsOf, TOOL_GROUPS } from '../lib/nav.js';
 
 /**
  * The guided layer, held to the thing it was built for.
@@ -284,6 +284,20 @@ test('a run label describes its run and is not itself a destination', () => {
       assert.ok(!hrefs.has(`/${run.label.toLowerCase().replace(/ /g, '-')}`),
         `"${run.label}" collides with a real route — a reader will try to click it`);
     }
+});
+
+test('no destination is offered in two menus', () => {
+  /* Shervin, 26 Sep: "the menu drop down now have duplicated tools". Map, MOP
+     and Rates were under Look up and again in the Tools grid, each under a
+     different name. The header renders Look up and Read from NAV and Tools
+     from TOOL_GROUPS; a page may be in one of them. */
+  const seen = new Map();
+  const add = (href, where) => {
+    assert.ok(!seen.has(href), `${href} is in both ${seen.get(href)} and ${where}`);
+    seen.set(href, where);
+  };
+  for (const g of NAV) if (!g.guided) for (const i of g.items) add(i.href, g.group);
+  for (const run of TOOL_GROUPS) for (const i of run.items) add(i.href, `Tools › ${run.label}`);
 });
 
 test('every item still belongs to exactly one run', () => {
