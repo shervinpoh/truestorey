@@ -4,6 +4,7 @@ import { CONSENT_COPY, CONSENT_COPY_VERSION } from '../../../lib/consent.js';
 import { upsertWatch, configured as dbConfigured } from '../../../lib/supabase/rest.js';
 import { send, configured as mailConfigured } from '../../../lib/email.js';
 import { recordByHref } from '../../../lib/data/query.js';
+import { WATCH_PAUSED } from '../../../lib/watch.js';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -51,6 +52,11 @@ function throttled(ip) {
 const looksLikeEmail = s => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(s || '').trim());
 
 export async function POST(req) {
+  /* Paused (lib/watch.js). Refused before anything is read, so no address is
+     taken for updates that will not be sent. */
+  if (WATCH_PAUSED) {
+    return NextResponse.json({ error: 'Block updates are paused. Nothing was saved.' }, { status: 410 });
+  }
   /*
    * BOTH HALVES, BEFORE ANYTHING IS READ OR WRITTEN.
    *

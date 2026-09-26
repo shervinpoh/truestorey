@@ -25,7 +25,7 @@
  *   npm run digest -- --dry  resolve and render everything, send nothing
  */
 import fs from 'node:fs/promises';
-import { newSince } from '../lib/watch.js';
+import { newSince, WATCH_PAUSED } from '../lib/watch.js';
 import { renderDigest } from '../lib/digest.js';
 import { send, configured as mailConfigured } from '../lib/email.js';
 import { watchesFor, markWatchSent, configured as dbConfigured } from '../lib/supabase/rest.js';
@@ -40,6 +40,10 @@ const slug = n => String(n).toUpperCase().replace(/&/g, ' AND ')
 const hrefOf = r => `/hdb/${slug(r.town)}/${slug(`${r.block} ${r.street}`)}`;
 
 async function main() {
+  if (WATCH_PAUSED) {
+    console.log('Block updates are paused (WATCH_PAUSED in lib/watch.js). Nothing sent; no watermark moved.');
+    return;
+  }
   if (!dbConfigured()) { console.error('Supabase is not configured — no watches to read.'); process.exit(1); }
   if (!mailConfigured() && !DRY) {
     console.error('RESEND_API_KEY or DIGEST_FROM is missing. Nothing can be sent.');

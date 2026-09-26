@@ -1,6 +1,7 @@
 import Masthead from '../../components/Masthead.jsx';
 import WatchList from '../../components/WatchList.jsx';
 import { configured as mailConfigured } from '../../lib/email.js';
+import { WATCH_PAUSED } from '../../lib/watch.js';
 
 export const metadata = {
   title: 'Blocks you are watching | Truestorey',
@@ -27,7 +28,8 @@ export default function Page() {
         title="Blocks you are watching"
         sub="Kept in this browser, with no account and nothing sent anywhere." />
       <section className="pane">
-        <WatchList canWatch={mailConfigured()} />
+        {/* Paused updates read as "not switched on" here, which is true. */}
+        <WatchList canWatch={mailConfigured() && !WATCH_PAUSED} />
       </section>
     </main>
   );

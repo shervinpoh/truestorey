@@ -206,3 +206,17 @@ test('the search says nothing when there is nothing typed', () => {
   assert.match(m[1], /^answered\s*&&\s*answered === q\.trim\(\)/,
     'the condition must require a NON-EMPTY answered term, not just an equal one');
 });
+
+test('paused means paused everywhere, and leaving still works', () => {
+  /* 26 Sep 2026: block updates paused. The form, the route and the sender all
+     read the one switch; unsubscribe does not, because an address on the list
+     must always be able to leave it. */
+  assert.match(src('lib/watch.js'), /export const WATCH_PAUSED = (true|false);/);
+  assert.match(src('components/RecordPage.jsx'), /hdb && canWatch && !WATCH_PAUSED &&/);
+  const route = src('app/api/watch/route.js');
+  assert.ok(route.indexOf('WATCH_PAUSED)') < route.indexOf('req.json') || route.indexOf('req.json') === -1,
+    'the route reads the request before checking the pause');
+  assert.ok(route.indexOf('if (WATCH_PAUSED)') < route.indexOf('upsertWatch('), 'the pause check comes after the write');
+  assert.match(src('scripts/send-digest.mjs'), /if \(WATCH_PAUSED\)/);
+  assert.doesNotMatch(src('app/api/watch/unsubscribe/route.js'), /WATCH_PAUSED/, 'unsubscribe must work while paused');
+});

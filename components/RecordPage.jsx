@@ -17,6 +17,7 @@ import BlockMop from './BlockMop.jsx';
 import { titleCase } from '../lib/name.js';
 import { track } from './Track.jsx';
 import { EVENTS } from '../lib/analytics.js';
+import { WATCH_PAUSED } from '../lib/watch.js';
 
 /**
  * A record at its own URL: the numbers, then the fork, then everything the
@@ -176,7 +177,7 @@ export default function RecordPage({ rec, attribution, crumbs, posts = [], near 
           an address and then says email is not switched on has already
           collected the address — which is the same objection that removed the
           mobile field from the lead form. */}
-      {hdb && canWatch && (
+      {hdb && canWatch && !WATCH_PAUSED && (
         <section className="pane">
           <WatchBlock href={rec.href} label={titleCase(rec.label)} />
         </section>
