@@ -3121,3 +3121,4 @@ sup.cite a:hover{text-decoration:underline}
 .stmt .txn:last-of-type{border-bottom:0}
 .stmt .txn b{font-size:var(--t-body);letter-spacing:0}
 .stmt .txn .r b{font-family:"IBM Plex Mono",ui-monospace,monospace;font-weight:500;font-variant-numeric:tabular-nums}
+.nobr{white-space:nowrap}

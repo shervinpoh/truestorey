@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { f, fk, mLabel } from './fmt.js';
 import { titleCase } from '../lib/name.js';
 import { Grow, withTransition } from './Motion.jsx';
@@ -200,9 +200,13 @@ export default function RecordView({ rec, attribution = [], onType, afterSummary
                   t.areaSqm && `${t.areaSqm} sqm`,
                   t.storey ? `storey ${t.storey.replace(' TO ','–')}` : (t.floor && t.floor !== '-' ? `floor ${t.floor}` : null),
                 ].filter(Boolean).join('  ·  ') || '—'}</b>
+                {/* Each part unbroken: at 390px the line wrapped inside the
+                    month and printed "2026-" over "08". */}
                 <span className="lab">{[
                   !rtype && (t.flatType || t.propertyType), t.model, t.saleType, t.month,
-                ].filter(Boolean).join(' · ')}</span>
+                ].filter(Boolean).map((part, k) => (
+                  <Fragment key={k}>{k > 0 && ' · '}<span className="nobr">{part}</span></Fragment>
+                ))}</span>
               </div>
               <div className="r">
                 {/* Inside the <b>, because `.txn b` is display:block and a
