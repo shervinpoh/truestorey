@@ -349,6 +349,8 @@ function handleCommand_(from, text) {
   if (lower === '/summary' || lower === '/s')          return botSummary(from);
   if (lower === '/triggers')                           return botTriggers(from);
   if (lower === '/brief')                              return botMarketBrief(from);
+  if (lower === '/leads' || lower === '/l')      return botLeadsToday(from);
+  if (lower === '/week')                          return botLeadsWeek(from);
   if (lower === '/drafts')                          return botDrafts(from);
   if (lower.indexOf('/pub ') === 0)                 return botPublish(from, after(5), 'published');
   if (lower.indexOf('/skip ') === 0)                return botPublish(from, after(6), 'archived');
