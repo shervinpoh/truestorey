@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
 import { bsd, absd, ssd } from '../lib/calc/stampDuty.js';
-import { saleProceeds, cpfAccruedInterest } from '../lib/calc/proceeds.js';
+import { saleProceeds, cpfAccruedInterest, proceedsStatement } from '../lib/calc/proceeds.js';
 import { CPF_OA_RATE, HDB_LOAN_CASH_MIN_REVIEWED } from '../lib/calc/constants.js';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -125,7 +125,7 @@ test('the proceeds figures come from the constants, not from literals', () => {
 test('Proceeds.jsx uses the tested module and does not floor the result', () => {
   const src = readFileSync(path.join(process.cwd(), 'components', 'Proceeds.jsx'), 'utf8');
 
-  assert.match(src, /import \{ saleProceeds \}/,
+  assert.match(src, /import \{ saleProceeds[ ,]/,
     'Proceeds.jsx no longer imports saleProceeds. The sale-proceeds maths must ' +
     'exist in exactly one place, and lib/calc/proceeds.js is it.');
 
@@ -324,4 +324,26 @@ test('every compact calculator explains its boundary and gives one next action',
   ]) assert.match(src, new RegExp(`aria-label="${label}"`));
   assert.match(src, /Which HDB classification or scheme/);
   assert.match(src, /\[5, 'Unclassified \/ Standard'\].*\[10, 'Plus \/ Prime'\].*\[20, 'Fresh Start'\]/s);
+});
+
+test('the proceeds statement adds up as printed, and counts the CPF refund once', () => {
+  /* The block page listed the required refund and the refund paid from the
+     proceeds as two deductions, so the column never summed. What is left must
+     be the printed arithmetic, match what the module reports within rounding,
+     and go negative — never to zero — when the sale does not cover the loan. */
+  const cases = [
+    { salePrice: 650_000, outstandingLoan: 200_000, cpfPrincipal: 150_000, yearsHeld: 8 },          // enough for everything
+    { salePrice: 368_000, outstandingLoan: 180_000, cpfPrincipal: 150_000, yearsHeld: 12 },         // CPF gap
+    { salePrice: 300_000, outstandingLoan: 320_000, cpfPrincipal: 100_000, yearsHeld: 5 },          // does not clear the loan
+    { salePrice: 1_500_000, outstandingLoan: 900_000, cpfPrincipal: 300_000, yearsHeld: 3,
+      propertyType: 'PRIVATE', purchaseDate: '2024-01-01' },                                          // with SSD
+  ];
+  for (const c of cases) {
+    const r = saleProceeds({ agentFeePct: 2, ...c });
+    const st = proceedsStatement(r);
+    assert.equal(st.price - st.lines.reduce((a, l) => a + l.amount, 0), st.left, 'the column does not add up');
+    assert.equal(st.lines.filter(l => l.key === 'cpf').length, 1, 'the CPF refund is counted more than once');
+    const expected = r.nonCpfCompletionShortfall > 0 ? -r.nonCpfCompletionShortfall : r.cashProceedsAtMarketValue;
+    assert.ok(Math.abs(st.left - expected) <= 2, `left ${st.left}, the module says ${expected}`);
+  }
 });

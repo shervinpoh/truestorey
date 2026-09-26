@@ -4,6 +4,7 @@ import { f, fk, mLabel } from './fmt.js';
 import { titleCase } from '../lib/name.js';
 import { Grow, withTransition } from './Motion.jsx';
 import { hdbFlatLabel } from '../lib/blindspot/unit.js';
+import Statement from './Statement.jsx';
 
 /**
  * One block or one project.
@@ -180,70 +181,72 @@ export default function RecordView({ rec, attribution = [], onType, afterSummary
         </>);
       })()}
 
-      {recent.length > 0 && (<>
-        <h2 className="sh" id="transactions"><span>The transactions behind those figures</span>
-          <span>{recent.length} of {rv.n}</span></h2>
-        <p className="hint" style={{marginTop:10}}>
-          Nothing modelled — these are the filed sales.
-          {rec.kind !== 'HDB' && ' URA does not include the number of bedrooms in a sale record.'}
-        </p>
-        {/* Eight, then the rest on request. A block with forty filed sales put
-            forty rows between the chart and everything below it, and nobody
-            reads the twenty-ninth. They are all still here, and still in the
-            page for anyone who wants them — one click, not a fetch. */}
-        {filed.slice(0, showAll ? filed.length : 8).map((t,i)=>(
-          <div className="txn" key={i}>
-            <div>
-              <b>{[
-                t.areaSqm && `${t.areaSqm} sqm`,
-                t.storey ? `storey ${t.storey.replace(' TO ','–')}` : (t.floor && t.floor !== '-' ? `floor ${t.floor}` : null),
-              ].filter(Boolean).join('  ·  ') || '—'}</b>
-              <span className="lab">{[
-                !rtype && (t.flatType || t.propertyType), t.model, t.saleType, t.month,
-              ].filter(Boolean).join(' · ')}</span>
+      {/* The evidence behind the headline, set as the page's statement
+          (components/Statement.jsx): these rows are the reason the range
+          above can be trusted, and at 14px under a grey label they read as
+          a footnote to it. The note on why it is a range closes it. */}
+      {recent.length > 0 ? (
+        <Statement id="transactions" title="The transactions behind those figures"
+          basis={`${recent.length} of ${rv.n} · filed, nothing modelled`}
+          lede={rec.kind !== 'HDB' ? 'URA does not include the number of bedrooms in a sale record.' : null}>
+          {/* Eight, then the rest on request. A block with forty filed sales put
+              forty rows between the chart and everything below it, and nobody
+              reads the twenty-ninth. They are all still here, and still in the
+              page for anyone who wants them — one click, not a fetch. */}
+          {filed.slice(0, showAll ? filed.length : 8).map((t,i)=>(
+            <div className="txn" key={i}>
+              <div>
+                <b>{[
+                  t.areaSqm && `${t.areaSqm} sqm`,
+                  t.storey ? `storey ${t.storey.replace(' TO ','–')}` : (t.floor && t.floor !== '-' ? `floor ${t.floor}` : null),
+                ].filter(Boolean).join('  ·  ') || '—'}</b>
+                <span className="lab">{[
+                  !rtype && (t.flatType || t.propertyType), t.model, t.saleType, t.month,
+                ].filter(Boolean).join(' · ')}</span>
+              </div>
+              <div className="r">
+                {/* Inside the <b>, because `.txn b` is display:block and a
+                    sibling span would drop to its own line — the count belongs
+                    beside the price it counts. */}
+                <b>{f(t.price)}{t.n > 1 && <span className="txnrep" title={
+                  `${t.n} sales filed with these particulars. Listed once; counted ${t.n} times in every figure on this page.`
+                }>&times;{t.n}</span>}</b>
+                <span className="lab">${Math.round(t.psf)} psf</span></div>
             </div>
-            <div className="r">
-              {/* Inside the <b>, because `.txn b` is display:block and a
-                  sibling span would drop to its own line — the count belongs
-                  beside the price it counts. */}
-              <b>{f(t.price)}{t.n > 1 && <span className="txnrep" title={
-                `${t.n} sales filed with these particulars. Listed once; counted ${t.n} times in every figure on this page.`
-              }>&times;{t.n}</span>}</b>
-              <span className="lab">${Math.round(t.psf)} psf</span></div>
-          </div>
-        ))}
-        {filed.length > 8 && (
-          <button type="button" className="ghost" onClick={() => setShowAll(v => !v)}>
-            {showAll ? 'Show the most recent eight' : `Show all ${filed.length} rows`}
-          </button>
-        )}
-        {filed.length < recent.length && (
-          <p className="hint" style={{ marginTop: 10 }}>
-            {recent.length - filed.length === 1
-              ? 'One row arrives'
-              : `${recent.length - filed.length} rows arrive`} from the source with particulars
-            identical to another &mdash; same size, price, month and type &mdash; and{' '}
-            {recent.length - filed.length === 1 ? 'is' : 'are'} listed once here with a count.
-            Whether those are separate sales or one sale filed more than once is not something the
-            feed distinguishes, so nothing has been removed and every figure above still counts
-            them all.
+          ))}
+          {filed.length > 8 && (
+            <button type="button" className="ghost" style={{ marginTop: 12 }} onClick={() => setShowAll(v => !v)}>
+              {showAll ? 'Show the most recent eight' : `Show all ${filed.length} rows`}
+            </button>
+          )}
+          {filed.length < recent.length && (
+            <p className="stmt-foot">
+              {recent.length - filed.length === 1 ? 'One row arrives' : `${recent.length - filed.length} rows arrive`}{' '}
+              with particulars identical to another and {recent.length - filed.length === 1 ? 'is' : 'are'} listed
+              once with a count. Nothing is removed: every figure above counts them all.
+            </p>
+          )}
+          <p className="stmt-foot">
+            {rv.n === 1 ? (<>
+              <b>One filed sale is not a range.</b> It is what was filed here once, not a level this
+              address trades at — the nearby sales below are the wider evidence.
+            </>) : (<>
+              <b>Why a range, not one number.</b> No record shows your floor, facing, renovation or
+              lease, and where your unit sits inside this spread depends on them.
+            </>)}
           </p>
-        )}
-      </>)}
-
-      <div className="note">
-        {rv.n === 1 ? (<>
-          <b>One filed sale is not a range.</b> Everything above rests on a single transaction, so
-          there is no cheapest and dearest to report and no spread to read. It is what was filed
-          here, once, over the period shown — not a level this address trades at. The nearby sales
-          below are the wider evidence.
-        </>) : (<>
-          <b>Why a range, not one number.</b> Valuation tools routinely disagree by
-          S$15,000–S$80,000 on the same home, because none can see your floor, facing, renovation or
-          lease. The spread above is the real one — the cheapest and dearest psf actually filed here
-          over the period. Where your unit sits inside it depends on the things the data cannot see.
-        </>)}
-      </div>
+        </Statement>
+      ) : (
+        <div className="note">
+          {rv.n === 1 ? (<>
+            <b>One filed sale is not a range.</b> It is what was filed here once, not a level this
+            address trades at — the nearby sales below are the wider evidence.
+          </>) : (<>
+            <b>Why a range, not one number.</b> No record shows your floor, facing, renovation or
+            lease, and where your unit sits inside this spread depends on them.
+          </>)}
+        </div>
+      )}
 
       {attribution.length > 0 && (
         <details className="licence-details">

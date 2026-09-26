@@ -1,5 +1,6 @@
 import { compass, sgTime } from '../lib/sun.js';
 import Facing from './Facing.jsx';
+import HowWorked from './HowWorked.jsx';
 
 /**
  * Where the afternoon sun comes from, and what has permission to stand in it.
@@ -85,17 +86,14 @@ export default function SunPath({ sun, approvals, label }) {
             Seen from here, the sun sets at <b className="mono">{Math.round(arc.from)}&deg;</b>{' '}
             ({compass(arc.from)}) in December and <b className="mono">{Math.round(arc.to)}&deg;</b>{' '}
             ({compass(arc.to)}) in June &mdash; a swing of{' '}
-            <b className="mono">{Math.round(arc.to - arc.from)}&deg;</b> across the year. A window on
-            one of those bearings takes the low sun for part of the year and none of it for the rest.
+            <b className="mono">{Math.round(arc.to - arc.from)}&deg;</b>. A window on those bearings
+            takes the low sun for part of the year only.
           </p>
           {today && (
             <p className="hint">
-              Today the sun drops below {sun.lowDeg}&deg; at{' '}
-              <b className="mono">{sgTime(today.start)}</b> and sets at{' '}
-              <b className="mono">{sgTime(today.end)}</b>, arriving from{' '}
-              <b className="mono">{Math.round(today.from)}&deg;</b> ({compass(today.from)}). Above
-              that angle it is over the roof rather than through the window; near the equator the
-              midday sun is almost overhead, which is why this is only ever about the last hour.
+              Today: below {sun.lowDeg}&deg; at <b className="mono">{sgTime(today.start)}</b>, sets at{' '}
+              <b className="mono">{sgTime(today.end)}</b>, from{' '}
+              <b className="mono">{Math.round(today.from)}&deg;</b> ({compass(today.from)}).
             </p>
           )}
         </div>
@@ -109,15 +107,13 @@ export default function SunPath({ sun, approvals, label }) {
         approvals.total === 0 ? (
           <p className="hint">
             Nothing with planning permission sits on those bearings within{' '}
-            <b className="mono">{approvals.within}m</b>. That is a fact about this radius and these
-            bearings, not a guarantee of a view &mdash; an application not yet decided does not
-            appear here, and neither does anything further out.
+            <b className="mono">{approvals.within}m</b>, straight-line &mdash; not a guarantee of a view.
           </p>
         ) : (<>
           <p className="hint" style={{ marginBottom: 8 }}>
             <b className="mono">{approvals.total}</b> permitted planning{' '}
             {approvals.total === 1 ? 'decision sits' : 'decisions sit'} on those bearings within{' '}
-            {approvals.within}m. What it means depends entirely on which:
+            {approvals.within}m, straight-line:
           </p>
           <div className="tablewrap">
             <table className="nstable">
@@ -145,14 +141,19 @@ export default function SunPath({ sun, approvals, label }) {
       )}
 
       <div className="note">
-        <b>This does not tell you whether anything is blocked.</b> A shadow needs the height and
-        footprint of every building between you and the sun, and no public dataset here carries
-        them &mdash; so none is drawn. What is above is the bearing the sun arrives on, which is
-        astronomy, and what has been permitted along it, which is a filed decision with a reference
-        number. Joining the two is yours. Bearings and distances are straight-line. A decision is
-        permission to build, not a building: some are never started, and heights come from URA&rsquo;s
-        own wording, which states one about four times in five.
+        <b>This does not tell you whether anything is blocked.</b> No public dataset carries the
+        heights and footprints a shadow needs, so none is drawn.
       </div>
+      <HowWorked title="What this shows, and what it cannot">
+        <p>The bearings are astronomy: where the sun sets from this building, month by month. Near
+          the equator the midday sun is almost overhead, and above {sun.lowDeg}&deg; it is over the
+          roof rather than through a window — which is why this is only ever about the last hour.</p>
+        <p>The decisions are URA&rsquo;s filed planning permissions along those bearings. Permission
+          is not a building: some are never started, and heights come from URA&rsquo;s own wording,
+          which states one about four times in five. An application not yet decided does not appear,
+          and neither does anything beyond {approvals?.within || 400}m. Joining the sun to what may
+          be built is yours to do; bearings and distances are straight-line.</p>
+      </HowWorked>
     </section>
   );
 }

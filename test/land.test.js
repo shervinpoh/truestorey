@@ -176,6 +176,6 @@ test('identical filed sales are grouped for display, never deduped', () => {
     'sales are being filtered out rather than grouped');
 
   // The header still counts SALES, not rows, or the page understates volume.
-  assert.match(recordViewSrc, /\{recent\.length\} of \{rv\.n\}/,
+  assert.match(recordViewSrc, /\$?\{recent\.length\} of \$?\{rv\.n\}/,
     'the transaction count header must stay in filed sales, not grouped rows');
 });

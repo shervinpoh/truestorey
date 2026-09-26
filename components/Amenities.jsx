@@ -108,17 +108,19 @@ export default function Amenities({ near, manifest }) {
           {twoTrack.length > 0 && (
             <div className="note method">
               <b>Distance stops ordering Phase 2C at {twoTrack.length === 1 ? 'one of these schools' : `${twoTrack.length} of these schools`}, from the 2027 registration exercise.</b>{' '}
-              MOE is splitting Phase 2C places equally into a track for homes within 2km and a track
-              for homes beyond it, with <em>neither track having priority over the other</em>, at
-              twelve schools where public housing is under 40% of dwelling units within 2km. Marked{' '}
-              <em className="edge">2C two-track</em> above: {twoTrack.map(s => titleCase(s.name)).join(', ')}.
-              {' '}At {twoTrack.length === 1 ? 'it' : 'those'}, being 300m away buys nothing over being
-              1.5km away in that phase — both sit in the same track and ballot within it — and a home
-              beyond 2km goes from last in line to half the places. Phases 2A and 2B are unchanged, and
-              so is every other school in this list. Announced{' '}
-              <a href="https://www.moe.gov.sg/news/press-releases/20260910-enhancing-the-primary-one-registration-framework-for-greater-access-and-inclusivity"
-                target="_blank" rel="noopener noreferrer">10 September 2026</a>; it first applies to
-              children entering Primary 1 in 2028.
+              At {twoTrack.map(s => titleCase(s.name)).join(', ')} (marked <em className="edge">2C two-track</em>),
+              300m buys nothing over 1.5km in that phase. Phases 2A and 2B are unchanged.
+              <details className="amfold">
+                <summary>What MOE changed</summary>
+                <p>MOE is splitting Phase 2C places equally into a track for homes within 2km and a
+                  track for homes beyond it, with <em>neither track having priority over the other</em>,
+                  at twelve schools where public housing is under 40% of dwelling units within 2km. Both
+                  tracks ballot within themselves, and a home beyond 2km goes from last in line to half
+                  the places. Every other school in this list is unchanged. Announced{' '}
+                  <a href="https://www.moe.gov.sg/news/press-releases/20260910-enhancing-the-primary-one-registration-framework-for-greater-access-and-inclusivity"
+                    target="_blank" rel="noopener noreferrer">10 September 2026</a>; it first applies to
+                  children entering Primary 1 in 2028.</p>
+              </details>
             </div>
           )}
 

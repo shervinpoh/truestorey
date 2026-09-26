@@ -236,10 +236,10 @@ function Fork({ planHref, href, hdb, hasMop }) {
           <ul>
             <li><a href={`/blindspot?from=${encodeURIComponent(href)}`}>
               <b>Run Blindspot on the asking price</b>
-              <span>Six checks against the filed record. You add the unit type, actual price and floor area.</span></a></li>
+              <span>Six checks against the filed record</span></a></li>
             <li><a href={planHref}>
               <b>See what the purchase needs upfront</b>
-              <span>The filed median starts as an example. Replace it with the asking price.</span></a></li>
+              <span>Loan, cash and both stamp duties</span></a></li>
           </ul>
         </div>
         <div className="forkcol">
@@ -247,13 +247,13 @@ function Fork({ planHref, href, hdb, hasMop }) {
           <ul>
             <li><a href="#proceeds">
               <b>What a sale would actually net</b>
-              <span>Every deduction in order, with CPF taken back before you see a cent</span></a></li>
+              <span>Every deduction, CPF included</span></a></li>
             {hdb && hasMop ? <li><a href="#mop">
               <b>See this block&rsquo;s MOP context</b>
-              <span>Its earliest possible fifth year and the filings held after the previous wave.</span></a></li>
+              <span>Its earliest fifth year, and the last wave</span></a></li>
               : <li><a href="/guides/absd-tdsr-ssd">
                 <b>Check what selling early costs</b>
-                <span>Seller&rsquo;s Stamp Duty by year held, and the rules behind it.</span></a></li>}
+                <span>Seller&rsquo;s Stamp Duty by year held</span></a></li>}
           </ul>
         </div>
       </div>

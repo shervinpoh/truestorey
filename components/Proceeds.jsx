@@ -1,7 +1,8 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { f } from './fmt.js';
-import { saleProceeds } from '../lib/calc/proceeds.js';
+import { saleProceeds, proceedsStatement } from '../lib/calc/proceeds.js';
+import Statement from './Statement.jsx';
 import MoneyInput from './MoneyInput.jsx';
 
 /*
@@ -97,6 +98,7 @@ export default function Proceeds({ median, onEngage }) {
     propertyType: 'HDB',
   });
   const accrued = r.cpfAccruedInterest;
+  const st = proceedsStatement(r);
   const agent   = r.agentFee + r.legalFees;
   const cash    = r.cashProceedsAtMarketValue;
   const short   = r.nonCpfCompletionShortfall > 0;
@@ -164,18 +166,34 @@ export default function Proceeds({ median, onEngage }) {
         </p>
       )}
 
-      <div style={{marginTop:18}}>
-        <Row label="Sale price" v={sp} />
-        <Row label="Outstanding loan" v={-loan} />
-        <Row label={`Agent fee (${fee}% + GST) and legal`} v={-agent} />
-        <Row label={r.cpfAccruedInterestEstimated ? 'Estimated required CPF refund' : 'Required CPF refund entered'}
-          v={-(cpf + accrued)} sub={r.cpfAccruedInterestEstimated ? 'Principal plus a rough accrued-interest estimate' : 'Principal plus the accrued interest you entered'} />
-        <Row label="CPF refund available from these proceeds" v={-r.cpfRefundFromProceeds} sub="Returns to CPF; it is not a selling expense" />
-        <div className={`row tot${short ? ' neg' : ''}`}>
-          <span>{short ? 'Shortfall before any CPF refund' : 'Cash proceeds if sold at market value'}</span>
-          <span>{f(short ? r.nonCpfCompletionShortfall : cash)}</span>
+      {/* Set as a statement (components/Statement.jsx), and it now adds up:
+          it used to list the CPF refund required AND the refund paid from the
+          proceeds as two deductions. Only what the sale pays out comes off;
+          what CPF requires is stated under it. Deductions are ink with a minus
+          sign — red is reserved for a price that moved. */}
+      <Statement id="proceeds-statement" title={`A sale at ${f(sp)}`}
+        basis={r.cpfAccruedInterestEstimated ? 'Your figures · CPF interest estimated' : 'Your figures'}>
+        <div className="tablewrap">
+          <table className="stmt-rows">
+            <tbody>
+              <tr><td>Sale price</td><td className="r">{f(st.price)}</td></tr>
+              {st.lines.map(l => (
+                <tr key={l.key}><td>{{
+                  loan: 'Redeems the loan',
+                  fees: `Agent fee (${fee}% + GST) and legal`,
+                  ssd: 'Seller’s Stamp Duty',
+                  other: 'Other costs',
+                  cpf: <>Refund to your CPF<span className="q">{r.cpfRefundGap > 0
+                    ? `of ${f(cpf + accrued)} required — all the proceeds can pay`
+                    : `principal plus ${r.cpfAccruedInterestEstimated ? 'estimated' : 'your'} accrued interest`}</span></>,
+                }[l.key]}</td><td className="r">{l.amount ? <>&minus;{f(l.amount)}</> : f(0)}</td></tr>
+              ))}
+              <tr className="stmt-total"><td>{st.left < 0 ? 'Cash to bring to completion' : 'Cash to you'}</td>
+                <td className="r">{st.left < 0 ? <>&minus;{f(-st.left)}</> : f(st.left)}</td></tr>
+            </tbody>
+          </table>
         </div>
-      </div>
+      </Statement>
 
       <div className={r.cpfRefundGap > 0 ? 'warn' : 'note'}>
         {r.cpfRefundGap > 0 ? <>
@@ -189,14 +207,5 @@ export default function Proceeds({ median, onEngage }) {
           CPF Board’s market-value rule</a> · CPF OA interest 2.5% p.a.
       </div>
     </>
-  );
-}
-
-function Row({ label, v, sub }) {
-  return (
-    <div className={'row' + (v<0?' neg':'')}>
-      <span>{label}{sub && <small>{sub}</small>}</span>
-      <span>{v<0?'−':''}{f(Math.abs(v))}</span>
-    </div>
   );
 }

@@ -42,15 +42,13 @@ export default function NearbySales({ data, label }) {
         <input type="range" min={0} max={data.bands.length - 1} step={1} value={i}
           aria-valuetext={`within ${radius} metres`}
           onChange={e => setI(Number(e.target.value))} />
-        <span className="hint">
-          Straight-line, not walking &mdash; what sits between two points is in no dataset here.
-        </span>
+        <span className="hint">Straight-line, not walking.</span>
       </label>
 
       {band.projects === 0 ? (
         <p className="note warnline">
-          No other {hdb ? 'block' : 'project'} with filed sales sits within {radius}m. That is a
-          fact about this radius, not about the market &mdash; widen it above.
+          No other {hdb ? 'block' : 'project'} with filed sales sits within {radius}m &mdash; widen it
+          above.
         </p>
       ) : (<>
         <div className="nsstat">
@@ -81,12 +79,11 @@ export default function NearbySales({ data, label }) {
         {/* The qualification is not a footnote. `indexed` counts what the file
             holds, and the file holds at most twenty per address. */}
         <p className="hint">
-          From <b className="mono">{num(band.indexed)}</b> filed sales &mdash; the{' '}
-          {data.perProjectCap} most recent at each {hdb ? 'block' : 'project'}, which is all this
-          index keeps.{' '}
-          {band.atCap > 0 && <>{num(band.atCap)} of them {band.atCap === 1 ? 'is' : 'are'} at that
-            limit, so {band.atCap === 1 ? 'it has' : 'they have'} sold more than is counted
-            here.</>}
+          From <b className="mono">{num(band.indexed)}</b> filed sales, at most the{' '}
+          {data.perProjectCap} most recent per {hdb ? 'block' : 'project'}
+          {band.atCap > 0
+            ? <> &mdash; {num(band.atCap)} {band.atCap === 1 ? 'has' : 'have'} sold more than is counted here.</>
+            : '.'}
         </p>
 
         <p className="ns-tablehint">Scroll sideways to see the date, storey, size and psf →</p>
@@ -125,10 +122,9 @@ export default function NearbySales({ data, label }) {
 
         <p className="hint">
           {rows.length < band.indexed
-            ? <>The <b className="mono">{num(rows.length)}</b> most recent are listed, out of{' '}
-                {num(band.indexed)} in the index at this radius.</>
-            : <>All <b className="mono">{num(rows.length)}</b> at this radius are listed.</>}
-          {' '}The floor band is what URA and HDB publish; neither feed carries a unit number.
+            ? <>The <b className="mono">{num(rows.length)}</b> most recent of {num(band.indexed)} at this radius.</>
+            : <>All <b className="mono">{num(rows.length)}</b> at this radius.</>}
+          {' '}Storey bands as published; no feed carries a unit number.
         </p>
       </>)}
     </section>

@@ -81,9 +81,8 @@ export default function Storey({ data, label }) {
             <>
               <b className="statnum" style={{ color: 'var(--mute)' }}>—</b>
               <p className="hint">
-                Not enough filed sales at both ends of this {unitNoun} to compare it with itself.
-                It needs {data.bars.side} or more high and {data.bars.side} or more low.
-                The figure beside this one is the town, not here.
+                Too few filed sales at both ends of this {unitNoun} — it needs {data.bars.side} high
+                and {data.bars.side} low. The figure beside is {data.scopeLabel}, not here.
               </p>
             </>
           )}
@@ -116,10 +115,8 @@ export default function Storey({ data, label }) {
       {g?.bands?.length > 1 && (
         <>
           <p className="hint" style={{ marginTop: 18 }}>
-            <b>Every band in {data.scopeLabel}, for reference.</b> This pools all buildings in the
-            town, so it carries the estates as well as the storeys — a town whose tall blocks are its
-            newest ones will show a steeper climb than height alone buys. The two figures above are
-            the ones that hold a building constant.
+            <b>Every band in {data.scopeLabel}, for reference.</b> Pooled across buildings, so it mixes
+            the age of an estate with height; the two figures above hold a building constant.
           </p>
           <div className="tablewrap">
             <table className="bandtable">
@@ -145,9 +142,8 @@ export default function Storey({ data, label }) {
 
       <p className="prov">
         {isHdb ? data.source.hdb : data.source.private} · accessed{' '}
-        {isHdb ? data.source.hdbAccessed : data.source.privateAccessed}.
-        Storey bands are the source's own — no floor number is inferred from them.
-        A premium is a median of filed transactions, not a valuation of any home.
+        {String(isHdb ? data.source.hdbAccessed : data.source.privateAccessed).slice(0, 10)} ·
+        storey bands as published · a median of filed sales, not a valuation of any home
       </p>
     </section>
   );

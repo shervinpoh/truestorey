@@ -66,10 +66,8 @@ export default function Facing({ byMonth = [] }) {
 
       {facing === null ? (
         <p className="hint">
-          Nothing published says which way a unit points &mdash; not URA, not HDB. You are the one
-          standing in it, or holding the plan. If the floor plan carries a north arrow,{' '}
-          <Link href="/floorplan">the plan reader</Link> will read it off and say so when it
-          cannot.
+          No record says which way a unit faces. Pick it, or let{' '}
+          <Link href="/floorplan">the floor plan reader</Link> find the north arrow.
         </p>
       ) : (<>
         <ol className="facingyear" aria-label={`How squarely the setting sun meets a ${compass(facing)} window, by month`}>
@@ -104,8 +102,7 @@ export default function Facing({ byMonth = [] }) {
           <li><i className="none" />over 90&deg; &mdash; behind the wall</li>
         </ul>
         <p className="hint">
-          This is the sun&rsquo;s bearing against a facing you gave. It does not know what stands
-          between the two &mdash; that is the table above, and it is not the same question.
+          The sun&rsquo;s bearing against the facing you gave &mdash; not what stands between them.
         </p>
       </>)}
     </div>

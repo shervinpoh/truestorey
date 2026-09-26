@@ -2434,7 +2434,8 @@ sup.cite a:hover{text-decoration:underline}
 .nstable td:first-child{min-width:5.5em}
 /* The six-column table needs a sideways swipe on narrow phones. Keep its
    identifying column in view while the figures move, or a row loses its name. */
-.nstable th:first-child,.nstable td:first-child{position:sticky;left:0;z-index:1;background:var(--card)}
+.nstable th:first-child,.nstable td:first-child{position:sticky;left:0;z-index:1;background:var(--paper)}
+.stmt .nstable th:first-child,.stmt .nstable td:first-child{background:var(--card)}
 .ns-tablehint{display:none}
 @media(max-width:640px){
   .nsstat{grid-template-columns:1fr}
@@ -3100,3 +3101,9 @@ sup.cite a:hover{text-decoration:underline}
  .stmt{padding:18px 16px 16px}
  .stmt-rows td.r{padding-left:10px}
 }
+/* Transaction rows inside a statement read at reading size, prices in the
+   figure face — the row is the evidence, not a caption under it. */
+.stmt .txn{padding:11px 0;border-bottom:1px solid var(--line2)}
+.stmt .txn:last-of-type{border-bottom:0}
+.stmt .txn b{font-size:var(--t-body);letter-spacing:0}
+.stmt .txn .r b{font-family:"IBM Plex Mono",ui-monospace,monospace;font-weight:500;font-variant-numeric:tabular-nums}
